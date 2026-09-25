@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 702" width="900" height="702" role="img" aria-label="A 3-turn conversation, end to end (8-bit KV)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="900" height="702" rx="8" fill="#1a1a19"/>
+<text x="20" y="30" fill="#ffffff" font-size="16" font-weight="600">A 3-turn conversation, end to end (8-bit KV)</text>
+<text x="20" y="50" fill="#c3c2b7" font-size="12">Turn 1 reads the prompt cold; turns 2–3 add ~300 tokens each · ≤ 256 generated tokens per turn · own time scale per panel</text>
+<rect x="23" y="66" width="16" height="11" rx="2" fill="#3987e5"/>
+<text x="48" y="76" fill="#c3c2b7" font-size="12">MTPLX fork</text>
+<rect x="133" y="66" width="16" height="11" rx="2" fill="#d95926"/>
+<text x="158" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
+<rect x="271" y="66" width="16" height="11" rx="2" fill="#199e70"/>
+<text x="296" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
+<rect x="650" y="66" width="16" height="11" rx="2" fill="#c3c2b7"/><text x="672" y="76" fill="#c3c2b7" font-size="12">TTFT</text><rect x="720" y="66" width="16" height="11" rx="2" fill="#c3c2b7" fill-opacity="0.4"/><text x="742" y="76" fill="#c3c2b7" font-size="12">generation</text>
+<text x="20" y="110" fill="#ffffff" font-size="13" font-weight="600">2K prompt</text>
+<line x1="150.0" x2="150.0" y1="118" y2="194" stroke="#34332f"/><text x="150.0" y="208" fill="#c3c2b7" font-size="10" text-anchor="middle">0 s</text>
+<line x1="315.0" x2="315.0" y1="118" y2="194" stroke="#34332f"/><text x="315.0" y="208" fill="#c3c2b7" font-size="10" text-anchor="middle">20 </text>
+<line x1="480.0" x2="480.0" y1="118" y2="194" stroke="#34332f"/><text x="480.0" y="208" fill="#c3c2b7" font-size="10" text-anchor="middle">40 </text>
+<line x1="645.0" x2="645.0" y1="118" y2="194" stroke="#34332f"/><text x="645.0" y="208" fill="#c3c2b7" font-size="10" text-anchor="middle">60 </text>
+<line x1="810.0" x2="810.0" y1="118" y2="194" stroke="#34332f"/><text x="810.0" y="208" fill="#c3c2b7" font-size="10" text-anchor="middle">80 </text>
+<text x="142" y="135" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX fork</text>
+<rect x="150.0" y="122" width="94.0" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 2K turn 1: TTFT 11.4 s, generation 9.15 s</title></rect>
+<rect x="244.0" y="122" width="75.5" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 2K turn 1: TTFT 11.4 s, generation 9.15 s</title></rect>
+<rect x="321.6" y="122" width="5.1" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 2K turn 2: TTFT 0.62 s, generation 9.86 s</title></rect>
+<rect x="326.7" y="122" width="81.3" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 2K turn 2: TTFT 0.62 s, generation 9.86 s</title></rect>
+<rect x="410.0" y="122" width="5.0" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 2K turn 3: TTFT 0.61 s, generation 6.59 s</title></rect>
+<rect x="415.0" y="122" width="54.4" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 2K turn 3: TTFT 0.61 s, generation 6.59 s</title></rect>
+<text x="477.4" y="135" fill="#ffffff" font-size="11">38.2 s</text>
+<text x="142" y="159" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX upstream</text>
+<rect x="150.0" y="146" width="94.9" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 2K turn 1: TTFT 11.5 s, generation 10.3 s</title></rect>
+<rect x="244.9" y="146" width="84.7" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 2K turn 1: TTFT 11.5 s, generation 10.3 s</title></rect>
+<rect x="331.6" y="146" width="5.2" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 2K turn 2: TTFT 0.64 s, generation 11.3 s</title></rect>
+<rect x="336.8" y="146" width="93.0" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 2K turn 2: TTFT 0.64 s, generation 11.3 s</title></rect>
+<rect x="431.8" y="146" width="5.3" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 2K turn 3: TTFT 0.64 s, generation 7.44 s</title></rect>
+<rect x="437.1" y="146" width="61.3" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 2K turn 3: TTFT 0.64 s, generation 7.44 s</title></rect>
+<text x="506.5" y="159" fill="#ffffff" font-size="11">41.8 s</text>
+<text x="142" y="183" fill="#c3c2b7" font-size="11" text-anchor="end">oMLX</text>
+<rect x="150.0" y="170" width="94.4" height="18" rx="2" fill="#199e70"><title>oMLX 2K turn 1: TTFT 11.4 s, generation 12.3 s</title></rect>
+<rect x="244.4" y="170" width="101.3" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 2K turn 1: TTFT 11.4 s, generation 12.3 s</title></rect>
+<rect x="347.7" y="170" width="111.0" height="18" rx="2" fill="#199e70"><title>oMLX 2K turn 2: TTFT 13.5 s, generation 10.9 s</title></rect>
+<rect x="458.7" y="170" width="89.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 2K turn 2: TTFT 13.5 s, generation 10.9 s</title></rect>
+<rect x="550.3" y="170" width="127.4" height="18" rx="2" fill="#199e70"><title>oMLX 2K turn 3: TTFT 15.4 s, generation 7.95 s</title></rect>
+<rect x="677.8" y="170" width="65.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 2K turn 3: TTFT 15.4 s, generation 7.95 s</title></rect>
+<text x="751.4" y="183" fill="#ffffff" font-size="11">1.2 min</text>
+<text x="20" y="258" fill="#ffffff" font-size="13" font-weight="600">8K prompt</text>
+<line x1="150.0" x2="150.0" y1="266" y2="342" stroke="#34332f"/><text x="150.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">0 s</text>
+<line x1="282.0" x2="282.0" y1="266" y2="342" stroke="#34332f"/><text x="282.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">25 </text>
+<line x1="414.0" x2="414.0" y1="266" y2="342" stroke="#34332f"/><text x="414.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">50 </text>
+<line x1="546.0" x2="546.0" y1="266" y2="342" stroke="#34332f"/><text x="546.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">75 </text>
+<line x1="678.0" x2="678.0" y1="266" y2="342" stroke="#34332f"/><text x="678.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">100 </text>
+<line x1="810.0" x2="810.0" y1="266" y2="342" stroke="#34332f"/><text x="810.0" y="356" fill="#c3c2b7" font-size="10" text-anchor="middle">125 </text>
+<text x="142" y="283" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX fork</text>
+<rect x="150.0" y="270" width="284.1" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 8K turn 1: TTFT 53.8 s, generation 9.72 s</title></rect>
+<rect x="434.1" y="270" width="51.3" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 8K turn 1: TTFT 53.8 s, generation 9.72 s</title></rect>
+<rect x="487.4" y="270" width="3.6" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 8K turn 2: TTFT 0.68 s, generation 9.67 s</title></rect>
+<rect x="491.0" y="270" width="51.1" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 8K turn 2: TTFT 0.68 s, generation 9.67 s</title></rect>
+<rect x="544.1" y="270" width="3.7" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 8K turn 3: TTFT 0.71 s, generation 7.95 s</title></rect>
+<rect x="547.8" y="270" width="42.0" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 8K turn 3: TTFT 0.71 s, generation 7.95 s</title></rect>
+<text x="597.8" y="283" fill="#ffffff" font-size="11">1.4 min</text>
+<text x="142" y="307" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX upstream</text>
+<rect x="150.0" y="294" width="286.1" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 8K turn 1: TTFT 54.2 s, generation 11.0 s</title></rect>
+<rect x="436.1" y="294" width="58.0" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 8K turn 1: TTFT 54.2 s, generation 11.0 s</title></rect>
+<rect x="496.1" y="294" width="4.0" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 8K turn 2: TTFT 0.76 s, generation 11.1 s</title></rect>
+<rect x="500.1" y="294" width="58.7" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 8K turn 2: TTFT 0.76 s, generation 11.1 s</title></rect>
+<rect x="560.8" y="294" width="4.1" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 8K turn 3: TTFT 0.77 s, generation 8.62 s</title></rect>
+<rect x="564.9" y="294" width="45.5" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 8K turn 3: TTFT 0.77 s, generation 8.62 s</title></rect>
+<text x="618.4" y="307" fill="#ffffff" font-size="11">1.4 min</text>
+<text x="142" y="331" fill="#c3c2b7" font-size="11" text-anchor="end">oMLX</text>
+<rect x="150.0" y="318" width="297.6" height="18" rx="2" fill="#199e70"><title>oMLX 8K turn 1: TTFT 56.4 s, generation 12.6 s</title></rect>
+<rect x="447.6" y="318" width="66.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 8K turn 1: TTFT 56.4 s, generation 12.6 s</title></rect>
+<rect x="516.3" y="318" width="158.2" height="18" rx="2" fill="#199e70"><title>oMLX 8K turn 2: TTFT 30.0 s, generation 12.9 s</title></rect>
+<rect x="674.4" y="318" width="68.2" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 8K turn 2: TTFT 30.0 s, generation 12.9 s</title></rect>
+<rect x="744.6" y="318" width="14.2" height="18" rx="2" fill="#199e70"><title>oMLX 8K turn 3: TTFT 2.69 s, generation 10.00 s</title></rect>
+<rect x="758.8" y="318" width="52.8" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 8K turn 3: TTFT 2.69 s, generation 10.00 s</title></rect>
+<text x="819.6" y="331" fill="#ffffff" font-size="11">2.1 min</text>
+<text x="20" y="406" fill="#ffffff" font-size="13" font-weight="600">32K prompt</text>
+<line x1="150.0" x2="150.0" y1="414" y2="490" stroke="#34332f"/><text x="150.0" y="504" fill="#c3c2b7" font-size="10" text-anchor="middle">0 min</text>
+<line x1="315.0" x2="315.0" y1="414" y2="490" stroke="#34332f"/><text x="315.0" y="504" fill="#c3c2b7" font-size="10" text-anchor="middle">2 </text>
+<line x1="480.0" x2="480.0" y1="414" y2="490" stroke="#34332f"/><text x="480.0" y="504" fill="#c3c2b7" font-size="10" text-anchor="middle">4 </text>
+<line x1="645.0" x2="645.0" y1="414" y2="490" stroke="#34332f"/><text x="645.0" y="504" fill="#c3c2b7" font-size="10" text-anchor="middle">6 </text>
+<line x1="810.0" x2="810.0" y1="414" y2="490" stroke="#34332f"/><text x="810.0" y="504" fill="#c3c2b7" font-size="10" text-anchor="middle">8 </text>
+<text x="142" y="431" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX fork</text>
+<rect x="150.0" y="418" width="337.7" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 32K turn 1: TTFT 4.1 min, generation 11.5 s</title></rect>
+<rect x="487.7" y="418" width="15.9" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 32K turn 1: TTFT 4.1 min, generation 11.5 s</title></rect>
+<rect x="505.6" y="418" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 32K turn 2: TTFT 0.97 s, generation 12.1 s</title></rect>
+<rect x="507.1" y="418" width="16.6" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 32K turn 2: TTFT 0.97 s, generation 12.1 s</title></rect>
+<rect x="525.7" y="418" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 32K turn 3: TTFT 0.98 s, generation 8.91 s</title></rect>
+<rect x="527.2" y="418" width="12.3" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 32K turn 3: TTFT 0.98 s, generation 8.91 s</title></rect>
+<text x="547.5" y="431" fill="#ffffff" font-size="11">4.7 min</text>
+<text x="142" y="455" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX upstream</text>
+<rect x="150.0" y="442" width="338.0" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 32K turn 1: TTFT 4.1 min, generation 15.0 s</title></rect>
+<rect x="488.0" y="442" width="20.7" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 32K turn 1: TTFT 4.1 min, generation 15.0 s</title></rect>
+<rect x="510.7" y="442" width="1.9" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 32K turn 2: TTFT 1.38 s, generation 20.7 s</title></rect>
+<rect x="512.6" y="442" width="28.4" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 32K turn 2: TTFT 1.38 s, generation 20.7 s</title></rect>
+<rect x="543.0" y="442" width="1.9" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 32K turn 3: TTFT 1.37 s, generation 17.3 s</title></rect>
+<rect x="544.9" y="442" width="23.7" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 32K turn 3: TTFT 1.37 s, generation 17.3 s</title></rect>
+<text x="576.6" y="455" fill="#ffffff" font-size="11">5.0 min</text>
+<text x="142" y="479" fill="#c3c2b7" font-size="11" text-anchor="end">oMLX</text>
+<rect x="150.0" y="466" width="361.1" height="18" rx="2" fill="#199e70"><title>oMLX 32K turn 1: TTFT 4.4 min, generation 17.7 s</title></rect>
+<rect x="511.1" y="466" width="24.3" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 32K turn 1: TTFT 4.4 min, generation 17.7 s</title></rect>
+<rect x="537.3" y="466" width="61.3" height="18" rx="2" fill="#199e70"><title>oMLX 32K turn 2: TTFT 44.6 s, generation 18.2 s</title></rect>
+<rect x="598.6" y="466" width="25.1" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 32K turn 2: TTFT 44.6 s, generation 18.2 s</title></rect>
+<rect x="625.7" y="466" width="4.7" height="18" rx="2" fill="#199e70"><title>oMLX 32K turn 3: TTFT 3.45 s, generation 14.3 s</title></rect>
+<rect x="630.4" y="466" width="19.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 32K turn 3: TTFT 3.45 s, generation 14.3 s</title></rect>
+<text x="658.0" y="479" fill="#ffffff" font-size="11">6.0 min</text>
+<text x="20" y="554" fill="#ffffff" font-size="13" font-weight="600">64K prompt</text>
+<line x1="150.0" x2="150.0" y1="562" y2="638" stroke="#34332f"/><text x="150.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">0 min</text>
+<line x1="282.0" x2="282.0" y1="562" y2="638" stroke="#34332f"/><text x="282.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">2.5 </text>
+<line x1="414.0" x2="414.0" y1="562" y2="638" stroke="#34332f"/><text x="414.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">5 </text>
+<line x1="546.0" x2="546.0" y1="562" y2="638" stroke="#34332f"/><text x="546.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">7.5 </text>
+<line x1="678.0" x2="678.0" y1="562" y2="638" stroke="#34332f"/><text x="678.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">10 </text>
+<line x1="810.0" x2="810.0" y1="562" y2="638" stroke="#34332f"/><text x="810.0" y="652" fill="#c3c2b7" font-size="10" text-anchor="middle">12.5 </text>
+<text x="142" y="579" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX fork</text>
+<rect x="150.0" y="566" width="512.4" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 64K turn 1: TTFT 9.7 min, generation 12.2 s</title></rect>
+<rect x="662.4" y="566" width="10.7" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 64K turn 1: TTFT 9.7 min, generation 12.2 s</title></rect>
+<rect x="675.1" y="566" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 64K turn 2: TTFT 1.37 s, generation 12.1 s</title></rect>
+<rect x="676.6" y="566" width="10.7" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 64K turn 2: TTFT 1.37 s, generation 12.1 s</title></rect>
+<rect x="689.3" y="566" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX fork 64K turn 3: TTFT 1.37 s, generation 8.71 s</title></rect>
+<rect x="690.8" y="566" width="7.7" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX fork 64K turn 3: TTFT 1.37 s, generation 8.71 s</title></rect>
+<text x="706.5" y="579" fill="#ffffff" font-size="11">10.3 min</text>
+<text x="142" y="603" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX upstream</text>
+<rect x="150.0" y="590" width="520.3" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 64K turn 1: TTFT 9.9 min, generation 29.2 s</title></rect>
+<rect x="670.3" y="590" width="25.7" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 64K turn 1: TTFT 9.9 min, generation 29.2 s</title></rect>
+<rect x="698.0" y="590" width="1.8" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 64K turn 2: TTFT 2.07 s, generation 29.7 s</title></rect>
+<rect x="699.8" y="590" width="26.1" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 64K turn 2: TTFT 2.07 s, generation 29.7 s</title></rect>
+<rect x="727.9" y="590" width="1.9" height="18" rx="2" fill="#d95926"><title>MTPLX upstream 64K turn 3: TTFT 2.12 s, generation 20.9 s</title></rect>
+<rect x="729.8" y="590" width="18.4" height="18" rx="2" fill="#d95926" fill-opacity="0.4"><title>MTPLX upstream 64K turn 3: TTFT 2.12 s, generation 20.9 s</title></rect>
+<text x="756.2" y="603" fill="#ffffff" font-size="11">11.3 min</text>
+<text x="142" y="627" fill="#c3c2b7" font-size="11" text-anchor="end">oMLX</text>
+<rect x="150.0" y="614" width="539.9" height="18" rx="2" fill="#199e70"><title>oMLX 64K turn 1: TTFT 10.2 min, generation 23.4 s</title></rect>
+<rect x="689.9" y="614" width="20.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 64K turn 1: TTFT 10.2 min, generation 23.4 s</title></rect>
+<rect x="712.5" y="614" width="54.3" height="18" rx="2" fill="#199e70"><title>oMLX 64K turn 2: TTFT 1.0 min, generation 23.4 s</title></rect>
+<rect x="766.8" y="614" width="20.6" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 64K turn 2: TTFT 1.0 min, generation 23.4 s</title></rect>
+<rect x="789.4" y="614" width="4.2" height="18" rx="2" fill="#199e70"><title>oMLX 64K turn 3: TTFT 4.76 s, generation 17.3 s</title></rect>
+<rect x="793.6" y="614" width="15.2" height="18" rx="2" fill="#199e70" fill-opacity="0.4"><title>oMLX 64K turn 3: TTFT 4.76 s, generation 17.3 s</title></rect>
+<text x="816.9" y="627" fill="#ffffff" font-size="11">12.4 min</text>
+</svg>

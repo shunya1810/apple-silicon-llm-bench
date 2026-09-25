@@ -1,0 +1,129 @@
+{
+  "version": "1.0",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 18101,
+    "log_level": "info",
+    "cors_origins": [
+      "*"
+    ],
+    "server_aliases": [
+      "127.0.0.1",
+      "localhost"
+    ],
+    "sse_keepalive_mode": "chunk",
+    "auto_start_on_launch": false,
+    "burst_decode_mode": "balanced",
+    "preserve_mid_system_cache": true,
+    "distributed_inference_enabled": false,
+    "max_audio_upload_size": "100MB"
+  },
+  "model": {
+    "model_dirs": [
+      "${ROOT}/models"
+    ],
+    "model_dir": "${ROOT}/models",
+    "model_fallback": false,
+    "hide_helper_models": false
+  },
+  "memory": {
+    "prefill_memory_guard": true,
+    "memory_guard_tier": "balanced",
+    "memory_guard_custom_ceiling_gb": 0.0,
+    "soft_threshold": 0.85,
+    "hard_threshold": 0.95,
+    "prefill_safe_zone_ratio": 0.8,
+    "prefill_min_chunk_tokens": 32
+  },
+  "scheduler": {
+    "max_concurrent_requests": 8,
+    "embedding_batch_size": 32,
+    "chunked_prefill": false,
+    "prefill_priority": "context",
+    "decode_fairness": true
+  },
+  "cache": {
+    "enabled": true,
+    "hot_cache_only": false,
+    "gdn_ssd_split_enabled": true,
+    "gdn_snapshot_storage": "auto",
+    "gdn_ssd_pending_max_size": "512MB",
+    "gdn_sidecar_precision": "fp32",
+    "ssd_cache_dir": "${ROOT}/engines/omlx-base-fp16/cache",
+    "ssd_cache_max_size": "auto",
+    "hot_cache_max_size": "0",
+    "hot_cache_write_through": false,
+    "ane_compile_cache": false,
+    "initial_cache_blocks": 256
+  },
+  "auth": {
+    "api_key": "",
+    "secret_key": "",
+    "skip_api_key_verification": true,
+    "sub_keys": []
+  },
+  "mcp": {
+    "config_path": null,
+    "expose_tools": true
+  },
+  "huggingface": {
+    "endpoint": "",
+    "hf_cache_enabled": true
+  },
+  "modelscope": {
+    "endpoint": ""
+  },
+  "network": {
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
+    "ca_bundle": ""
+  },
+  "sampling": {
+    "max_context_window": 262144,
+    "max_context_window_policy": null,
+    "max_tokens": 32768,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 0,
+    "repetition_penalty": 1.0
+  },
+  "logging": {
+    "log_dir": null,
+    "retention_days": 7
+  },
+  "claude_code": {
+    "mode": "cloud",
+    "opus_model": null,
+    "sonnet_model": null,
+    "haiku_model": null
+  },
+  "integrations": {
+    "codex_model": null,
+    "opencode_model": null,
+    "openclaw_model": null,
+    "hermes_model": null,
+    "pi_model": null,
+    "copilot_model": null,
+    "openclaw_tools_profile": "coding",
+    "markitdown_enabled": false,
+    "markitdown_expose_model": false,
+    "markitdown_max_file_size_mb": 25,
+    "markitdown_max_files_per_request": 5,
+    "markitdown_pdf_processing_engine": "markitdown",
+    "web_search_provider": "ddgs",
+    "web_search_brave_api_key": "",
+    "web_search_searxng_url": "",
+    "web_search_ddgs_backends": "",
+    "web_search_max_results": 3,
+    "web_search_content_mode": "snippet",
+    "web_search_content_truncate": true,
+    "web_search_content_max_chars": 20000
+  },
+  "ui": {
+    "language": "en"
+  },
+  "idle_timeout": {
+    "idle_timeout_seconds": null
+  }
+}

@@ -1,0 +1,36 @@
+{
+ "rounds": [
+  [
+   "mtplx-upstream",
+   "omlx",
+   "mtplx-fork"
+  ],
+  [
+   "mtplx-fork",
+   "omlx",
+   "mtplx-upstream"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "mt-2k",
+   "kv": "fp16"
+  },
+  {
+   "scenario": "mt-2k",
+   "kv": "q8"
+  },
+  {
+   "scenario": "mt-8k"
+  },
+  {
+   "scenario": "mt-32k"
+  },
+  {
+   "scenario": "mt-64k"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.03
+}

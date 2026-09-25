@@ -1,0 +1,14 @@
+{
+ "id": "mt-32k",
+ "context_tokens": 32768,
+ "reserve_tokens": 400,
+ "max_tokens": 256,
+ "turn_timeout_s": 3600,
+ "turns": [
+  "\n\nThe records above are synthetic telemetry. In about 150 words, describe how the sensor values and status fields vary across the records, then list three concrete observations.",
+  "Now compare records whose status is offline with records whose status is nominal. In about 150 words, describe differences in their sensor values and zones, citing three records by number.",
+  "One line in the data is not a normal telemetry record. Quote that line exactly, then in about 120 words explain how it differs from the other records."
+ ],
+ "needle_turn": 3,
+ "canary_question": "\n\nIn about 100 words, summarize the records above."
+}

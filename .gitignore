@@ -1,0 +1,12 @@
+# machine-specific
+config/local.json
+models/
+engines/omlx-base-*/
+work/
+phase0/
+# large or machine-specific per-cell artifacts (rows.jsonl carries the measurements)
+results/*/cells/*/server.log
+results/*/cells/*/memory.jsonl
+results-run_all.log
+__pycache__/
+.DS_Store

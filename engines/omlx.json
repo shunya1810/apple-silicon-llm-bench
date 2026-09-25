@@ -1,0 +1,44 @@
+{
+ "id": "omlx",
+ "label": "oMLX 0.6.4",
+ "port": 18101,
+ "model_id": "qwen38-27b-mtplx-speed",
+ "tokenizer_dir": "${ROOT}/models/qwen38-27b-mtplx-speed",
+ "model_artifact": "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed (FP16 variant): 4-bit g32 body, 8-bit embed/lm_head/out_proj/last 8 MLPs, native MTP head 4-bit g64 (same files; symlinked text-only dir, MTP tensors exposed as model-mtp.safetensors, MTP quant overrides in config)",
+ "mtp_impl": "oMLX Lightning MTP, mtp_num_draft_tokens 3",
+ "stats": "omlx-log",
+ "health_path": "/v1/models",
+ "start_timeout_s": 300,
+ "cmd": [
+  "${OMLX_CLI}",
+  "serve",
+  "--port",
+  "18101"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "oMLX TurboQuant 8-bit (last KV layer kept unquantized)",
+   "cmd_extra": [
+    "--base-path",
+    "${ROOT}/engines/omlx-base-q8"
+   ],
+   "wipe_before_start": [
+    "${ROOT}/engines/omlx-base-q8/cache"
+   ]
+  },
+  "fp16": {
+   "kv_impl": "oMLX KV unquantized",
+   "cmd_extra": [
+    "--base-path",
+    "${ROOT}/engines/omlx-base-fp16"
+   ],
+   "wipe_before_start": [
+    "${ROOT}/engines/omlx-base-fp16/cache"
+   ]
+  }
+ },
+ "version_cmds": {
+  "version": "grep -o '[0-9.]*' /Applications/oMLX.app/Contents/Resources/omlx/_version.py"
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "machine": "MacBook Pro, Apple M1 Max (32-core GPU), 64 GB",
+ "os": "macOS 26.5.2 (25F84)",
+ "model": {
+  "artifact": "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed, FP16 variant (4-bit g32 body; 8-bit embed, lm_head, linear_attn.out_proj and MLPs of layers 56-63; native MTP head 4-bit g64)",
+  "layers": "64 (16 full attention with KV, 48 linear attention / GDN)"
+ },
+ "engines": {
+  "mtplx-fork": {
+   "repo": "https://github.com/shunya1810/MTPLX",
+   "branch": "m1max-longctx",
+   "commit": "16751dc",
+   "mlx": "0.32.2",
+   "kv": "--paged-kv-quantization q8 (fp16 cells: off)"
+  },
+  "mtplx-upstream": {
+   "repo": "https://github.com/youssofal/MTPLX",
+   "commit": "1de2b1c (main at run time)",
+   "mlx": "0.32.2",
+   "kv": "--paged-kv-quantization q8 (fp16 cells: off)"
+  },
+  "omlx": {
+   "repo": "https://github.com/jundot/omlx",
+   "version": "0.6.4 (latest stable at run time; 0.7.0rc1 was a release candidate)",
+   "mlx": "0.32.0",
+   "kv": "TurboQuant 8-bit, turboquant_skip_last=true (fp16 cells: off)",
+   "mtp": "Lightning MTP, mtp_num_draft_tokens=3"
+  }
+ },
+ "run": {
+  "date": "2026-09-25",
+  "day_plan": "2K fp16, 2K/8K/32K/64K 8-bit KV; 2 rounds, engine order reversed in round 2",
+  "night_plan": "128K, pending"
+ }
+}
