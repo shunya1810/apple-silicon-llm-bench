@@ -10,3 +10,4 @@ results/*/cells/*/memory.jsonl
 results-*.log
 __pycache__/
 .DS_Store
+results/*/*_DONE
