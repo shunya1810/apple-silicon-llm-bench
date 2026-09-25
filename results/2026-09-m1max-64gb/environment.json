@@ -30,6 +30,6 @@
  "run": {
   "date": "2026-09-25",
   "day_plan": "2K fp16, 2K/8K/32K/64K 8-bit KV; 2 rounds, engine order reversed in round 2",
-  "night_plan": "128K, pending"
+  "night_plan": "128K, one round (upstream -> oMLX -> fork), 2026-09-26 00:14-01:50"
  }
 }

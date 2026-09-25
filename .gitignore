@@ -7,6 +7,6 @@ phase0/
 # large or machine-specific per-cell artifacts (rows.jsonl carries the measurements)
 results/*/cells/*/server.log
 results/*/cells/*/memory.jsonl
-results-run_all.log
+results-*.log
 __pycache__/
 .DS_Store

@@ -63,3 +63,10 @@
 23:02:25 round 2 mt-64k q8 mtplx-upstream attempt 1
 23:14:23   canary 24.501221486386886 ref 24.665175702158074 slow=False
 23:15:53 plan done
+00:14:23 round 1 mt-128k q8 mtplx-upstream attempt 1
+00:47:57   canary 24.053730161696837 ref None slow=False
+00:49:57 round 1 mt-128k q8 omlx attempt 1
+01:20:05   canary 21.035894981537925 ref None slow=False
+01:22:05 round 1 mt-128k q8 mtplx-fork attempt 1
+01:48:18   canary 27.131733537246582 ref None slow=False
+01:50:18 plan done

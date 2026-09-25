@@ -973,5 +973,194 @@
    "commit": "16751dc06147fe0665b1be2dc029fc5624c168ac"
   },
   "context_tokens_raw": 65117
+ },
+ "mtplx-upstream|q8|mt-128k": {
+  "engine": "mtplx-upstream",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1828.1103028750222,
+    "gen_s": 56.87711512498208,
+    "e2e_s": 1884.9874180000043,
+    "decode_tok_s": 4.613785573338782,
+    "completion_tokens": 256,
+    "peak_wired": 52680228864,
+    "peak_rss": 21585608704,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5863309352517986
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130969,
+    "ttft_s": 4.16147533300682,
+    "gen_s": 50.88327887500054,
+    "e2e_s": 55.04475420800736,
+    "decode_tok_s": 5.076388553533381,
+    "completion_tokens": 256,
+    "peak_wired": 51090161664,
+    "peak_rss": 21605220352,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6827309236947792
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131276,
+    "ttft_s": 3.4936427079956047,
+    "gen_s": 37.676740916998824,
+    "e2e_s": 41.17038362499443,
+    "decode_tok_s": 4.992850300713372,
+    "completion_tokens": 188,
+    "peak_wired": 52056244224,
+    "peak_rss": 20732821504,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6214689265536724
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "1de2b1c049136ed117af0c6712baaadd81820b51"
+  },
+  "context_tokens_raw": 130667
+ },
+ "omlx|q8|mt-128k": {
+  "engine": "omlx",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1576.7403375830036,
+    "gen_s": 33.363220416998956,
+    "e2e_s": 1610.1035580000025,
+    "decode_tok_s": 7.643815790017435,
+    "completion_tokens": 256,
+    "peak_wired": 48500080640,
+    "peak_rss": 20933132288,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.8040540540540541
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 126976,
+    "ttft_s": 97.58748416599701,
+    "gen_s": 32.81614154201816,
+    "e2e_s": 130.40362570801517,
+    "decode_tok_s": 7.770691238745889,
+    "completion_tokens": 256,
+    "peak_wired": 45334134784,
+    "peak_rss": 24967970816,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.8601398601398601
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131072,
+    "ttft_s": 7.917151833011303,
+    "gen_s": 25.473473082995042,
+    "e2e_s": 33.390624916006345,
+    "decode_tok_s": 6.877315274888098,
+    "completion_tokens": 176,
+    "peak_wired": 34763751424,
+    "peak_rss": 21174108160,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6727272727272727
+   }
+  },
+  "kv_impl": "oMLX TurboQuant 8-bit (last KV layer kept unquantized)",
+  "mtp_impl": "oMLX Lightning MTP, mtp_num_draft_tokens 3",
+  "engine_version": {
+   "version": "0.6.4"
+  },
+  "context_tokens_raw": 130667
+ },
+ "mtplx-fork|q8|mt-128k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1494.9359163329937,
+    "gen_s": 15.826357874990208,
+    "e2e_s": 1510.7622742079839,
+    "decode_tok_s": 17.825583429395074,
+    "completion_tokens": 256,
+    "peak_wired": 43374297088,
+    "peak_rss": 21612199936,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6043956043956044
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130969,
+    "ttft_s": 2.2412465840170626,
+    "gen_s": 15.104298457998084,
+    "e2e_s": 17.345545042015146,
+    "decode_tok_s": 17.24529351043917,
+    "completion_tokens": 256,
+    "peak_wired": 46930886656,
+    "peak_rss": 21640085504,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6395348837209303
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131276,
+    "ttft_s": 2.2527824999997392,
+    "gen_s": 12.268002750002779,
+    "e2e_s": 14.520785250002518,
+    "decode_tok_s": 15.018439282959545,
+    "completion_tokens": 182,
+    "peak_wired": 47782084608,
+    "peak_rss": 21672935424,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6140350877192983
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "16751dc06147fe0665b1be2dc029fc5624c168ac"
+  },
+  "context_tokens_raw": 130667
  }
 }

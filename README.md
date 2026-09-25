@@ -13,22 +13,26 @@ speculative decoding (depth 3) and 8-bit KV cache, on a MacBook Pro with M1 Max 
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time; the fork's base |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
 
-Results so far: 2K–64K (2 rounds each). 128K is prepared and will be added to this page.
+Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once.
 
-## Highlights (64K prompt, 8-bit KV)
+## Highlights (8-bit KV)
 
-- **Decode:** MTPLX fork **20.9 tok/s**, oMLX 10.7, MTPLX upstream 8.7 (mean of the three
-  turns). The fork's lead grows with the prompt: +13–35% at 2K–8K, about 1.5× at 32K,
-  2.0–2.4× at 64K.
-- **Follow-up turns:** time to first token for turns 2 and 3 is **1.4 s** on the fork,
-  2.1 s on upstream, and 1.0 min / 4.8 s on oMLX. oMLX keeps its prefix cache on SSD in
-  4,096-token blocks and, for this model family, can save a prompt only up to the last
-  block boundary it crossed, so the next turn re-reads the rest (up to ~4K tokens).
-- **The first turn costs the same everywhere:** reading a 64K prompt cold takes 9.7–10.2
-  minutes on all three, and a 2K prompt 11.4–11.5 s. The prefill is bound by the same MLX
-  quantized matrix multiply (about 7.9 TFLOPS at 2K on this GPU).
-- **Whole conversation:** 10.3 min (fork), 11.3 min (upstream), 12.4 min (oMLX).
-- **Memory:** peak wired memory 39.6 GB (oMLX), 42.7 GB (fork), 48.4 GB (upstream).
+- **Decode:** at 128K the MTPLX fork decodes at **16.7 tok/s**, oMLX at 7.4 and MTPLX
+  upstream at 4.9 (mean of the three turns); at 64K it is 20.9, 10.7 and 8.7. The fork's
+  lead grows with the prompt: +13–35% at 2K–8K, about 1.5× at 32K, 2.0–2.4× at 64K and
+  2.3–3.4× at 128K.
+- **Follow-up turns:** time to first token for turns 2 and 3 at 128K is **2.2 s** on the
+  fork, 3.5–4.2 s on upstream, and 1.6 min / 7.9 s on oMLX (64K: 1.4 s, 2.1 s, 1.0 min /
+  4.8 s). oMLX keeps its prefix cache on SSD in 4,096-token blocks and, for this model
+  family, can save a prompt only up to the last block boundary it crossed, so the next
+  turn re-reads the rest (up to ~4K tokens).
+- **First turn:** up to 64K, reading the prompt cold takes the same time on all three
+  (9.7–10.2 min at 64K, 11.4–11.5 s at 2K): the prefill is bound by the same MLX quantized
+  matrix multiply (about 7.9 TFLOPS at 2K on this GPU). At 128K attention becomes a large
+  share and the engines separate: 24.9 min (fork), 26.3 min (oMLX), 30.5 min (upstream).
+- **Whole conversation at 128K:** 25.7 min (fork), 29.6 min (oMLX), 33.0 min (upstream).
+- **Memory:** peak wired memory at 128K is 47.8 GB (fork), 48.5 GB (oMLX), 52.7 GB
+  (upstream); at 64K 42.7, 39.6 and 48.4 GB.
 - **Output check:** every engine quoted the needle line correctly in turn 3 in every run.
 
 ## Decode speed
@@ -61,7 +65,7 @@ Results so far: 2K–64K (2 rounds each). 128K is prepared and will be added to 
 
 ## Tables
 
-Median of 2 rounds per cell. `cached` is the engine-reported
+Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the engine-reported
 `usage.prompt_tokens_details.cached_tokens`. Wired memory is system-wide.
 
 | context | engine | T1 TTFT (cold) | T2 TTFT | T3 TTFT | decode T1 / T2 / T3 (tok/s) | 3-turn total | cached T2 / T3 | peak wired | needle |
@@ -78,6 +82,9 @@ Median of 2 rounds per cell. `cached` is the engine-reported
 | 64K | MTPLX fork | 9.7 min | 1.37 s | 1.37 s | 21.7 / 21.1 / 19.8 | 10.3 min | 65,419 / 65,726 | 42.7 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.12 s | 8.8 / 8.7 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.4 GB | 2/2 |
 | 64K | oMLX | 10.2 min | 1.0 min | 4.76 s | 10.9 / 10.9 / 10.4 | 12.4 min | 61,440 / 65,536 | 39.6 GB | 2/2 |
+| 128K | MTPLX fork | 24.9 min | 2.24 s | 2.25 s | 17.8 / 17.2 / 15.0 | 25.7 min | 130,969 / 131,276 | 47.8 GB | 1/1 |
+| 128K | MTPLX upstream | 30.5 min | 4.16 s | 3.49 s | 4.6 / 5.1 / 5.0 | 33.0 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
+| 128K | oMLX | 26.3 min | 1.6 min | 7.92 s | 7.6 / 7.8 / 6.9 | 29.6 min | 126,976 / 131,072 | 48.5 GB | 1/1 |
 
 **2K: fp16 KV vs 8-bit KV** (decode tok/s, mean of turns 1–3)
 
@@ -110,6 +117,9 @@ Short version (full details in [METHODOLOGY.md](METHODOLOGY.md)):
 - Every cell restarts the engine with its caches wiped, then runs a warmup and a
   thermal canary. Engine order is reversed in round 2. A cell whose canary was >3%
   slower than that engine's best was re-run after a 5-minute rest (this happened once).
+  128K ran once, in the order upstream → oMLX → fork (the fork last, on the warmest
+  machine); its canaries were 1.7% (fork), 2.5% (upstream) and 4.8% (oMLX) below each
+  engine's best canary of the 2K–64K run, and those cells were not re-run.
 - Round-to-round decode difference: median 1.0%, largest 10% (oMLX, 64K turn 3, where the
   two runs generated different text). Both MTPLX arms produced byte-identical text in both
   rounds in all 15 of their turns; oMLX in 12 of 15.
