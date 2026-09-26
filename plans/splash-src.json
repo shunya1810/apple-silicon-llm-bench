@@ -1,0 +1,27 @@
+{
+ "rounds": [
+  [
+   "splash-src"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "mt-2k"
+  },
+  {
+   "scenario": "mt-8k"
+  },
+  {
+   "scenario": "mt-32k"
+  },
+  {
+   "scenario": "mt-64k"
+  },
+  {
+   "scenario": "mt-128k"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.03
+}

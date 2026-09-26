@@ -1912,5 +1912,320 @@
    "commit": "40b6113ca13121a2f299299b2e0ade3c4c8a01a3"
   },
   "context_tokens_raw": 130667
+ },
+ "splash-src|q8|mt-2k": {
+  "engine": "splash-src",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 1680,
+    "cached_tokens": 0,
+    "ttft_s": 12.231737333990168,
+    "gen_s": 8.91569929101388,
+    "e2e_s": 21.147436625004048,
+    "decode_tok_s": 28.601725303848998,
+    "completion_tokens": 256,
+    "peak_wired": 21127135232,
+    "peak_rss": 1741258752,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.29081632653061223
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 1987,
+    "cached_tokens": 1664,
+    "ttft_s": 2.812944083008915,
+    "gen_s": 7.111245291976957,
+    "e2e_s": 9.924189374985872,
+    "decode_tok_s": 35.85982961812149,
+    "completion_tokens": 256,
+    "peak_wired": 21100101632,
+    "peak_rss": 2133606400,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.40298507462686567
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 2291,
+    "cached_tokens": 1984,
+    "ttft_s": 2.620048874989152,
+    "gen_s": 5.540069667011267,
+    "e2e_s": 8.160118542000419,
+    "decode_tok_s": 32.31073273993825,
+    "completion_tokens": 180,
+    "peak_wired": 21100281856,
+    "peak_rss": 2456698880,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3489010989010989
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "commit": "a4f7e964825fe73ec2ad0eaab659807994de799c"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-src|q8|mt-8k": {
+  "engine": "splash-src",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 7833,
+    "cached_tokens": 0,
+    "ttft_s": 58.6309186249855,
+    "gen_s": 8.959876375010936,
+    "e2e_s": 67.59079499999643,
+    "decode_tok_s": 28.46082505062252,
+    "completion_tokens": 256,
+    "peak_wired": 21381267456,
+    "peak_rss": 1778728960,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.30864197530864196
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 8140,
+    "cached_tokens": 7808,
+    "ttft_s": 3.05771975000971,
+    "gen_s": 6.351880375004839,
+    "e2e_s": 9.40960012501455,
+    "decode_tok_s": 40.146626759747726,
+    "completion_tokens": 256,
+    "peak_wired": 21369421824,
+    "peak_rss": 2087616512,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.49874686716791977
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 8444,
+    "cached_tokens": 8128,
+    "ttft_s": 2.914793042000383,
+    "gen_s": 6.264683832996525,
+    "e2e_s": 9.179476874996908,
+    "decode_tok_s": 29.212248228903533,
+    "completion_tokens": 184,
+    "peak_wired": 21370175488,
+    "peak_rss": 2479915008,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3239795918367347
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "commit": "a4f7e964825fe73ec2ad0eaab659807994de799c"
+  },
+  "context_tokens_raw": 7787
+ },
+ "splash-src|q8|mt-32k": {
+  "engine": "splash-src",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 32409,
+    "cached_tokens": 0,
+    "ttft_s": 294.47655154101085,
+    "gen_s": 10.062259833997814,
+    "e2e_s": 304.53881137500866,
+    "decode_tok_s": 25.342698189163013,
+    "completion_tokens": 256,
+    "peak_wired": 22201679872,
+    "peak_rss": 1787904000,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.33646616541353386
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 32716,
+    "cached_tokens": 32384,
+    "ttft_s": 3.970693042007042,
+    "gen_s": 8.772715708008036,
+    "e2e_s": 12.743408750015078,
+    "decode_tok_s": 29.068206805204625,
+    "completion_tokens": 256,
+    "peak_wired": 22210609152,
+    "peak_rss": 2094383104,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4090909090909091
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 33020,
+    "cached_tokens": 32704,
+    "ttft_s": 3.958460958994692,
+    "gen_s": 6.428923333005514,
+    "e2e_s": 10.387384292000206,
+    "decode_tok_s": 27.066548126554405,
+    "completion_tokens": 175,
+    "peak_wired": 22192275456,
+    "peak_rss": 2486878208,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.375
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "commit": "a4f7e964825fe73ec2ad0eaab659807994de799c"
+  },
+  "context_tokens_raw": 32363
+ },
+ "splash-src|q8|mt-64k": {
+  "engine": "splash-src",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 65163,
+    "cached_tokens": 0,
+    "ttft_s": 738.9605377920088,
+    "gen_s": 12.334224499994889,
+    "e2e_s": 751.2947622920037,
+    "decode_tok_s": 20.674521255118073,
+    "completion_tokens": 256,
+    "peak_wired": 23300882432,
+    "peak_rss": 1811185664,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3383458646616541
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 65470,
+    "cached_tokens": 65152,
+    "ttft_s": 5.0056074999738485,
+    "gen_s": 9.417039208026836,
+    "e2e_s": 14.422646708000684,
+    "decode_tok_s": 27.079041891438713,
+    "completion_tokens": 256,
+    "peak_wired": 23305699328,
+    "peak_rss": 2107473920,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4852216748768473
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 65774,
+    "cached_tokens": 65440,
+    "ttft_s": 5.778110250015743,
+    "gen_s": 9.666105915996013,
+    "e2e_s": 15.444216166011756,
+    "decode_tok_s": 18.311742519355786,
+    "completion_tokens": 178,
+    "peak_wired": 23302275072,
+    "peak_rss": 2499821568,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.2857142857142857
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "commit": "a4f7e964825fe73ec2ad0eaab659807994de799c"
+  },
+  "context_tokens_raw": 65117
+ },
+ "splash-src|q8|mt-128k": {
+  "engine": "splash-src",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 2060.069117625011,
+    "gen_s": 17.769003708002856,
+    "e2e_s": 2077.838121333014,
+    "decode_tok_s": 14.35268429901741,
+    "completion_tokens": 256,
+    "peak_wired": 25509052416,
+    "peak_rss": 1833779200,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.30864197530864196
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130688,
+    "ttft_s": 8.024696625012439,
+    "gen_s": 13.816453957988415,
+    "e2e_s": 21.841150583000854,
+    "decode_tok_s": 18.45655775246836,
+    "completion_tokens": 256,
+    "peak_wired": 25490030592,
+    "peak_rss": 2137505792,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4470046082949309
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131008,
+    "ttft_s": 7.81352062500082,
+    "gen_s": 11.650752500019735,
+    "e2e_s": 19.464273125020554,
+    "decode_tok_s": 14.591585282670545,
+    "completion_tokens": 171,
+    "peak_wired": 25491587072,
+    "peak_rss": 2473754624,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.30687830687830686
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "commit": "a4f7e964825fe73ec2ad0eaab659807994de799c"
+  },
+  "context_tokens_raw": 130667
  }
 }

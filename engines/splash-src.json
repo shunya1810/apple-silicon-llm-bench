@@ -1,0 +1,52 @@
+{
+ "id": "splash-src",
+ "label": "Splash source 5967821 + a4f7e96 (M1 fork HEAD, analysis build)",
+ "port": 18105,
+ "model_id": "splash",
+ "tokenizer_dir": "${MTPLX_MODEL}",
+ "model_artifact": "incoai/Qwen3.8-27B-Splash: mlx-community/Qwen3.8-27B-4bit (affine 4-bit, group 64) prepared for Splash's kernels, plus the incoai/Qwen3.8-27B-DFlash2 draft (5 layers). Different files from the MTPLX artifact used by the other engines.",
+ "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+ "stats": "splash-status",
+ "health_path": "/v1/models",
+ "start_timeout_s": 1800,
+ "request_extra": {
+  "reasoning_effort": "none"
+ },
+ "cmd": [
+  "${ROOT}/../splash-src/splash",
+  "serve",
+  "--model",
+  "incoai/Qwen3.8-27B-Splash",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "18105",
+  "--served-model-name",
+  "splash",
+  "--default-reasoning-effort",
+  "none",
+  "--max-context",
+  "256K",
+  "--no-webui"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "Splash INT8 target KV (default)",
+   "cmd_extra": [
+    "--kv-format",
+    "int8"
+   ]
+  },
+  "fp16": {
+   "kv_impl": "Splash BF16 target KV",
+   "cmd_extra": [
+    "--kv-format",
+    "bf16"
+   ]
+  }
+ },
+ "version_cmds": {
+  "commit": "git -C ${ROOT}/../splash-src rev-parse HEAD"
+ }
+}

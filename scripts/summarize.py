@@ -16,8 +16,9 @@ import statistics
 import sys
 from pathlib import Path
 
-ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash M1 build"}
+ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "splash-src"]  # table order
+CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
+NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash M1 build", "splash-src": "Splash source (HEAD)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
 GB = 1e9
@@ -67,7 +68,7 @@ def build(rows: list[dict]) -> dict:
             for x in rs:
                 s = x.get("engine_stats") or {}
                 if s.get("drafted_tokens"):
-                    acc.append(s["accepted_drafts"] / s["drafted_tokens"])
+                    acc.append(s.get("accepted_drafts", s.get("accepted_draft_tokens", 0)) / s["drafted_tokens"])
             turns[t] = {
                 "n": len(rs),
                 "prompt_tokens": med(x.get("prompt_tokens") for x in rs),
@@ -163,6 +164,22 @@ def tables_md(cells: dict, lang: str) -> str:
     return "\n".join(out) + "\n"
 
 
+def passes_md(rows: list[dict], lang: str) -> str:
+    """Per-turn speculative stats for engines that report them (Splash /status deltas)."""
+    ja = lang == "ja"
+    out = ["| context | turn | decode tok/s | verify passes | drafted / pass | accepted / pass | tokens / pass | acceptance | ms / pass |"
+           if not ja else "| 文脈 | ターン | decode tok/s | verify の回数 | draft / 回 | 受理 / 回 | 確定トークン / 回 | 受理率 | ms / 回 |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    for r in rows:
+        s = r.get("engine_stats") or {}
+        if r["phase"] != "turn" or r["engine"] != "splash-src" or not s.get("verify_passes"):
+            continue
+        out.append(f"| {CTX_LABEL[r['scenario']]} | {r['turn']} | {f(r.get('decode_tok_s'))} | {s['verify_passes']} | "
+                   f"{s['drafted_per_pass']:.1f} | {s['accepted_per_pass']:.2f} | {s['output_tokens_per_pass']:.2f} | "
+                   f"{s['acceptance_rate'] * 100:.0f}% | {s['ms_per_pass']:.0f} |")
+    return "\n".join(out) + "\n"
+
+
 def write_csv(cells: dict, path: Path) -> None:
     fields = ["engine", "kv", "scenario", "turn", "rounds", "prompt_tokens", "cached_tokens", "ttft_s", "gen_s",
               "e2e_s", "decode_tok_s", "completion_tokens", "accept_rate", "peak_wired", "peak_rss", "needle_ok"]
@@ -242,7 +259,7 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
         ticks = [i * step for i in range(int(round(hi / step)) + 1)]
     fx = lambda i: L + pw * (i + 0.5) / len(ctxs)
     o = svg_open(W, H, th, title, subtitle)
-    legend(o, th, [e for e in ENGINES if e in series], 20, 76)
+    legend(o, th, [e for e in CHART_ENGINES if e in series], 20, 76)
     for t in ticks:
         lab = (f"{t:g}" if t < 1 else (f"{t:,.0f}")) if logy else f"{t:g}"
         o.append(f'<line x1="{L}" x2="{L + pw}" y1="{fy(t):.1f}" y2="{fy(t):.1f}" stroke="{th["grid"]}"/>'
@@ -256,7 +273,7 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
     o.append(f'<text x="16" y="{T + ph / 2}" fill="{th["t2"]}" font-size="11" text-anchor="middle" '
              f'transform="rotate(-90 16 {T + ph / 2})">{esc(ylabel)}</text>')
     ends = []
-    for e in ENGINES:
+    for e in CHART_ENGINES:
         if e not in series:
             continue
         pts = [(fx(i), fy(v), v) for i, v in enumerate(series[e]) if v]
@@ -294,12 +311,12 @@ def conversation_chart(th, cells, ctxs):
     Each context gets its own time scale (small multiples), so short follow-up turns stay visible."""
     W, L, R, rowh, panel_gap = 900, 150, 90, 18, 58
     pw = W - L - R
-    rows_per = [[e for e in ENGINES if (e, "q8", s) in cells] for s in ctxs]
+    rows_per = [[e for e in CHART_ENGINES if (e, "q8", s) in cells] for s in ctxs]
     H = 100 + sum(len(r) * (rowh + 6) + panel_gap + 18 for r in rows_per) + 10
     o = svg_open(W, H, th, "A 3-turn conversation, end to end (8-bit KV)",
                  "Turn 1 reads the prompt cold; turns 2–3 add ~300 tokens each · ≤ 256 generated tokens per turn · "
                  "own time scale per panel")
-    legend(o, th, ENGINES, 20, 76, swatch=True)
+    legend(o, th, CHART_ENGINES, 20, 76, swatch=True)
     o.append(f'<rect x="{W - 250}" y="66" width="16" height="11" rx="2" fill="{th["t2"]}"/>'
              f'<text x="{W - 228}" y="76" fill="{th["t2"]}" font-size="12">TTFT</text>'
              f'<rect x="{W - 180}" y="66" width="16" height="11" rx="2" fill="{th["t2"]}" fill-opacity="0.4"/>'
@@ -355,17 +372,17 @@ def charts(cells: dict, out: Path) -> list[str]:
                 th, "Decode speed vs prompt length (8-bit KV)",
                 "Qwen3.8-27B, MTP depth 3, temperature 0 · mean of turns 1–3, median of rounds · higher is better",
                 "decode tok/s", ctxs,
-                {e: [mean_turns(cells, e, s, "decode_tok_s") for s in ctxs] for e in ENGINES}),
+                {e: [mean_turns(cells, e, s, "decode_tok_s") for s in ctxs] for e in CHART_ENGINES}),
             "ttft-followup": line_chart(
                 th, "Time to first token, turns 2–3 (follow-up)",
                 "Previous turns should come from the engine's prefix cache · mean of turns 2 and 3 · log scale · lower is better",
                 "seconds (log)", ctxs,
-                {e: [mean_turns(cells, e, s, "ttft_s", ts=(2, 3)) for s in ctxs] for e in ENGINES}, logy=True, vfmt=fs),
+                {e: [mean_turns(cells, e, s, "ttft_s", ts=(2, 3)) for s in ctxs] for e in CHART_ENGINES}, logy=True, vfmt=fs),
             "memory": line_chart(
                 th, "Peak wired memory during the conversation",
                 "System-wide wired memory (vm_stat), max over turns 1–3 · 64 GB machine · lower is better", "GB", ctxs,
                 {e: [(lambda v: v / GB if v else None)(max((turn(cells, e, s, t, "peak_wired") or 0) for t in (1, 2, 3)) or None)
-                     for s in ctxs] for e in ENGINES}, vfmt=lambda v: f"{v:.1f} GB"),
+                     for s in ctxs] for e in CHART_ENGINES}, vfmt=lambda v: f"{v:.1f} GB"),
             "conversation": conversation_chart(th, cells, ctxs),
         }
         for name, svg in specs.items():
@@ -380,8 +397,10 @@ def main() -> None:
     cells = build(load(run))
     (run / "summary.json").write_text(json.dumps({"|".join(k): v for k, v in cells.items()}, indent=1, default=list))
     write_csv(cells, run / "summary.csv")
+    rows = load(run)
     for lang in ("en", "ja"):
         (run / f"tables.{lang}.md").write_text(tables_md(cells, lang))
+        (run / f"passes.{lang}.md").write_text(passes_md(rows, lang))
     made = charts(cells, run.parent.parent / "charts")
     print("cells:", len(cells), "charts:", len(made))
 

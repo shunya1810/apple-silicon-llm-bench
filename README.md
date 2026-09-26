@@ -16,6 +16,7 @@ reflects a different quantization and a different speculative method.
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time; the fork's base |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
 | **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | community M1/M2 build of [incoai/splash](https://github.com/incoai/splash) with Apple7 kernels; model `incoai/Qwen3.8-27B-Splash` (4-bit g64 + DFlash2 draft), INT8 KV |
+| **Splash source (HEAD)** | [paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels) + [a4f7e96](https://github.com/shunya1810/splash/tree/m1-analysis-metrics) | the M1 fork's unreleased head, built locally for analysis (one round; tables and the section below only) |
 
 Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once. Splash ran
 after the other three, in its own two rounds; its 128K cell could not complete (see
@@ -95,22 +96,27 @@ Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the 
 | 2K | MTPLX upstream | 11.5 s | 0.64 s | 0.64 s | 25.1 / 22.9 / 23.2 | 41.8 s | 1,936 / 2,243 | 34.0 GB | 2/2 |
 | 2K | oMLX | 11.4 s | 13.5 s | 15.4 s | 20.4 / 23.5 / 21.0 | 1.2 min | 0 / 0 | 26.9 GB | 2/2 |
 | 2K | Splash M1 build | 12.1 s | 2.87 s | 2.68 s | 27.6 / 41.6 / 29.6 | 39.0 s | 1,664 / 1,984 | 21.7 GB | 2/2 |
+| 2K | Splash source (HEAD) | 12.2 s | 2.81 s | 2.62 s | 28.6 / 35.9 / 32.3 | 39.2 s | 1,664 / 1,984 | 21.1 GB | 1/1 |
 | 8K | MTPLX fork | 55.8 s | 0.76 s | 0.72 s | 26.3 / 28.3 / 26.2 | 1.4 min | 8,089 / 8,396 | 32.8 GB | 2/2 |
 | 8K | MTPLX upstream | 54.2 s | 0.76 s | 0.77 s | 23.5 / 23.2 / 21.7 | 1.4 min | 8,089 / 8,396 | 35.5 GB | 2/2 |
 | 8K | oMLX | 56.4 s | 30.0 s | 2.69 s | 20.2 / 19.8 / 18.3 | 2.1 min | 4,096 / 8,192 | 33.2 GB | 2/2 |
 | 8K | Splash M1 build | 59.6 s | 3.21 s | 3.05 s | 26.6 / 31.9 / 27.1 | 1.5 min | 7,808 / 8,128 | 21.6 GB | 2/2 |
+| 8K | Splash source (HEAD) | 58.6 s | 3.06 s | 2.91 s | 28.5 / 40.1 / 29.2 | 1.4 min | 7,808 / 8,128 | 21.4 GB | 1/1 |
 | 32K | MTPLX fork | 4.2 min | 0.96 s | 0.98 s | 24.6 / 25.2 / 22.1 | 4.7 min | 32,665 / 32,972 | 37.8 GB | 2/2 |
 | 32K | MTPLX upstream | 4.1 min | 1.38 s | 1.37 s | 17.1 / 12.5 / 12.0 | 5.0 min | 32,665 / 32,972 | 40.8 GB | 2/2 |
 | 32K | oMLX | 4.4 min | 44.6 s | 3.45 s | 14.4 / 14.0 / 14.4 | 6.0 min | 28,672 / 32,768 | 37.0 GB | 2/2 |
 | 32K | Splash M1 build | 5.0 min | 4.43 s | 4.18 s | 23.2 / 27.2 / 22.1 | 5.7 min | 32,384 / 32,704 | 23.1 GB | 2/2 |
+| 32K | Splash source (HEAD) | 4.9 min | 3.97 s | 3.96 s | 25.3 / 29.1 / 27.1 | 5.5 min | 32,384 / 32,704 | 22.2 GB | 1/1 |
 | 64K | MTPLX fork | 9.9 min | 1.39 s | 1.37 s | 20.8 / 22.8 / 19.6 | 10.5 min | 65,419 / 65,726 | 44.1 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.12 s | 8.8 / 8.7 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.4 GB | 2/2 |
 | 64K | oMLX | 10.2 min | 1.0 min | 4.76 s | 10.9 / 10.9 / 10.4 | 12.4 min | 61,440 / 65,536 | 39.6 GB | 2/2 |
 | 64K | Splash M1 build | 12.8 min | 5.68 s | 6.34 s | 18.7 / 22.5 / 16.5 | 13.6 min | 65,152 / 65,440 | 23.4 GB | 2/2 |
+| 64K | Splash source (HEAD) | 12.3 min | 5.01 s | 5.78 s | 20.7 / 27.1 / 18.3 | 13.0 min | 65,152 / 65,440 | 23.3 GB | 1/1 |
 | 128K | MTPLX fork | 24.7 min | 2.21 s | 2.15 s | 17.9 / 18.7 / 17.5 | 25.4 min | 130,969 / 131,276 | 48.0 GB | 1/1 |
 | 128K | MTPLX upstream | 30.5 min | 4.16 s | 3.49 s | 4.6 / 5.1 / 5.0 | 33.0 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
 | 128K | oMLX | 26.3 min | 1.6 min | 7.92 s | 7.6 / 7.8 / 6.9 | 29.6 min | 126,976 / 131,072 | 48.5 GB | 1/1 |
 | 128K | Splash M1 build | — | — | — | — / — / — | — | — / — | 24.7 GB | — |
+| 128K | Splash source (HEAD) | 34.3 min | 8.02 s | 7.81 s | 14.4 / 18.5 / 14.6 | 35.3 min | 130,688 / 131,008 | 25.5 GB | 1/1 |
 
 **2K: fp16 KV vs 8-bit KV** (decode tok/s, mean of turns 1–3)
 
@@ -120,11 +126,56 @@ Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the 
 | MTPLX upstream | 24.8 | 23.7 | -4.5% |
 | oMLX | 23.1 | 21.6 | -6.4% |
 | Splash M1 build | 33.8 | 33.0 | -2.5% |
+| Splash source (HEAD) | — | 32.3 | — |
 
 Raw rows: [`results/2026-09-m1max-64gb/rows.jsonl`](results/2026-09-m1max-64gb/rows.jsonl) ·
 per-turn CSV: [`summary.csv`](results/2026-09-m1max-64gb/summary.csv) ·
 environment: [`environment.json`](results/2026-09-m1max-64gb/environment.json) ·
 generated text of every turn: `results/2026-09-m1max-64gb/cells/*/`.
+
+## Why Splash is fastest on turn 2
+
+A source build of Splash's M1 fork at its current head
+([paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels),
+built locally with [one added status counter](https://github.com/shunya1810/splash/tree/m1-analysis-metrics))
+reports its draft and verify counters, so each turn can be broken down into verify passes
+(one DFlash2 draft of 7 tokens plus one verify of 8 positions). One round, 8-bit KV:
+
+| context | turn | decode tok/s | verify passes | drafted / pass | accepted / pass | tokens / pass | acceptance | ms / pass |
+|---|---|---|---|---|---|---|---|---|
+| 2K | 1 | 28.6 | 84 | 7.0 | 2.04 | 3.05 | 29% | 107 |
+| 2K | 2 | 35.9 | 67 | 7.0 | 2.82 | 3.82 | 40% | 107 |
+| 2K | 3 | 32.3 | 52 | 7.0 | 2.44 | 3.46 | 35% | 107 |
+| 8K | 1 | 28.5 | 81 | 7.0 | 2.16 | 3.16 | 31% | 111 |
+| 8K | 2 | 40.1 | 57 | 7.0 | 3.49 | 4.49 | 50% | 113 |
+| 8K | 3 | 29.2 | 56 | 7.0 | 2.27 | 3.29 | 32% | 113 |
+| 32K | 1 | 25.3 | 76 | 7.0 | 2.36 | 3.37 | 34% | 133 |
+| 32K | 2 | 29.1 | 66 | 7.0 | 2.86 | 3.88 | 41% | 133 |
+| 32K | 3 | 27.1 | 48 | 7.0 | 2.62 | 3.65 | 38% | 136 |
+| 64K | 1 | 20.7 | 76 | 7.0 | 2.37 | 3.37 | 34% | 163 |
+| 64K | 2 | 27.1 | 58 | 7.0 | 3.40 | 4.41 | 49% | 164 |
+| 64K | 3 | 18.3 | 59 | 7.0 | 2.00 | 3.02 | 29% | 166 |
+| 128K | 1 | 14.4 | 81 | 7.0 | 2.16 | 3.16 | 31% | 220 |
+| 128K | 2 | 18.5 | 62 | 7.0 | 3.13 | 4.13 | 45% | 225 |
+| 128K | 3 | 14.6 | 54 | 7.0 | 2.15 | 3.17 | 31% | 218 |
+
+- **Turn 2 is the only turn where the draft is accepted often:** 40–50% of drafted tokens,
+  against 29–38% on turns 1 and 3, so a pass commits 3.8–4.5 tokens instead of 3.0–3.7. The
+  cost of a pass does not depend on the turn, so the extra tokens are the whole difference.
+  The turn-2 answer repeats the comparison pattern set up in turn 1, which a 7-token draft
+  can follow further than the 3-token MTP draft; the MTPLX fork commits 2.9–3.0 tokens per
+  round on turn 2 and 2.6–2.9 on turns 1 and 3, with a ceiling of 4.
+- **Splash verifies twice as many positions per pass at the same cost at short context:**
+  107 ms per pass at 2K for 8 positions and a 7-token draft, against about 100 ms per
+  round on the fork for 4 positions and a 3-token MTP draft.
+- **The pass cost grows faster with the prompt:** from 107 ms (2K) to 220 ms (128K) on
+  Splash, against 100 to 157 ms per round on the fork. Each pass attends over the whole
+  history for 8 positions instead of 4, which most likely explains why Splash falls
+  behind from 64K on turns 1 and 3.
+- This source build finishes 128K (first turn 34.3 min, then 8.0 / 7.8 s to first token):
+  its server's `--request-timeout` default is 10,000 s, where the 1.0.2-m1 release had
+  1,800 s. It also carries two newer Apple7/8 attention commits; at 64K it decodes at
+  20.7 / 27.1 / 18.3 tok/s against 18.7 / 22.5 / 16.5 for the release.
 
 ## How it was measured
 

@@ -163,8 +163,15 @@ class Engine:
             if kind == "splash-status":
                 now, pre = self._splash_metrics(), getattr(self, "_pre", None) or {}
                 keys = ("drafted_tokens", "accepted_draft_tokens", "decode_output_tokens", "decode_wall_ms",
-                        "prefill_input_tokens", "prefill_wall_ms")
+                        "prefill_input_tokens", "prefill_wall_ms", "decode_batches")
                 d = {k: (now.get(k) or 0) - (pre.get(k) or 0) for k in keys}
+                if d["decode_batches"]:
+                    d["verify_passes"] = d["decode_batches"]
+                    d["output_tokens_per_pass"] = d["decode_output_tokens"] / d["decode_batches"]
+                    d["accepted_per_pass"] = d["accepted_draft_tokens"] / d["decode_batches"]
+                    d["drafted_per_pass"] = d["drafted_tokens"] / d["decode_batches"]
+                    if d["decode_wall_ms"]:
+                        d["ms_per_pass"] = d["decode_wall_ms"] / d["decode_batches"]
                 if d["drafted_tokens"]:
                     d["acceptance_rate"] = d["accepted_draft_tokens"] / d["drafted_tokens"]
                 if d["decode_wall_ms"]:
@@ -204,7 +211,13 @@ class Engine:
                     if hit:
                         return hit
             return None
-        return find(get_json(self.base + "/status", timeout=60)) or {}
+        status = get_json(self.base + "/status", timeout=60)
+        out = dict(find(status) or {})
+        # verify passes: the scheduler's decode batch count (older builds lack metrics.decode_batches)
+        sched = status.get("scheduler") if isinstance(status, dict) else None
+        if "decode_batches" not in out and isinstance(sched, dict) and "decode_batches" in sched:
+            out["decode_batches"] = sched["decode_batches"]
+        return out
 
     def pre_request(self) -> None:
         """Snapshot cumulative counters before a request (engines whose stats are cumulative)."""

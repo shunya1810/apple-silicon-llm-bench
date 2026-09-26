@@ -1,0 +1,6 @@
+The provided telemetry data exhibits a highly structured, deterministic pattern rather than random noise. Sensor values generally decrease linearly from approximately 99.6 to 0.0 across the sequence, resetting periodically to high values (e.g., 99.x) to create a sawtooth wave. The status field cycles through a fixed five-state sequence: nominal, degraded, recovering, offline, and calibrating. Zones alternate between 'A' and 'N' prefixes with incrementing numeric suffixes. Notably, one anomalous record (000653) contains non-numeric maintenance text, breaking the standard telemetry format.
+
+Three concrete observations include:
+1.  **Linear Decay:** Sensor values decrease by exactly 0.7 units per record until they approach zero, after which the cycle resets to a high value (e.g., 99.6, 99.5, 99.4).
+2.  **Cyclic Status:** The status field follows a rigid, repeating five-step cycle (nominal → degraded → recovering → offline → calibrating) that is independent of the sensor value magnitude.
+3.  **Data Anomaly:** Record 000653 is a text-based
