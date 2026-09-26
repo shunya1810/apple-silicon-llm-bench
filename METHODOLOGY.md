@@ -73,6 +73,12 @@ the only per-phase measurement.
 - The fork column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
   on M1), with the same plans: 2K–64K in two rounds, then 128K once, running alone. The
   first measurement (`16751dc`) is kept in `rows.jsonl` under `mtplx-fork-16751dc`.
+- It was re-measured again the same evening at `4fe8067` (M1 memory defaults: MLX buffer
+  cache capped at 1 GiB, two saved states per conversation in the session bank, MMA
+  prefill attention from the first chunk), with the same plans. The `40b6113` rows are
+  kept under `mtplx-fork-40b6113`. Decode and cold prefill stayed within run-to-run noise;
+  peak wired memory fell from 37.8 / 44.1 / 48.0 GB to 34.4 / 38.0 / 44.3 GB at
+  32K / 64K / 128K.
 
 ## Splash M1 build
 
