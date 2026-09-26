@@ -78,8 +78,10 @@ the only per-phase measurement.
   `reasoning_effort: "none"` per request (Splash's switch); `--kv-format int8`
   (8-bit cells) or `bf16` (2K fp16 cells); `--max-context 256K`.
 - Its prefix cache is in memory only, so a fresh process per cell starts cold.
-- It ran after the other engines, in two rounds of its own (2K–64K) and one 128K
-  attempt plus one retry; neither 128K attempt completed (see README).
+- It ran after the other engines, in two rounds of its own (2K–64K). 128K was tried
+  three times and never completed: a Metal command-buffer error after 23 minutes, a run
+  under another GPU load (not counted), and a run on an idle machine that Splash cut off
+  at its 30-minute request deadline (see README).
 
 ## Known limitations
 

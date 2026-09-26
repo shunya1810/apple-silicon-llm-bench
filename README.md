@@ -18,7 +18,7 @@ reflects a different quantization and a different speculative method.
 | **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | community M1/M2 build of [incoai/splash](https://github.com/incoai/splash) with Apple7 kernels; model `incoai/Qwen3.8-27B-Splash` (4-bit g64 + DFlash2 draft), INT8 KV |
 
 Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once. Splash ran
-after the other three, in its own two rounds; its 128K cell did not complete (see
+after the other three, in its own two rounds; its 128K cell could not complete (see
 below).
 
 ## Highlights (8-bit KV)
@@ -44,11 +44,14 @@ below).
   1 and 3 (21.7 / 21.1 / 19.8 against 18.7 / 22.5 / 16.5). Its cold prefill is slower (32K:
   5.0 min against 4.1; 64K: 12.8 min against 9.7) and follow-up turns re-read ~300
   tokens (TTFT 2.7–6.3 s against 0.6–1.4 s on the fork). It uses the least memory:
-  22–23 GB wired at every length, against 33–43 GB on the fork. At 128K it did not
-  finish: the first attempt stopped after 23 minutes of prefill with a Metal
-  command-buffer error (`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`);
-  a retry ran while another GPU load slowed the machine to a third (its canary read
-  8.9 tok/s instead of ~29) and hit Splash's request deadline, so it is not counted.
+  22–23 GB wired at every length, against 33–43 GB on the fork. **At 128K it could not
+  start the conversation:** reading 128K cold takes longer than Splash's 30-minute request
+  deadline on this GPU (64K took 12.8 min). Three attempts: the first stopped after 23
+  minutes with a Metal command-buffer error
+  (`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`); the second ran while another
+  GPU load slowed the machine to a third and is not counted; the third, on an idle machine
+  (canary 26.8 tok/s), was cut off by Splash at exactly 30.0 minutes (`request timed out`).
+  No documented setting changes that deadline.
 - **Output check:** every engine quoted the needle line correctly in turn 3 in every
   completed run.
 
