@@ -26,12 +26,12 @@
 <text x="628.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">128K</text>
 <text x="380.0" y="418" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="234.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 234.0)">seconds (log)</text>
-<polyline points="132.0,301.3 256.0,296.3 380.0,282.2 504.0,268.4 628.0,248.0" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="301.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 2K: 0.62 s</title></circle>
-<circle cx="256.0" cy="296.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 8K: 0.69 s</title></circle>
-<circle cx="380.0" cy="282.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 32K: 0.98 s</title></circle>
-<circle cx="504.0" cy="268.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 64K: 1.37 s</title></circle>
-<circle cx="628.0" cy="248.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 128K: 2.25 s</title></circle>
+<polyline points="132.0,300.8 256.0,293.8 380.0,282.7 504.0,268.1 628.0,249.3" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="132.0" cy="300.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 2K: 0.62 s</title></circle>
+<circle cx="256.0" cy="293.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 8K: 0.74 s</title></circle>
+<circle cx="380.0" cy="282.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 32K: 0.97 s</title></circle>
+<circle cx="504.0" cy="268.1" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 64K: 1.38 s</title></circle>
+<circle cx="628.0" cy="249.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 128K: 2.18 s</title></circle>
 <polyline points="132.0,299.8 256.0,292.5 380.0,268.2 504.0,250.8 628.0,226.2" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 293.8L138.0 299.8L132.0 305.8L126.0 299.8Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 0.64 s</title></path>
 <path d="M256.0 286.5L262.0 292.5L256.0 298.5L250.0 292.5Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 0.76 s</title></path>
@@ -52,5 +52,5 @@
 <text x="504.0" y="227.6" fill="#ffffff" font-size="12" font-weight="600" text-anchor="middle">6.01 s</text><text x="504.0" y="240.6" fill="#c3c2b7" font-size="11" text-anchor="middle">Splash M1 build</text>
 <text x="640.0" y="117.3" fill="#ffffff" font-size="12" font-weight="600">52.8 s</text><text x="640.0" y="131.3" fill="#c3c2b7" font-size="11">oMLX</text>
 <text x="640.0" y="225.2" fill="#ffffff" font-size="12" font-weight="600">3.83 s</text><text x="640.0" y="239.2" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
-<text x="640.0" y="255.2" fill="#ffffff" font-size="12" font-weight="600">2.25 s</text><text x="640.0" y="269.2" fill="#c3c2b7" font-size="11">MTPLX fork</text>
+<text x="640.0" y="255.2" fill="#ffffff" font-size="12" font-weight="600">2.18 s</text><text x="640.0" y="269.2" fill="#c3c2b7" font-size="11">MTPLX fork</text>
 </svg>

@@ -67,6 +67,12 @@ the only per-phase measurement.
   separate run, so its canaries had no reference and no cell was re-run (they were
   1.7–4.8% below the engines' best canaries of the 2K–64K run).
 
+## Re-run of the fork
+
+- The fork column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
+  on M1), with the same plans: 2K–64K in two rounds, then 128K once, running alone. The
+  first measurement (`16751dc`) is kept in `rows.jsonl` under `mtplx-fork-16751dc`.
+
 ## Splash M1 build
 
 - Splash reads only its own packages (MLX affine 4-bit, group 64, or GGUF, prepared

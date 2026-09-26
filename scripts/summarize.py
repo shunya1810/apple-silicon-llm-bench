@@ -169,7 +169,7 @@ def write_csv(cells: dict, path: Path) -> None:
     with path.open("w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(fields)
-        for (e, kv, s), c in sorted(cells.items(), key=lambda kv_: (CTX.index(kv_[0][2]), kv_[0][1], ENGINES.index(kv_[0][0]))):
+        for (e, kv, s), c in sorted(cells.items(), key=lambda kv_: (CTX.index(kv_[0][2]), kv_[0][1], ENGINES.index(kv_[0][0]) if kv_[0][0] in ENGINES else len(ENGINES), kv_[0][0])):
             for t, d in c["turns"].items():
                 w.writerow([e, kv, s, t, len(c["rounds"])] + [d.get(k) if k != "needle_ok" else
                                                                  ",".join(map(str, d[k])) for k in fields[5:]])

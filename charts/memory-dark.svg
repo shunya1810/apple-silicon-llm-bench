@@ -26,12 +26,12 @@
 <text x="628.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">128K</text>
 <text x="380.0" y="418" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="234.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 234.0)">GB</text>
-<polyline points="132.0,221.0 256.0,215.2 380.0,193.8 504.0,173.7 628.0,149.8" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="221.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 2K: 32.8 GB</title></circle>
-<circle cx="256.0" cy="215.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 8K: 34.0 GB</title></circle>
-<circle cx="380.0" cy="193.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 32K: 38.5 GB</title></circle>
-<circle cx="504.0" cy="173.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 64K: 42.7 GB</title></circle>
-<circle cx="628.0" cy="149.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 128K: 47.8 GB</title></circle>
+<polyline points="132.0,226.3 256.0,220.8 380.0,197.1 504.0,167.2 628.0,149.0" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="132.0" cy="226.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 2K: 31.6 GB</title></circle>
+<circle cx="256.0" cy="220.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 8K: 32.8 GB</title></circle>
+<circle cx="380.0" cy="197.1" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 32K: 37.8 GB</title></circle>
+<circle cx="504.0" cy="167.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 64K: 44.1 GB</title></circle>
+<circle cx="628.0" cy="149.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 128K: 48.0 GB</title></circle>
 <polyline points="132.0,215.2 256.0,208.0 380.0,183.1 504.0,147.1 628.0,126.6" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 209.2L138.0 215.2L132.0 221.2L126.0 215.2Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 34.0 GB</title></path>
 <path d="M256.0 202.0L262.0 208.0L256.0 214.0L250.0 208.0Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 35.5 GB</title></path>
@@ -44,14 +44,14 @@
 <rect x="375.0" y="195.9" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 37.0 GB</title></rect>
 <rect x="499.0" y="183.4" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 39.6 GB</title></rect>
 <rect x="623.0" y="141.4" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 48.5 GB</title></rect>
-<polyline points="132.0,273.3 256.0,273.7 380.0,266.7 504.0,265.0 628.0,275.1" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="132.0,273.3 256.0,273.7 380.0,266.7 504.0,265.0 628.0,259.0" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 267.3L138.0 278.3L126.0 278.3Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 2K: 21.7 GB</title></path>
 <path d="M256.0 267.7L262.0 278.7L250.0 278.7Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 8K: 21.6 GB</title></path>
 <path d="M380.0 260.7L386.0 271.7L374.0 271.7Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 32K: 23.1 GB</title></path>
 <path d="M504.0 259.0L510.0 270.0L498.0 270.0Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 64K: 23.4 GB</title></path>
-<path d="M628.0 269.1L634.0 280.1L622.0 280.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 128K: 21.3 GB</title></path>
+<path d="M628.0 253.0L634.0 264.0L622.0 264.0Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash M1 build · 128K: 24.7 GB</title></path>
 <text x="640.0" y="125.6" fill="#ffffff" font-size="12" font-weight="600">52.7 GB</text><text x="640.0" y="139.6" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
 <text x="640.0" y="155.6" fill="#ffffff" font-size="12" font-weight="600">48.5 GB</text><text x="640.0" y="169.6" fill="#c3c2b7" font-size="11">oMLX</text>
-<text x="640.0" y="185.6" fill="#ffffff" font-size="12" font-weight="600">47.8 GB</text><text x="640.0" y="199.6" fill="#c3c2b7" font-size="11">MTPLX fork</text>
-<text x="640.0" y="274.1" fill="#ffffff" font-size="12" font-weight="600">21.3 GB</text><text x="640.0" y="288.1" fill="#c3c2b7" font-size="11">Splash M1 build</text>
+<text x="640.0" y="185.6" fill="#ffffff" font-size="12" font-weight="600">48.0 GB</text><text x="640.0" y="199.6" fill="#c3c2b7" font-size="11">MTPLX fork</text>
+<text x="640.0" y="258.0" fill="#ffffff" font-size="12" font-weight="600">24.7 GB</text><text x="640.0" y="272.0" fill="#c3c2b7" font-size="11">Splash M1 build</text>
 </svg>

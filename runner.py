@@ -160,6 +160,17 @@ class Engine:
                         "drafted_tokens", "accepted_by_depth", "peak_memory_bytes", "cache_source",
                         "paged_kv_quant_mode", "verify_time_s", "draft_time_s")
                 return {k: latest.get(k) for k in keys}
+            if kind == "splash-status":
+                now, pre = self._splash_metrics(), getattr(self, "_pre", None) or {}
+                keys = ("drafted_tokens", "accepted_draft_tokens", "decode_output_tokens", "decode_wall_ms",
+                        "prefill_input_tokens", "prefill_wall_ms")
+                d = {k: (now.get(k) or 0) - (pre.get(k) or 0) for k in keys}
+                if d["drafted_tokens"]:
+                    d["acceptance_rate"] = d["accepted_draft_tokens"] / d["drafted_tokens"]
+                if d["decode_wall_ms"]:
+                    d["engine_decode_tok_s"] = d["decode_output_tokens"] / (d["decode_wall_ms"] / 1e3)
+                d["metal_failures_total"] = now.get("metal_failures")
+                return d
             if kind == "omlx-log":
                 text = (self.cell_dir / "server.log").read_text(errors="replace")[log_offset:]
                 out = {}
@@ -181,6 +192,28 @@ class Engine:
         except Exception as exc:
             return {"error": repr(exc)}
         return None
+
+    def _splash_metrics(self) -> dict:
+        """Cumulative engine counters from Splash's /status (found by key, wherever nested)."""
+        def find(o):
+            if isinstance(o, dict):
+                if "draft_acceptance_rate" in o and "drafted_tokens" in o:
+                    return o
+                for v in o.values():
+                    hit = find(v)
+                    if hit:
+                        return hit
+            return None
+        return find(get_json(self.base + "/status", timeout=60)) or {}
+
+    def pre_request(self) -> None:
+        """Snapshot cumulative counters before a request (engines whose stats are cumulative)."""
+        self._pre = None
+        if self.spec.get("stats") == "splash-status":
+            try:
+                self._pre = self._splash_metrics()
+            except Exception:
+                self._pre = None
 
     def log_size(self) -> int:
         p = self.cell_dir / "server.log"
@@ -293,6 +326,7 @@ def run_turn(engine: Engine, spec: dict, messages: list, max_tokens: int, timeou
                "chat_template_kwargs": {"enable_thinking": False}}
     payload.update(spec.get("request_extra", {}))
     offset = engine.log_size()
+    engine.pre_request()
     r = stream_chat(engine.base, payload, timeout)
     usage = r["usage"] or {}
     completion = usage.get("completion_tokens") or len(tokenizer.encode(r["text"]).ids)

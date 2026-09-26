@@ -6,7 +6,7 @@
  "tokenizer_dir": "${MTPLX_MODEL}",
  "model_artifact": "incoai/Qwen3.8-27B-Splash: mlx-community/Qwen3.8-27B-4bit (affine 4-bit, group 64) prepared for Splash's kernels, plus the incoai/Qwen3.8-27B-DFlash2 draft (5 layers). Different files from the MTPLX artifact used by the other engines.",
  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
- "stats": null,
+ "stats": "splash-status",
  "health_path": "/v1/models",
  "start_timeout_s": 1800,
  "request_extra": {

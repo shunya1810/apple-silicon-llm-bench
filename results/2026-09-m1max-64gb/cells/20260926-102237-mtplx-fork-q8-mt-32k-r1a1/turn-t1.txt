@@ -1,0 +1,5 @@
+The provided telemetry data exhibits a highly structured, deterministic pattern rather than random noise. Sensor values follow a strict linear decrement of 5.7 units per record, starting at 0.0 and cycling through a range that resets after reaching near-zero values. This creates a sawtooth wave where values drop from approximately 99.6 to 0.0 before jumping back up. Concurrently, the status field cycles through a fixed five-state sequence: nominal, degraded, recovering, offline, and calibrating. This status cycle repeats every five records, independent of the sensor value magnitude. The zone identifiers also follow a predictable alternating pattern between 'A' and 'N' prefixes with incrementing numbers.
+
+Three concrete observations are:
+1.  **Linear Decay:** The sensor value decreases by exactly 5.7 for each subsequent record until it approaches zero, at which point it resets to a high value (e.g., Record 000017 is 2.8, Record 000018 is 96.8).
+2.  **Fixed Status Cycle:** The status field strictly follows the order: nominal, degraded, recovering, offline, calibrating, repeating this five-step loop for every group of
