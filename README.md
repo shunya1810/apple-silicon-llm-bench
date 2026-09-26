@@ -54,6 +54,11 @@ below).
   GPU load slowed the machine to a third and is not counted; the third, on an idle machine
   (canary 26.8 tok/s), was cut off by Splash at exactly 30.0 minutes (`request timed out`).
   No documented setting changes that deadline in this release.
+- **Splash source (HEAD):** the M1 fork's unreleased head, built from source, raises that
+  deadline to 10,000 s and adds newer Apple7/8 attention kernels. It finishes 128K (first
+  turn 34.3 min, decode 14.4 / 18.5 / 14.6 tok/s) and decodes 10–15% faster than the
+  release from 8K up (64K: 22.0 against 19.3 tok/s, mean of the turns). It ran one round
+  only, so the charts show it beside the release, which needs no build.
 - **Output check:** every engine quoted the needle line correctly in turn 3 in every
   completed run.
 

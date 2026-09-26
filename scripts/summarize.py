@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "splash-src"]  # table order
-CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
+CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "splash-src"]  # fixed order = fixed color slot
 NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash M1 build", "splash-src": "Splash source (HEAD)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
@@ -25,12 +25,12 @@ GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100"},
+              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500"},
+             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
-MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle"}
+MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down"}
 
 
 # ---------------------------------------------------------------- data
@@ -218,6 +218,8 @@ def mark(o, cx, cy, color, th, kind, tip=None):
     ring = f'stroke="{th["bg"]}" stroke-width="2"'
     if kind == "diamond":
         o.append(f'<path d="M{cx} {cy - 6}L{cx + 6} {cy}L{cx} {cy + 6}L{cx - 6} {cy}Z" fill="{color}" {ring}>{t}</path>')
+    elif kind == "triangle-down":
+        o.append(f'<path d="M{cx} {cy + 6}L{cx + 6} {cy - 5}L{cx - 6} {cy - 5}Z" fill="{color}" {ring}>{t}</path>')
     elif kind == "triangle":
         o.append(f'<path d="M{cx} {cy - 6}L{cx + 6} {cy + 5}L{cx - 6} {cy + 5}Z" fill="{color}" {ring}>{t}</path>')
     elif kind == "square":

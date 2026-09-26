@@ -14,6 +14,9 @@
 <line x1="336" x2="358" y1="72" y2="72" stroke="#eda100" stroke-width="2"/>
 <path d="M347 66L353 77L341 77Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"></path>
 <text x="364" y="76" fill="#52514e" font-size="12">Splash M1 build</text>
+<line x1="481" x2="503" y1="72" y2="72" stroke="#e87ba4" stroke-width="2"/>
+<path d="M492 78L498 67L486 67Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"></path>
+<text x="509" y="76" fill="#52514e" font-size="12">Splash source (HEAD)</text>
 <line x1="70" x2="690" y1="376.0" y2="376.0" stroke="#e4e3de"/><text x="62" y="380.0" fill="#52514e" font-size="11" text-anchor="end">0.1</text>
 <line x1="70" x2="690" y1="281.3" y2="281.3" stroke="#e4e3de"/><text x="62" y="285.3" fill="#52514e" font-size="11" text-anchor="end">1</text>
 <line x1="70" x2="690" y1="186.7" y2="186.7" stroke="#e4e3de"/><text x="62" y="190.7" fill="#52514e" font-size="11" text-anchor="end">10</text>
@@ -50,7 +53,14 @@
 <path d="M380.0 215.3L386.0 226.3L374.0 226.3Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 32K: 4.30 s</title></path>
 <path d="M504.0 201.6L510.0 212.6L498.0 212.6Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 64K: 6.01 s</title></path>
 <text x="504.0" y="227.6" fill="#0b0b0b" font-size="12" font-weight="600" text-anchor="middle">6.01 s</text><text x="504.0" y="240.6" fill="#52514e" font-size="11" text-anchor="middle">Splash M1 build</text>
+<polyline points="132.0,240.2 256.0,236.4 380.0,224.7 504.0,212.1 628.0,196.3" fill="none" stroke="#e87ba4" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 246.2L138.0 235.2L126.0 235.2Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>Splash source (HEAD) · 2K: 2.72 s</title></path>
+<path d="M256.0 242.4L262.0 231.4L250.0 231.4Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>Splash source (HEAD) · 8K: 2.99 s</title></path>
+<path d="M380.0 230.7L386.0 219.7L374.0 219.7Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>Splash source (HEAD) · 32K: 3.96 s</title></path>
+<path d="M504.0 218.1L510.0 207.1L498.0 207.1Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>Splash source (HEAD) · 64K: 5.39 s</title></path>
+<path d="M628.0 202.3L634.0 191.3L622.0 191.3Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>Splash source (HEAD) · 128K: 7.92 s</title></path>
 <text x="640.0" y="117.3" fill="#0b0b0b" font-size="12" font-weight="600">52.8 s</text><text x="640.0" y="131.3" fill="#52514e" font-size="11">oMLX</text>
-<text x="640.0" y="225.2" fill="#0b0b0b" font-size="12" font-weight="600">3.83 s</text><text x="640.0" y="239.2" fill="#52514e" font-size="11">MTPLX upstream</text>
-<text x="640.0" y="255.2" fill="#0b0b0b" font-size="12" font-weight="600">2.18 s</text><text x="640.0" y="269.2" fill="#52514e" font-size="11">MTPLX fork</text>
+<text x="640.0" y="195.3" fill="#0b0b0b" font-size="12" font-weight="600">7.92 s</text><text x="640.0" y="209.3" fill="#52514e" font-size="11">Splash source (HEAD)</text>
+<text x="640.0" y="225.3" fill="#0b0b0b" font-size="12" font-weight="600">3.83 s</text><text x="640.0" y="239.3" fill="#52514e" font-size="11">MTPLX upstream</text>
+<text x="640.0" y="255.3" fill="#0b0b0b" font-size="12" font-weight="600">2.18 s</text><text x="640.0" y="269.3" fill="#52514e" font-size="11">MTPLX fork</text>
 </svg>
