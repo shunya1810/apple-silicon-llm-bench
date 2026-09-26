@@ -16,20 +16,20 @@ import statistics
 import sys
 from pathlib import Path
 
-ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX"}
+ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
+NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash M1 build"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
 GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a"},
+              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70"},
+             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
-MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square"}
+MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle"}
 
 
 # ---------------------------------------------------------------- data
@@ -201,6 +201,8 @@ def mark(o, cx, cy, color, th, kind, tip=None):
     ring = f'stroke="{th["bg"]}" stroke-width="2"'
     if kind == "diamond":
         o.append(f'<path d="M{cx} {cy - 6}L{cx + 6} {cy}L{cx} {cy + 6}L{cx - 6} {cy}Z" fill="{color}" {ring}>{t}</path>')
+    elif kind == "triangle":
+        o.append(f'<path d="M{cx} {cy - 6}L{cx + 6} {cy + 5}L{cx - 6} {cy + 5}Z" fill="{color}" {ring}>{t}</path>')
     elif kind == "square":
         o.append(f'<rect x="{cx - 5}" y="{cy - 5}" width="10" height="10" rx="1.5" fill="{color}" {ring}>{t}</rect>')
     else:
@@ -264,6 +266,14 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
                  f'stroke="{th[e]}" stroke-width="2" stroke-linejoin="round"/>')
         for (x, y, v), c in zip(pts, [c for c, v in zip(ctxs, series[e]) if v]):
             mark(o, round(x, 1), round(y, 1), th[e], th, MARKER[e], f"{NAMES[e]} · {CTX_LABEL[c]}: {vfmt(v)}")
+        if pts[-1][0] < fx(len(ctxs) - 1) - 1:
+            # the line stops before the last column: label under its last point, clear of
+            # the lines that continue to the right
+            x, y, v = pts[-1]
+            o.append(f'<text x="{x:.1f}" y="{y + 20:.1f}" fill="{th["t1"]}" font-size="12" font-weight="600" '
+                     f'text-anchor="middle">{esc(vfmt(v))}</text><text x="{x:.1f}" y="{y + 33:.1f}" '
+                     f'fill="{th["t2"]}" font-size="11" text-anchor="middle">{esc(NAMES[e])}</text>')
+            continue
         ends.append([pts[-1][1], e, pts[-1][2], pts[-1][0]])
     # end labels, de-collided
     ends.sort()

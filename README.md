@@ -3,17 +3,23 @@
 English | [日本語](README.ja.md)
 
 How fast is a **3-turn conversation over a long prompt** on a Mac, depending on the
-inference engine? Three engines serve the **same Qwen3.8-27B model files** with MTP
-speculative decoding (depth 3) and 8-bit KV cache, on a MacBook Pro with M1 Max and
-64 GB, measured the same way over each engine's OpenAI-compatible streaming API.
+inference engine? On a MacBook Pro with M1 Max and 64 GB, four engines serve
+Qwen3.8-27B with speculative decoding and 8-bit KV cache, measured the same way over
+each engine's OpenAI-compatible streaming API. The three MTPLX/oMLX engines load the
+**same model files** with MTP (depth 3); Splash needs its own package (the
+mlx-community 4-bit, group-64 weights plus a DFlash2 draft model), so its column also
+reflects a different quantization and a different speculative method.
 
 | engine | version | notes |
 |---|---|---|
 | **MTPLX fork** | [`shunya1810/MTPLX@16751dc`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx) | M1-family long-context branch, maintained by the author of this benchmark |
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time; the fork's base |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
+| **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | community M1/M2 build of [incoai/splash](https://github.com/incoai/splash) with Apple7 kernels; model `incoai/Qwen3.8-27B-Splash` (4-bit g64 + DFlash2 draft), INT8 KV |
 
-Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once.
+Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once. Splash ran
+after the other three, in its own two rounds; its 128K cell did not complete (see
+below).
 
 ## Highlights (8-bit KV)
 
@@ -33,7 +39,18 @@ Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once.
 - **Whole conversation at 128K:** 25.7 min (fork), 29.6 min (oMLX), 33.0 min (upstream).
 - **Memory:** peak wired memory at 128K is 47.8 GB (fork), 48.5 GB (oMLX), 52.7 GB
   (upstream); at 64K 42.7, 39.6 and 48.4 GB.
-- **Output check:** every engine quoted the needle line correctly in turn 3 in every run.
+- **Splash M1 build (2K–64K):** fastest decode up to 32K, most of all on turn 2
+  (41.6 tok/s at 2K, 31.9 at 8K, 27.2 at 32K); at 64K the MTPLX fork is faster on turns
+  1 and 3 (21.7 / 21.1 / 19.8 against 18.7 / 22.5 / 16.5). Its cold prefill is slower (32K:
+  5.0 min against 4.1; 64K: 12.8 min against 9.7) and follow-up turns re-read ~300
+  tokens (TTFT 2.7–6.3 s against 0.6–1.4 s on the fork). It uses the least memory:
+  22–23 GB wired at every length, against 33–43 GB on the fork. At 128K it did not
+  finish: the first attempt stopped after 23 minutes of prefill with a Metal
+  command-buffer error (`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`);
+  a retry ran while another GPU load slowed the machine to a third (its canary read
+  8.9 tok/s instead of ~29) and hit Splash's request deadline, so it is not counted.
+- **Output check:** every engine quoted the needle line correctly in turn 3 in every
+  completed run.
 
 ## Decode speed
 
@@ -73,18 +90,23 @@ Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the 
 | 2K | MTPLX fork | 11.4 s | 0.62 s | 0.61 s | 28.2 / 26.1 / 26.2 | 38.2 s | 1,936 / 2,243 | 32.8 GB | 2/2 |
 | 2K | MTPLX upstream | 11.5 s | 0.64 s | 0.64 s | 25.1 / 22.9 / 23.2 | 41.8 s | 1,936 / 2,243 | 34.0 GB | 2/2 |
 | 2K | oMLX | 11.4 s | 13.5 s | 15.4 s | 20.4 / 23.5 / 21.0 | 1.2 min | 0 / 0 | 26.9 GB | 2/2 |
+| 2K | Splash M1 build | 12.1 s | 2.87 s | 2.68 s | 27.6 / 41.6 / 29.6 | 39.0 s | 1,664 / 1,984 | 21.7 GB | 2/2 |
 | 8K | MTPLX fork | 53.8 s | 0.68 s | 0.71 s | 26.5 / 26.7 / 25.1 | 1.4 min | 8,089 / 8,396 | 34.0 GB | 2/2 |
 | 8K | MTPLX upstream | 54.2 s | 0.76 s | 0.77 s | 23.5 / 23.2 / 21.7 | 1.4 min | 8,089 / 8,396 | 35.5 GB | 2/2 |
 | 8K | oMLX | 56.4 s | 30.0 s | 2.69 s | 20.2 / 19.8 / 18.3 | 2.1 min | 4,096 / 8,192 | 33.2 GB | 2/2 |
+| 8K | Splash M1 build | 59.6 s | 3.21 s | 3.05 s | 26.6 / 31.9 / 27.1 | 1.5 min | 7,808 / 8,128 | 21.6 GB | 2/2 |
 | 32K | MTPLX fork | 4.1 min | 0.97 s | 0.98 s | 22.4 / 21.3 / 20.9 | 4.7 min | 32,665 / 32,972 | 38.5 GB | 2/2 |
 | 32K | MTPLX upstream | 4.1 min | 1.38 s | 1.37 s | 17.1 / 12.5 / 12.0 | 5.0 min | 32,665 / 32,972 | 40.8 GB | 2/2 |
 | 32K | oMLX | 4.4 min | 44.6 s | 3.45 s | 14.4 / 14.0 / 14.4 | 6.0 min | 28,672 / 32,768 | 37.0 GB | 2/2 |
+| 32K | Splash M1 build | 5.0 min | 4.43 s | 4.18 s | 23.2 / 27.2 / 22.1 | 5.7 min | 32,384 / 32,704 | 23.1 GB | 2/2 |
 | 64K | MTPLX fork | 9.7 min | 1.37 s | 1.37 s | 21.7 / 21.1 / 19.8 | 10.3 min | 65,419 / 65,726 | 42.7 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.12 s | 8.8 / 8.7 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.4 GB | 2/2 |
 | 64K | oMLX | 10.2 min | 1.0 min | 4.76 s | 10.9 / 10.9 / 10.4 | 12.4 min | 61,440 / 65,536 | 39.6 GB | 2/2 |
+| 64K | Splash M1 build | 12.8 min | 5.68 s | 6.34 s | 18.7 / 22.5 / 16.5 | 13.6 min | 65,152 / 65,440 | 23.4 GB | 2/2 |
 | 128K | MTPLX fork | 24.9 min | 2.24 s | 2.25 s | 17.8 / 17.2 / 15.0 | 25.7 min | 130,969 / 131,276 | 47.8 GB | 1/1 |
 | 128K | MTPLX upstream | 30.5 min | 4.16 s | 3.49 s | 4.6 / 5.1 / 5.0 | 33.0 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
 | 128K | oMLX | 26.3 min | 1.6 min | 7.92 s | 7.6 / 7.8 / 6.9 | 29.6 min | 126,976 / 131,072 | 48.5 GB | 1/1 |
+| 128K | Splash M1 build | — | — | — | — / — / — | — | — / — | 23.8 GB | — |
 
 **2K: fp16 KV vs 8-bit KV** (decode tok/s, mean of turns 1–3)
 
@@ -93,6 +115,7 @@ Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the 
 | MTPLX fork | 24.9 | 26.8 | +7.6% |
 | MTPLX upstream | 24.8 | 23.7 | -4.5% |
 | oMLX | 23.1 | 21.6 | -6.4% |
+| Splash M1 build | 33.8 | 33.0 | -2.5% |
 
 Raw rows: [`results/2026-09-m1max-64gb/rows.jsonl`](results/2026-09-m1max-64gb/rows.jsonl) ·
 per-turn CSV: [`summary.csv`](results/2026-09-m1max-64gb/summary.csv) ·

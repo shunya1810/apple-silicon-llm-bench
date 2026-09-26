@@ -11,10 +11,14 @@
 <line x1="268" x2="290" y1="72" y2="72" stroke="#1baf7a" stroke-width="2"/>
 <rect x="274" y="67" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"></rect>
 <text x="296" y="76" fill="#52514e" font-size="12">oMLX</text>
+<line x1="336" x2="358" y1="72" y2="72" stroke="#eda100" stroke-width="2"/>
+<path d="M347 66L353 77L341 77Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"></path>
+<text x="364" y="76" fill="#52514e" font-size="12">Splash M1 build</text>
 <line x1="70" x2="690" y1="376.0" y2="376.0" stroke="#e4e3de"/><text x="62" y="380.0" fill="#52514e" font-size="11" text-anchor="end">0</text>
-<line x1="70" x2="690" y1="281.3" y2="281.3" stroke="#e4e3de"/><text x="62" y="285.3" fill="#52514e" font-size="11" text-anchor="end">10</text>
-<line x1="70" x2="690" y1="186.7" y2="186.7" stroke="#e4e3de"/><text x="62" y="190.7" fill="#52514e" font-size="11" text-anchor="end">20</text>
-<line x1="70" x2="690" y1="92.0" y2="92.0" stroke="#e4e3de"/><text x="62" y="96.0" fill="#52514e" font-size="11" text-anchor="end">30</text>
+<line x1="70" x2="690" y1="305.0" y2="305.0" stroke="#e4e3de"/><text x="62" y="309.0" fill="#52514e" font-size="11" text-anchor="end">10</text>
+<line x1="70" x2="690" y1="234.0" y2="234.0" stroke="#e4e3de"/><text x="62" y="238.0" fill="#52514e" font-size="11" text-anchor="end">20</text>
+<line x1="70" x2="690" y1="163.0" y2="163.0" stroke="#e4e3de"/><text x="62" y="167.0" fill="#52514e" font-size="11" text-anchor="end">30</text>
+<line x1="70" x2="690" y1="92.0" y2="92.0" stroke="#e4e3de"/><text x="62" y="96.0" fill="#52514e" font-size="11" text-anchor="end">40</text>
 <line x1="70" x2="690" y1="376" y2="376" stroke="#8a8983"/>
 <text x="132.0" y="394" fill="#52514e" font-size="12" text-anchor="middle">2K</text>
 <text x="256.0" y="394" fill="#52514e" font-size="12" text-anchor="middle">8K</text>
@@ -23,25 +27,31 @@
 <text x="628.0" y="394" fill="#52514e" font-size="12" text-anchor="middle">128K</text>
 <text x="380.0" y="418" fill="#52514e" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="234.0" fill="#52514e" font-size="11" text-anchor="middle" transform="rotate(-90 16 234.0)">decode tok/s</text>
-<polyline points="132.0,122.2 256.0,129.0 380.0,172.1 504.0,178.4 628.0,217.9" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="122.2" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 2K: 26.8</title></circle>
-<circle cx="256.0" cy="129.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 8K: 26.1</title></circle>
-<circle cx="380.0" cy="172.1" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 32K: 21.5</title></circle>
-<circle cx="504.0" cy="178.4" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 64K: 20.9</title></circle>
-<circle cx="628.0" cy="217.9" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 128K: 16.7</title></circle>
-<polyline points="132.0,151.4 256.0,160.2 380.0,244.9 504.0,294.1 628.0,329.7" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
-<path d="M132.0 145.4L138.0 151.4L132.0 157.4L126.0 151.4Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 2K: 23.7</title></path>
-<path d="M256.0 154.2L262.0 160.2L256.0 166.2L250.0 160.2Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 8K: 22.8</title></path>
-<path d="M380.0 238.9L386.0 244.9L380.0 250.9L374.0 244.9Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 32K: 13.8</title></path>
-<path d="M504.0 288.1L510.0 294.1L504.0 300.1L498.0 294.1Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 64K: 8.7</title></path>
-<path d="M628.0 323.7L634.0 329.7L628.0 335.7L622.0 329.7Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 128K: 4.9</title></path>
-<polyline points="132.0,171.3 256.0,192.0 380.0,240.9 504.0,274.3 628.0,305.7" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
-<rect x="127.0" y="166.3" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 2K: 21.6</title></rect>
-<rect x="251.0" y="187.0" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 8K: 19.4</title></rect>
-<rect x="375.0" y="235.9" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 32K: 14.3</title></rect>
-<rect x="499.0" y="269.3" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 64K: 10.7</title></rect>
-<rect x="623.0" y="300.7" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 128K: 7.4</title></rect>
-<text x="640.0" y="216.9" fill="#0b0b0b" font-size="12" font-weight="600">16.7</text><text x="640.0" y="230.9" fill="#52514e" font-size="11">MTPLX fork</text>
-<text x="640.0" y="304.7" fill="#0b0b0b" font-size="12" font-weight="600">7.4</text><text x="640.0" y="318.7" fill="#52514e" font-size="11">oMLX</text>
-<text x="640.0" y="334.7" fill="#0b0b0b" font-size="12" font-weight="600">4.9</text><text x="640.0" y="348.7" fill="#52514e" font-size="11">MTPLX upstream</text>
+<polyline points="132.0,185.7 256.0,190.7 380.0,223.0 504.0,227.8 628.0,257.5" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="132.0" cy="185.7" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 2K: 26.8</title></circle>
+<circle cx="256.0" cy="190.7" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 8K: 26.1</title></circle>
+<circle cx="380.0" cy="223.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 32K: 21.5</title></circle>
+<circle cx="504.0" cy="227.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 64K: 20.9</title></circle>
+<circle cx="628.0" cy="257.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>MTPLX fork · 128K: 16.7</title></circle>
+<polyline points="132.0,207.6 256.0,214.2 380.0,277.7 504.0,314.5 628.0,341.3" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 201.6L138.0 207.6L132.0 213.6L126.0 207.6Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 2K: 23.7</title></path>
+<path d="M256.0 208.2L262.0 214.2L256.0 220.2L250.0 214.2Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 8K: 22.8</title></path>
+<path d="M380.0 271.7L386.0 277.7L380.0 283.7L374.0 277.7Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 32K: 13.8</title></path>
+<path d="M504.0 308.5L510.0 314.5L504.0 320.5L498.0 314.5Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 64K: 8.7</title></path>
+<path d="M628.0 335.3L634.0 341.3L628.0 347.3L622.0 341.3Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>MTPLX upstream · 128K: 4.9</title></path>
+<polyline points="132.0,222.5 256.0,238.0 380.0,274.7 504.0,299.7 628.0,323.2" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<rect x="127.0" y="217.5" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 2K: 21.6</title></rect>
+<rect x="251.0" y="233.0" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 8K: 19.4</title></rect>
+<rect x="375.0" y="269.7" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 32K: 14.3</title></rect>
+<rect x="499.0" y="294.7" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 64K: 10.7</title></rect>
+<rect x="623.0" y="318.2" width="10" height="10" rx="1.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>oMLX · 128K: 7.4</title></rect>
+<polyline points="132.0,142.0 256.0,173.3 380.0,204.3 504.0,239.3" fill="none" stroke="#eda100" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 136.0L138.0 147.0L126.0 147.0Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 2K: 33.0</title></path>
+<path d="M256.0 167.3L262.0 178.3L250.0 178.3Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 8K: 28.5</title></path>
+<path d="M380.0 198.3L386.0 209.3L374.0 209.3Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 32K: 24.2</title></path>
+<path d="M504.0 233.3L510.0 244.3L498.0 244.3Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>Splash M1 build · 64K: 19.3</title></path>
+<text x="504.0" y="259.3" fill="#0b0b0b" font-size="12" font-weight="600" text-anchor="middle">19.3</text><text x="504.0" y="272.3" fill="#52514e" font-size="11" text-anchor="middle">Splash M1 build</text>
+<text x="640.0" y="256.5" fill="#0b0b0b" font-size="12" font-weight="600">16.7</text><text x="640.0" y="270.5" fill="#52514e" font-size="11">MTPLX fork</text>
+<text x="640.0" y="322.2" fill="#0b0b0b" font-size="12" font-weight="600">7.4</text><text x="640.0" y="336.2" fill="#52514e" font-size="11">oMLX</text>
+<text x="640.0" y="352.2" fill="#0b0b0b" font-size="12" font-weight="600">4.9</text><text x="640.0" y="366.2" fill="#52514e" font-size="11">MTPLX upstream</text>
 </svg>

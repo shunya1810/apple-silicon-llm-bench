@@ -1,5 +1,6 @@
 {
  "MTPLX_PYTHON": "/Users/you/Library/Application Support/MTPLX/runtime-venv/bin/python",
  "MTPLX_MODEL": "/Users/you/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optimized-Speed-FP16",
- "OMLX_CLI": "/Applications/oMLX.app/Contents/MacOS/omlx-cli"
+ "OMLX_CLI": "/Applications/oMLX.app/Contents/MacOS/omlx-cli",
+ "SPLASH_M1": "/Users/you/.local/bin/splash-m1"
 }

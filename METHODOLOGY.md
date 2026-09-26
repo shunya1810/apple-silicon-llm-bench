@@ -67,6 +67,20 @@ the only per-phase measurement.
   separate run, so its canaries had no reference and no cell was re-run (they were
   1.7–4.8% below the engines' best canaries of the 2K–64K run).
 
+## Splash M1 build
+
+- Splash reads only its own packages (MLX affine 4-bit, group 64, or GGUF, prepared
+  for its kernels, paired with a DFlash2 draft), so it runs `incoai/Qwen3.8-27B-Splash`
+  (revision 9d27070) instead of the MTPLX checkpoint. Speed differences therefore
+  include the weight format and the speculative method, not only the engine.
+- Installed from the release tarball after checking its SHA-256 and the engine and
+  metallib hashes against the release notes. `--default-reasoning-effort none` plus
+  `reasoning_effort: "none"` per request (Splash's switch); `--kv-format int8`
+  (8-bit cells) or `bf16` (2K fp16 cells); `--max-context 256K`.
+- Its prefix cache is in memory only, so a fresh process per cell starts cold.
+- It ran after the other engines, in two rounds of its own (2K–64K) and one 128K
+  attempt plus one retry; neither 128K attempt completed (see README).
+
 ## Known limitations
 
 - One machine (M1 Max, 64 GB), one model, one synthetic workload.

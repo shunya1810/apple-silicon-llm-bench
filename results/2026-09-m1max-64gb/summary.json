@@ -1162,5 +1162,367 @@
    "commit": "16751dc06147fe0665b1be2dc029fc5624c168ac"
   },
   "context_tokens_raw": 130667
+ },
+ "splash-m1|fp16|mt-2k": {
+  "engine": "splash-m1",
+  "kv": "fp16",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 12.354176374996314,
+    "gen_s": 9.35741508299543,
+    "e2e_s": 21.711591457991744,
+    "decode_tok_s": 27.252058896856283,
+    "completion_tokens": 256.0,
+    "peak_wired": 21481881600,
+    "peak_rss": 1757954048,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1664.0,
+    "ttft_s": 2.896018228988396,
+    "gen_s": 6.294621250504861,
+    "e2e_s": 9.190639479493257,
+    "decode_tok_s": 40.51661513218119,
+    "completion_tokens": 256.0,
+    "peak_wired": 21471723520,
+    "peak_rss": 2148794368,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 1984.0,
+    "ttft_s": 2.6856791459867964,
+    "gen_s": 4.676142145515769,
+    "e2e_s": 7.361821291502565,
+    "decode_tok_s": 33.57686225303056,
+    "completion_tokens": 158.0,
+    "peak_wired": 21466578944,
+    "peak_rss": 2477211648,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash BF16 target KV",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-m1|q8|mt-2k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 12.140379749500426,
+    "gen_s": 9.223738354005036,
+    "e2e_s": 21.36411810350546,
+    "decode_tok_s": 27.64857247944191,
+    "completion_tokens": 256.0,
+    "peak_wired": 21691695104,
+    "peak_rss": 1780154368,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1664.0,
+    "ttft_s": 2.8689737289969344,
+    "gen_s": 6.1304106040042825,
+    "e2e_s": 8.999384333001217,
+    "decode_tok_s": 41.59816298890848,
+    "completion_tokens": 256.0,
+    "peak_wired": 21317353472,
+    "peak_rss": 2154496000,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 1984.0,
+    "ttft_s": 2.6809224169992376,
+    "gen_s": 5.911357124510687,
+    "e2e_s": 8.592279541509924,
+    "decode_tok_s": 29.61106815758534,
+    "completion_tokens": 176.0,
+    "peak_wired": 21303246848,
+    "peak_rss": 2495496192,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-m1|q8|mt-8k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 7833.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 59.55278610349342,
+    "gen_s": 9.501527458502096,
+    "e2e_s": 69.05431356199551,
+    "decode_tok_s": 26.63302112186919,
+    "completion_tokens": 254.0,
+    "peak_wired": 21611085824,
+    "peak_rss": 1782710272,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 8137.0,
+    "cached_tokens": 7808.0,
+    "ttft_s": 3.2123095625138376,
+    "gen_s": 8.005111124992254,
+    "e2e_s": 11.217420687506092,
+    "decode_tok_s": 31.87698367578591,
+    "completion_tokens": 256.0,
+    "peak_wired": 21609857024,
+    "peak_rss": 2082881536,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 8441.0,
+    "cached_tokens": 8128.0,
+    "ttft_s": 3.049395520487451,
+    "gen_s": 6.783995646008407,
+    "e2e_s": 9.833391166495858,
+    "decode_tok_s": 27.123597218731685,
+    "completion_tokens": 185.0,
+    "peak_wired": 21615968256,
+    "peak_rss": 2475196416,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 7787
+ },
+ "splash-m1|q8|mt-32k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 302.9347206454986,
+    "gen_s": 10.982068978992174,
+    "e2e_s": 313.9167896244908,
+    "decode_tok_s": 23.220202955702888,
+    "completion_tokens": 256.0,
+    "peak_wired": 22837641216,
+    "peak_rss": 1795227648,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32716.0,
+    "cached_tokens": 32384.0,
+    "ttft_s": 4.428928125009406,
+    "gen_s": 9.360976625001058,
+    "e2e_s": 13.789904750010464,
+    "decode_tok_s": 27.24148407332151,
+    "completion_tokens": 256.0,
+    "peak_wired": 22831726592,
+    "peak_rss": 2099085312,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33019.0,
+    "cached_tokens": 32704.0,
+    "ttft_s": 4.1797538954997435,
+    "gen_s": 7.962899854508578,
+    "e2e_s": 12.142653750008321,
+    "decode_tok_s": 22.103422364378545,
+    "completion_tokens": 177.0,
+    "peak_wired": 23089823744,
+    "peak_rss": 2491596800,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 32363
+ },
+ "splash-m1|q8|mt-64k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 769.9890436459827,
+    "gen_s": 13.628279583514086,
+    "e2e_s": 783.6173232294968,
+    "decode_tok_s": 18.71227497795453,
+    "completion_tokens": 256.0,
+    "peak_wired": 23440883712,
+    "peak_rss": 1829683200,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65470.0,
+    "cached_tokens": 65152.0,
+    "ttft_s": 5.680202208503033,
+    "gen_s": 11.3342761665117,
+    "e2e_s": 17.014478375014733,
+    "decode_tok_s": 22.498444070074306,
+    "completion_tokens": 256.0,
+    "peak_wired": 23443357696,
+    "peak_rss": 2125463552,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": null
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65774.0,
+    "cached_tokens": 65440.0,
+    "ttft_s": 6.343292437493801,
+    "gen_s": 10.701751520507969,
+    "e2e_s": 17.04504395800177,
+    "decode_tok_s": 16.539757454130488,
+    "completion_tokens": 178.0,
+    "peak_wired": 23427825664,
+    "peak_rss": 2518007808,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 65117
+ },
+ "splash-m1|q8|mt-128k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": null,
+    "cached_tokens": null,
+    "ttft_s": null,
+    "gen_s": null,
+    "e2e_s": 338.2948268750042,
+    "decode_tok_s": null,
+    "completion_tokens": 0,
+    "peak_wired": 21306523648,
+    "peak_rss": 1820491776,
+    "needle_ok": [],
+    "errors": [
+     {
+      "message": "request deadline exceeded",
+      "type": "server_error",
+      "code": "request_timeout"
+     }
+    ],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.0.2-m1"
+  },
+  "context_tokens_raw": 130667
  }
 }
