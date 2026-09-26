@@ -3,8 +3,8 @@
 English | [日本語](README.ja.md)
 
 How fast is a **3-turn conversation over a long prompt** on a Mac, depending on the
-inference engine? On a MacBook Pro with M1 Max and 64 GB, four engines serve
-Qwen3.8-27B with speculative decoding and 8-bit KV cache, measured the same way over
+inference engine? On a MacBook Pro with M1 Max and 64 GB, four inference engines (plus a
+source build of one of them) serve Qwen3.8-27B with speculative decoding and 8-bit KV cache, measured the same way over
 each engine's OpenAI-compatible streaming API. The three MTPLX/oMLX engines load the
 **same model files** with MTP (depth 3); Splash needs its own package (the
 mlx-community 4-bit, group-64 weights plus a DFlash2 draft model), so its column also
@@ -66,7 +66,7 @@ below).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg">
-  <img alt="Decode tok/s vs prompt length for the three engines" src="charts/decode-light.svg">
+  <img alt="Decode tok/s vs prompt length, five engine builds" src="charts/decode-light.svg">
 </picture>
 
 ## Follow-up turns
@@ -92,7 +92,9 @@ below).
 
 ## Tables
 
-Median of 2 rounds per cell for 2K–64K; 128K is a single run. `cached` is the engine-reported
+Median of 2 rounds per cell for 2K–64K; 128K and the Splash source build are single runs.
+`needle` counts the runs whose turn 3 quoted the needle line correctly. For Splash, the
+2K fp16 cells use its BF16 KV (`--kv-format bf16`). `cached` is the engine-reported
 `usage.prompt_tokens_details.cached_tokens`. Wired memory is system-wide.
 
 | context | engine | T1 TTFT (cold) | T2 TTFT | T3 TTFT | decode T1 / T2 / T3 (tok/s) | 3-turn total | cached T2 / T3 | peak wired | needle |
@@ -191,9 +193,9 @@ Short version (full details in [METHODOLOGY.md](METHODOLOGY.md)):
   (~300 tokens); turn 3 asks for the needle line. At most 256 generated tokens per turn.
 - `temperature 0`, thinking off. These speeds compare engines on the same deterministic
   workload; with sampling on, MTP acceptance and so decode speed change.
-- Same model files everywhere: oMLX reads the MTPLX checkpoint through a symlinked,
-  text-only view ([`scripts/prepare_omlx.py`](scripts/prepare_omlx.py)); no weight is
-  converted.
+- Same model files for the MTPLX and oMLX engines: oMLX reads the MTPLX checkpoint
+  through a symlinked, text-only view ([`scripts/prepare_omlx.py`](scripts/prepare_omlx.py));
+  no weight is converted. Splash reads its own package, `incoai/Qwen3.8-27B-Splash`.
 - 8-bit KV is each engine's own implementation (MTPLX affine q8 paged KV, oMLX
   TurboQuant 8-bit). Everything else is at engine defaults, including the prefix cache
   (MTPLX: RAM; oMLX: SSD, 4,096-token blocks).

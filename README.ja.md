@@ -3,10 +3,12 @@
 [English](README.md) | 日本語
 
 Mac で長いプロンプトを読ませて3ターン会話するとき、推論エンジンによって速さはどれだけ変わるのか。
-このリポジトリは、MacBook Pro（M1 Max、64 GB）の上で、4つのエンジンに Qwen3.8-27B を動かして測った結果である。
+このリポジトリは、MacBook Pro（M1 Max、64 GB）の上で Qwen3.8-27B を複数の推論エンジンで動かし、同じ会話の速さを比べたベンチマークである。
 どのエンジンも投機的デコードと 8-bit の KV キャッシュを使い、各エンジンの OpenAI 互換のストリーミング API を同じ方法で計測した。
-MTPLX の2つと oMLX は**同じモデルファイル**を MTP（深さ 3）で動かす。
-Splash は専用のパッケージ（mlx-community の 4bit、group size 64 の重みと DFlash2 の draft モデル）しか読めないので、Splash の列は量子化と投機的デコードの方式の違いも含む。
+
+MTPLX の2つ（fork と upstream）と oMLX は、**同じモデルファイル**を MTP（深さ 3）で動かす。
+Splash は専用のパッケージ（mlx-community の 4bit、group size 64 の重みと DFlash2 の draft モデル）しか読めない。
+そのため Splash の列は、エンジンの違いに加えて、量子化と投機的デコードの方式の違いも含む。
 
 | エンジン | 版 | 備考 |
 |---|---|---|
@@ -16,68 +18,69 @@ Splash は専用のパッケージ（mlx-community の 4bit、group size 64 の�
 | **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | [incoai/splash](https://github.com/incoai/splash) を M1/M2 向けの kernel で動かすコミュニティ版。モデルは `incoai/Qwen3.8-27B-Splash`（4bit g64 と DFlash2 の draft）、KV は INT8 |
 | **Splash source (HEAD)** | [paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels) + [a4f7e96](https://github.com/shunya1810/splash/tree/m1-analysis-metrics) | M1 版の未リリースの最新を分析用に手元でビルドしたもの（1回。表と下の節のみ） |
 
-2K〜64K は各2回（中央値を示す）、128K は1回測った。
-Splash は他の3つの後に、別に2回測った。Splash の 128K は完了しなかった（後述）。
+2K〜64K は各2回測り、中央値を載せた。128K は1回である。
+Splash のリリース版は、他の3つの後に別に2回測った（128K は完了しなかった。後述）。
+Splash のソース版は、分析のために1回だけ測った。
 
-## 要点（8-bit KV）
+## 主な結果（8-bit KV）
 
-- **decode**：128K では MTPLX fork が **18.0 tok/s**、oMLX が 7.4、MTPLX upstream が 4.9 だった（3ターンの平均）。64K では 21.1、10.7、8.7 だった。
-  他の2つとの差はプロンプトが長いほど開き、2K〜8K で +18〜39%、32K で約 1.7 倍、64K で 2.0〜2.4 倍、128K で 2.4〜3.7 倍になる。
-- **続きのターン**：128K の2〜3ターン目の最初のトークンまでの時間（TTFT）は、fork が **2.2 秒**、upstream が 3.5〜4.2 秒、oMLX が 1.6 分と 7.9 秒だった（64K では 1.4 秒、2.1 秒、1.0 分と 4.8 秒）。
+- **decode の速さ**：128K では MTPLX fork が **18.0 tok/s**、oMLX が 7.4、MTPLX upstream が 4.9 だった（3ターンの平均）。64K では 21.1、10.7、8.7 だった。
+  fork と他の2つの差はプロンプトが長いほど開き、2K〜8K で +18〜39%、32K で約 1.7 倍、64K で 2.0〜2.4 倍、128K で 2.4〜3.7 倍になる。
+- **2〜3ターン目の最初のトークンまでの時間（TTFT）**：128K では fork が **2.2 秒**、upstream が 3.5〜4.2 秒、oMLX が 1.6 分と 7.9 秒だった（64K では 1.4 秒、2.1 秒、1.0 分と 4.8 秒）。
   oMLX はプレフィックスキャッシュを 4,096 トークン単位で SSD に保存し、このモデル系統では、プロンプトが最後に越えたブロックの境界までしか保存できない。
-  そのため、次のターンでは残りの部分（最大で約 4K トークン）を読み直す。
-- **1ターン目**：64K までは、MTPLX と oMLX でプロンプトを最初から読む時間がほぼ同じだった（64K で 9.9〜10.2 分、2K で 11.4〜11.7 秒）。
+  そのため次のターンでは、境界より後ろの部分（最大で約 4K トークン）を読み直す。
+- **1ターン目（最初から読む prefill）**：64K までは、MTPLX と oMLX でほぼ同じ時間だった（64K で 9.9〜10.2 分、2K で 11.4〜11.7 秒）。
   prefill は同じ MLX の量子化行列積で律速されている（この GPU で、2K のとき約 7.9 TFLOPS）。
   128K では attention の占める割合が大きくなり、fork が 24.7 分、oMLX が 26.3 分、upstream が 30.5 分と差が出た。
-- **128K の会話全体**：fork が 25.4 分、oMLX が 29.6 分、upstream が 33.0 分だった。
-- **メモリ**：128K の wired メモリの最大値は fork が 48.0 GB、oMLX が 48.5 GB、upstream が 52.7 GB だった（64K では 44.1、39.6、48.4 GB）。
-- **Splash M1 build（2K〜64K）**：decode は2ターン目で最も速い（2K で fork の 28.0 に対して 41.6 tok/s、8K で 28.3 に対して 31.9）。
-  1ターン目と3ターン目は、32K までは fork とほぼ同じで、64K では遅い（fork の 20.8 / 19.6 に対して 18.7 / 16.5）。
-  最初から読む prefill は遅く（32K で 5.0 分と 4.2 分、64K で 12.8 分と 9.9 分）、続きのターンでは約 300 トークンを読み直す（TTFT は fork の 0.6〜1.4 秒に対して 2.7〜6.3 秒）。
-  メモリは最も少なく、どの長さでも wired が 22〜25 GB だった（fork は 32〜48 GB）。
-  **128K では会話を始められなかった。** この GPU では 128K を最初から読むのに、Splash のリクエストの制限時間（30 分）より長くかかる（64K で 12.8 分）。
-  3回試した。1回目は prefill を 23 分続けたところで Metal のコマンドがエラーで打ち切られた（`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`）。
-  2回目は、別の GPU の負荷でマシンの速度が3分の1に落ちた状態で走ったので、数に入れていない。
-  3回目は、マシンが空いている状態（canary 26.8 tok/s）で、ちょうど 30.0 分で Splash に打ち切られた（`request timed out`）。
-  このリリースには、この制限時間を変える設定が無い。
+- **128K の3ターン全体**：fork が 25.4 分、oMLX が 29.6 分、upstream が 33.0 分だった。
+- **メモリ**：128K の wired メモリの最大値は、fork が 48.0 GB、oMLX が 48.5 GB、upstream が 52.7 GB だった（64K では 44.1、39.6、48.4 GB）。
+- **Splash M1 build（リリース版、2K〜64K）**
+  - **decode**：2ターン目で最も速い（2K で fork の 28.0 に対して 41.6 tok/s、8K で 28.3 に対して 31.9）。1ターン目と3ターン目は、32K までは fork とほぼ同じで、64K では遅い（fork の 20.8 / 19.6 に対して 18.7 / 16.5）。
+  - **prefill と TTFT**：最初から読む prefill は遅い（32K で 5.0 分と 4.2 分、64K で 12.8 分と 9.9 分）。続きのターンでは約 300 トークンを読み直すので、TTFT は fork の 0.6〜1.4 秒に対して 2.7〜6.3 秒だった。
+  - **メモリ**：最も少なく、どの長さでも wired が 22〜25 GB だった（fork は 32〜48 GB）。
+  - **128K**：会話を始められなかった。この GPU では 128K を最初から読むのに、Splash のリクエストの制限時間（30 分）より長くかかる（64K で 12.8 分）。
+    3回試した。1回目は prefill を 23 分続けたところで、Metal のコマンドがエラーで打ち切られた（`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`）。
+    2回目は、別の GPU の負荷でマシンの速度が3分の1に落ちた状態で走ったので、数に入れていない。
+    3回目は、canary が正常な状態（26.8 tok/s）で走り、ちょうど 30.0 分で Splash に打ち切られた（`request timed out`）。このリリースには、制限時間を変える設定が無い。
 - **Splash source (HEAD)**：M1 版の未リリースの最新をソースからビルドしたもの。制限時間が 10,000 秒に上がり、Apple7/8 用の新しい attention の kernel が入っている。
   128K を最後まで完了し（1ターン目 34.3 分、decode 14.4 / 18.5 / 14.6 tok/s）、8K 以上ではリリース版より decode が 10〜15% 速い（64K で 19.3 に対して 22.0 tok/s、ターンの平均）。
   計測は1回だけなので、グラフではビルドの要らないリリース版と並べて示している。
-- **出力の確認**：3ターン目で needle の行を引用させる質問には、完了したすべての回で、すべてのエンジンが正しく答えた。
+- **出力の確認**：3ターン目では、文脈の中央に1行だけ埋め込んだ特別な行（needle）をそのまま引用させた。完了したすべての回で、すべてのエンジンが正しく答えた。
 
 ## decode の速さ
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg">
-  <img alt="プロンプト長ごとの decode tok/s（3エンジン）" src="charts/decode-light.svg">
+  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg">
 </picture>
 
-## 続きのターン
+## 2〜3ターン目の TTFT
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg">
-  <img alt="2〜3ターン目の TTFT（対数目盛り）" src="charts/ttft-followup-light.svg">
+  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg">
 </picture>
 
-## 会話全体
+## 3ターンの合計所要時間
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg">
   <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg">
 </picture>
 
-## メモリ
+## 最大メモリ使用量
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg">
   <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg">
 </picture>
 
-## 表
+## 計測値の表
 
-2K〜64K の各セルは2回の中央値、128K は1回の値である。
+2K〜64K の各セルは2回の中央値、128K と Splash のソース版は1回の値である。
 cache の列は、エンジンが返す `usage.prompt_tokens_details.cached_tokens` の値である。
 wired メモリはシステム全体の値である。
+needle の列は、3ターン目で needle を正しく引用した回数である。
 
 | 文脈 | エンジン | T1 TTFT（cold） | T2 TTFT | T3 TTFT | decode T1 / T2 / T3（tok/s） | 3ターンの合計 | cache T2 / T3 | 最大 wired | needle |
 |---|---|---|---|---|---|---|---|---|---|
@@ -117,13 +120,15 @@ wired メモリはシステム全体の値である。
 | Splash M1 build | 33.8 | 33.0 | -2.5% |
 | Splash source (HEAD) | — | 32.3 | — |
 
+2K の fp16 KV は、Splash では BF16 の KV（`--kv-format bf16`）を指す。
+
 生データは [`results/2026-09-m1max-64gb/rows.jsonl`](results/2026-09-m1max-64gb/rows.jsonl)、ターンごとの CSV は [`summary.csv`](results/2026-09-m1max-64gb/summary.csv)、計測環境は [`environment.json`](results/2026-09-m1max-64gb/environment.json) にある。
 各ターンの生成テキストは `results/2026-09-m1max-64gb/cells/*/` に置いた。
 
 ## Splash が2ターン目で速い理由
 
-Splash の M1 版の現在の最新（[paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels)）を手元でビルドし（[状態の項目を1つ追加](https://github.com/shunya1810/splash/tree/m1-analysis-metrics)）、draft と verify の数を読んだ。
-これで各ターンを verify の回数（1回は DFlash2 の 7 トークンの draft と、8 位置の verify）に分解できる。
+Splash の M1 版の現在の最新（[paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels)）を手元でビルドし、エンジンが `/status` に出す draft と受理の数を、リクエストの前後で読んだ（verify の回数のカウンターを1つ[足した](https://github.com/shunya1810/splash/tree/m1-analysis-metrics)）。
+これで各ターンを verify の回数に分解できる。1回は、DFlash2 による 7 トークンの draft と、8 位置の verify からなる。
 1回の計測、8-bit KV の値である。
 
 | 文脈 | ターン | decode tok/s | verify の回数 | draft / 回 | 受理 / 回 | 確定トークン / 回 | 受理率 | ms / 回 |
@@ -144,36 +149,39 @@ Splash の M1 版の現在の最新（[paperniuk/splash@5967821](https://github.
 | 128K | 2 | 18.5 | 62 | 7.0 | 3.13 | 4.13 | 45% | 225 |
 | 128K | 3 | 14.6 | 54 | 7.0 | 2.15 | 3.17 | 31% | 218 |
 
-- **draft がよく受理されるのは2ターン目だけ**で、受理率は 40〜50%（1ターン目と3ターン目は 29〜38%）。そのため1回で確定するトークンが 3.0〜3.7 でなく 3.8〜4.5 になる。
-  1回の費用はターンによらないので、この差がそのまま速さの差になる。
-  2ターン目の回答は1ターン目で決まった比較の型を繰り返すので、7 トークンの draft は3トークンの MTP の draft より先まで当てられる。MTPLX fork は2ターン目で 1ラウンド 2.9〜3.0 トークン、1ターン目と3ターン目で 2.6〜2.9 トークンで、上限は 4 である。
-- **短い文脈では、Splash は同じ時間で2倍の位置を verify する。** 2K で 8 位置の verify と 7 トークンの draft が 1回 107 ms、fork は 4 位置と3トークンの MTP の draft で 1ラウンド約 100 ms。
-- **1回の費用は、プロンプトが長いほど大きく伸びる。** Splash は 2K の 107 ms から 128K の 220 ms へ、fork は 100 ms から 157 ms へ伸びる。1回ごとに履歴全体への attention を 4 位置でなく 8 位置ぶん計算するためと考えられ、64K 以上の1ターン目と3ターン目で Splash が遅れる理由もこれだと推定している。
-- このソース版は 128K を最後まで完了した（1ターン目 34.3 分、続きのターンの TTFT は 8.0 秒と 7.8 秒）。サーバーの `--request-timeout` の既定値が 10,000 秒で、1.0.2-m1 のリリースは 1,800 秒だった。
-  Apple7/8 用の attention の新しいコミットも2つ入っていて、64K の decode はリリースの 18.7 / 22.5 / 16.5 に対して 20.7 / 27.1 / 18.3 tok/s だった。
+- **draft がよく受理されるのは2ターン目だけ**：受理率は 40〜50% で、1ターン目と3ターン目は 29〜38% だった。そのため1回で確定するトークンが、3.0〜3.7 でなく 3.8〜4.5 になる。
+  1回の時間はターンによらないので、この差がそのまま decode の速さの差になる。
+  2ターン目の回答は、1ターン目で決まった比較の型を繰り返す。7 トークンの draft は、3トークンの MTP の draft より先まで当てられると考えられる。MTPLX fork は、2ターン目で1ラウンド 2.9〜3.0 トークン、1ターン目と3ターン目で 2.6〜2.9 トークンで、上限は 4 である。
+- **短い文脈では、Splash は同じくらいの時間で2倍の位置を verify する**：2K で、8 位置の verify と 7 トークンの draft が1回 107 ms だった。fork は、4 位置の verify と3トークンの MTP の draft で1ラウンド約 100 ms である。
+- **1回の時間は、プロンプトが長いほど大きく伸びる**：Splash は 2K の 107 ms から 128K の 220 ms へ、fork は 100 ms から 157 ms へ伸びた。
+  1回ごとに履歴全体への attention を、4 位置でなく 8 位置ぶん計算するためと考えられ、64K 以上の1ターン目と3ターン目で Splash が遅れる理由もこれだと推定している（kernel ごとの時間はまだ測っていない）。
+- **ソース版で変わったこと**：サーバーの `--request-timeout` の既定値が 10,000 秒に上がり（1.0.2-m1 のリリースは 1,800 秒）、128K を最後まで完了した（1ターン目 34.3 分、続きのターンの TTFT は 8.0 秒と 7.8 秒）。
+  Apple7/8 用の attention の新しいコミットも入っていて、64K の decode はリリースの 18.7 / 22.5 / 16.5 に対して 20.7 / 27.1 / 18.3 tok/s だった。
 
 ## 計測の方法
 
 詳細は [METHODOLOGY.md](METHODOLOGY.md)（英語）にある。
 要点は次のとおりである。
 
-- 1ターン目には、目標の長さの合成テレメトリのログ（50% の位置に needle の行を1行含む）と質問を送る。
-  2〜3ターン目は、前の回答と新しい質問（約 300 トークン）を足していく。
-  3ターン目では needle の行の引用を求める。
-  各ターンの生成は最大 256 トークンである。
-- `temperature 0`、thinking off で測った。
-  これは同じ決定的な課題の上でエンジンを比べるための速度であり、サンプリングを有効にすると MTP の受理率が変わり、decode の速さも変わる。
-- どのエンジンも同じモデルファイルを読む。
-  oMLX は、MTPLX のチェックポイントを symlink で組んだテキスト専用のフォルダ経由で読む（[`scripts/prepare_omlx.py`](scripts/prepare_omlx.py)）。
-  重みの変換やコピーはしていない。
-- 8-bit KV は各エンジン独自の実装である（MTPLX は affine q8 の paged KV、oMLX は TurboQuant 8-bit）。
-  それ以外はプレフィックスキャッシュも含めて各エンジンの既定値である（MTPLX は RAM、oMLX は SSD に 4,096 トークン単位）。
-- セルごとにエンジンを起動し直し、キャッシュを消してから、ウォームアップと熱の確認用のリクエスト（canary）を送る。
-  2回目はエンジンの順番を逆にした。
-  canary がそのエンジンの最良値より 3% 以上遅いセルは、5 分休んでから測り直した（1回だけ起きた）。
-  128K は1回だけ、upstream、oMLX、fork の順に測った（fork が最後で、最もマシンが温まった状態になる）。
-  128K の canary は、2K〜64K の計測での各エンジンの最良値より、fork が 1.7%、upstream が 2.5%、oMLX が 4.8% 低く、測り直しはしていない。
-- 2回の計測の decode の差は、中央値で 1.0%、最大で 10% だった（oMLX の 64K の3ターン目。2回で生成テキストが異なった）。
+- **会話の内容**
+  - 1ターン目：目標の長さの合成テレメトリのログ（50% の位置に needle の行を1行含む）と、質問を送る。
+  - 2〜3ターン目：前の回答と新しい質問を足していく（合わせて約 300 トークン）。
+  - 3ターン目では、needle の行の引用を求める。各ターンの生成は最大 256 トークンである。
+- **生成の設定**：`temperature 0`、thinking off で測った。
+  これは同じ決定的な課題の上でエンジンを比べるための速度である。サンプリングを有効にすると、投機的デコードの受理率が変わり、decode の速さも変わる。
+- **モデルファイル**：MTPLX の2つと oMLX は同じモデルファイルを読む。
+  oMLX は、MTPLX のチェックポイントを symlink で組んだテキスト専用のフォルダ経由で読む（[`scripts/prepare_omlx.py`](scripts/prepare_omlx.py)）。重みの変換やコピーはしていない。
+  Splash は、専用のパッケージ `incoai/Qwen3.8-27B-Splash` を読む。
+- **KV キャッシュ**：8-bit KV は各エンジン独自の実装である（MTPLX は affine q8 の paged KV、oMLX は TurboQuant 8-bit、Splash は INT8）。
+  それ以外は、プレフィックスキャッシュも含めて各エンジンの既定値である（MTPLX は RAM、oMLX は SSD に 4,096 トークン単位、Splash は RAM）。
+- **熱と順番**
+  - セルごとにエンジンを起動し直し、エンジンのディスク上のキャッシュを消してから、ウォームアップと、熱の確認用のリクエスト（canary：約 2K の固定のプロンプトで decode の速さを測る）を送る。
+  - 2回目は、エンジンの順番を逆にした。
+  - canary がそのエンジンの最良値より 3% 以上遅いセルは、5 分休んでから測り直した（1回だけ起きた）。
+  - 128K は1回だけ、upstream、oMLX、fork の順に測った（fork が最後で、最もマシンが温まった状態になる）。
+    128K は別の計画として走らせたので canary の基準値が無く、測り直しは働かなかった。128K の canary は、2K〜64K の計測での最良値より、fork が 1.7%、upstream が 2.5%、oMLX が 4.8% 低かった。
+  - fork は 2026-09-26 に、`40b6113` で同じ計画を単独で測り直した。
+- **回ごとのばらつき**：2回測ったセルの decode の差は、中央値で 1.0%、最大で 10% だった（oMLX の 64K の3ターン目。2回で生成テキストが異なった）。
   MTPLX の2つは、それぞれ 15 ターンすべてで2回の出力がバイト単位で一致し、oMLX は 15 ターン中 12 ターンで一致した。
 
 ## 再現の手順

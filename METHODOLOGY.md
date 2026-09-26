@@ -42,7 +42,8 @@ the only per-phase measurement.
 
 ## Fairness
 
-- **Same model files for all engines.** oMLX reads the MTPLX checkpoint through a
+- **Same model files for the MTPLX and oMLX engines** (Splash needs its own package; see
+  below). oMLX reads the MTPLX checkpoint through a
   symlinked, text-only view (`scripts/prepare_omlx.py`): the MTP tensors are exposed
   under a file name mlx-lm loads and the MTP head's per-module quantization (4-bit,
   group 64) is written into `config.json`. No weight is converted or copied.
