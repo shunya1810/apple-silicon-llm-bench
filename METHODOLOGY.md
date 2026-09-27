@@ -79,6 +79,12 @@ the only per-phase measurement.
   kept under `mtplx-fork-40b6113`. Decode and cold prefill stayed within run-to-run noise;
   peak wired memory fell from 37.8 / 44.1 / 48.0 GB to 34.4 / 38.0 / 44.3 GB at
   32K / 64K / 128K.
+- It was re-measured again on 2026-09-27 at `bba1b7b` (M1: small attention/GDN
+  projections fused; the pruned FR-Spec draft head, with a Japanese-aware token list,
+  now reaches the greedy draft path), with the same plans. The `4fe8067` rows are kept
+  under `mtplx-fork-4fe8067`. Decode rose 1.7–6.3% (mean of the turns, 2K–128K) with
+  the same acceptance, memory and cold prefill; turns 2–3 at 2K–8K generate different
+  text.
 
 ## Splash M1 build
 
