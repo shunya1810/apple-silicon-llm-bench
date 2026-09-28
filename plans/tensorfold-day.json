@@ -1,0 +1,31 @@
+{
+ "rounds": [
+  [
+   "tensorfold"
+  ],
+  [
+   "tensorfold"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "mt-2k",
+   "kv": "bf16"
+  },
+  {
+   "scenario": "mt-8k",
+   "kv": "bf16"
+  },
+  {
+   "scenario": "mt-32k",
+   "kv": "bf16"
+  },
+  {
+   "scenario": "mt-64k",
+   "kv": "bf16"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.03
+}

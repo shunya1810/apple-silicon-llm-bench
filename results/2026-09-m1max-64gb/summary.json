@@ -3779,5 +3779,328 @@
    "version": "Splash 1.1.0-m1"
   },
   "context_tokens_raw": 130667
+ },
+ "tensorfold|q8|mt-2k": {
+  "engine": "tensorfold",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 15.681118624999726,
+    "gen_s": 9.775866791998851,
+    "e2e_s": 25.456985416998577,
+    "decode_tok_s": 26.08895159613149,
+    "completion_tokens": 256.0,
+    "peak_wired": 22874750976,
+    "peak_rss": 7186857984,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3010752688172043
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1673.0,
+    "ttft_s": 3.470082542000455,
+    "gen_s": 8.835719396000059,
+    "e2e_s": 12.305801938000513,
+    "decode_tok_s": 28.876092345037897,
+    "completion_tokens": 256.0,
+    "peak_wired": 20361707520,
+    "peak_rss": 6933217280,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3576348444610104
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 1980.0,
+    "ttft_s": 3.479547292001371,
+    "gen_s": 5.708408374497594,
+    "e2e_s": 9.187955666498965,
+    "decode_tok_s": 28.035745280780056,
+    "completion_tokens": 161.0,
+    "peak_wired": 20505739264,
+    "peak_rss": 6933463040,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3373134328358209
+   }
+  },
+  "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+  "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+  "engine_version": {
+   "version": "tensorfold 0.3.5.1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "tensorfold|q8|mt-8k": {
+  "engine": "tensorfold",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 7833.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 72.06163370849936,
+    "gen_s": 10.348059270500016,
+    "e2e_s": 82.40969297899937,
+    "decode_tok_s": 24.644692485614595,
+    "completion_tokens": 256.0,
+    "peak_wired": 22292414464,
+    "peak_rss": 7193575424,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3403846153846154
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 8139.0,
+    "cached_tokens": 7826.0,
+    "ttft_s": 3.6843753954999556,
+    "gen_s": 9.81466785449993,
+    "e2e_s": 13.499043249999886,
+    "decode_tok_s": 25.98398211285643,
+    "completion_tokens": 256.0,
+    "peak_wired": 22047801344,
+    "peak_rss": 6941589504,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3724696356275304
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 8443.0,
+    "cached_tokens": 8132.0,
+    "ttft_s": 3.689114749999135,
+    "gen_s": 6.766750687500462,
+    "e2e_s": 10.455865437499597,
+    "decode_tok_s": 26.01440742755581,
+    "completion_tokens": 177.0,
+    "peak_wired": 22566420480,
+    "peak_rss": 6942294016,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3760932944606414
+   }
+  },
+  "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+  "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+  "engine_version": {
+   "version": "tensorfold 0.3.5.1"
+  },
+  "context_tokens_raw": 7787
+ },
+ "tensorfold|q8|mt-32k": {
+  "engine": "tensorfold",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 319.59580918749816,
+    "gen_s": 16.529012208502536,
+    "e2e_s": 336.1248213960007,
+    "decode_tok_s": 15.434148802952139,
+    "completion_tokens": 256.0,
+    "peak_wired": 27099693056,
+    "peak_rss": 7197491200,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.32774674115456237
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32716.0,
+    "cached_tokens": 32402.0,
+    "ttft_s": 4.309869999500734,
+    "gen_s": 13.47279712549971,
+    "e2e_s": 17.782667125000444,
+    "decode_tok_s": 18.939763311564512,
+    "completion_tokens": 256.0,
+    "peak_wired": 25506168832,
+    "peak_rss": 6945701888,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4282511210762332
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33020.0,
+    "cached_tokens": 32709.0,
+    "ttft_s": 4.311430083500454,
+    "gen_s": 10.191443666499254,
+    "e2e_s": 14.502873749999708,
+    "decode_tok_s": 16.489012222527084,
+    "completion_tokens": 169.0,
+    "peak_wired": 24661164032,
+    "peak_rss": 6946537472,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3556851311953353
+   }
+  },
+  "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+  "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+  "engine_version": {
+   "version": "tensorfold 0.3.5.1"
+  },
+  "context_tokens_raw": 32363
+ },
+ "tensorfold|q8|mt-64k": {
+  "engine": "tensorfold",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 713.2746512920003,
+    "gen_s": 23.68493293749998,
+    "e2e_s": 736.9595842295003,
+    "decode_tok_s": 10.76722520235295,
+    "completion_tokens": 256.0,
+    "peak_wired": 33206108160,
+    "peak_rss": 7226933248,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3371212121212121
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65470.0,
+    "cached_tokens": 65156.0,
+    "ttft_s": 5.24851897949884,
+    "gen_s": 19.448454583001876,
+    "e2e_s": 24.696973562500716,
+    "decode_tok_s": 13.11484498043065,
+    "completion_tokens": 256.0,
+    "peak_wired": 29897768960,
+    "peak_rss": 6989021184,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4346846846846847
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65774.0,
+    "cached_tokens": 65463.0,
+    "ttft_s": 5.186090687500837,
+    "gen_s": 19.06901766649935,
+    "e2e_s": 24.255108354000185,
+    "decode_tok_s": 9.964519825684285,
+    "completion_tokens": 191.0,
+    "peak_wired": 28894183424,
+    "peak_rss": 7000457216,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.29411764705882354
+   }
+  },
+  "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+  "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+  "engine_version": {
+   "version": "tensorfold 0.3.5.1"
+  },
+  "context_tokens_raw": 65117
+ },
+ "tensorfold|q8|mt-128k": {
+  "engine": "tensorfold",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1749.973432666,
+    "gen_s": 40.65666695899927,
+    "e2e_s": 1790.6300996249993,
+    "decode_tok_s": 6.272645833611082,
+    "completion_tokens": 256,
+    "peak_wired": 37240045568,
+    "peak_rss": 7265173504,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3247232472324723
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 0,
+    "ttft_s": 1758.8622149170005,
+    "gen_s": 36.10116108299917,
+    "e2e_s": 1794.9633759999997,
+    "decode_tok_s": 6.509939751720079,
+    "completion_tokens": 236,
+    "peak_wired": 37053317120,
+    "peak_rss": 7045660672,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3408163265306122
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131303,
+    "cached_tokens": 0,
+    "ttft_s": 1764.3755899999996,
+    "gen_s": 28.258412125000177,
+    "e2e_s": 1792.6340021249998,
+    "decode_tok_s": 6.264210739197254,
+    "completion_tokens": 178,
+    "peak_wired": 36918263808,
+    "peak_rss": 7074889728,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.32558139534883723
+   }
+  },
+  "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+  "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+  "engine_version": {
+   "version": "tensorfold 0.3.5.1"
+  },
+  "context_tokens_raw": 130667
  }
 }

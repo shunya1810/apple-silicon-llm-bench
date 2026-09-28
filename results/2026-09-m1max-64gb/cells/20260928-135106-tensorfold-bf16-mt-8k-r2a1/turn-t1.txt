@@ -1,0 +1,5 @@
+The provided telemetry data exhibits a highly structured, deterministic pattern rather than random noise. Sensor values generally decrease linearly from approximately 99.0 to 10.5 across the sequence, resetting periodically to high values (e.g., 99.x) every 18 records. This creates a sawtooth wave effect where readings drop by roughly 5.7 units per step before jumping back up. The status field cycles through a fixed five-state sequence: nominal, degraded, recovering, offline, and calibrating. This cycle repeats consistently, meaning the status is strictly determined by the record index modulo 5. Zones also follow a predictable alternating pattern between 'A' and 'N' prefixes with incrementing numbers. Notably, one anomalous record (NEEDLE) contains non-telemetry maintenance text, breaking the standard format.
+
+Three concrete observations are:
+1. The sensor value decreases by exactly 5.7 units per record until it drops below 2.0, at which point it resets to a value near 99.0.
+2. The status field follows a rigid, repeating five-step cycle (nominal → degraded → recovering → offline → calibrating) that aligns perfectly with the record index.

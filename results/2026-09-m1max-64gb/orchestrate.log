@@ -242,3 +242,23 @@
 11:40:31 round 1 mt-128k q8 splash-m1-110 attempt 1
 12:10:44   canary 30.28676559447366 ref None slow=False
 12:12:44 plan done
+13:11:17 round 1 mt-2k bf16 tensorfold attempt 1
+13:14:01   canary 28.345063006419117 ref None slow=False
+13:15:31 round 1 mt-8k bf16 tensorfold attempt 1
+13:19:13   canary 28.353683352555468 ref 28.345063006419117 slow=False
+13:20:43 round 1 mt-32k bf16 tensorfold attempt 1
+13:28:48   canary 28.1941394308458 ref 28.353683352555468 slow=False
+13:30:18 round 1 mt-64k bf16 tensorfold attempt 1
+13:45:21   canary 28.34339221426305 ref 28.353683352555468 slow=False
+13:46:51 round 2 mt-2k bf16 tensorfold attempt 1
+13:49:36   canary 28.382645327695485 ref 28.353683352555468 slow=False
+13:51:06 round 2 mt-8k bf16 tensorfold attempt 1
+13:54:48   canary 28.222698159296726 ref 28.382645327695485 slow=False
+13:56:18 round 2 mt-32k bf16 tensorfold attempt 1
+14:04:23   canary 28.28661015071116 ref 28.382645327695485 slow=False
+14:05:53 round 2 mt-64k bf16 tensorfold attempt 1
+14:20:56   canary 28.270236930838518 ref 28.382645327695485 slow=False
+14:22:26 plan done
+14:27:26 round 1 mt-128k bf16 tensorfold attempt 1
+15:59:03   canary 28.41186752343149 ref None slow=False
+16:01:04 plan done

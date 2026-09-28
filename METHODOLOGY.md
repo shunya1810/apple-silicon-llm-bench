@@ -120,6 +120,20 @@ the only per-phase measurement.
   counter). 1.1.0-m1 matched or beat both at every length and finished 128K, so only it
   is shown.
 
+## TensorFold
+
+- Installed with pip from the v0.3.5.1 tag into its own Python 3.12 environment
+  (MLX 0.32.2). 0.3.5 and earlier stop at load on M1/M2 Max (a 512-thread threadgroup
+  above the GPU's 448; TensorFold issue #48); 0.3.5.1 loads.
+- It serves its own packages: `Vontra/Qwen3.8-27B-MLX-4bit` (revision 70ae7fa) and the
+  `z-lab/Qwen3.8-27B-DFlash2` draft (revision 50307d4), which it quantizes to 4-bit at load.
+- `--context 262144 --max-tokens 4096 --no-thinking --parallel 1 --snapshot-dir none`
+  (no disk snapshots, so each cell starts cold); everything else at its defaults,
+  including the in-memory prompt cache (an eighth of RAM, 8 GiB here). It has no 8-bit
+  KV option, so its cells run bf16 KV and fill the 8-bit column, labelled "(bf16 KV)".
+- Per-request rounds and accepted/drafted counts come from its server log line.
+- It ran last, in two rounds of its own (2K–64K) and one 128K run.
+
 ## Known limitations
 
 - One machine (M1 Max, 64 GB), one model, one synthetic workload.

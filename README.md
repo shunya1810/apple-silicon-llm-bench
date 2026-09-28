@@ -3,11 +3,12 @@
 English | [日本語](README.ja.md)
 
 How fast is a **3-turn conversation over a long prompt** on a Mac, depending on the
-inference engine? On a MacBook Pro with M1 Max and 64 GB, four inference engines serve Qwen3.8-27B with speculative decoding and 8-bit KV cache, measured the same way over
+inference engine? On a MacBook Pro with M1 Max and 64 GB, five inference engines serve Qwen3.8-27B with speculative decoding and 8-bit KV cache
+(TensorFold has no 8-bit KV and runs bf16 KV), measured the same way over
 each engine's OpenAI-compatible streaming API. The three MTPLX/oMLX engines load the
-**same model files** with MTP (depth 3); Splash needs its own package (the
-mlx-community 4-bit, group-64 weights plus a DFlash2 draft model), so its column also
-reflects a different quantization and a different speculative method.
+**same model files** with MTP (depth 3); Splash and TensorFold need their own packages
+(4-bit, group-64 weights plus a DFlash2 draft model), so their columns also reflect a
+different quantization and a different speculative method.
 
 | engine | version | notes |
 |---|---|---|
@@ -15,9 +16,10 @@ reflects a different quantization and a different speculative method.
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time; the fork's base |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
 | **Splash 1.1.0-m1** | [paperniuk/splash 1.1.0-m1](https://github.com/paperniuk/splash/releases/tag/1.1.0-m1) | community M1/M2 build of [incoai/splash](https://github.com/incoai/splash) 1.1.0 with Apple7/8 kernels; model `incoai/Qwen3.8-27B-Splash` (4-bit g64 + DFlash2 draft), INT8 KV; replaces the 1.0.2-m1 release and a source build of its head measured earlier (raw data: `splash-m1-102`, `splash-src`) |
+| **TensorFold** | [0.3.5.1](https://github.com/ashhart/TensorFold/releases/tag/v0.3.5.1) | Python/MLX engine with exact (token-equality) draft acceptance; model `Vontra/Qwen3.8-27B-MLX-4bit` (4-bit g64) + `z-lab/Qwen3.8-27B-DFlash2` draft (4-bit at load), bf16 KV (no 8-bit option); release of 2026-09-28, the first that loads on M1 Max |
 
 Prompt lengths 2K–64K ran in 2 rounds each (median shown); 128K ran once. Splash ran
-after the other three, in its own two rounds and one 128K run.
+after the other three, in its own two rounds and one 128K run; TensorFold ran last, the same way.
 
 ## Highlights (8-bit KV)
 
@@ -70,35 +72,45 @@ after the other three, in its own two rounds and one 128K run.
   +18% (128K) over a source build of the port's earlier head (equal at 2K–32K); cold
   prefill at 64K takes 10.9 min against 12.8 (1.0.2-m1) and 12.3 (source build), and 34.3
   min at 128K on the source build against 28.5. Those rows stay in the raw data.
+- **TensorFold 0.3.5.1 (bf16 KV):** decode 27.7 / 25.5 / 16.9 / 11.3 / 6.4 tok/s at 2K /
+  8K / 32K / 64K / 128K (mean of the turns): 13–16% behind the fork at 2K–8K and a third
+  of it at 128K. Cold prefill is the slowest of the five up to 64K (64K: 11.9 min) and
+  follow-up turns take 3.5–5.3 s to the first token up to 64K. At 128K its default prompt
+  cache (an eighth of RAM, 8 GiB) cannot hold the conversation, so turns 2 and 3 re-read
+  all 131K tokens (29.3–29.4 min each) and the conversation takes 89.6 min; a larger
+  `--prompt-cache-gib` may avoid that, but every engine runs at its defaults here. Peak
+  wired memory 22.6–37.2 GB. It accepts a draft token only when it equals the target's own
+  sample (exact decoding, output independent of drafting), which works at temperature 0
+  but accepts fewer tokens when sampling.
 - **Output check:** every engine quoted the needle line correctly in turn 3 in every
   completed run.
 
 ## Decode speed
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=splash110">
-  <img alt="Decode tok/s vs prompt length, four engines" src="charts/decode-light.svg?v=splash110">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=tensorfold">
+  <img alt="Decode tok/s vs prompt length, five engines" src="charts/decode-light.svg?v=tensorfold">
 </picture>
 
 ## Follow-up turns
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=splash110">
-  <img alt="Time to first token for turns 2-3, log scale" src="charts/ttft-followup-light.svg?v=splash110">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=tensorfold">
+  <img alt="Time to first token for turns 2-3, log scale" src="charts/ttft-followup-light.svg?v=tensorfold">
 </picture>
 
 ## The whole conversation
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=splash110">
-  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg?v=splash110">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=tensorfold">
+  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg?v=tensorfold">
 </picture>
 
 ## Memory
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=splash110">
-  <img alt="Peak wired memory vs prompt length" src="charts/memory-light.svg?v=splash110">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=tensorfold">
+  <img alt="Peak wired memory vs prompt length" src="charts/memory-light.svg?v=tensorfold">
 </picture>
 
 ## Tables
@@ -114,22 +126,27 @@ Median of 2 rounds per cell for 2K–64K; 128K is a single run.
 | 2K | MTPLX upstream | 11.5 s | 0.64 s | 0.64 s | 25.1 / 22.9 / 23.2 | 41.8 s | 1,936 / 2,243 | 34.0 GB | 2/2 |
 | 2K | oMLX | 11.4 s | 13.5 s | 15.4 s | 20.4 / 23.5 / 21.0 | 1.2 min | 0 / 0 | 26.9 GB | 2/2 |
 | 2K | Splash 1.1.0-m1 | 12.0 s | 2.56 s | 2.76 s | 31.3 / 39.2 / 28.8 | 37.8 s | 1,664 / 1,952 | 21.9 GB | 2/2 |
+| 2K | TensorFold (bf16 KV) | 15.7 s | 3.47 s | 3.48 s | 26.1 / 28.9 / 28.0 | 47.0 s | 1,673 / 1,980 | 22.9 GB | 2/2 |
 | 8K | MTPLX fork | 1.0 min | 0.72 s | 0.71 s | 30.0 / 32.2 / 28.8 | 1.4 min | 8,089 / 8,396 | 30.7 GB | 2/2 |
 | 8K | MTPLX upstream | 54.2 s | 0.76 s | 0.77 s | 23.5 / 23.2 / 21.7 | 1.4 min | 8,089 / 8,396 | 35.5 GB | 2/2 |
 | 8K | oMLX | 56.4 s | 30.0 s | 2.69 s | 20.2 / 19.8 / 18.3 | 2.1 min | 4,096 / 8,192 | 33.2 GB | 2/2 |
 | 8K | Splash 1.1.0-m1 | 56.8 s | 2.91 s | 2.79 s | 31.1 / 37.4 / 29.1 | 1.4 min | 7,808 / 8,128 | 22.1 GB | 2/2 |
+| 8K | TensorFold (bf16 KV) | 1.2 min | 3.68 s | 3.69 s | 24.6 / 26.0 / 26.0 | 1.8 min | 7,826 / 8,132 | 22.6 GB | 2/2 |
 | 32K | MTPLX fork | 4.2 min | 0.97 s | 0.98 s | 27.5 / 26.9 / 26.7 | 4.7 min | 32,665 / 32,972 | 33.7 GB | 2/2 |
 | 32K | MTPLX upstream | 4.1 min | 1.38 s | 1.37 s | 17.1 / 12.5 / 12.0 | 5.0 min | 32,665 / 32,972 | 40.8 GB | 2/2 |
 | 32K | oMLX | 4.4 min | 44.6 s | 3.45 s | 14.4 / 14.0 / 14.4 | 6.0 min | 28,672 / 32,768 | 37.0 GB | 2/2 |
 | 32K | Splash 1.1.0-m1 | 4.5 min | 3.57 s | 3.57 s | 23.3 / 29.1 / 28.7 | 5.1 min | 32,384 / 32,704 | 22.9 GB | 2/2 |
+| 32K | TensorFold (bf16 KV) | 5.3 min | 4.31 s | 4.31 s | 15.4 / 18.9 / 16.5 | 6.1 min | 32,402 / 32,709 | 27.1 GB | 2/2 |
 | 64K | MTPLX fork | 9.8 min | 1.36 s | 1.36 s | 23.8 / 25.3 / 23.9 | 10.3 min | 65,419 / 65,726 | 37.8 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.12 s | 8.8 / 8.7 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.4 GB | 2/2 |
 | 64K | oMLX | 10.2 min | 1.0 min | 4.76 s | 10.9 / 10.9 / 10.4 | 12.4 min | 61,440 / 65,536 | 39.6 GB | 2/2 |
 | 64K | Splash 1.1.0-m1 | 10.9 min | 4.28 s | 4.90 s | 23.2 / 29.9 / 19.1 | 11.5 min | 65,152 / 65,440 | 24.1 GB | 2/2 |
+| 64K | TensorFold (bf16 KV) | 11.9 min | 5.25 s | 5.19 s | 10.8 / 13.1 / 10.0 | 13.1 min | 65,156 / 65,463 | 33.2 GB | 2/2 |
 | 128K | MTPLX fork | 24.7 min | 2.15 s | 2.15 s | 19.0 / 20.8 / 19.0 | 25.3 min | 130,969 / 131,276 | 43.1 GB | 1/1 |
 | 128K | MTPLX upstream | 30.5 min | 4.16 s | 3.49 s | 4.6 / 5.1 / 5.0 | 33.0 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
 | 128K | oMLX | 26.3 min | 1.6 min | 7.92 s | 7.6 / 7.8 / 6.9 | 29.6 min | 126,976 / 131,072 | 48.5 GB | 1/1 |
 | 128K | Splash 1.1.0-m1 | 28.5 min | 6.27 s | 6.20 s | 15.9 / 22.8 / 17.4 | 29.4 min | 130,688 / 131,008 | 26.2 GB | 1/1 |
+| 128K | TensorFold (bf16 KV) | 29.2 min | 29.3 min | 29.4 min | 6.3 / 6.5 / 6.3 | 89.6 min | 0 / 0 | 37.2 GB | 1/1 |
 
 **2K: fp16 KV vs 8-bit KV** (decode tok/s, mean of turns 1–3)
 

@@ -16,21 +16,22 @@ import statistics
 import sys
 from pathlib import Path
 
-ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # table order
-CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)"}
+ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # table order
+CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
+NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
+         "tensorfold": "TensorFold (bf16 KV)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
 GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4"},
+              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181"},
+             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
-MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down"}
+MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
 
 
 # ---------------------------------------------------------------- data
@@ -42,7 +43,12 @@ def load(run: Path) -> list[dict]:
     for r in rows:
         k = (r["engine"], r["kv"], r["scenario"], r["round"])
         last[k] = max(last.get(k, 0), r.get("attempt", 1))
-    return [r for r in rows if r.get("attempt", 1) == last[(r["engine"], r["kv"], r["scenario"], r["round"])]]
+    rows = [r for r in rows if r.get("attempt", 1) == last[(r["engine"], r["kv"], r["scenario"], r["round"])]]
+    # TensorFold has no 8-bit KV: its bf16 cells fill the main (8-bit KV) slot, labelled in NAMES.
+    for r in rows:
+        if r["engine"] == "tensorfold" and r["kv"] == "bf16":
+            r["kv"] = "q8"
+    return rows
 
 
 def med(values):
@@ -156,7 +162,7 @@ def tables_md(cells: dict, lang: str) -> str:
                 "**2K：fp16 KV と 8-bit KV**（decode tok/s、ターン1〜3の平均）", "",
                 "| engine | fp16 KV | 8-bit KV | change |" if not ja else "| エンジン | fp16 KV | 8-bit KV | 変化 |",
                 "|---|---|---|---|"]
-        for e in ENGINES:
+        for e in [e for e in ENGINES if e != "tensorfold"]:
             a = mean_turns(cells, e, "mt-2k", "decode_tok_s", kv="fp16")
             b = mean_turns(cells, e, "mt-2k", "decode_tok_s", kv="q8")
             ch = "—" if not (a and b) else f"{(b / a - 1) * 100:+.1f}%"
@@ -299,6 +305,10 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
     ends.sort()
     for i in range(1, len(ends)):
         ends[i][0] = max(ends[i][0], ends[i - 1][0] + 30)
+    if ends and ends[-1][0] > T + ph - 20:  # keep the lowest label (value + name) above the x-axis labels
+        ends[-1][0] = T + ph - 20
+        for i in range(len(ends) - 2, -1, -1):
+            ends[i][0] = min(ends[i][0], ends[i + 1][0] - 30)
     for y, e, v, x in ends:
         o.append(f'<text x="{x + 12:.1f}" y="{y - 1:.1f}" fill="{th["t1"]}" font-size="12" font-weight="600">'
                  f'{esc(vfmt(v))}</text><text x="{x + 12:.1f}" y="{y + 13:.1f}" fill="{th["t2"]}" font-size="11">'

@@ -1,0 +1,43 @@
+{
+ "id": "tensorfold",
+ "label": "TensorFold 0.3.5.1",
+ "port": 18105,
+ "model_id": "tensorfold",
+ "tokenizer_dir": "${MTPLX_MODEL}",
+ "model_artifact": "Vontra/Qwen3.8-27B-MLX-4bit (MLX affine 4-bit, group 64; revision 70ae7fa) plus the z-lab/Qwen3.8-27B-DFlash2 draft (revision 50307d4, quantized to 4-bit at load). Different files from the MTPLX artifact.",
+ "mtp_impl": "DFlash2 draft (separate model) plus context copies, exact (token-equality) acceptance",
+ "stats": "tensorfold-log",
+ "health_path": "/health",
+ "start_timeout_s": 1800,
+ "cmd": [
+  "${TENSORFOLD}",
+  "serve",
+  "Vontra/Qwen3.8-27B-MLX-4bit",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "18105",
+  "--name",
+  "tensorfold",
+  "--context",
+  "262144",
+  "--max-tokens",
+  "4096",
+  "--no-thinking",
+  "--parallel",
+  "1",
+  "--snapshot-dir",
+  "none",
+  "--no-update-check"
+ ],
+ "default_kv": "bf16",
+ "kv_variants": {
+  "bf16": {
+   "kv_impl": "TensorFold bf16 KV (it has no 8-bit KV option)",
+   "cmd_extra": []
+  }
+ },
+ "version_cmds": {
+  "version": "${TENSORFOLD} --version"
+ }
+}

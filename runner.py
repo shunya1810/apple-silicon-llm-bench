@@ -196,6 +196,25 @@ class Engine:
                 if m:
                     out["cache_hit_tokens_log"] = int(m[-1])
                 return out
+            if kind == "tensorfold-log":
+                path = self.cell_dir / "server.log"
+                for _ in range(20):  # the "done" line is printed after the stream closes
+                    text = path.read_text(errors="replace")[log_offset:]
+                    m = re.findall(r"\[tensorfold\] done \S+ prompt=(\d+) cached=(\d+) .*?tokens=(\d+) .*?"
+                                   r"tok/s=([\d.]+) ttft=([-\d.]+)s prefill=([-\d.]+)s .*?rounds=(\d+) "
+                                   r"accepted=(\d+)/(\d+)", text)
+                    if m:
+                        p, c, t, tps, ttft, pre, rounds, acc, dr = m[-1]
+                        out = {"prompt_tokens": int(p), "cached_tokens": int(c), "completion_tokens": int(t),
+                               "engine_decode_tok_s": float(tps), "ttft_s": float(ttft), "prefill_s": float(pre),
+                               "rounds": int(rounds), "accepted_drafts": int(acc), "drafted_tokens": int(dr)}
+                        if out["rounds"]:
+                            out["tokens_per_round"] = out["completion_tokens"] / out["rounds"]
+                        if out["drafted_tokens"]:
+                            out["acceptance_rate"] = out["accepted_drafts"] / out["drafted_tokens"]
+                        return out
+                    time.sleep(0.25)
+                return {}
         except Exception as exc:
             return {"error": repr(exc)}
         return None
