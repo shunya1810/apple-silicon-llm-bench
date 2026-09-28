@@ -12,7 +12,7 @@ reflects a different quantization and a different speculative method.
 
 | engine | version | notes |
 |---|---|---|
-| **MTPLX fork** | [`shunya1810/MTPLX@0cd2a73`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx) | M1-family long-context branch, maintained by the author of this benchmark; re-run on 2026-09-26/27 after it turned context-copy off on M1 (`40b6113`), lowered its M1 memory defaults (`4fe8067`), and fused small projections and pruned the draft head on M1 (`bba1b7b`), and enlarged its M1 Metal command buffers (`0cd2a73`); the earlier rows stay in the raw data as `mtplx-fork-16751dc`, `mtplx-fork-40b6113`, `mtplx-fork-4fe8067` and `mtplx-fork-bba1b7b` |
+| **MTPLX fork** | [`shunya1810/MTPLX@0cd2a73`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx) | M1-family long-context branch, maintained by the author of this benchmark; re-run on 2026-09-26–28 after it turned context-copy off on M1 (`40b6113`), lowered its M1 memory defaults (`4fe8067`), and fused small projections and pruned the draft head on M1 (`bba1b7b`), and enlarged its M1 Metal command buffers (`0cd2a73`); the earlier rows stay in the raw data as `mtplx-fork-16751dc`, `mtplx-fork-40b6113`, `mtplx-fork-4fe8067` and `mtplx-fork-bba1b7b` |
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time; the fork's base |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
 | **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | community M1/M2 build of [incoai/splash](https://github.com/incoai/splash) with Apple7 kernels; model `incoai/Qwen3.8-27B-Splash` (4-bit g64 + DFlash2 draft), INT8 KV |
@@ -81,29 +81,29 @@ below).
 ## Decode speed
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg">
-  <img alt="Decode tok/s vs prompt length, five engine builds" src="charts/decode-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=0cd2a73">
+  <img alt="Decode tok/s vs prompt length, five engine builds" src="charts/decode-light.svg?v=0cd2a73">
 </picture>
 
 ## Follow-up turns
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg">
-  <img alt="Time to first token for turns 2-3, log scale" src="charts/ttft-followup-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=0cd2a73">
+  <img alt="Time to first token for turns 2-3, log scale" src="charts/ttft-followup-light.svg?v=0cd2a73">
 </picture>
 
 ## The whole conversation
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg">
-  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=0cd2a73">
+  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg?v=0cd2a73">
 </picture>
 
 ## Memory
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg">
-  <img alt="Peak wired memory vs prompt length" src="charts/memory-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=0cd2a73">
+  <img alt="Peak wired memory vs prompt length" src="charts/memory-light.svg?v=0cd2a73">
 </picture>
 
 ## Tables

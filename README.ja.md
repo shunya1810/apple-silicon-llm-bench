@@ -57,29 +57,29 @@ Splash のソース版は、分析のために1回だけ測った。
 ## decode の速さ
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg">
-  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=0cd2a73">
+  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg?v=0cd2a73">
 </picture>
 
 ## 2〜3ターン目の TTFT
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg">
-  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=0cd2a73">
+  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg?v=0cd2a73">
 </picture>
 
 ## 3ターンの合計所要時間
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg">
-  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=0cd2a73">
+  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=0cd2a73">
 </picture>
 
 ## 最大メモリ使用量
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg">
-  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=0cd2a73">
+  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg?v=0cd2a73">
 </picture>
 
 ## 計測値の表
