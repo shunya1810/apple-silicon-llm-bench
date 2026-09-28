@@ -85,6 +85,15 @@ the only per-phase measurement.
   under `mtplx-fork-4fe8067`. Decode rose 1.7–6.3% (mean of the turns, 2K–128K) with
   the same acceptance, memory and cold prefill; turns 2–3 at 2K–8K generate different
   text.
+- It was re-measured again on 2026-09-28 at `0cd2a73` (M1: up to 150 operations and
+  1,000 MB per Metal command buffer, prefill evaluated every four layers), with the same
+  plans. The `bba1b7b` rows are kept under `mtplx-fork-bba1b7b`. Decode rose 6.3–9.6%
+  (mean of the turns, 2K–128K), cold prefill at 128K fell 4%, peak memory stayed the same
+  or fell, and all 18 turns generated the same text as `bba1b7b`. A first attempt on
+  2026-09-27 stopped when the Mac slept during the 64K prefill (Metal command-buffer error
+  on wake); its rows were dropped and the whole plan was run again. In the re-run, the 8K
+  cell of round 1 (just after a reboot) stayed 5% slow on its canary after one re-run and
+  is kept, as the plan specifies.
 
 ## Splash M1 build
 

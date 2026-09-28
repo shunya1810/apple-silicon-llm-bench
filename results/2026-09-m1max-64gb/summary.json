@@ -2616,8 +2616,8 @@
   },
   "context_tokens_raw": 130667
  },
- "mtplx-fork|fp16|mt-2k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|fp16|mt-2k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "fp16",
   "scenario": "mt-2k",
   "rounds": [
@@ -2681,8 +2681,8 @@
   },
   "context_tokens_raw": 1634
  },
- "mtplx-fork|q8|mt-2k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|q8|mt-2k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "q8",
   "scenario": "mt-2k",
   "rounds": [
@@ -2746,8 +2746,8 @@
   },
   "context_tokens_raw": 1634
  },
- "mtplx-fork|q8|mt-8k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|q8|mt-8k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "q8",
   "scenario": "mt-8k",
   "rounds": [
@@ -2811,8 +2811,8 @@
   },
   "context_tokens_raw": 7787
  },
- "mtplx-fork|q8|mt-32k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|q8|mt-32k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "q8",
   "scenario": "mt-32k",
   "rounds": [
@@ -2876,8 +2876,8 @@
   },
   "context_tokens_raw": 32363
  },
- "mtplx-fork|q8|mt-64k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|q8|mt-64k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "q8",
   "scenario": "mt-64k",
   "rounds": [
@@ -2941,8 +2941,8 @@
   },
   "context_tokens_raw": 65117
  },
- "mtplx-fork|q8|mt-128k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-bba1b7b|q8|mt-128k": {
+  "engine": "mtplx-fork-bba1b7b",
   "kv": "q8",
   "scenario": "mt-128k",
   "rounds": [
@@ -3001,6 +3001,394 @@
   "mtp_impl": "MTPLX native MTP, depth 3",
   "engine_version": {
    "commit": "bba1b7b7361a5e201d16fc21b8f20f27138453c8"
+  },
+  "context_tokens_raw": 130667
+ },
+ "mtplx-fork|fp16|mt-2k": {
+  "engine": "mtplx-fork",
+  "kv": "fp16",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 12.437228749999889,
+    "gen_s": 8.781630374500025,
+    "e2e_s": 21.218859124499915,
+    "decode_tok_s": 28.604899339523165,
+    "completion_tokens": 252.0,
+    "peak_wired": 28039512064,
+    "peak_rss": 16905027584,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5326460481099656
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1982.0,
+    "cached_tokens": 1932.0,
+    "ttft_s": 0.5934385625000118,
+    "gen_s": 7.586102937499845,
+    "e2e_s": 8.179541499999857,
+    "decode_tok_s": 33.65056139828889,
+    "completion_tokens": 256.0,
+    "peak_wired": 27039268864,
+    "peak_rss": 16916119552,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6852589641434262
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2285.0,
+    "cached_tokens": 1932.0,
+    "ttft_s": 2.7080252499999915,
+    "gen_s": 6.110387458000048,
+    "e2e_s": 8.81841270800004,
+    "decode_tok_s": 27.546322104422792,
+    "completion_tokens": 169.0,
+    "peak_wired": 27221262336,
+    "peak_rss": 16929144832,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5074626865671642
+   }
+  },
+  "kv_impl": "MTPLX paged KV, unquantized",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
+  },
+  "context_tokens_raw": 1634
+ },
+ "mtplx-fork|q8|mt-2k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 11.600900291000016,
+    "gen_s": 8.174877583999944,
+    "e2e_s": 19.77577787499996,
+    "decode_tok_s": 31.511688318351247,
+    "completion_tokens": 256.0,
+    "peak_wired": 29156540416,
+    "peak_rss": 16935796736,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5905797101449275
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1936.0,
+    "ttft_s": 0.6148636875000193,
+    "gen_s": 7.936831500000039,
+    "e2e_s": 8.551695187500059,
+    "decode_tok_s": 32.172469717845686,
+    "completion_tokens": 256.0,
+    "peak_wired": 30045650944,
+    "peak_rss": 16941891584,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6525096525096525
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 2243.0,
+    "ttft_s": 0.6153830204999622,
+    "gen_s": 5.383575499999836,
+    "e2e_s": 5.998958520499798,
+    "decode_tok_s": 32.05393462330108,
+    "completion_tokens": 173.0,
+    "peak_wired": 29551378432,
+    "peak_rss": 16954425344,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6120218579234973
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
+  },
+  "context_tokens_raw": 1634
+ },
+ "mtplx-fork|q8|mt-8k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 7833.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 60.901333417000046,
+    "gen_s": 8.532223333000047,
+    "e2e_s": 69.4335567500001,
+    "decode_tok_s": 30.003625096315453,
+    "completion_tokens": 256.0,
+    "peak_wired": 30719868928,
+    "peak_rss": 16940089344,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6194029850746269
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 8140.0,
+    "cached_tokens": 8089.0,
+    "ttft_s": 0.7166497914998899,
+    "gen_s": 7.957922916500138,
+    "e2e_s": 8.674572708000028,
+    "decode_tok_s": 32.155518023402855,
+    "completion_tokens": 256.0,
+    "peak_wired": 30157996032,
+    "peak_rss": 16945561600,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6758893280632411
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 8444.0,
+    "cached_tokens": 8396.0,
+    "ttft_s": 0.7078686040001685,
+    "gen_s": 5.963639791999981,
+    "e2e_s": 6.671508396000149,
+    "decode_tok_s": 28.816241387817776,
+    "completion_tokens": 172.0,
+    "peak_wired": 30266851328,
+    "peak_rss": 16947560448,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5767195767195767
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
+  },
+  "context_tokens_raw": 7787
+ },
+ "mtplx-fork|q8|mt-32k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 254.27426200050002,
+    "gen_s": 9.412946937000129,
+    "e2e_s": 263.68720893750015,
+    "decode_tok_s": 27.478951135513007,
+    "completion_tokens": 256.0,
+    "peak_wired": 33320419328,
+    "peak_rss": 16969891840,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6550387596899225
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32716.0,
+    "cached_tokens": 32665.0,
+    "ttft_s": 0.9700913335000223,
+    "gen_s": 9.612617312499992,
+    "e2e_s": 10.582708646000015,
+    "decode_tok_s": 26.91873954239226,
+    "completion_tokens": 256.0,
+    "peak_wired": 33671282688,
+    "peak_rss": 16986095616,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6007326007326007
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33020.0,
+    "cached_tokens": 32972.0,
+    "ttft_s": 0.9815723959999332,
+    "gen_s": 6.5614799999999605,
+    "e2e_s": 7.543052395999894,
+    "decode_tok_s": 26.735502838730802,
+    "completion_tokens": 173.0,
+    "peak_wired": 32739917824,
+    "peak_rss": 17002184704,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6065573770491803
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
+  },
+  "context_tokens_raw": 32363
+ },
+ "mtplx-fork|q8|mt-64k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 585.7621402914999,
+    "gen_s": 11.115637542000286,
+    "e2e_s": 596.8777778335002,
+    "decode_tok_s": 23.844429009936718,
+    "completion_tokens": 256.0,
+    "peak_wired": 35517251584,
+    "peak_rss": 16985128960,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6066176470588235
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65470.0,
+    "cached_tokens": 65419.0,
+    "ttft_s": 1.3628104579997853,
+    "gen_s": 10.273747312500063,
+    "e2e_s": 11.636557770499849,
+    "decode_tok_s": 25.27909828398313,
+    "completion_tokens": 256.0,
+    "peak_wired": 37789515776,
+    "peak_rss": 17007968256,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6575875486381323
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65774.0,
+    "cached_tokens": 65726.0,
+    "ttft_s": 1.3620690415000354,
+    "gen_s": 7.4294907915000294,
+    "e2e_s": 8.791559833000065,
+    "decode_tok_s": 23.86147259937532,
+    "completion_tokens": 176.0,
+    "peak_wired": 35782098944,
+    "peak_rss": 17022648320,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5978835978835979
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
+  },
+  "context_tokens_raw": 65117
+ },
+ "mtplx-fork|q8|mt-128k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1479.5313641249995,
+    "gen_s": 14.930016958000124,
+    "e2e_s": 1494.4613810829997,
+    "decode_tok_s": 18.974076754913497,
+    "completion_tokens": 256,
+    "peak_wired": 40071577600,
+    "peak_rss": 17020813312,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5669014084507042
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130969,
+    "ttft_s": 2.1520355000002382,
+    "gen_s": 12.564016874999652,
+    "e2e_s": 14.71605237499989,
+    "decode_tok_s": 20.77745960745973,
+    "completion_tokens": 256,
+    "peak_wired": 43123687424,
+    "peak_rss": 17052319744,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6325757575757576
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131276,
+    "ttft_s": 2.14796641599969,
+    "gen_s": 9.451338124999893,
+    "e2e_s": 11.599304540999583,
+    "decode_tok_s": 19.021123879837408,
+    "completion_tokens": 177,
+    "peak_wired": 43118526464,
+    "peak_rss": 17071538176,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5606060606060606
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "0cd2a7387cf05d08e6f8aa271cd7d509e0b68255"
   },
   "context_tokens_raw": 130667
  }

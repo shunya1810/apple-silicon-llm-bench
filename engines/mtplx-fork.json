@@ -1,6 +1,6 @@
 {
  "id": "mtplx-fork",
- "label": "MTPLX fork m1max-longctx bba1b7b",
+ "label": "MTPLX fork m1max-longctx 0cd2a73",
  "port": 18103,
  "model_id": "mtplx",
  "tokenizer_dir": "${MTPLX_MODEL}",
@@ -10,7 +10,7 @@
  "health_path": "/health",
  "start_timeout_s": 900,
  "env": {
-  "PYTHONPATH": "${ROOT}/work/worktrees/mtplx-bba1b7b"
+  "PYTHONPATH": "${ROOT}/work/worktrees/mtplx-0cd2a73"
  },
  "cmd": [
   "${MTPLX_PYTHON}",
@@ -56,6 +56,6 @@
   }
  },
  "version_cmds": {
-  "commit": "git -C ${ROOT}/work/worktrees/mtplx-bba1b7b rev-parse HEAD"
+  "commit": "git -C ${ROOT}/work/worktrees/mtplx-0cd2a73 rev-parse HEAD"
  }
 }
