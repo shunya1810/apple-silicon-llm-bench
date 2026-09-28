@@ -4,19 +4,19 @@
 <text x="20" y="50" fill="#c3c2b7" font-size="12">Qwen3.8-27B, MTP depth 3, temperature 0 · mean of turns 1–3, median of rounds · higher is better</text>
 <line x1="20" x2="42" y1="72" y2="72" stroke="#3987e5" stroke-width="2"/>
 <circle cx="31" cy="72" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"></circle>
-<text x="48" y="76" fill="#c3c2b7" font-size="12">MTPLX fork</text>
-<line x1="130" x2="152" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
-<path d="M141 66L147 72L141 78L135 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
-<text x="158" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
-<line x1="268" x2="290" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
-<rect x="274" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
-<text x="296" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
-<line x1="336" x2="358" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
-<path d="M347 66L353 77L341 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
-<text x="364" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
-<line x1="481" x2="503" y1="72" y2="72" stroke="#a483e8" stroke-width="2"/>
-<path d="M492 78L498 67L486 67Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"></path>
-<text x="509" y="76" fill="#c3c2b7" font-size="12">TensorFold (bf16 KV)</text>
+<text x="48" y="76" fill="#c3c2b7" font-size="12">MTPLX M1 build</text>
+<line x1="158" x2="180" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
+<path d="M169 66L175 72L169 78L163 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
+<text x="186" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
+<line x1="296" x2="318" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
+<rect x="302" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
+<text x="324" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
+<line x1="364" x2="386" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
+<path d="M375 66L381 77L369 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
+<text x="392" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
+<line x1="509" x2="531" y1="72" y2="72" stroke="#a483e8" stroke-width="2"/>
+<path d="M520 78L526 67L514 67Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"></path>
+<text x="537" y="76" fill="#c3c2b7" font-size="12">TensorFold (bf16 KV)</text>
 <line x1="70" x2="690" y1="376.0" y2="376.0" stroke="#34332f"/><text x="62" y="380.0" fill="#c3c2b7" font-size="11" text-anchor="end">0</text>
 <line x1="70" x2="690" y1="305.0" y2="305.0" stroke="#34332f"/><text x="62" y="309.0" fill="#c3c2b7" font-size="11" text-anchor="end">10</text>
 <line x1="70" x2="690" y1="234.0" y2="234.0" stroke="#34332f"/><text x="62" y="238.0" fill="#c3c2b7" font-size="11" text-anchor="end">20</text>
@@ -31,11 +31,11 @@
 <text x="380.0" y="418" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="234.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 234.0)">decode tok/s</text>
 <polyline points="132.0,149.4 256.0,160.7 380.0,184.0 504.0,203.3 628.0,236.9" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="149.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 2K: 31.9</title></circle>
-<circle cx="256.0" cy="160.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 8K: 30.3</title></circle>
-<circle cx="380.0" cy="184.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 32K: 27.0</title></circle>
-<circle cx="504.0" cy="203.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 64K: 24.3</title></circle>
-<circle cx="628.0" cy="236.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX fork · 128K: 19.6</title></circle>
+<circle cx="132.0" cy="149.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 31.9</title></circle>
+<circle cx="256.0" cy="160.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 30.3</title></circle>
+<circle cx="380.0" cy="184.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 27.0</title></circle>
+<circle cx="504.0" cy="203.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 24.3</title></circle>
+<circle cx="628.0" cy="236.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 19.6</title></circle>
 <polyline points="132.0,207.6 256.0,214.2 380.0,277.7 504.0,314.5 628.0,341.3" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 201.6L138.0 207.6L132.0 213.6L126.0 207.6Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 23.7</title></path>
 <path d="M256.0 208.2L262.0 214.2L256.0 220.2L250.0 214.2Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 22.8</title></path>
@@ -60,7 +60,7 @@
 <path d="M380.0 261.6L386.0 250.6L374.0 250.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 32K: 17.0</title></path>
 <path d="M504.0 301.9L510.0 290.9L498.0 290.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 64K: 11.3</title></path>
 <path d="M628.0 336.9L634.0 325.9L622.0 325.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 128K: 6.3</title></path>
-<text x="640.0" y="235.0" fill="#ffffff" font-size="12" font-weight="600">19.6</text><text x="640.0" y="249.0" fill="#c3c2b7" font-size="11">MTPLX fork</text>
+<text x="640.0" y="235.0" fill="#ffffff" font-size="12" font-weight="600">19.6</text><text x="640.0" y="249.0" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
 <text x="640.0" y="265.0" fill="#ffffff" font-size="12" font-weight="600">18.7</text><text x="640.0" y="279.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
 <text x="640.0" y="295.0" fill="#ffffff" font-size="12" font-weight="600">7.4</text><text x="640.0" y="309.0" fill="#c3c2b7" font-size="11">oMLX</text>
 <text x="640.0" y="325.0" fill="#ffffff" font-size="12" font-weight="600">6.3</text><text x="640.0" y="339.0" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>

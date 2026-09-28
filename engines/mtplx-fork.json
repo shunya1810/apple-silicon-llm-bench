@@ -1,6 +1,6 @@
 {
  "id": "mtplx-fork",
- "label": "MTPLX fork m1max-longctx 0cd2a73",
+ "label": "MTPLX M1 build v2.12.0-m1 (measured at 0cd2a73)",
  "port": 18103,
  "model_id": "mtplx",
  "tokenizer_dir": "${MTPLX_MODEL}",

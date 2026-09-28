@@ -18,7 +18,7 @@ from pathlib import Path
 
 ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # table order
 CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
+NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
          "tensorfold": "TensorFold (bf16 KV)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}

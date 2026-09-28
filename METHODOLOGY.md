@@ -64,13 +64,13 @@ the only per-phase measurement.
   fixed ~2K "canary" request measures decode speed; if it was more than 3% below
   that engine's best canary in the run, the machine rested 5 minutes and the cell
   was re-run once (the last attempt is used). 128K ran as one round in the order
-  upstream → oMLX → fork, which puts the fork last, on the warmest machine; it was a
+  upstream → oMLX → M1 build, which puts the M1 build last, on the warmest machine; it was a
   separate run, so its canaries had no reference and no cell was re-run (they were
   1.7–4.8% below the engines' best canaries of the 2K–64K run).
 
-## Re-run of the fork
+## Re-run of the M1 build
 
-- The fork column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
+- The M1 build column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
   on M1), with the same plans: 2K–64K in two rounds, then 128K once, running alone. The
   first measurement (`16751dc`) is kept in `rows.jsonl` under `mtplx-fork-16751dc`.
 - It was re-measured again the same evening at `4fe8067` (M1 memory defaults: MLX buffer
