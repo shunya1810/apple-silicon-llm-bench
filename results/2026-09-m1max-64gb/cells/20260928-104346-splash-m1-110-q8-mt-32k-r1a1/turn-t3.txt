@@ -1,0 +1,3 @@
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+This line differs from the standard telemetry records in several key ways. First, it lacks the standard numerical record identifier (e.g., "000653"), instead using the text "NEEDLE." Second, it omits the structured `sensor=` and `status=` fields entirely, which are present in every other entry. Third, the zone identifier is "Q42," whereas all valid telemetry records use zones prefixed with either "A" or "N." Finally, the content is a free-text maintenance note referencing a specific code ("7391-ALPHA") and explicitly stating it is not telemetry, rather than providing quantitative sensor data and a defined operational status.

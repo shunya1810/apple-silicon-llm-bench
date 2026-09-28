@@ -1,6 +1,6 @@
 {
  "id": "splash-m1",
- "label": "Splash 1.0.2-m1 (paperniuk M1/M2 build)",
+ "label": "Splash 1.1.0-m1 (paperniuk M1/M2 build)",
  "port": 18104,
  "model_id": "splash",
  "tokenizer_dir": "${MTPLX_MODEL}",

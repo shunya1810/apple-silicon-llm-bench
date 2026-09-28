@@ -99,17 +99,26 @@ the only per-phase measurement.
 
 - Splash reads only its own packages (MLX affine 4-bit, group 64, or GGUF, prepared
   for its kernels, paired with a DFlash2 draft), so it runs `incoai/Qwen3.8-27B-Splash`
-  (revision 9d27070) instead of the MTPLX checkpoint. Speed differences therefore
-  include the weight format and the speculative method, not only the engine.
-- Installed from the release tarball after checking its SHA-256 and the engine and
+  (revision 9d27070, draft `incoai/Qwen3.8-27B-DFlash2` 015e795) instead of the MTPLX
+  checkpoint. Speed differences therefore include the weight format and the speculative
+  method, not only the engine.
+- The published column is the 1.1.0-m1 release (2026-09-28), installed from the release
+  tarball next to the older version after checking its SHA-256 and the engine and
   metallib hashes against the release notes. `--default-reasoning-effort none` plus
   `reasoning_effort: "none"` per request (Splash's switch); `--kv-format int8`
-  (8-bit cells) or `bf16` (2K fp16 cells); `--max-context 256K`.
+  (8-bit cells) or `bf16` (2K fp16 cells); `--max-context 256K`; everything else at its
+  defaults (request timeout 10,000 s, bounded prefill).
 - Its prefix cache is in memory only, so a fresh process per cell starts cold.
-- It ran after the other engines, in two rounds of its own (2K–64K). 128K was tried
-  three times and never completed: a Metal command-buffer error after 23 minutes, a run
-  under another GPU load (not counted), and a run on an idle machine that Splash cut off
-  at its 30-minute request deadline (see README).
+- It ran after the other engines, in two rounds of its own (2K–64K) and one 128K run.
+  Per-turn draft and verify counts come from its `/status` counters, read before and
+  after each request.
+- Earlier Splash rows stay in `rows.jsonl`: `splash-m1-102` is the 1.0.2-m1 release
+  (2026-09-26), which could not finish 128K (a Metal command-buffer error after 23
+  minutes; a run under another GPU load, not counted; and a run on an idle machine cut
+  off at that release's 30-minute request deadline); `splash-src` is a one-round source
+  build of the port's head at the time (paperniuk/splash@5967821 plus one status
+  counter). 1.1.0-m1 matched or beat both at every length and finished 128K, so only it
+  is shown.
 
 ## Known limitations
 

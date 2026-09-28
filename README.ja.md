@@ -15,12 +15,10 @@ Splash は専用のパッケージ（mlx-community の 4bit、group size 64 の�
 | **MTPLX fork** | [`shunya1810/MTPLX@0cd2a73`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx) | M1 系向けの長い文脈の改善ブランチ（このベンチの作者が管理）。M1 で context-copy を止め（`40b6113`）、M1 のメモリの既定値を小さくし（`4fe8067`）、M1 で小さい射影の結合と draft head の縮小を既定にし（`bba1b7b`）、M1 で Metal の command buffer を大きくした（`0cd2a73`）後の版で、2026-09-26〜28 に測り直した（前の行は、生データに `mtplx-fork-16751dc`、`mtplx-fork-40b6113`、`mtplx-fork-4fe8067`、`mtplx-fork-bba1b7b` として残した） |
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | 計測時点の `main`（fork の土台） |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | 計測時点の最新の正式版 |
-| **Splash M1 build** | [paperniuk/splash 1.0.2-m1](https://github.com/paperniuk/splash/releases/tag/1.0.2-m1) | [incoai/splash](https://github.com/incoai/splash) を M1/M2 向けの kernel で動かすコミュニティ版。モデルは `incoai/Qwen3.8-27B-Splash`（4bit g64 と DFlash2 の draft）、KV は INT8 |
-| **Splash source (HEAD)** | [paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels) + [a4f7e96](https://github.com/shunya1810/splash/tree/m1-analysis-metrics) | M1 版の未リリースの最新を分析用に手元でビルドしたもの（1回。表と下の節のみ） |
+| **Splash 1.1.0-m1** | [paperniuk/splash 1.1.0-m1](https://github.com/paperniuk/splash/releases/tag/1.1.0-m1) | [incoai/splash](https://github.com/incoai/splash) 1.1.0 を M1/M2 向けの kernel で動かすコミュニティ版。モデルは `incoai/Qwen3.8-27B-Splash`（4bit g64 と DFlash2 の draft）、KV は INT8。前に測った 1.0.2-m1 のリリースと、その時点の最新をビルドしたソース版を置き換えた（生データに `splash-m1-102`、`splash-src` として残した） |
 
 2K〜64K は各2回測り、中央値を載せた。128K は1回である。
-Splash のリリース版は、他の3つの後に別に2回測った（128K は完了しなかった。後述）。
-Splash のソース版は、分析のために1回だけ測った。
+Splash は、他の3つの後に別に2回測り、128K は1回測った。
 
 ## 主な結果（8-bit KV）
 
@@ -41,50 +39,46 @@ Splash のソース版は、分析のために1回だけ測った。
 - **fork の `0cd2a73` と `bba1b7b` の比較**：decode が 2K で +9.6%、8K で +6.3%、32K で +8.9%、64K で +7.5%、128K で +6.5%。
   1ラウンドが約 100 個の Metal command buffer に分かれていて、その継ぎ目ごとに GPU が止まっていた（1ラウンドの 13%）。M1 では 1つの command buffer に最大 150 個の処理と 1,000 MB を入れるようにし、prefill は 4 層ごとに評価して最大メモリが増えないようにした。
   128K の最初の prefill は 4% 速くなり、最大メモリは同じか少し下がった。18 ターンすべてで、生成テキストは `bba1b7b` と同じだった。
-- **Splash M1 build（リリース版、2K〜64K）**
-  - **decode**：2ターン目で最も速い（2K で fork の 32.2 に対して 41.6 tok/s、8K では fork の 32.2 に対して 31.9）。1ターン目と3ターン目は、32K までは fork より 6〜17% 遅く、64K ではさらに遅い（fork の 23.8 / 23.9 に対して 18.7 / 16.5）。
-  - **prefill と TTFT**：最初から読む prefill は遅い（32K で 5.0 分と 4.2 分、64K で 12.8 分と 9.8 分）。続きのターンでは約 300 トークンを読み直すので、TTFT は fork の 0.6〜1.4 秒に対して 2.7〜6.3 秒だった。
-  - **メモリ**：最も少なく、どの長さでも wired が 22〜25 GB だった（fork は 30〜43 GB）。
-  - **128K**：会話を始められなかった。この GPU では 128K を最初から読むのに、Splash のリクエストの制限時間（30 分）より長くかかる（64K で 12.8 分）。
-    3回試した。1回目は prefill を 23 分続けたところで、Metal のコマンドがエラーで打ち切られた（`kIOGPUCommandBufferCallbackErrorImpactingInteractivity`）。
-    2回目は、別の GPU の負荷でマシンの速度が3分の1に落ちた状態で走ったので、数に入れていない。
-    3回目は、canary が正常な状態（26.8 tok/s）で走り、ちょうど 30.0 分で Splash に打ち切られた（`request timed out`）。このリリースには、制限時間を変える設定が無い。
-- **Splash source (HEAD)**：M1 版の未リリースの最新をソースからビルドしたもの。制限時間が 10,000 秒に上がり、Apple7/8 用の新しい attention の kernel が入っている。
-  128K を最後まで完了し（1ターン目 34.3 分、decode 14.4 / 18.5 / 14.6 tok/s）、8K 以上ではリリース版より decode が 10〜15% 速い（64K で 19.3 に対して 22.0 tok/s、ターンの平均）。
-  計測は1回だけなので、グラフではビルドの要らないリリース版と並べて示している。
+- **Splash 1.1.0-m1**
+  - **decode**：2K / 8K / 32K / 64K / 128K で 33.1 / 32.5 / 27.1 / 24.1 / 18.7 tok/s（ターンの平均）。fork の 31.9 / 30.3 / 27.0 / 24.3 / 19.6 に対して、2K〜8K で 4〜7% 速く、32K〜64K で同じ、128K で 5% 遅い。
+    2ターン目が最も速く（2K で 39.2、128K で 22.8 tok/s。fork は 32.2 と 20.8）、32K 以上の1ターン目と3ターン目は fork より遅い（128K で fork の 19.0 / 19.0 に対して 15.9 / 17.4）。
+  - **prefill と TTFT**：最初から読む prefill は 32K 以上で遅い（64K で 10.9 分と 9.8 分、128K で 28.5 分と 24.7 分）。続きのターンでは約 300 トークンを読み直すので、TTFT は fork の 0.6〜2.2 秒に対して 2.6〜6.3 秒だった。128K の3ターン全体は、fork の 25.3 分に対して 29.4 分だった。
+  - **メモリ**：最も少なく、どの長さでも wired が 22〜26 GB だった（fork は 30〜43 GB）。
+- **Splash 1.1.0-m1 と前の Splash の比較**：1.0.2-m1 のリリースは、128K を最初から読む時間がリクエストの制限時間（30 分）を超えて完了できなかった。1.1.0 は制限時間の既定値が 10,000 秒になり、prefill を約 5 秒ずつの GPU のコマンドに分けるので、128K も最後まで完了した。
+  decode は 1.0.2-m1 より 8K で +14%、32K で +12%、64K で +25%、前に測ったソース版より 64K で +9%、128K で +18% 速い（2K〜32K は同じ）。最初の prefill は 64K で 10.9 分（1.0.2-m1 は 12.8 分、ソース版は 12.3 分）、128K で 28.5 分（ソース版は 34.3 分）だった。前の行は生データに残した。
 - **出力の確認**：3ターン目では、文脈の中央に1行だけ埋め込んだ特別な行（needle）をそのまま引用させた。完了したすべての回で、すべてのエンジンが正しく答えた。
 
 ## decode の速さ
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=0cd2a73">
-  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg?v=0cd2a73">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=splash110">
+  <img alt="プロンプト長ごとの decode tok/s（4エンジン）" src="charts/decode-light.svg?v=splash110">
 </picture>
 
 ## 2〜3ターン目の TTFT
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=0cd2a73">
-  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg?v=0cd2a73">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=splash110">
+  <img alt="2〜3ターン目の TTFT（対数目盛り、4エンジン）" src="charts/ttft-followup-light.svg?v=splash110">
 </picture>
 
 ## 3ターンの合計所要時間
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=0cd2a73">
-  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=0cd2a73">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=splash110">
+  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=splash110">
 </picture>
 
 ## 最大メモリ使用量
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=0cd2a73">
-  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg?v=0cd2a73">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=splash110">
+  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg?v=splash110">
 </picture>
 
 ## 計測値の表
 
-2K〜64K の各セルは2回の中央値、128K と Splash のソース版は1回の値である。
+2K〜64K の各セルは2回の中央値、128K は1回の値である。
 cache の列は、エンジンが返す `usage.prompt_tokens_details.cached_tokens` の値である。
 wired メモリはシステム全体の値である。
 needle の列は、3ターン目で needle を正しく引用した回数である。
@@ -94,28 +88,23 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 | 2K | MTPLX fork | 11.6 s | 0.61 s | 0.62 s | 31.5 / 32.2 / 32.1 | 34.3 s | 1,936 / 2,243 | 30.0 GB | 2/2 |
 | 2K | MTPLX upstream | 11.5 s | 0.64 s | 0.64 s | 25.1 / 22.9 / 23.2 | 41.8 s | 1,936 / 2,243 | 34.0 GB | 2/2 |
 | 2K | oMLX | 11.4 s | 13.5 s | 15.4 s | 20.4 / 23.5 / 21.0 | 1.2 min | 0 / 0 | 26.9 GB | 2/2 |
-| 2K | Splash M1 build | 12.1 s | 2.87 s | 2.68 s | 27.6 / 41.6 / 29.6 | 39.0 s | 1,664 / 1,984 | 21.7 GB | 2/2 |
-| 2K | Splash source (HEAD) | 12.2 s | 2.81 s | 2.62 s | 28.6 / 35.9 / 32.3 | 39.2 s | 1,664 / 1,984 | 21.1 GB | 1/1 |
+| 2K | Splash 1.1.0-m1 | 12.0 s | 2.56 s | 2.76 s | 31.3 / 39.2 / 28.8 | 37.8 s | 1,664 / 1,952 | 21.9 GB | 2/2 |
 | 8K | MTPLX fork | 1.0 min | 0.72 s | 0.71 s | 30.0 / 32.2 / 28.8 | 1.4 min | 8,089 / 8,396 | 30.7 GB | 2/2 |
 | 8K | MTPLX upstream | 54.2 s | 0.76 s | 0.77 s | 23.5 / 23.2 / 21.7 | 1.4 min | 8,089 / 8,396 | 35.5 GB | 2/2 |
 | 8K | oMLX | 56.4 s | 30.0 s | 2.69 s | 20.2 / 19.8 / 18.3 | 2.1 min | 4,096 / 8,192 | 33.2 GB | 2/2 |
-| 8K | Splash M1 build | 59.6 s | 3.21 s | 3.05 s | 26.6 / 31.9 / 27.1 | 1.5 min | 7,808 / 8,128 | 21.6 GB | 2/2 |
-| 8K | Splash source (HEAD) | 58.6 s | 3.06 s | 2.91 s | 28.5 / 40.1 / 29.2 | 1.4 min | 7,808 / 8,128 | 21.4 GB | 1/1 |
+| 8K | Splash 1.1.0-m1 | 56.8 s | 2.91 s | 2.79 s | 31.1 / 37.4 / 29.1 | 1.4 min | 7,808 / 8,128 | 22.1 GB | 2/2 |
 | 32K | MTPLX fork | 4.2 min | 0.97 s | 0.98 s | 27.5 / 26.9 / 26.7 | 4.7 min | 32,665 / 32,972 | 33.7 GB | 2/2 |
 | 32K | MTPLX upstream | 4.1 min | 1.38 s | 1.37 s | 17.1 / 12.5 / 12.0 | 5.0 min | 32,665 / 32,972 | 40.8 GB | 2/2 |
 | 32K | oMLX | 4.4 min | 44.6 s | 3.45 s | 14.4 / 14.0 / 14.4 | 6.0 min | 28,672 / 32,768 | 37.0 GB | 2/2 |
-| 32K | Splash M1 build | 5.0 min | 4.43 s | 4.18 s | 23.2 / 27.2 / 22.1 | 5.7 min | 32,384 / 32,704 | 23.1 GB | 2/2 |
-| 32K | Splash source (HEAD) | 4.9 min | 3.97 s | 3.96 s | 25.3 / 29.1 / 27.1 | 5.5 min | 32,384 / 32,704 | 22.2 GB | 1/1 |
+| 32K | Splash 1.1.0-m1 | 4.5 min | 3.57 s | 3.57 s | 23.3 / 29.1 / 28.7 | 5.1 min | 32,384 / 32,704 | 22.9 GB | 2/2 |
 | 64K | MTPLX fork | 9.8 min | 1.36 s | 1.36 s | 23.8 / 25.3 / 23.9 | 10.3 min | 65,419 / 65,726 | 37.8 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.12 s | 8.8 / 8.7 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.4 GB | 2/2 |
 | 64K | oMLX | 10.2 min | 1.0 min | 4.76 s | 10.9 / 10.9 / 10.4 | 12.4 min | 61,440 / 65,536 | 39.6 GB | 2/2 |
-| 64K | Splash M1 build | 12.8 min | 5.68 s | 6.34 s | 18.7 / 22.5 / 16.5 | 13.6 min | 65,152 / 65,440 | 23.4 GB | 2/2 |
-| 64K | Splash source (HEAD) | 12.3 min | 5.01 s | 5.78 s | 20.7 / 27.1 / 18.3 | 13.0 min | 65,152 / 65,440 | 23.3 GB | 1/1 |
+| 64K | Splash 1.1.0-m1 | 10.9 min | 4.28 s | 4.90 s | 23.2 / 29.9 / 19.1 | 11.5 min | 65,152 / 65,440 | 24.1 GB | 2/2 |
 | 128K | MTPLX fork | 24.7 min | 2.15 s | 2.15 s | 19.0 / 20.8 / 19.0 | 25.3 min | 130,969 / 131,276 | 43.1 GB | 1/1 |
 | 128K | MTPLX upstream | 30.5 min | 4.16 s | 3.49 s | 4.6 / 5.1 / 5.0 | 33.0 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
 | 128K | oMLX | 26.3 min | 1.6 min | 7.92 s | 7.6 / 7.8 / 6.9 | 29.6 min | 126,976 / 131,072 | 48.5 GB | 1/1 |
-| 128K | Splash M1 build | — | — | — | — / — / — | — | — / — | 24.7 GB | — |
-| 128K | Splash source (HEAD) | 34.3 min | 8.02 s | 7.81 s | 14.4 / 18.5 / 14.6 | 35.3 min | 130,688 / 131,008 | 25.5 GB | 1/1 |
+| 128K | Splash 1.1.0-m1 | 28.5 min | 6.27 s | 6.20 s | 15.9 / 22.8 / 17.4 | 29.4 min | 130,688 / 131,008 | 26.2 GB | 1/1 |
 
 **2K：fp16 KV と 8-bit KV**（decode tok/s、ターン1〜3の平均）
 
@@ -124,8 +113,7 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 | MTPLX fork | 29.9 | 31.9 | +6.6% |
 | MTPLX upstream | 24.8 | 23.7 | -4.5% |
 | oMLX | 23.1 | 21.6 | -6.4% |
-| Splash M1 build | 33.8 | 33.0 | -2.5% |
-| Splash source (HEAD) | — | 32.3 | — |
+| Splash 1.1.0-m1 | 33.5 | 33.1 | -1.3% |
 
 2K の fp16 KV は、Splash では BF16 の KV（`--kv-format bf16`）を指す。
 
@@ -134,36 +122,35 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 
 ## Splash が2ターン目で速い理由
 
-Splash の M1 版の現在の最新（[paperniuk/splash@5967821](https://github.com/paperniuk/splash/tree/apple7-m1-kernels)）を手元でビルドし、エンジンが `/status` に出す draft と受理の数を、リクエストの前後で読んだ（verify の回数のカウンターを1つ[足した](https://github.com/shunya1810/splash/tree/m1-analysis-metrics)）。
+Splash は、エンジンが `/status` に出す draft と受理の数を、リクエストの前後で読める。
 これで各ターンを verify の回数に分解できる。1回は、DFlash2 による 7 トークンの draft と、8 位置の verify からなる。
-1回の計測、8-bit KV の値である。
+Splash 1.1.0-m1 の1回目、8-bit KV の値である。
 
 | 文脈 | ターン | decode tok/s | verify の回数 | draft / 回 | 受理 / 回 | 確定トークン / 回 | 受理率 | ms / 回 |
 |---|---|---|---|---|---|---|---|---|
-| 2K | 1 | 28.6 | 84 | 7.0 | 2.04 | 3.05 | 29% | 107 |
-| 2K | 2 | 35.9 | 67 | 7.0 | 2.82 | 3.82 | 40% | 107 |
-| 2K | 3 | 32.3 | 52 | 7.0 | 2.44 | 3.46 | 35% | 107 |
-| 8K | 1 | 28.5 | 81 | 7.0 | 2.16 | 3.16 | 31% | 111 |
-| 8K | 2 | 40.1 | 57 | 7.0 | 3.49 | 4.49 | 50% | 113 |
-| 8K | 3 | 29.2 | 56 | 7.0 | 2.27 | 3.29 | 32% | 113 |
-| 32K | 1 | 25.3 | 76 | 7.0 | 2.36 | 3.37 | 34% | 133 |
-| 32K | 2 | 29.1 | 66 | 7.0 | 2.86 | 3.88 | 41% | 133 |
-| 32K | 3 | 27.1 | 48 | 7.0 | 2.62 | 3.65 | 38% | 136 |
-| 64K | 1 | 20.7 | 76 | 7.0 | 2.37 | 3.37 | 34% | 163 |
-| 64K | 2 | 27.1 | 58 | 7.0 | 3.40 | 4.41 | 49% | 164 |
-| 64K | 3 | 18.3 | 59 | 7.0 | 2.00 | 3.02 | 29% | 166 |
-| 128K | 1 | 14.4 | 81 | 7.0 | 2.16 | 3.16 | 31% | 220 |
-| 128K | 2 | 18.5 | 62 | 7.0 | 3.13 | 4.13 | 45% | 225 |
-| 128K | 3 | 14.6 | 54 | 7.0 | 2.15 | 3.17 | 31% | 218 |
+| 2K | 1 | 31.2 | 75 | 7.0 | 2.24 | 3.25 | 32% | 105 |
+| 2K | 2 | 39.2 | 63 | 7.0 | 3.06 | 4.06 | 44% | 105 |
+| 2K | 3 | 28.8 | 60 | 7.0 | 1.98 | 3.00 | 28% | 105 |
+| 8K | 1 | 31.1 | 76 | 7.0 | 2.34 | 3.36 | 33% | 109 |
+| 8K | 2 | 37.1 | 63 | 7.0 | 3.06 | 4.06 | 44% | 111 |
+| 8K | 3 | 29.3 | 57 | 7.0 | 2.16 | 3.18 | 31% | 109 |
+| 32K | 1 | 24.0 | 86 | 7.0 | 1.98 | 2.98 | 28% | 125 |
+| 32K | 2 | 29.1 | 71 | 7.0 | 2.59 | 3.61 | 37% | 125 |
+| 32K | 3 | 28.7 | 47 | 7.0 | 2.55 | 3.57 | 36% | 126 |
+| 64K | 1 | 23.2 | 76 | 7.0 | 2.37 | 3.37 | 34% | 146 |
+| 64K | 2 | 28.8 | 57 | 7.0 | 3.47 | 4.49 | 50% | 157 |
+| 64K | 3 | 19.1 | 66 | 7.0 | 1.79 | 2.80 | 26% | 148 |
+| 128K | 1 | 15.9 | 82 | 7.0 | 2.12 | 3.12 | 30% | 197 |
+| 128K | 2 | 22.8 | 60 | 7.0 | 3.27 | 4.27 | 47% | 189 |
+| 128K | 3 | 17.4 | 57 | 7.0 | 2.25 | 3.26 | 32% | 189 |
 
-- **draft がよく受理されるのは2ターン目だけ**：受理率は 40〜50% で、1ターン目と3ターン目は 29〜38% だった。そのため1回で確定するトークンが、3.0〜3.7 でなく 3.8〜4.5 になる。
+- **draft がよく受理されるのは2ターン目だけ**：受理率は 37〜50% で、1ターン目と3ターン目は 26〜36% だった。そのため1回で確定するトークンが、2.8〜3.4 でなく 3.6〜4.5 になる。
   1回の時間はターンによらないので、この差がそのまま decode の速さの差になる。
-  2ターン目の回答は、1ターン目で決まった比較の型を繰り返す。7 トークンの draft は、3トークンの MTP の draft より先まで当てられると考えられる。MTPLX fork は、2ターン目で1ラウンド 2.9〜3.0 トークン、1ターン目と3ターン目で 2.7〜2.9 トークンで、上限は 4 である。
-- **短い文脈では、Splash は同じくらいの時間で2倍の位置を verify する**：2K で、8 位置の verify と 7 トークンの draft が1回 107 ms だった。fork は、4 位置の verify と3トークンの MTP の draft で1ラウンド約 95 ms である。
-- **1回の時間は、プロンプトが長いほど大きく伸びる**：Splash は 2K の 107 ms から 128K の 220 ms へ、fork は 95 ms から 149 ms へ伸びた。
-  1回ごとに履歴全体への attention を、4 位置でなく 8 位置ぶん計算するためと考えられ、64K 以上の1ターン目と3ターン目で Splash が遅れる理由もこれだと推定している（kernel ごとの時間はまだ測っていない）。
-- **ソース版で変わったこと**：サーバーの `--request-timeout` の既定値が 10,000 秒に上がり（1.0.2-m1 のリリースは 1,800 秒）、128K を最後まで完了した（1ターン目 34.3 分、続きのターンの TTFT は 8.0 秒と 7.8 秒）。
-  Apple7/8 用の attention の新しいコミットも入っていて、64K の decode はリリースの 18.7 / 22.5 / 16.5 に対して 20.7 / 27.1 / 18.3 tok/s だった。
+  2ターン目の回答は、1ターン目で決まった比較の型を繰り返す。7 トークンの draft は、3トークンの MTP の draft より先まで当てられると考えられる。MTPLX fork は、2ターン目で1ラウンド 2.8〜3.0 トークン、1ターン目と3ターン目で 2.7〜2.9 トークンで、上限は 4 である。
+- **短い文脈では、Splash は近い時間で2倍の位置を verify する**：2K で、8 位置の verify と 7 トークンの draft が1回 105 ms だった。fork は、4 位置の verify と3トークンの MTP の draft で1ラウンド 88〜91 ms である。
+- **1回の時間は、プロンプトが長いほど大きく伸びる**：Splash は 2K の 105 ms から 128K の 189〜197 ms へ、fork は 88〜91 ms から 140〜142 ms へ伸びた。
+  1回ごとに履歴全体への attention を、4 位置でなく 8 位置ぶん計算するためと考えられ、長い文脈の1ターン目と3ターン目で Splash が遅れる理由もこれだと推定している（kernel ごとの時間はまだ測っていない）。
+- **前に測ったソース版との違い**：1.1.0-m1 は1回の時間が短い（64K で 163〜166 ms に対して 146〜157 ms、128K で 218〜225 ms に対して 189〜197 ms）。受理率はほぼ同じなので、長い文脈での速さの差はこの時間の差から来ている。
 
 ## 計測の方法
 

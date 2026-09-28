@@ -16,9 +16,9 @@ import statistics
 import sys
 from pathlib import Path
 
-ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "splash-src"]  # table order
-CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "splash-src"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash M1 build", "splash-src": "Splash source (HEAD)"}
+ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # table order
+CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]  # fixed order = fixed color slot
+NAMES = {"mtplx-fork": "MTPLX fork", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
 GB = 1e9
@@ -172,7 +172,8 @@ def passes_md(rows: list[dict], lang: str) -> str:
            "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         s = r.get("engine_stats") or {}
-        if r["phase"] != "turn" or r["engine"] != "splash-src" or not s.get("verify_passes"):
+        if (r["phase"] != "turn" or r["engine"] != "splash-m1" or r["kv"] != "q8" or str(r.get("round")) != "1"
+                or not s.get("verify_passes")):
             continue
         out.append(f"| {CTX_LABEL[r['scenario']]} | {r['turn']} | {f(r.get('decode_tok_s'))} | {s['verify_passes']} | "
                    f"{s['drafted_per_pass']:.1f} | {s['accepted_per_pass']:.2f} | {s['output_tokens_per_pass']:.2f} | "
