@@ -73,6 +73,14 @@ decode は3ターンの平均（tok/s）で、2K / 8K / 32K / 64K / 128K の順�
   <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg?v=fair0929">
 </picture>
 
+
+256K の確認をした2エンジンについて、256K まで伸ばしたもの（M1 build の 256K は v2.12.0-m1.1 で、破線で示した）：
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-256k-dark.svg?v=spot256">
+  <img alt="2K から 256K までの decode tok/s（MTPLX M1 build、MTPLX upstream、Splash 1.1.0-m1）" src="charts/decode-256k-light.svg?v=spot256">
+</picture>
+
 ## 2〜3ターン目の TTFT
 
 <picture>
@@ -82,9 +90,11 @@ decode は3ターンの平均（tok/s）で、2K / 8K / 32K / 64K / 128K の順�
 
 ## 3ターンの合計所要時間
 
+最後のパネルは 256K の確認である（各1回。M1 build は v2.12.0-m1.1）。
+
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=fair0929">
-  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=fair0929">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=spot256">
+  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=spot256">
 </picture>
 
 ## 最大メモリ使用量

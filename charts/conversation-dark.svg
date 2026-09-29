@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1228" width="900" height="1228" role="img" aria-label="A 3-turn conversation, end to end (8-bit KV)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
-<rect width="900" height="1228" rx="8" fill="#1a1a19"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1352" width="900" height="1352" role="img" aria-label="A 3-turn conversation, end to end (8-bit KV)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="900" height="1352" rx="8" fill="#1a1a19"/>
 <text x="20" y="30" fill="#ffffff" font-size="16" font-weight="600">A 3-turn conversation, end to end (8-bit KV)</text>
 <text x="20" y="50" fill="#c3c2b7" font-size="12">Turn 1 reads the prompt cold; turns 2–3 add ~300 tokens each · ≤ 256 generated tokens per turn · own time scale per panel</text>
 <rect x="23" y="66" width="16" height="11" rx="2" fill="#3987e5"/>
@@ -286,4 +286,27 @@
 <rect x="548.4" y="1140" width="194.1" height="18" rx="2" fill="#a483e8"><title>TensorFold (bf16 KV) 128K turn 3: TTFT 29.4 min, generation 28.3 s</title></rect>
 <rect x="742.5" y="1140" width="3.1" height="18" rx="2" fill="#a483e8" fill-opacity="0.4"><title>TensorFold (bf16 KV) 128K turn 3: TTFT 29.4 min, generation 28.3 s</title></rect>
 <text x="753.6" y="1153" fill="#ffffff" font-size="11">89.6 min</text>
+<text x="20" y="1228" fill="#ffffff" font-size="13" font-weight="600">256K prompt<tspan fill="#c3c2b7" font-size="11" font-weight="400" dx="8">one run each · the M1 build here is v2.12.0-m1.1</tspan></text>
+<line x1="150.0" x2="150.0" y1="1236" y2="1288" stroke="#34332f"/><text x="150.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">0 min</text>
+<line x1="282.0" x2="282.0" y1="1236" y2="1288" stroke="#34332f"/><text x="282.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">20 </text>
+<line x1="414.0" x2="414.0" y1="1236" y2="1288" stroke="#34332f"/><text x="414.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">40 </text>
+<line x1="546.0" x2="546.0" y1="1236" y2="1288" stroke="#34332f"/><text x="546.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">60 </text>
+<line x1="678.0" x2="678.0" y1="1236" y2="1288" stroke="#34332f"/><text x="678.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">80 </text>
+<line x1="810.0" x2="810.0" y1="1236" y2="1288" stroke="#34332f"/><text x="810.0" y="1302" fill="#c3c2b7" font-size="10" text-anchor="middle">100 </text>
+<text x="142" y="1253" fill="#c3c2b7" font-size="11" text-anchor="end">MTPLX M1 build m1.1</text>
+<rect x="150.0" y="1240" width="447.8" height="18" rx="2" fill="#3987e5"><title>MTPLX M1 build m1.1 256K turn 1: TTFT 67.9 min, generation 21.8 s</title></rect>
+<rect x="597.8" y="1240" width="2.4" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX M1 build m1.1 256K turn 1: TTFT 67.9 min, generation 21.8 s</title></rect>
+<rect x="602.2" y="1240" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX M1 build m1.1 256K turn 2: TTFT 3.64 s, generation 17.7 s</title></rect>
+<rect x="603.7" y="1240" width="1.9" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX M1 build m1.1 256K turn 2: TTFT 3.64 s, generation 17.7 s</title></rect>
+<rect x="607.7" y="1240" width="1.5" height="18" rx="2" fill="#3987e5"><title>MTPLX M1 build m1.1 256K turn 3: TTFT 3.60 s, generation 13.1 s</title></rect>
+<rect x="609.2" y="1240" width="1.5" height="18" rx="2" fill="#3987e5" fill-opacity="0.4"><title>MTPLX M1 build m1.1 256K turn 3: TTFT 3.60 s, generation 13.1 s</title></rect>
+<text x="618.7" y="1253" fill="#ffffff" font-size="11">68.9 min</text>
+<text x="142" y="1277" fill="#c3c2b7" font-size="11" text-anchor="end">Splash 1.1.0-m1</text>
+<rect x="150.0" y="1264" width="576.0" height="18" rx="2" fill="#c98500"><title>Splash 1.1.0-m1 256K turn 1: TTFT 87.3 min, generation 22.3 s</title></rect>
+<rect x="726.0" y="1264" width="2.5" height="18" rx="2" fill="#c98500" fill-opacity="0.4"><title>Splash 1.1.0-m1 256K turn 1: TTFT 87.3 min, generation 22.3 s</title></rect>
+<rect x="730.4" y="1264" width="1.5" height="18" rx="2" fill="#c98500"><title>Splash 1.1.0-m1 256K turn 2: TTFT 9.31 s, generation 17.1 s</title></rect>
+<rect x="731.9" y="1264" width="1.9" height="18" rx="2" fill="#c98500" fill-opacity="0.4"><title>Splash 1.1.0-m1 256K turn 2: TTFT 9.31 s, generation 17.1 s</title></rect>
+<rect x="735.8" y="1264" width="1.5" height="18" rx="2" fill="#c98500"><title>Splash 1.1.0-m1 256K turn 3: TTFT 10.1 s, generation 15.8 s</title></rect>
+<rect x="737.3" y="1264" width="1.7" height="18" rx="2" fill="#c98500" fill-opacity="0.4"><title>Splash 1.1.0-m1 256K turn 3: TTFT 10.1 s, generation 15.8 s</title></rect>
+<text x="747.0" y="1277" fill="#ffffff" font-size="11">88.5 min</text>
 </svg>

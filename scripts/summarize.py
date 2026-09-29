@@ -252,8 +252,11 @@ def legend(o, th, engines, x, y, swatch=False, right=800):
         x += 40 + 7 * len(NAMES[e])
 
 
-def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=lambda v: f"{v:.1f}", note=None):
-    """series: {engine: [value or None per ctx]} — lines with markers, end labels (direct labels)."""
+def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=lambda v: f"{v:.1f}", note=None,
+               tfmt=None, dashed_last=()):
+    """series: {engine: [value or None per ctx]} — lines with markers, end labels (direct labels).
+
+    dashed_last: engines whose last segment is a different build (dashed, hollow last marker)."""
     W, H, L, R, T, B = 820, 458, 70, 130, 110, 64
     pw, ph = W - L - R, H - T - B
     vals = [v for s in series.values() for v in s if v]
@@ -275,7 +278,7 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
     o = svg_open(W, H, th, title, subtitle)
     legend(o, th, [e for e in CHART_ENGINES if e in series], 20, 76)
     for t in ticks:
-        lab = (f"{t:g}" if t < 1 else (f"{t:,.0f}")) if logy else f"{t:g}"
+        lab = tfmt(t) if tfmt else ((f"{t:g}" if t < 1 else (f"{t:,.0f}")) if logy else f"{t:g}")
         o.append(f'<line x1="{L}" x2="{L + pw}" y1="{fy(t):.1f}" y2="{fy(t):.1f}" stroke="{th["grid"]}"/>'
                  f'<text x="{L - 8}" y="{fy(t) + 4:.1f}" fill="{th["t2"]}" font-size="11" text-anchor="end">{lab}</text>')
     o.append(f'<line x1="{L}" x2="{L + pw}" y1="{T + ph}" y2="{T + ph}" stroke="{th["axis"]}"/>')
@@ -293,10 +296,17 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
         pts = [(fx(i), fy(v), v) for i, v in enumerate(series[e]) if v]
         if not pts:
             continue
-        o.append(f'<polyline points="{" ".join(f"{x:.1f},{y:.1f}" for x, y, _ in pts)}" fill="none" '
+        solid = pts[:-1] if e in dashed_last else pts
+        o.append(f'<polyline points="{" ".join(f"{x:.1f},{y:.1f}" for x, y, _ in solid)}" fill="none" '
                  f'stroke="{th[e]}" stroke-width="2" stroke-linejoin="round"/>')
-        for (x, y, v), c in zip(pts, [c for c, v in zip(ctxs, series[e]) if v]):
+        if e in dashed_last and len(pts) > 1:
+            (x0, y0, _), (x1, y1, _) = pts[-2], pts[-1]
+            o.append(f'<line x1="{x0:.1f}" y1="{y0:.1f}" x2="{x1:.1f}" y2="{y1:.1f}" stroke="{th[e]}" '
+                     f'stroke-width="2" stroke-dasharray="5 4"/>')
+        for k, ((x, y, v), c) in enumerate(zip(pts, [c for c, v in zip(ctxs, series[e]) if v])):
             mark(o, round(x, 1), round(y, 1), th[e], th, MARKER[e], f"{NAMES[e]} · {CTX_LABEL[c]}: {vfmt(v)}")
+            if e in dashed_last and k == len(pts) - 1:
+                o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.5" fill="{th["bg"]}"/>')
         if pts[-1][0] < fx(len(ctxs) - 1) - 1:
             # the line stops before the last column: label under its last point, clear of
             # the lines that continue to the right
@@ -324,12 +334,15 @@ def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=la
     return "\n".join(o)
 
 
-def conversation_chart(th, cells, ctxs):
+def conversation_chart(th, cells, ctxs, spot=None):
     """Per context, one bar per engine: turns 1-3 end to end, TTFT solid + generation light.
     Each context gets its own time scale (small multiples), so short follow-up turns stay visible."""
     W, L, R, rowh, panel_gap = 900, 150, 90, 18, 58
     pw = W - L - R
     rows_per = [[e for e in CHART_ENGINES if (e, "q8", s) in cells] for s in ctxs]
+    if spot:  # (scenario, engines): a panel for the spot check, with its own engine list
+        ctxs = ctxs + [spot[0]]
+        rows_per.append([e for e in spot[1] if (e, "q8", spot[0]) in cells])
     H = 118 + sum(len(r) * (rowh + 6) + panel_gap + 18 for r in rows_per) + 10
     o = svg_open(W, H, th, "A 3-turn conversation, end to end (8-bit KV)",
                  "Turn 1 reads the prompt cold; turns 2–3 add ~300 tokens each · ≤ 256 generated tokens per turn · "
@@ -347,7 +360,9 @@ def conversation_chart(th, cells, ctxs):
         hi = step * math.ceil(top / div / step)
         fx = lambda sec: L + pw * (sec / div) / hi
         o.append(f'<text x="20" y="{y + 6}" fill="{th["t1"]}" font-size="13" font-weight="600">'
-                 f'{CTX_LABEL[s]} prompt</text>')
+                 f'{CTX_LABEL[s]} prompt'
+                 + (f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">one run each · the M1 build '
+                    f'here is v2.12.0-m1.1</tspan>' if spot and s == spot[0] else '') + '</text>')
         y += 18
         ybot = y + len(engines) * (rowh + 6)
         t = 0.0
@@ -427,6 +442,35 @@ def spot256_chart(th, cells):
     return "\n".join(o)
 
 
+LONG_ENGINES = ["mtplx-fork", "mtplx-upstream", "splash-m1"]
+SPOT_OF = {"mtplx-fork": "mtplx-fork-m1.1", "splash-m1": "splash-m1"}  # whose 256K cell continues each line
+
+
+def long_charts(th, cells, ctxs):
+    """2K-256K: the main 2K-128K columns plus the 256K spot check (dashed where the build changes)."""
+    if not all((SPOT_OF[e], "q8", "mt-256k") in cells for e in SPOT_OF):
+        return {}
+    cx = ctxs + ["mt-256k"]
+
+    def series(get):
+        out = {}
+        for e in LONG_ENGINES:
+            row = [get(e, c) for c in ctxs]
+            row.append(get(SPOT_OF[e], "mt-256k") if e in SPOT_OF else None)
+            out[e] = row
+        return out
+
+    note = ("256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1 "
+            "(dashed), which decodes 6–8% below v2.12.0-m1")
+    return {
+        "decode-256k": line_chart(
+            th, "Decode speed, 2K to 256K (8-bit KV)",
+            "Qwen3.8-27B, temperature 0 · mean of turns 1–3 · 2K–64K median of 2 rounds, 128K–256K one run · higher is better",
+            "decode tok/s", cx, series(lambda e, c: mean_turns(cells, e, c, "decode_tok_s")),
+            note=note, dashed_last=("mtplx-fork",)),
+    }
+
+
 def charts(cells: dict, out: Path) -> list[str]:
     out.mkdir(parents=True, exist_ok=True)
     ctxs = [s for s in CTX if any((e, "q8", s) in cells for e in ENGINES)]
@@ -448,8 +492,9 @@ def charts(cells: dict, out: Path) -> list[str]:
                 "System-wide wired memory (vm_stat), max over turns 1–3 · 64 GB machine · lower is better", "GB", ctxs,
                 {e: [(lambda v: v / GB if v else None)(max((turn(cells, e, s, t, "peak_wired") or 0) for t in (1, 2, 3)) or None)
                      for s in ctxs] for e in CHART_ENGINES}, vfmt=lambda v: f"{v:.1f} GB"),
-            "conversation": conversation_chart(th, cells, ctxs),
+            "conversation": conversation_chart(th, cells, ctxs, spot=("mt-256k", SPOT_ENGINES)),
             "spot256k": spot256_chart(th, cells),
+            **long_charts(th, cells, ctxs),
         }
         for name, svg in specs.items():
             if svg is None:

@@ -102,6 +102,14 @@ Decode is the mean of the three turns, in tok/s, at 2K / 8K / 32K / 64K / 128K.
   <img alt="Decode tok/s vs prompt length, six engines" src="charts/decode-light.svg?v=fair0929">
 </picture>
 
+
+The same, extended to 256K for the two engines of the spot check (the M1 build's 256K point is v2.12.0-m1.1, dashed):
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-256k-dark.svg?v=spot256">
+  <img alt="Decode tok/s from 2K to 256K for the MTPLX M1 build, MTPLX upstream and Splash 1.1.0-m1" src="charts/decode-256k-light.svg?v=spot256">
+</picture>
+
 ## Follow-up turns
 
 <picture>
@@ -111,9 +119,11 @@ Decode is the mean of the three turns, in tok/s, at 2K / 8K / 32K / 64K / 128K.
 
 ## The whole conversation
 
+The last panel is the 256K spot check (one run each; the M1 build there is v2.12.0-m1.1).
+
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=fair0929">
-  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg?v=fair0929">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=spot256">
+  <img alt="Three turns end to end per engine and prompt length" src="charts/conversation-light.svg?v=spot256">
 </picture>
 
 ## Memory
