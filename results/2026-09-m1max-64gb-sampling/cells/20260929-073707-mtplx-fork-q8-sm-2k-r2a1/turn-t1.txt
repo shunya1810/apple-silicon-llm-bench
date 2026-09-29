@@ -1,0 +1,6 @@
+The provided synthetic telemetry displays a highly structured, deterministic pattern rather than random noise. The sensor values do not fluctuate unpredictably; instead, they follow a strict arithmetic sequence. Starting at 0.0 for the first record, the values decrease by a constant increment of 5.7 units per subsequent entry. This linear decay continues until it reaches a low point, after which the sequence abruptly resets to a high value (96.8) and begins the same downward progression again. Concurrently, the status field cycles through five distinct states—nominal, degraded, recovering, offline, and calibrating—in a fixed, repeating five-record loop. The zone identifiers alternate between 'A' and 'N' prefixes with varying suffixes, but these do not correlate with the sensor decay or status cycles.
+
+Three concrete observations from the data are:
+1.  The sensor values decrement by exactly 5.7 units from one record to the next (e.g., 94.0 to 88.3).
+2.  The status field repeats the identical five-state cycle (nominal through calibrating) for every group of five consecutive records.
+3.  One record is an anomalous injection containing maintenance override text for zone Q42, which breaks the established telemetry format.

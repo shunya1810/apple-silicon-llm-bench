@@ -57,6 +57,19 @@ the only per-phase measurement.
   cache on SSD in 4,096-token blocks. For this model family oMLX can only store a
   prefix at a block boundary (the GDN state has to be snapshotted there), so a
   follow-up turn re-reads everything after the last full block.
+- **The two MTPLX engines get the same command line** (`engines/mtplx-*.json`): same
+  model, profile, depth, KV mode, context window and session-cache setting. Only
+  `PYTHONPATH` differs, which picks the code (the M1 build or upstream `1de2b1c`), and
+  both run in the MTPLX app's Python runtime (MLX 0.32.2).
+- **The M1 build changes defaults on M1, and upstream exposes some of them.** Part of
+  the M1 build's lead is code upstream does not have (the M1 attention kernels, the
+  session-bank fixes, prefill evaluated every four layers, the Japanese-aware FR-Spec
+  list); part is defaults that upstream can reach with environment variables
+  (context-copy off, fused projections, the FR-Spec draft head with upstream's
+  64K code list, a 1 GiB MLX cache, two saved states per conversation, larger Metal
+  command buffers). The `MTPLX upstream + env` column runs upstream with all of the
+  latter (`engines/mtplx-upstream-tuned.json`), so the gap between it and the M1 build
+  is the code alone.
 - **Every cell starts the engine fresh**, with its on-disk cache wiped, then sends a
   short warmup request (excluded) and a thermal canary.
 - **Order and heat.** 2K–64K ran twice, with the engine order reversed in the second
@@ -94,6 +107,43 @@ the only per-phase measurement.
   on wake); its rows were dropped and the whole plan was run again. In the re-run, the 8K
   cell of round 1 (just after a reboot) stayed 5% slow on its canary after one re-run and
   is kept, as the plan specifies.
+
+## Same-session re-run (2026-09-29)
+
+- The M1 build (at its release tag `v2.12.0-m1`, `6be2b28`), upstream `1de2b1c` and
+  upstream + env ran in one session with the same plans (`plans/fair-day.json`: 2K–64K,
+  two rounds, order reversed in the second; `plans/fair-night.json`: 128K once, in the
+  order upstream → upstream + env → M1 build, which puts the M1 build on the warmest
+  machine). Before, upstream had been measured on 2026-09-25/26 and the M1 build
+  re-measured alone on later days.
+- Earlier rows stay in `rows.jsonl`: `mtplx-upstream-0925` (upstream, first run) and
+  `mtplx-fork-0cd2a73` (the M1 build's 2026-09-28 run), next to the older M1 build rounds.
+- **Command buffers left out of upstream + env.** The first upstream + env arm
+  (`mtplx-upstream-tuned`) also set `MLX_MAX_MB_PER_BUFFER=1000` and
+  `MLX_MAX_OPS_PER_BUFFER=150`, the M1 build's command-buffer defaults. In the M1 build
+  those come with a prefill that evaluates every four layers (`MTPLX_PREFILL_LAYER_EVAL_EVERY`,
+  code upstream does not have) to hold its peak; without it, upstream's peak wired memory
+  rose 12–15 GB, its 32K–64K cold prefill slowed 12–16%, and its 128K turn 1 failed with a
+  Metal out-of-memory error, for the same decode (±2%). The published column
+  (`mtplx-upstream-tuned-nobuf`) leaves both variables at MLX's default and ran the same
+  plans afterwards (`plans/fair-nobuf*.json`); the first arm's rows stay in `rows.jsonl`.
+- In the published sampled table, upstream + env is the same `-nobuf` arm
+  (`plans/sampling-nobuf.json`, run after the others); the first arm's sampled rows stay
+  in the raw data.
+- The 128K canaries of this run were 0.2% (M1 build), 2.4% (upstream) below and 1.1%
+  (upstream + env) above each engine's best 2K–64K canary; no cell needed a re-run.
+
+## Sampled scenario
+
+- Greedy decoding at 256 tokens is a matched workload, not how the model is normally
+  run. The `sm-2k`, `sm-32k` and `sm-64k` scenarios repeat the same conversations at the
+  model's own sampling settings (`generation_config.json`: temperature 1.0, top-p 0.95,
+  top-k 20) with up to 512 tokens per turn, for the MTPLX engines and Splash
+  1.1.0-m1 (`plans/sampling.json`, two rounds, order reversed). The canary stays greedy.
+- Sampled text differs run to run, so turns 2 and 3 see different prompts and
+  acceptance moves with the text; the tables report each turn's median over the
+  rounds and the engine-reported draft acceptance. Results are in
+  `results/2026-09-m1max-64gb-sampling/` (`scripts/summarize_sampling.py`).
 
 ## Splash M1 build
 
@@ -136,7 +186,8 @@ the only per-phase measurement.
 
 ## Known limitations
 
-- One machine (M1 Max, 64 GB), one model, one synthetic workload.
+- One machine (M1 Max, 64 GB), one model, one synthetic workload (greedy, plus the
+  sampled scenario above).
 - Greedy decoding produces different text on different engines, so turn 2 and 3
   prompts differ between engines (by at most 6 tokens in this run).
 - The oMLX run uses its default memory guard and scheduler settings; oMLX has other

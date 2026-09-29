@@ -16,9 +16,9 @@ import statistics
 import sys
 from pathlib import Path
 
-ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # table order
-CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
+ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # table order
+CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
+NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "mtplx-upstream-tuned-nobuf": "MTPLX upstream + env", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
          "tensorfold": "TensorFold (bf16 KV)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
@@ -26,12 +26,12 @@ GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
+              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "mtplx-upstream-tuned-nobuf": "#e87ba4", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
+             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "mtplx-upstream-tuned-nobuf": "#d55181", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
-MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
+MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "mtplx-upstream-tuned-nobuf": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
 
 
 # ---------------------------------------------------------------- data
@@ -235,8 +235,12 @@ def mark(o, cx, cy, color, th, kind, tip=None):
         o.append(f'<circle cx="{cx}" cy="{cy}" r="5" fill="{color}" {ring}>{t}</circle>')
 
 
-def legend(o, th, engines, x, y, swatch=False):
+def legend(o, th, engines, x, y, swatch=False, right=800):
+    """Wraps to a second line (18 px lower) when an entry would pass `right`."""
+    x0 = x
     for e in engines:
+        if x + 40 + 7 * len(NAMES[e]) > right:
+            x, y = x0, y + 18
         c = th[e]
         if swatch:
             o.append(f'<rect x="{x + 3}" y="{y - 10}" width="16" height="11" rx="2" fill="{c}"/>')
@@ -249,7 +253,7 @@ def legend(o, th, engines, x, y, swatch=False):
 
 def line_chart(th, title, subtitle, ylabel, ctxs, series, *, logy=False, vfmt=lambda v: f"{v:.1f}", note=None):
     """series: {engine: [value or None per ctx]} — lines with markers, end labels (direct labels)."""
-    W, H, L, R, T, B = 820, 440, 70, 130, 92, 64
+    W, H, L, R, T, B = 820, 458, 70, 130, 110, 64
     pw, ph = W - L - R, H - T - B
     vals = [v for s in series.values() for v in s if v]
     if logy:
@@ -325,16 +329,16 @@ def conversation_chart(th, cells, ctxs):
     W, L, R, rowh, panel_gap = 900, 150, 90, 18, 58
     pw = W - L - R
     rows_per = [[e for e in CHART_ENGINES if (e, "q8", s) in cells] for s in ctxs]
-    H = 100 + sum(len(r) * (rowh + 6) + panel_gap + 18 for r in rows_per) + 10
+    H = 118 + sum(len(r) * (rowh + 6) + panel_gap + 18 for r in rows_per) + 10
     o = svg_open(W, H, th, "A 3-turn conversation, end to end (8-bit KV)",
                  "Turn 1 reads the prompt cold; turns 2–3 add ~300 tokens each · ≤ 256 generated tokens per turn · "
                  "own time scale per panel")
-    legend(o, th, CHART_ENGINES, 20, 76, swatch=True)
+    legend(o, th, CHART_ENGINES, 20, 76, swatch=True, right=W - 270)
     o.append(f'<rect x="{W - 250}" y="66" width="16" height="11" rx="2" fill="{th["t2"]}"/>'
              f'<text x="{W - 228}" y="76" fill="{th["t2"]}" font-size="12">TTFT</text>'
              f'<rect x="{W - 180}" y="66" width="16" height="11" rx="2" fill="{th["t2"]}" fill-opacity="0.4"/>'
              f'<text x="{W - 158}" y="76" fill="{th["t2"]}" font-size="12">generation</text>')
-    y = 104
+    y = 122
     for s, engines in zip(ctxs, rows_per):
         top = max((conv_total(cells, e, s) or 0) for e in engines)
         unit, div = ("min", 60) if top > 150 else ("s", 1)

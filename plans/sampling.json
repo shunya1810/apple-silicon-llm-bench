@@ -1,0 +1,30 @@
+{
+ "rounds": [
+  [
+   "mtplx-fork",
+   "mtplx-upstream",
+   "mtplx-upstream-tuned",
+   "splash-m1"
+  ],
+  [
+   "splash-m1",
+   "mtplx-upstream-tuned",
+   "mtplx-upstream",
+   "mtplx-fork"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "sm-2k"
+  },
+  {
+   "scenario": "sm-32k"
+  },
+  {
+   "scenario": "sm-64k"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.03
+}

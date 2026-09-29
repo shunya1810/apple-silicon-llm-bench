@@ -262,3 +262,96 @@
 14:27:26 round 1 mt-128k bf16 tensorfold attempt 1
 15:59:03   canary 28.41186752343149 ref None slow=False
 16:01:04 plan done
+01:30:00 round 1 mt-2k fp16 mtplx-fork attempt 1
+01:31:11   canary 30.751390552104276 ref None slow=False
+01:32:41 round 1 mt-2k fp16 mtplx-upstream attempt 1
+01:33:49   canary 27.422115968553285 ref None slow=False
+01:35:19 round 1 mt-2k fp16 mtplx-upstream-tuned attempt 1
+01:36:21   canary 32.350762763180605 ref None slow=False
+01:37:51 round 1 mt-2k q8 mtplx-fork attempt 1
+01:38:54   canary 32.69948226914761 ref None slow=False
+01:40:24 round 1 mt-2k q8 mtplx-upstream attempt 1
+01:41:32   canary 24.32069401330017 ref None slow=False
+01:43:02 round 1 mt-2k q8 mtplx-upstream-tuned attempt 1
+01:44:10   canary 27.42527594917069 ref None slow=False
+01:45:40 round 1 mt-8k q8 mtplx-fork attempt 1
+01:47:26   canary 32.74163814466363 ref 32.69948226914761 slow=False
+01:48:56 round 1 mt-8k q8 mtplx-upstream attempt 1
+01:50:49   canary 24.33334012720693 ref 24.32069401330017 slow=False
+01:52:19 round 1 mt-8k q8 mtplx-upstream-tuned attempt 1
+01:54:07   canary 27.401369545412717 ref 27.42527594917069 slow=False
+01:55:37 round 1 mt-32k q8 mtplx-fork attempt 1
+02:00:45   canary 32.7365823832763 ref 32.74163814466363 slow=False
+02:02:15 round 1 mt-32k q8 mtplx-upstream attempt 1
+02:07:39   canary 23.995069295160544 ref 24.33334012720693 slow=False
+02:09:09 round 1 mt-32k q8 mtplx-upstream-tuned attempt 1
+02:15:28   canary 27.43945634496667 ref 27.42527594917069 slow=False
+02:16:58 round 1 mt-64k q8 mtplx-fork attempt 1
+02:29:07   canary 31.848346371865624 ref 32.74163814466363 slow=False
+02:30:37 round 1 mt-64k q8 mtplx-upstream attempt 1
+02:42:42   canary 24.738332677169357 ref 24.33334012720693 slow=False
+02:44:12 round 1 mt-64k q8 mtplx-upstream-tuned attempt 1
+02:58:54   canary 26.85146488671491 ref 27.43945634496667 slow=False
+03:00:24 round 2 mt-2k fp16 mtplx-upstream-tuned attempt 1
+03:01:31   canary 32.44483970093079 ref 32.350762763180605 slow=False
+03:03:01 round 2 mt-2k fp16 mtplx-upstream attempt 1
+03:04:10   canary 26.933046279890966 ref 27.422115968553285 slow=False
+03:05:40 round 2 mt-2k fp16 mtplx-fork attempt 1
+03:06:43   canary 31.861037044314834 ref 30.751390552104276 slow=False
+03:08:13 round 2 mt-2k q8 mtplx-upstream-tuned attempt 1
+03:09:20   canary 27.29008978647853 ref 27.43945634496667 slow=False
+03:10:50 round 2 mt-2k q8 mtplx-upstream attempt 1
+03:12:01   canary 24.298729924985683 ref 24.738332677169357 slow=False
+03:13:31 round 2 mt-2k q8 mtplx-fork attempt 1
+03:14:27   canary 32.4311114406374 ref 32.74163814466363 slow=False
+03:15:57 round 2 mt-8k q8 mtplx-upstream-tuned attempt 1
+03:17:47   canary 27.4039945151912 ref 27.43945634496667 slow=False
+03:19:17 round 2 mt-8k q8 mtplx-upstream attempt 1
+03:21:13   canary 24.2427273488216 ref 24.738332677169357 slow=False
+03:22:43 round 2 mt-8k q8 mtplx-fork attempt 1
+03:24:27   canary 32.624472821003486 ref 32.74163814466363 slow=False
+03:25:57 round 2 mt-32k q8 mtplx-upstream-tuned attempt 1
+03:31:28   canary 27.340466849099318 ref 27.43945634496667 slow=False
+03:32:59 round 2 mt-32k q8 mtplx-upstream attempt 1
+03:38:24   canary 24.216349440970767 ref 24.738332677169357 slow=False
+03:39:54 round 2 mt-32k q8 mtplx-fork attempt 1
+03:45:02   canary 32.634523405532846 ref 32.74163814466363 slow=False
+03:46:32 round 2 mt-64k q8 mtplx-upstream-tuned attempt 1
+03:58:33   canary 27.443210112243072 ref 27.43945634496667 slow=False
+04:00:03 round 2 mt-64k q8 mtplx-upstream attempt 1
+04:11:36   canary 24.292400741710697 ref 24.738332677169357 slow=False
+04:13:06 round 2 mt-64k q8 mtplx-fork attempt 1
+04:23:49   canary 32.62602858176685 ref 32.74163814466363 slow=False
+04:25:19 plan done
+04:30:19 round 1 mt-128k q8 mtplx-upstream attempt 1
+05:01:22   canary 24.150110623779714 ref None slow=False
+05:03:22 round 1 mt-128k q8 mtplx-upstream-tuned attempt 1
+05:16:35   canary 27.427386223936022 ref None slow=False
+05:18:35 round 1 mt-128k q8 mtplx-fork attempt 1
+05:44:27   canary 32.691177285881444 ref None slow=False
+05:46:27 plan done
+09:06:40 round 1 mt-2k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:07:43   canary 27.325955428942905 ref None slow=False
+09:09:13 round 1 mt-32k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:14:33   canary 27.18763140136037 ref 27.325955428942905 slow=False
+09:16:03 round 1 mt-64k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:27:55   canary 27.357273883891178 ref 27.325955428942905 slow=False
+09:29:25 round 2 mt-2k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:30:31   canary 27.108671781261563 ref 27.357273883891178 slow=False
+09:32:01 round 2 mt-32k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:37:19   canary 27.45286805261116 ref 27.357273883891178 slow=False
+09:38:49 round 2 mt-64k q8 mtplx-upstream-tuned-nobuf attempt 1
+09:50:24   canary 27.37172149828802 ref 27.45286805261116 slow=False
+09:51:54 plan done
+09:57:45 round 1 mt-128k q8 mtplx-upstream-tuned-nobuf attempt 1
+10:30:26   canary 27.75421017367926 ref None slow=False
+10:32:26 plan done
+10:32:43 round 1 mt-2k fp16 mtplx-upstream-tuned-nobuf attempt 1
+10:33:52   canary 30.11078338318958 ref None slow=False
+10:35:22 round 1 mt-8k q8 mtplx-upstream-tuned-nobuf attempt 1
+10:37:13   canary 27.38104409794955 ref None slow=False
+10:38:43 round 2 mt-2k fp16 mtplx-upstream-tuned-nobuf attempt 1
+10:39:48   canary 30.238200834174023 ref 30.11078338318958 slow=False
+10:41:18 round 2 mt-8k q8 mtplx-upstream-tuned-nobuf attempt 1
+10:43:08   canary 27.571564193488527 ref 27.38104409794955 slow=False
+10:44:38 plan done

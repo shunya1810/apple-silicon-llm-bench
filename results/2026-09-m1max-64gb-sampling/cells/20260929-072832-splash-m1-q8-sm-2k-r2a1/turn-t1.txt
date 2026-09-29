@@ -1,0 +1,6 @@
+The telemetry data presents a consistent, downward linear trend in sensor values, starting at 0.0 and decreasing by approximately 5.7 units per record. This pattern resets periodically, creating a cyclical behavior where high values (near 99.6) are followed by a gradual decline to low values (near 2.7) before the cycle repeats. The status field follows a rigid five-step rotating sequence: nominal, degraded, recovering, offline, and calibrating. This sequence advances by one step for each subsequent record, independent of the actual sensor value. For instance, a sensor reading of 94.0 is marked "degraded," while a much lower reading of 2.8 is marked "recovering." Consequently, there is no apparent correlation between the magnitude of the sensor reading and its assigned operational status; the status is purely a function of the record’s position in the dataset.
+
+Three concrete observations include:
+1. The sensor values decrease linearly by exactly 5.7 units between consecutive records until the sequence wraps around to a new high value.
+2. The status field cycles strictly through the five defined states in a fixed order, repeating every five records.
+3. One record contains an anomalous maintenance override string for zone Q42, which breaks the standard telemetry format and is explicitly noted as non-telemetry data.

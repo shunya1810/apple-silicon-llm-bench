@@ -1,0 +1,4 @@
+Record 001316: sensor=76.0 status=degraded zone=A62.
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+This line differs significantly from the standard telemetry format in three key ways. First, it lacks the unique six-digit numerical identifier (e.g., "001316") found in all other records, instead using the label "NEEDLE." Second, it does not contain the structured fields for sensor value, status, or zone. Standard records follow the pattern `sensor=X.X status=Y zone=Z`, whereas this line consists entirely of free-form text. Third, the content describes a "maintenance override" with a specific alphanumeric code ("7391-ALPHA") and zone "Q42," which does not match the alternating 'A' or 'N' prefix pattern used in the legitimate zone data. This suggests the line is an injected anomaly, a log error, or a placeholder rather than valid sensor data.

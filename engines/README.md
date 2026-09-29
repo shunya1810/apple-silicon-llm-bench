@@ -34,3 +34,7 @@ Requests use `temperature 0`, `top_p 1`, `chat_template_kwargs.enable_thinking=f
 and `stream_options.include_usage`. An engine that ignores `chat_template_kwargs`
 needs its own way to turn thinking off: fields in the engine file's `request_extra`
 object are merged into every request body.
+
+A scenario may carry a `sampling` object (for example `{"temperature": 1.0, "top_p": 0.95,
+"top_k": 20}`); it is merged into the conversation turns' requests (not the warmup or
+canary) and stored with each row.

@@ -1,0 +1,29 @@
+Records with an "offline" status do not share a distinct sensor value range with "nominal" records, as the sensor values follow a linear decreasing cycle independent of status. However, the zones reveal a strict structural difference: all "nominal" records are assigned to zones beginning with the letter "A," whereas all "offline" records are assigned to zones beginning with "N." This indicates that the zone prefix acts as a binary classifier for these specific statuses, rather than the numerical telemetry.
+
+For example, Record 000000 is nominal with a zone of A10, while Record 000003 is offline with a zone of N61. Similarly, Record 000015 is nominal in zone N85 is actually incorrect based on the data provided; Record 000015 is nominal with zone N85? No, looking closer: Record 000015 is nominal with zone N85. Wait, let me re-read the prompt data carefully.
+
+Correction: Record 000015 is `nominal zone=N85`. My previous deduction that nominal=A was wrong. Let's re-examine the pattern.
+Record 000000: nominal, A10
+Record 000001: degraded, N27
+Record 000002: recovering, A44
+Record 000003: offline, N61
+Record 000004: calibrating, A78
+
+Record 000005: nominal, N95
+Record 000006: degraded, A22
+Record 000007: recovering, N39
+Record 000008: offline, A56
+Record 000009: calibrating, N73
+
+The zone prefix alternates A and N based on the record index parity or position in the cycle?
+Record 0 (nominal): A
+Record 1 (degraded): N
+Record 2 (recovering): A
+Record 3 (offline): N
+Record 4 (calibrating): A
+
+Record 5 (nominal): N
+Record 6 (degraded): A
+Record 7 (recovering): N
+Record 8 (offline): A
+Record 9 (cal

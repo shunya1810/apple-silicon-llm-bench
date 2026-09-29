@@ -1,0 +1,5 @@
+Records with an "offline" status exhibit a distinct distribution compared to those marked "nominal." Offline records appear at indices congruent to 3 mod 5 (e.g., 3, 8, 13), while nominal records occur at indices congruent to 0 mod 5 (e.g., 0, 5, 10). Due to the sawtooth nature of the sensor data, offline records often capture values in the middle-to-lower range of the declining cycle, whereas nominal records typically mark the start or a specific phase of each cycle.
+
+Regarding zones, offline records alternate between 'A' and 'N' prefixes but do not correlate with specific high or low sensor values due to the shifting cycle. For example, **Record 000003** is offline in zone N61 with a sensor value of 82.6, while **Record 000008** is offline in zone A56 with a value of 54.1. In contrast, nominal records show **Record 000000** in zone A10 with a value of 0.0 and **Record 000005** in zone N95 with 71.2.
+
+The primary difference is positional rather than intrinsic: the status field is strictly tied to the record index modulo 5, meaning sensor values for both statuses span the full 0–100 range over the dataset, but at different phases of the decreasing cycle.

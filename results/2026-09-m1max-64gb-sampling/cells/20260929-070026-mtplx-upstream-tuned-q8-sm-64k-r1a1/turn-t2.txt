@@ -1,0 +1,12 @@
+The dataset reveals a distinct separation between "offline" and "nominal" records regarding sensor values, though both follow the same overarching downward trend. In this synthetic sequence, "nominal" status initiates each 5-record cycle, typically holding higher sensor values than the "offline" status which follows later in that same cycle. For instance, Record 000000 is nominal with a sensor value of 0.0, while Record 000008 (offline) is significantly lower at 54.1. However, looking at the start of subsequent cycles, Record 000020 is nominal with a value of 85.4, whereas Record 000028 (offline) is at 39.8. This illustrates that within a single cycle, the nominal status appears first with a higher value, and the offline status appears fourth with a lower value. The zones for both statuses alternate between 'A' and 'N' prefixes in a predictable manner, but the key differentiator is their position in the status cycle, which dictates their relative sensor magnitude. Record 000010 (nominal, 42.7) is higher than Record 000018 (offline, 96.8), wait, let me re-check the trend. Actually, the sensor values decrease continuously. Record 000000 (0.0) -> Record 000008 (54.1) shows the value increased? No, looking closely: 000000 is 0.0. 000001 is 94.0. The values jump. Let's re-read carefully.
+Record 0: 0.0 (nominal)
+Record 1: 94.0 (degraded)
+Record 2: 88.3 (recovering)
+Record 3: 82.6 (offline)
+Record 4: 76.9 (calibrating)
+Record 5: 71.2 (nominal)
+Record 6: 65.5 (degraded)
+Record 7: 59.8 (recovering)
+Record 8: 54.1 (offline)
+
+The trend is a continuous decrease across *all* records, wrapping around or continuing. The "cycle" of status is fixed, but

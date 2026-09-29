@@ -1,0 +1,70 @@
+{
+ "id": "mtplx-upstream-tuned",
+ "label": "MTPLX upstream 1de2b1c + M1 build env defaults",
+ "port": 18108,
+ "model_id": "mtplx",
+ "tokenizer_dir": "${MTPLX_MODEL}",
+ "model_artifact": "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed (FP16 variant): 4-bit g32 body, 8-bit embed/lm_head/out_proj/last 8 MLPs, native MTP head 4-bit g64",
+ "mtp_impl": "MTPLX native MTP, depth 3",
+ "stats": "mtplx-metrics",
+ "health_path": "/health",
+ "start_timeout_s": 900,
+ "env": {
+  "PYTHONPATH": "${ROOT}/work/worktrees/mtplx-1de2b1c",
+  "MTPLX_CONTEXT_COPY": "0",
+  "MTPLX_FUSE_PROJ": "gdn,attn",
+  "MTPLX_SESSION_BANK_PER_SESSION_MAX_ENTRIES": "2",
+  "MTPLX_MLX_CACHE_LIMIT": "1G",
+  "MLX_MAX_MB_PER_BUFFER": "1000",
+  "MLX_MAX_OPS_PER_BUFFER": "150",
+  "MTPLX_FRSPEC_DRAFT": "1",
+  "MTPLX_FRSPEC_LEGACY": "1",
+  "MTPLX_FRSPEC_VOCAB": "builtin:qwen38-code-64k"
+ },
+ "cmd": [
+  "${MTPLX_PYTHON}",
+  "-m",
+  "mtplx.cli",
+  "serve",
+  "--model",
+  "${MTPLX_MODEL}",
+  "--profile",
+  "turbo",
+  "--depth",
+  "3",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "18108",
+  "--no-auth",
+  "--yes",
+  "--warmup-tokens",
+  "0",
+  "--ssd-session-cache",
+  "off",
+  "--context-window",
+  "262144",
+  "--max-tokens",
+  "4096"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "MTPLX paged KV, affine q8",
+   "cmd_extra": [
+    "--paged-kv-quantization",
+    "q8"
+   ]
+  },
+  "fp16": {
+   "kv_impl": "MTPLX paged KV, unquantized",
+   "cmd_extra": [
+    "--paged-kv-quantization",
+    "off"
+   ]
+  }
+ },
+ "version_cmds": {
+  "commit": "git -C ${ROOT}/work/worktrees/mtplx-1de2b1c rev-parse HEAD"
+ }
+}

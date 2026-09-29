@@ -1,0 +1,8 @@
+To compare the datasets, we first identify records with `status=nominal` and `status=offline`. In this synthetic data, the status cycles every five records. Nominal records appear at indices where $record \equiv 0 \pmod 5$ (0, 5, 10, etc.), while offline records appear where $record \equiv 3 \pmod 5$ (3, 8, 13, etc.).
+
+The primary difference lies in the sensor values relative to the cyclical phase. Because the sensor value resets to ~100 at index 0 and decreases linearly, "nominal" records consistently capture the **start** of each 100-to-0 decay cycle, resulting in high sensor values (typically >50). In contrast, "offline" records appear three steps into the cycle, capturing **mid-to-late** decay values (typically 10–50). For zones, both share the same rotating zone pool, so there is no distinct zone prefix preference, though the specific zone letter/number differs per instance.
+
+Three concrete comparisons:
+1.  **Record 000000 (Nominal)** has a sensor value of 0.0, which is the initial reset point, whereas **Record 000003 (Offline)** has a value of 82.6. Here, the nominal value is artificially low due to the reset, but generally, nominal tracks the peak.
+2.  **Record 000005 (Nominal)** shows a sensor value of 71.2, while **Record 000008 (Offline)** shows 54.1. The nominal record is significantly higher, consistent with the earlier position in the decay cycle.
+3.  **Record 000010 (Nominal)** has a sensor value of 42.7, while **Record 000013 (Offline)** has 25.6. This continues the trend where offline records are lower than their preceding nominal counterparts within the same cycle phase.

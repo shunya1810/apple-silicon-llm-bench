@@ -1,0 +1,6 @@
+The telemetry data exhibits a structured, periodic pattern in both sensor values and system status across the 65 valid records. Sensor readings consistently decrease by approximately 5.7 units per record, starting at 0.0 and cycling through values near 99.6, 93.9, and finally 34.0. This linear decline suggests a controlled test sequence rather than random environmental fluctuation. Concurrently, the status field follows a rigid five-state rotation: nominal, degraded, recovering, offline, and calibrating. This cycle repeats every five records, creating a predictable correlation between specific sensor value ranges and system states. The zone identifiers alternate between "A" and "N" prefixes, with the suffix numbers increasing by 17 or 23, indicating a systematic sweep of the monitored area. One record (Record NEEDLE) is explicitly marked as maintenance override noise and is excluded from this telemetry pattern analysis.
+
+Three concrete observations include:
+1. The status field cycles through exactly five states in a fixed order: nominal, degraded, recovering, offline, then calibrating.
+2. Sensor values decrement by a constant difference of 5.7 units between consecutive records, wrapping around near 100.
+3. Zone prefixes alternate strictly between "A" and "N," with the numeric portion of the zone ID increasing by 17 for "A" zones and 23 for "N" zones.

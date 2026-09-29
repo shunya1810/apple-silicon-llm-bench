@@ -1,0 +1,6 @@
+The provided telemetry dataset exhibits a highly regular, deterministic pattern rather than random noise. Sensor values decrease linearly by 0.7 units per record, cycling through a range from 99.6 down to 21.9 before repeating the sequence. The status field cycles through a fixed five-state sequence (nominal, degraded, recovering, offline, calibrating) in strict order, independent of the sensor value’s magnitude. Zone identifiers alternate systematically between 'A' and 'N' prefixes, with the numerical suffix increasing by 17 modulo 100. One notable anomaly is Record 000653, which contains non-telemetry text regarding a maintenance override, breaking the expected data structure.
+
+Three concrete observations include:
+1.  **Linear Decay:** The sensor value for record $n$ follows the formula $V = (99.6 - 0.7n) \pmod{100}$, creating a consistent sawtooth wave where values drop continuously until they reset near 100.
+2.  **Fixed Status Cycle:** The operational status cycles strictly every five records: nominal (index % 5 == 0), degraded (1), recovering (2), offline (3), and calibrating (4).
+3.  **Zone Progression:** Zone numbers increase by 17 for each increment in the record index, alternating prefixes between A and N based on the record's parity (even/odd).

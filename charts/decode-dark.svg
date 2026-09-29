@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 440" width="820" height="440" role="img" aria-label="Decode speed vs prompt length (8-bit KV)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
-<rect width="820" height="440" rx="8" fill="#1a1a19"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 458" width="820" height="458" role="img" aria-label="Decode speed vs prompt length (8-bit KV)" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="820" height="458" rx="8" fill="#1a1a19"/>
 <text x="20" y="30" fill="#ffffff" font-size="16" font-weight="600">Decode speed vs prompt length (8-bit KV)</text>
 <text x="20" y="50" fill="#c3c2b7" font-size="12">Qwen3.8-27B, MTP depth 3, temperature 0 · mean of turns 1–3, median of rounds · higher is better</text>
 <line x1="20" x2="42" y1="72" y2="72" stroke="#3987e5" stroke-width="2"/>
@@ -8,61 +8,71 @@
 <line x1="158" x2="180" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
 <path d="M169 66L175 72L169 78L163 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
 <text x="186" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
-<line x1="296" x2="318" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
-<rect x="302" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
-<text x="324" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
-<line x1="364" x2="386" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
-<path d="M375 66L381 77L369 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
-<text x="392" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
-<line x1="509" x2="531" y1="72" y2="72" stroke="#a483e8" stroke-width="2"/>
-<path d="M520 78L526 67L514 67Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"></path>
-<text x="537" y="76" fill="#c3c2b7" font-size="12">TensorFold (bf16 KV)</text>
-<line x1="70" x2="690" y1="376.0" y2="376.0" stroke="#34332f"/><text x="62" y="380.0" fill="#c3c2b7" font-size="11" text-anchor="end">0</text>
-<line x1="70" x2="690" y1="305.0" y2="305.0" stroke="#34332f"/><text x="62" y="309.0" fill="#c3c2b7" font-size="11" text-anchor="end">10</text>
-<line x1="70" x2="690" y1="234.0" y2="234.0" stroke="#34332f"/><text x="62" y="238.0" fill="#c3c2b7" font-size="11" text-anchor="end">20</text>
-<line x1="70" x2="690" y1="163.0" y2="163.0" stroke="#34332f"/><text x="62" y="167.0" fill="#c3c2b7" font-size="11" text-anchor="end">30</text>
-<line x1="70" x2="690" y1="92.0" y2="92.0" stroke="#34332f"/><text x="62" y="96.0" fill="#c3c2b7" font-size="11" text-anchor="end">40</text>
-<line x1="70" x2="690" y1="376" y2="376" stroke="#6d6c66"/>
-<text x="132.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">2K</text>
-<text x="256.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">8K</text>
-<text x="380.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">32K</text>
-<text x="504.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">64K</text>
-<text x="628.0" y="394" fill="#c3c2b7" font-size="12" text-anchor="middle">128K</text>
-<text x="380.0" y="418" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
-<text x="16" y="234.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 234.0)">decode tok/s</text>
-<polyline points="132.0,149.4 256.0,160.7 380.0,184.0 504.0,203.3 628.0,236.9" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="149.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 31.9</title></circle>
-<circle cx="256.0" cy="160.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 30.3</title></circle>
-<circle cx="380.0" cy="184.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 27.0</title></circle>
-<circle cx="504.0" cy="203.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 24.3</title></circle>
-<circle cx="628.0" cy="236.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 19.6</title></circle>
-<polyline points="132.0,207.6 256.0,214.2 380.0,277.7 504.0,314.5 628.0,341.3" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
-<path d="M132.0 201.6L138.0 207.6L132.0 213.6L126.0 207.6Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 23.7</title></path>
-<path d="M256.0 208.2L262.0 214.2L256.0 220.2L250.0 214.2Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 22.8</title></path>
-<path d="M380.0 271.7L386.0 277.7L380.0 283.7L374.0 277.7Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 32K: 13.8</title></path>
-<path d="M504.0 308.5L510.0 314.5L504.0 320.5L498.0 314.5Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 64K: 8.7</title></path>
-<path d="M628.0 335.3L634.0 341.3L628.0 347.3L622.0 341.3Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 128K: 4.9</title></path>
-<polyline points="132.0,222.5 256.0,238.0 380.0,274.7 504.0,299.7 628.0,323.2" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
-<rect x="127.0" y="217.5" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 21.6</title></rect>
-<rect x="251.0" y="233.0" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 19.4</title></rect>
-<rect x="375.0" y="269.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 14.3</title></rect>
-<rect x="499.0" y="294.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 10.7</title></rect>
-<rect x="623.0" y="318.2" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 7.4</title></rect>
-<polyline points="132.0,141.2 256.0,145.1 380.0,183.9 504.0,205.1 628.0,243.0" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
-<path d="M132.0 135.2L138.0 146.2L126.0 146.2Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 2K: 33.1</title></path>
-<path d="M256.0 139.1L262.0 150.1L250.0 150.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 8K: 32.5</title></path>
-<path d="M380.0 177.9L386.0 188.9L374.0 188.9Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 32K: 27.1</title></path>
-<path d="M504.0 199.1L510.0 210.1L498.0 210.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 64K: 24.1</title></path>
-<path d="M628.0 237.0L634.0 248.0L622.0 248.0Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 128K: 18.7</title></path>
-<polyline points="132.0,179.6 256.0,194.6 380.0,255.6 504.0,295.9 628.0,330.9" fill="none" stroke="#a483e8" stroke-width="2" stroke-linejoin="round"/>
-<path d="M132.0 185.6L138.0 174.6L126.0 174.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 2K: 27.7</title></path>
-<path d="M256.0 200.6L262.0 189.6L250.0 189.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 8K: 25.5</title></path>
-<path d="M380.0 261.6L386.0 250.6L374.0 250.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 32K: 17.0</title></path>
-<path d="M504.0 301.9L510.0 290.9L498.0 290.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 64K: 11.3</title></path>
-<path d="M628.0 336.9L634.0 325.9L622.0 325.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 128K: 6.3</title></path>
-<text x="640.0" y="235.0" fill="#ffffff" font-size="12" font-weight="600">19.6</text><text x="640.0" y="249.0" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
-<text x="640.0" y="265.0" fill="#ffffff" font-size="12" font-weight="600">18.7</text><text x="640.0" y="279.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
-<text x="640.0" y="295.0" fill="#ffffff" font-size="12" font-weight="600">7.4</text><text x="640.0" y="309.0" fill="#c3c2b7" font-size="11">oMLX</text>
-<text x="640.0" y="325.0" fill="#ffffff" font-size="12" font-weight="600">6.3</text><text x="640.0" y="339.0" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>
-<text x="640.0" y="355.0" fill="#ffffff" font-size="12" font-weight="600">4.9</text><text x="640.0" y="369.0" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
+<line x1="296" x2="318" y1="72" y2="72" stroke="#d55181" stroke-width="2"/>
+<path d="M307 66L313 72L307 78L301 72Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"></path>
+<text x="324" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream + env</text>
+<line x1="476" x2="498" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
+<rect x="482" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
+<text x="504" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
+<line x1="544" x2="566" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
+<path d="M555 66L561 77L549 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
+<text x="572" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
+<line x1="20" x2="42" y1="90" y2="90" stroke="#a483e8" stroke-width="2"/>
+<path d="M31 96L37 85L25 85Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"></path>
+<text x="48" y="94" fill="#c3c2b7" font-size="12">TensorFold (bf16 KV)</text>
+<line x1="70" x2="690" y1="394.0" y2="394.0" stroke="#34332f"/><text x="62" y="398.0" fill="#c3c2b7" font-size="11" text-anchor="end">0</text>
+<line x1="70" x2="690" y1="323.0" y2="323.0" stroke="#34332f"/><text x="62" y="327.0" fill="#c3c2b7" font-size="11" text-anchor="end">10</text>
+<line x1="70" x2="690" y1="252.0" y2="252.0" stroke="#34332f"/><text x="62" y="256.0" fill="#c3c2b7" font-size="11" text-anchor="end">20</text>
+<line x1="70" x2="690" y1="181.0" y2="181.0" stroke="#34332f"/><text x="62" y="185.0" fill="#c3c2b7" font-size="11" text-anchor="end">30</text>
+<line x1="70" x2="690" y1="110.0" y2="110.0" stroke="#34332f"/><text x="62" y="114.0" fill="#c3c2b7" font-size="11" text-anchor="end">40</text>
+<line x1="70" x2="690" y1="394" y2="394" stroke="#6d6c66"/>
+<text x="132.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">2K</text>
+<text x="256.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">8K</text>
+<text x="380.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">32K</text>
+<text x="504.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">64K</text>
+<text x="628.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">128K</text>
+<text x="380.0" y="436" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
+<text x="16" y="252.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 252.0)">decode tok/s</text>
+<polyline points="132.0,168.6 256.0,172.4 380.0,202.5 504.0,221.5 628.0,254.7" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="132.0" cy="168.6" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 31.8</title></circle>
+<circle cx="256.0" cy="172.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 31.2</title></circle>
+<circle cx="380.0" cy="202.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 27.0</title></circle>
+<circle cx="504.0" cy="221.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 24.3</title></circle>
+<circle cx="628.0" cy="254.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 19.6</title></circle>
+<polyline points="132.0,226.4 256.0,234.3 380.0,294.6 504.0,332.4 628.0,358.8" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 220.4L138.0 226.4L132.0 232.4L126.0 226.4Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 23.6</title></path>
+<path d="M256.0 228.3L262.0 234.3L256.0 240.3L250.0 234.3Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 22.5</title></path>
+<path d="M380.0 288.6L386.0 294.6L380.0 300.6L374.0 294.6Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 32K: 14.0</title></path>
+<path d="M504.0 326.4L510.0 332.4L504.0 338.4L498.0 332.4Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 64K: 8.7</title></path>
+<path d="M628.0 352.8L634.0 358.8L628.0 364.8L622.0 358.8Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 128K: 5.0</title></path>
+<polyline points="132.0,201.0 256.0,210.4 380.0,285.5 504.0,338.9 628.0,361.6" fill="none" stroke="#d55181" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 195.0L138.0 201.0L132.0 207.0L126.0 201.0Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 2K: 27.2</title></path>
+<path d="M256.0 204.4L262.0 210.4L256.0 216.4L250.0 210.4Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 8K: 25.9</title></path>
+<path d="M380.0 279.5L386.0 285.5L380.0 291.5L374.0 285.5Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 32K: 15.3</title></path>
+<path d="M504.0 332.9L510.0 338.9L504.0 344.9L498.0 338.9Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 64K: 7.8</title></path>
+<path d="M628.0 355.6L634.0 361.6L628.0 367.6L622.0 361.6Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 128K: 4.6</title></path>
+<polyline points="132.0,240.5 256.0,256.0 380.0,292.7 504.0,317.7 628.0,341.2" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
+<rect x="127.0" y="235.5" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 21.6</title></rect>
+<rect x="251.0" y="251.0" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 19.4</title></rect>
+<rect x="375.0" y="287.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 14.3</title></rect>
+<rect x="499.0" y="312.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 10.7</title></rect>
+<rect x="623.0" y="336.2" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 7.4</title></rect>
+<polyline points="132.0,159.2 256.0,163.1 380.0,201.9 504.0,223.1 628.0,261.0" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 153.2L138.0 164.2L126.0 164.2Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 2K: 33.1</title></path>
+<path d="M256.0 157.1L262.0 168.1L250.0 168.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 8K: 32.5</title></path>
+<path d="M380.0 195.9L386.0 206.9L374.0 206.9Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 32K: 27.1</title></path>
+<path d="M504.0 217.1L510.0 228.1L498.0 228.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 64K: 24.1</title></path>
+<path d="M628.0 255.0L634.0 266.0L622.0 266.0Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 128K: 18.7</title></path>
+<polyline points="132.0,197.6 256.0,212.6 380.0,273.6 504.0,313.9 628.0,348.9" fill="none" stroke="#a483e8" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 203.6L138.0 192.6L126.0 192.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 2K: 27.7</title></path>
+<path d="M256.0 218.6L262.0 207.6L250.0 207.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 8K: 25.5</title></path>
+<path d="M380.0 279.6L386.0 268.6L374.0 268.6Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 32K: 17.0</title></path>
+<path d="M504.0 319.9L510.0 308.9L498.0 308.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 64K: 11.3</title></path>
+<path d="M628.0 354.9L634.0 343.9L622.0 343.9Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 128K: 6.3</title></path>
+<text x="640.0" y="223.0" fill="#ffffff" font-size="12" font-weight="600">19.6</text><text x="640.0" y="237.0" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
+<text x="640.0" y="253.0" fill="#ffffff" font-size="12" font-weight="600">18.7</text><text x="640.0" y="267.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
+<text x="640.0" y="283.0" fill="#ffffff" font-size="12" font-weight="600">7.4</text><text x="640.0" y="297.0" fill="#c3c2b7" font-size="11">oMLX</text>
+<text x="640.0" y="313.0" fill="#ffffff" font-size="12" font-weight="600">6.3</text><text x="640.0" y="327.0" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>
+<text x="640.0" y="343.0" fill="#ffffff" font-size="12" font-weight="600">5.0</text><text x="640.0" y="357.0" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
+<text x="640.0" y="373.0" fill="#ffffff" font-size="12" font-weight="600">4.6</text><text x="640.0" y="387.0" fill="#c3c2b7" font-size="11">MTPLX upstream + env</text>
 </svg>

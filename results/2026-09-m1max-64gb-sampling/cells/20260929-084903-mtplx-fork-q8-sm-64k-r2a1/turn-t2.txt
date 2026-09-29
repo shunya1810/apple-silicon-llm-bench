@@ -1,0 +1,9 @@
+Records with a "nominal" status and those marked "offline" follow identical mathematical and structural patterns, differing only in their position within the five-state cycle. The sensor values for offline records are consistently higher than the preceding nominal records by exactly 11.4 units (two steps of the 5.7-unit decrement). For instance, Record 000000 is nominal with a sensor value of 0.0 in zone A10, whereas Record 000003 is offline with a sensor value of 82.6 in zone N61. This offset persists throughout the dataset; Record 001000 is nominal (sensor 82.6, zone A90), while Record 001003 is offline (sensor 65.5, zone N51).
+
+Three specific records illustrate these differences:
+
+1.  **Record 000000 (Nominal):** Sensor 0.0, Zone A10.
+2.  **Record 000003 (Offline):** Sensor 82.6, Zone N61.
+3.  **Record 001003 (Offline):** Sensor 65.5, Zone N51.
+
+While the sensor decay is linear for both groups, the zones appear permuted independently of status, meaning offline and nominal records do not share a consistent zone correlation.

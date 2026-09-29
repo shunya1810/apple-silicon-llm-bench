@@ -351,12 +351,14 @@ def stream_chat(base: str, payload: dict, timeout: float) -> dict:
             "text": text, "usage": usage, "finish_reason": finish, "error": error}
 
 
-def run_turn(engine: Engine, spec: dict, messages: list, max_tokens: int, timeout: float, tokenizer) -> dict:
+def run_turn(engine: Engine, spec: dict, messages: list, max_tokens: int, timeout: float, tokenizer,
+             sampling: dict | None = None) -> dict:
     payload = {"model": engine.spec["model_id"], "messages": messages, "max_tokens": max_tokens,
                "temperature": 0.0, "top_p": 1.0, "stream": True,
                "stream_options": {"include_usage": True},
                "chat_template_kwargs": {"enable_thinking": False}}
     payload.update(spec.get("request_extra", {}))
+    payload.update(sampling or {})
     offset = engine.log_size()
     engine.pre_request()
     r = stream_chat(engine.base, payload, timeout)
@@ -417,7 +419,8 @@ def main() -> None:
                 "kv_impl": spec.get("kv_impl"), "mtp_impl": spec.get("mtp_impl"),
                 "model_artifact": spec.get("model_artifact"), "scenario": scen["id"],
                 "context_target": scen["context_tokens"], "context_tokens_raw": ctx_tokens,
-                "round": a.round, "order_pos": a.order_pos, "attempt": a.attempt}
+                "round": a.round, "order_pos": a.order_pos, "attempt": a.attempt,
+                "sampling": scen.get("sampling")}
     sampler = None
     try:
         load_s = engine.start()
@@ -452,7 +455,7 @@ def main() -> None:
             content = (context + q) if i == 1 else q
             messages.append({"role": "user", "content": content})
             sampler.reset_window()
-            r = run_turn(engine, spec, messages, scen["max_tokens"], timeout, tok)
+            r = run_turn(engine, spec, messages, scen["max_tokens"], timeout, tok, scen.get("sampling"))
             peaks = sampler.reset_window()
             r.update(phase="turn", turn=i, peak_rss=peaks["rss"], peak_wired=peaks["wired"],
                      needle_ok=(NEEDLE_ANSWER in r["text"]) if scen.get("needle_turn") == i else None)

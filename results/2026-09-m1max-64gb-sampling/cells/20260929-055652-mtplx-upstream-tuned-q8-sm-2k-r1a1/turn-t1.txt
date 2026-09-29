@@ -1,0 +1,8 @@
+The synthetic telemetry data exhibits a highly regular, cyclical pattern rather than random variation. The sensor values generally decrease by approximately 5.7 units per record, creating a sawtooth wave that resets near the end of each 18-record cycle. For instance, values start at 0.0 in Record 000000, drop to 2.8 in Record 000017, then jump to 96.8 in Record 000018, before declining again. This periodicity indicates the data is procedurally generated with a fixed decrement and periodic reset.
+
+The status fields follow a strict, repeating five-state cycle: nominal, degraded, recovering, offline, and calibrating. Every fifth record shares the same status, independent of the sensor value. Simultaneously, the zone identifiers alternate prefixes between 'A' and 'N' with consistent numeric increments. Notably, one anomaly exists: the "NEEDLE" record interrupts the sequence with non-telemetry text, explicitly stating it is a maintenance override for zone Q42.
+
+Three concrete observations are:
+1. Sensor values follow a linear decrease of ~5.7 units, resetting every 18 records.
+2. Status labels cycle deterministically through five states in a fixed order.
+3. Zone prefixes alternate strictly between 'A' and 'N' based on record parity.

@@ -1,0 +1,7 @@
+The synthetic telemetry dataset exhibits a highly regular, deterministic structure rather than random stochastic behavior. Sensor values follow a strict linear decrement, decreasing by approximately 0.7 units per record and wrapping around from near 99 to near 0 roughly every 14 entries. Simultaneously, the status field cycles through five distinct states—nominal, degraded, recovering, offline, and calibrating—in a fixed five-record loop. The zone identifiers appear to cycle through a predefined set of alphanumeric labels (e.g., A10, N27, A44), independent of the sensor value trends.
+
+Three concrete observations include:
+
+1.  **Arithmetic Progression of Sensor Data:** The `sensor` values form a perfect arithmetic sequence with a common difference of -0.7, starting at 0.0 and ending at 21.9, with visible resets creating a sawtooth wave pattern.
+2.  **Fixed Status Cycle:** The `status` parameter repeats the sequence "nominal, degraded, recovering, offline, calibrating" exactly every five records without exception, indicating a synthetic generation rule rather than real-world fault progression.
+3.  **Distinct Anomaly Insertion:** Record 000653 explicitly breaks the established format and data types by inserting non-numeric maintenance override text regarding zone Q42, serving as a deliberate needle in the haystack for parsing tests.

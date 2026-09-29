@@ -1,0 +1,6 @@
+The provided telemetry records exhibit a highly structured, deterministic pattern. Sensor values generally trend downward from high to low values (ranging from ~99.6 to 0.0) within each 20-record cycle, decreasing by approximately 5.7 units per step. Simultaneously, the status field cycles rigidly through five states: *nominal*, *degraded*, *recovering*, *offline*, and *calibrating*. This five-state cycle repeats every five records, meaning the status is strictly determined by the record index modulo 5. Additionally, the zone identifiers follow a similar cyclic pattern, alternating between specific 'A' and 'N' prefixes with two-digit numbers that increment or reset in predictable sequences.
+
+Three concrete observations:
+1.  **Rigid Status Cycle:** The status field repeats the sequence [nominal, degraded, recovering, offline, calibrating] every five consecutive records without exception across the entire dataset.
+2.  **Linear Sensor Decay:** Within each 20-record block, sensor values decrease linearly by roughly 5.7 units per record, starting near 99.0–100.0 and ending near 0.0–1.0 before resetting in the next block.
+3.  **Embedded Anomaly:** Record 001316 is corrupted by non-telemetry text ("maintenance override for zone Q42..."), breaking the standard data schema and serving as a clear injection point or error in the synthetic generation.

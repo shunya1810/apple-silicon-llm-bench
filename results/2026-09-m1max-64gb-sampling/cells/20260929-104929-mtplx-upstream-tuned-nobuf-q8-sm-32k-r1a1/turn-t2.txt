@@ -1,0 +1,6 @@
+Comparing "offline" and "nominal" records reveals distinct differences in sensor magnitudes and zone distributions, driven by the dataset's cyclic nature. While sensor values for all records follow a linear downward trend, their phase relative to the reset point creates statistical differences. "Nominal" records appear at indices where $i \equiv 0 \pmod 5$, while "offline" records appear where $i \equiv 3 \pmod 5$. Because the sensor value resets roughly every 18 records, the "phase" of the value is determined by $i \pmod{18}$.
+
+Three concrete observations are:
+1.  **Phase Offset**: Record 000000 (nominal) has a sensor value of 0.0, the minimum in its cycle. In contrast, Record 000003 (offline) has a value of 82.6, occurring later in the cycle.
+2.  **Zone Prefix Preference**: Nominal zones often start with 'A' or 'N' based on the index, but specific offsets apply. Record 000000 is in zone A10, whereas Record 000003 is in zone N61.
+3.  **Repeating Patterns**: Record 000005 (nominal) has a sensor value of 71.2 in zone N95. Its corresponding offset "offline" record, 000008, has a value of 54.1 in zone A56. This shows that while both statuses cycle, their specific sensor values are fixed by their position in the 18-record sequence, creating predictable value gaps between statuses.

@@ -1,0 +1,6 @@
+The telemetry data exhibits a strictly deterministic, cyclical pattern. Sensor values start at 0.0 and decrease linearly by 5.7 units per record, resetting from approximately 0.1 back to 99.6 after every 18 records. This creates a repeating sawtooth wave across the entire dataset. Simultaneously, the status field cycles through five fixed states—nominal, degraded, recovering, offline, and calibrating—in a rigid sequence that repeats every five records. Zones alternate predictably between prefixes A and N, with numeric identifiers incrementing by 17 within each prefix cycle. This structured periodicity suggests synthetic generation rather than organic physical behavior.
+
+Three concrete observations are:
+1.  **Linear Decay**: Sensor values consistently decrease by exactly 5.7 units from one record to the next, indicating a constant rate of change independent of status or zone.
+2.  **Status Cycle**: The status field follows a fixed five-state rotation (nominal → degraded → recovering → offline → calibrating), meaning the status of any record is entirely predictable based on its index modulo 5.
+3.  **Zone Increment**: Zone identifiers increment by 17 (e.g., A10 to A27 to A44) within their respective A or N prefixes, creating a uniform distribution across the 100 possible zone slots every 100 records.

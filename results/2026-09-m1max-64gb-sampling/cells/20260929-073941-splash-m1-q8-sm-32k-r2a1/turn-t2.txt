@@ -1,0 +1,12 @@
+To compare "offline" and "nominal" records, we must look at their specific positions within the 20-record cycle. "Nominal" status occurs at records where the index modulo 20 is 0 (e.g., 000000, 000020), while "offline" status occurs at indices where the modulo is 3 (e.g., 000003, 000023).
+
+**Sensor Value Differences:**
+There is a consistent inverse relationship between the status label and the sensor magnitude. "Nominal" records consistently exhibit the lowest sensor values in any given cycle, typically ranging from 0.0 to 14.2. In contrast, "offline" records are associated with high sensor readings, generally between 82.6 and 97.0. For instance, Record 000000 (nominal) has a sensor value of 0.0, whereas Record 000003 (offline) has a value of 82.6. Similarly, Record 000020 (nominal) reads 85.4 (starting a new high-value cycle segment), while Record 000023 (offline) reads 68.3. This suggests that in this synthetic dataset, higher sensor values are tagged as "offline" rather than "nominal."
+
+**Zone Differences:**
+The zones for these statuses do not overlap. "Nominal" records use zones with prefixes like A10, N85, A90, and N65. "Offline" records use distinct zones such as N61, N41, and A26.
+
+**Three Cited Records:**
+1.  **Record 000000:** Status *nominal*, sensor 0.0, zone A10.
+2.  **Record 000003:** Status *offline*, sensor 82.6, zone N61.
+3.  **Record 000020:** Status *nominal*, sensor 85.4, zone A80.

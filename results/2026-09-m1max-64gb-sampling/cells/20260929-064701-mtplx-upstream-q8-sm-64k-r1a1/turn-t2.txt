@@ -1,0 +1,6 @@
+Records with "nominal" status and "offline" status exhibit identical distribution patterns for both sensor values and zone assignments, indicating no correlation between device state and measured parameters. The sensor values for both groups follow the same deterministic, sawtooth progression, decreasing by 0.7 per record and resetting near 100. Furthermore, both groups cycle through the same alternating pattern of A-prefixed and N-prefixed zones. There is no distinct difference in the magnitude or distribution of sensor readings between a functioning (nominal) unit and a non-functioning (offline) one; the status label appears to be an independent, cycling variable rather than a reflection of the sensor data.
+
+Three specific comparisons illustrate this uniformity:
+1.  **Record 000000 (nominal)** has a sensor value of 0.0 in zone A10, while **Record 000003 (offline)** has a value of 82.6 in zone N61.
+2.  **Record 000005 (nominal)** shows a value of 71.2 in zone N95, whereas **Record 000008 (offline)** displays 54.1 in zone A56.
+3.  **Record 000010 (nominal)** is at 42.7 in zone A90, compared to **Record 000013 (offline)** at 25.6 in zone N51.

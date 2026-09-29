@@ -1,0 +1,6 @@
+The sensor values exhibit a distinct linear downward trend, starting at 0.0 and decreasing by approximately 5.7 units per record until reaching a floor, after which the values wrap around to near 100 and resume the declining pattern. This creates a sawtooth waveform across the dataset. Concurrently, the status field cycles deterministically through a fixed five-state sequence: nominal, degraded, recovering, offline, and calibrating. This pattern repeats every five records, meaning the status is strictly determined by the record index modulo 5. The zones follow a less obvious but consistent alternating prefix pattern (A/N) with incrementing suffix numbers, though they do not directly correlate with the sensor magnitude or specific status beyond their positional assignment.
+
+Three concrete observations include:
+1. **Linear Decay:** The sensor value decreases by exactly 5.7 from Record 000000 to 000017, hitting 2.8 before resetting to 96.8 in Record 000018.
+2. **Fixed Status Cycle:** The status always follows the order nominal → degraded → recovering → offline → calibrating, repeating every five records without exception.
+3. **Anomalous Entry:** Record NEEDLE is non-telemetry data, containing a maintenance override for zone Q42 with code 7391-ALPHA, disrupting the numerical sequence between Records 000031 and 000032.

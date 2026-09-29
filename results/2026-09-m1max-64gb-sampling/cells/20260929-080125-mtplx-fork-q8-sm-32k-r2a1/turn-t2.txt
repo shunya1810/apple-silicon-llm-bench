@@ -1,0 +1,8 @@
+Records with **offline** and **nominal** statuses exhibit distinct spatial and numerical characteristics due to the dataset’s deterministic cycling patterns. While sensor values decrease linearly across all records, their specific magnitudes within these statuses depend on their position in the 10-record cycle (status cycles every 5, zone prefix every 1). Nominal records always occur at indices divisible by 10 (e.g., 0, 10, 20), whereas offline records occur at indices where the index modulo 5 equals 3 (e.g., 3, 8, 13).
+
+Consequently, offline records consistently appear in zones starting with 'N' (for odd indices like 3, 13) or 'A' (for even indices like 8, 18), while nominal records strictly alternate between 'A' (even indices) and 'N' (odd indices). However, a key difference is the sensor value range: nominal records include the highest values (e.g., 99.6, 85.4) and lowest values (e.g., 0.0, 2.8) in the cycle, whereas offline records occupy the mid-to-low descending segments.
+
+Three concrete observations:
+1.  **Record 000000** (nominal) has the maximum sensor value (0.0 initially, but resets to 99.6 at 000035) and is in zone A10.
+2.  **Record 000003** (offline) has a high sensor value (82.6) and is in zone N61.
+3.  **Record 000008** (offline) has a lower sensor value (54.1) and is in zone A56, showing that offline status does not imply a single value range.
