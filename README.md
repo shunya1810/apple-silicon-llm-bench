@@ -187,6 +187,11 @@ the note below the table), so the M1 build ran on the warmer machine. The other 
 were not run: at 128K they already decode at 4.6–7.4 tok/s, and a 256K first turn would
 take well over an hour each.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/spot256k-dark.svg?v=spot256">
+  <img alt="256K spot check: first-turn prefill, follow-up TTFT, decode and peak memory for Splash 1.1.0-m1 and the MTPLX M1 build m1.1" src="charts/spot256k-light.svg?v=spot256">
+</picture>
+
 | | Splash 1.1.0-m1 | MTPLX M1 build m1.1 |
 |---|---|---|
 | T1 TTFT (cold) | 87.3 min | **67.9 min** |

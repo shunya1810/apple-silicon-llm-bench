@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 546" width="820" height="546" role="img" aria-label="256K spot check: a 3-turn conversation over a 258K-token prompt" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="820" height="546" rx="8" fill="#fcfcfb"/>
+<text x="20" y="30" fill="#0b0b0b" font-size="16" font-weight="600">256K spot check: a 3-turn conversation over a 258K-token prompt</text>
+<text x="20" y="50" fill="#52514e" font-size="12">Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · 2026-09-29</text>
+<rect x="23" y="66" width="16" height="11" rx="2" fill="#2a78d6"/>
+<text x="48" y="76" fill="#52514e" font-size="12">MTPLX M1 build m1.1</text>
+<rect x="196" y="66" width="16" height="11" rx="2" fill="#eda100"/>
+<text x="221" y="76" fill="#52514e" font-size="12">Splash 1.1.0-m1</text>
+<text x="20" y="116" fill="#0b0b0b" font-size="13" font-weight="600">First turn: reading the 258K-token prompt cold<tspan fill="#52514e" font-size="11" font-weight="400" dx="8">lower is better</tspan></text>
+<line x1="190" x2="190" y1="126" y2="180" stroke="#8a8983"/>
+<text x="182" y="144" fill="#52514e" font-size="12" text-anchor="end">MTPLX M1 build m1.1</text>
+<rect x="190" y="130" width="361.0" height="20" rx="4" fill="#2a78d6"><title>MTPLX M1 build m1.1 · First turn: reading the 258K-token prompt cold: 67.9 min</title></rect>
+<text x="559.0" y="144" fill="#0b0b0b" font-size="12" font-weight="600">67.9 min</text>
+<text x="182" y="170" fill="#52514e" font-size="12" text-anchor="end">Splash 1.1.0-m1</text>
+<rect x="190" y="156" width="464.3" height="20" rx="4" fill="#eda100"><title>Splash 1.1.0-m1 · First turn: reading the 258K-token prompt cold: 87.3 min</title></rect>
+<text x="662.3" y="170" fill="#0b0b0b" font-size="12" font-weight="600">87.3 min</text>
+<text x="20" y="226" fill="#0b0b0b" font-size="13" font-weight="600">Follow-up turns: time to first token<tspan fill="#52514e" font-size="11" font-weight="400" dx="8">mean of turns 2–3 · lower is better</tspan></text>
+<line x1="190" x2="190" y1="236" y2="290" stroke="#8a8983"/>
+<text x="182" y="254" fill="#52514e" font-size="12" text-anchor="end">MTPLX M1 build m1.1</text>
+<rect x="190" y="240" width="173.1" height="20" rx="4" fill="#2a78d6"><title>MTPLX M1 build m1.1 · Follow-up turns: time to first token: 3.6 s</title></rect>
+<text x="371.1" y="254" fill="#0b0b0b" font-size="12" font-weight="600">3.6 s</text>
+<text x="182" y="280" fill="#52514e" font-size="12" text-anchor="end">Splash 1.1.0-m1</text>
+<rect x="190" y="266" width="464.3" height="20" rx="4" fill="#eda100"><title>Splash 1.1.0-m1 · Follow-up turns: time to first token: 9.7 s</title></rect>
+<text x="662.3" y="280" fill="#0b0b0b" font-size="12" font-weight="600">9.7 s</text>
+<text x="20" y="336" fill="#0b0b0b" font-size="13" font-weight="600">Decode speed<tspan fill="#52514e" font-size="11" font-weight="400" dx="8">mean of turns 1–3 · higher is better</tspan></text>
+<line x1="190" x2="190" y1="346" y2="400" stroke="#8a8983"/>
+<text x="182" y="364" fill="#52514e" font-size="12" text-anchor="end">MTPLX M1 build m1.1</text>
+<rect x="190" y="350" width="464.3" height="20" rx="4" fill="#2a78d6"><title>MTPLX M1 build m1.1 · Decode speed: 14.5 tok/s</title></rect>
+<text x="662.3" y="364" fill="#0b0b0b" font-size="12" font-weight="600">14.5 tok/s</text>
+<text x="182" y="390" fill="#52514e" font-size="12" text-anchor="end">Splash 1.1.0-m1</text>
+<rect x="190" y="376" width="414.2" height="20" rx="4" fill="#eda100"><title>Splash 1.1.0-m1 · Decode speed: 12.9 tok/s</title></rect>
+<text x="612.2" y="390" fill="#0b0b0b" font-size="12" font-weight="600">12.9 tok/s</text>
+<text x="20" y="446" fill="#0b0b0b" font-size="13" font-weight="600">Peak wired memory<tspan fill="#52514e" font-size="11" font-weight="400" dx="8">system-wide, max over turns 1–3 · 64 GB machine · lower is better</tspan></text>
+<line x1="190" x2="190" y1="456" y2="510" stroke="#8a8983"/>
+<text x="182" y="474" fill="#52514e" font-size="12" text-anchor="end">MTPLX M1 build m1.1</text>
+<rect x="190" y="460" width="464.3" height="20" rx="4" fill="#2a78d6"><title>MTPLX M1 build m1.1 · Peak wired memory: 51.8 GB</title></rect>
+<text x="662.3" y="474" fill="#0b0b0b" font-size="12" font-weight="600">51.8 GB</text>
+<text x="182" y="500" fill="#52514e" font-size="12" text-anchor="end">Splash 1.1.0-m1</text>
+<rect x="190" y="486" width="272.8" height="20" rx="4" fill="#eda100"><title>Splash 1.1.0-m1 · Peak wired memory: 30.4 GB</title></rect>
+<text x="470.8" y="500" fill="#0b0b0b" font-size="12" font-weight="600">30.4 GB</text>
+</svg>

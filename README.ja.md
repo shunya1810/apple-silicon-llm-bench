@@ -153,6 +153,11 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 2026-09-29 に Splash 1.1.0-m1、MTPLX M1 build **v2.12.0-m1.1**（表の下の注を参照）の順に測ったので、M1 build のほうがマシンが温まった状態になる。
 ほかのエンジンは 128K で decode が 4.6〜7.4 tok/s で、256K の1ターン目だけで1時間を大きく超える見込みなので測っていない。
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/spot256k-dark.svg?v=spot256">
+  <img alt="256K の確認：Splash 1.1.0-m1 と MTPLX M1 build m1.1 の最初の prefill、続きのターンの TTFT、decode、最大メモリ" src="charts/spot256k-light.svg?v=spot256">
+</picture>
+
 | | Splash 1.1.0-m1 | MTPLX M1 build m1.1 |
 |---|---|---|
 | T1 TTFT（cold） | 87.3 分 | **67.9 分** |

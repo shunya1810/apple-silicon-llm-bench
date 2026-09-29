@@ -19,16 +19,17 @@ from pathlib import Path
 ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # table order
 CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
 NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "mtplx-upstream-tuned-nobuf": "MTPLX upstream + env", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
-         "tensorfold": "TensorFold (bf16 KV)"}
+         "tensorfold": "TensorFold (bf16 KV)",
+         "mtplx-fork-m1.1": "MTPLX M1 build m1.1"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
-CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K"}
+CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K", "mt-256k": "256K"}
 GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-upstream": "#eb6834", "mtplx-upstream-tuned-nobuf": "#e87ba4", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
+              "mtplx-fork": "#2a78d6", "mtplx-fork-m1.1": "#2a78d6", "mtplx-upstream": "#eb6834", "mtplx-upstream-tuned-nobuf": "#e87ba4", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-upstream": "#d95926", "mtplx-upstream-tuned-nobuf": "#d55181", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
+             "mtplx-fork": "#3987e5", "mtplx-fork-m1.1": "#3987e5", "mtplx-upstream": "#d95926", "mtplx-upstream-tuned-nobuf": "#d55181", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
 MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "mtplx-upstream-tuned-nobuf": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
@@ -193,7 +194,7 @@ def write_csv(cells: dict, path: Path) -> None:
     with path.open("w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(fields)
-        for (e, kv, s), c in sorted(cells.items(), key=lambda kv_: (CTX.index(kv_[0][2]), kv_[0][1], ENGINES.index(kv_[0][0]) if kv_[0][0] in ENGINES else len(ENGINES), kv_[0][0])):
+        for (e, kv, s), c in sorted(cells.items(), key=lambda kv_: (CTX.index(kv_[0][2]) if kv_[0][2] in CTX else len(CTX), kv_[0][1], ENGINES.index(kv_[0][0]) if kv_[0][0] in ENGINES else len(ENGINES), kv_[0][0])):
             for t, d in c["turns"].items():
                 w.writerow([e, kv, s, t, len(c["rounds"])] + [d.get(k) if k != "needle_ok" else
                                                                  ",".join(map(str, d[k])) for k in fields[5:]])
@@ -379,6 +380,53 @@ def conversation_chart(th, cells, ctxs):
     return "\n".join(o)
 
 
+SPOT_ENGINES = ["mtplx-fork-m1.1", "splash-m1"]  # 256K spot check, one run each
+
+
+def spot256_chart(th, cells):
+    """256K spot check: one small panel per measure (each its own scale), a bar per engine."""
+    s = "mt-256k"
+    engines = [e for e in SPOT_ENGINES if (e, "q8", s) in cells]
+    if len(engines) < 2:
+        return None
+    wired = lambda e: max((turn(cells, e, s, t, "peak_wired") or 0) for t in (1, 2, 3)) / GB
+    panels = [
+        ("First turn: reading the 258K-token prompt cold", "lower is better",
+         lambda e: turn(cells, e, s, 1, "ttft_s") / 60, lambda v: f"{v:.1f} min"),
+        ("Follow-up turns: time to first token", "mean of turns 2–3 · lower is better",
+         lambda e: mean_turns(cells, e, s, "ttft_s", ts=(2, 3)), lambda v: f"{v:.1f} s"),
+        ("Decode speed", "mean of turns 1–3 · higher is better",
+         lambda e: mean_turns(cells, e, s, "decode_tok_s"), lambda v: f"{v:.1f} tok/s"),
+        ("Peak wired memory", "system-wide, max over turns 1–3 · 64 GB machine · lower is better",
+         wired, lambda v: f"{v:.1f} GB"),
+    ]
+    W, L, R, rowh, gap = 820, 190, 110, 20, 6
+    ph = 40 + len(engines) * (rowh + gap) + 18
+    H = 100 + len(panels) * ph + 6
+    o = svg_open(W, H, th, "256K spot check: a 3-turn conversation over a 258K-token prompt",
+                 "Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · 2026-09-29")
+    legend(o, th, engines, 20, 76, swatch=True)
+    y = 104
+    for title, note, get, fmt in panels:
+        vals = {e: get(e) for e in engines}
+        hi = max(vals.values()) * 1.12
+        o.append(f'<text x="20" y="{y + 12}" fill="{th["t1"]}" font-size="13" font-weight="600">{esc(title)}'
+                 f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">{esc(note)}</tspan></text>')
+        yb = y + 26
+        o.append(f'<line x1="{L}" x2="{L}" y1="{yb - 4}" y2="{yb + len(engines) * (rowh + gap) - gap + 4}" stroke="{th["axis"]}"/>')
+        for e in engines:
+            v = vals[e]
+            w = max((W - L - R) * v / hi, 2)
+            tip = f"{NAMES[e]} · {title}: {fmt(v)}"
+            o.append(f'<text x="{L - 8}" y="{yb + rowh - 6}" fill="{th["t2"]}" font-size="12" text-anchor="end">{esc(NAMES[e])}</text>')
+            o.append(f'<rect x="{L}" y="{yb}" width="{w:.1f}" height="{rowh}" rx="4" fill="{th[e]}"><title>{esc(tip)}</title></rect>')
+            o.append(f'<text x="{L + w + 8:.1f}" y="{yb + rowh - 6}" fill="{th["t1"]}" font-size="12" font-weight="600">{esc(fmt(v))}</text>')
+            yb += rowh + gap
+        y += ph
+    o.append("</svg>")
+    return "\n".join(o)
+
+
 def charts(cells: dict, out: Path) -> list[str]:
     out.mkdir(parents=True, exist_ok=True)
     ctxs = [s for s in CTX if any((e, "q8", s) in cells for e in ENGINES)]
@@ -401,8 +449,11 @@ def charts(cells: dict, out: Path) -> list[str]:
                 {e: [(lambda v: v / GB if v else None)(max((turn(cells, e, s, t, "peak_wired") or 0) for t in (1, 2, 3)) or None)
                      for s in ctxs] for e in CHART_ENGINES}, vfmt=lambda v: f"{v:.1f} GB"),
             "conversation": conversation_chart(th, cells, ctxs),
+            "spot256k": spot256_chart(th, cells),
         }
         for name, svg in specs.items():
+            if svg is None:
+                continue
             p = out / f"{name}-{mode}.svg"
             p.write_text(svg)
             made.append(p.name)
