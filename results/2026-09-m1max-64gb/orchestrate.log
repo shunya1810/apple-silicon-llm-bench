@@ -355,3 +355,9 @@
 10:41:18 round 2 mt-8k q8 mtplx-upstream-tuned-nobuf attempt 1
 10:43:08   canary 27.571564193488527 ref 27.38104409794955 slow=False
 10:44:38 plan done
+16:54:20 round 1 mt-256k q8 splash-m1 attempt 1
+18:23:48   canary 29.19753477940595 ref None slow=False
+18:25:48 plan done
+18:25:48 round 1 mt-256k q8 mtplx-fork-m1.1 attempt 1
+19:35:10   canary 29.996717189939204 ref None slow=False
+19:37:10 plan done

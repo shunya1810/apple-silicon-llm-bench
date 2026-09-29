@@ -18,7 +18,7 @@ so their columns also reflect a different quantization and a different speculati
 
 | engine | version | notes |
 |---|---|---|
-| **MTPLX M1 build** | [`v2.12.0-m1`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.0-m1) (`6be2b28`, [`shunya1810/MTPLX`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx)) | unofficial M1-family long-context build of MTPLX 2.12.0. Earlier rounds of this build stay in the raw data as `mtplx-fork-16751dc`, `-40b6113`, `-4fe8067`, `-bba1b7b` and `-0cd2a73` |
+| **MTPLX M1 build** | [`v2.12.0-m1`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.0-m1) (`6be2b28`, [`shunya1810/MTPLX`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx)) | unofficial M1-family long-context build of MTPLX 2.12.0. The 256K spot check runs its successor [`v2.12.0-m1.1`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.0-m1.1) (larger command buffers off: prompt reading at upstream speed, decode 6–8% lower; [below](#256k-spot-check-two-engines)). Earlier rounds of this build stay in the raw data as `mtplx-fork-16751dc`, `-40b6113`, `-4fe8067`, `-bba1b7b` and `-0cd2a73` |
 | **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | `main` at run time (still its head on 2026-09-29); the M1 build's base. Its first run (2026-09-25/26) stays in the raw data as `mtplx-upstream-0925` |
 | **MTPLX upstream + env** | upstream `1de2b1c` | the same code with every M1-build default that upstream exposes as an environment variable: `MTPLX_CONTEXT_COPY=0`, `MTPLX_FUSE_PROJ=gdn,attn`, `MTPLX_FRSPEC_DRAFT=1 MTPLX_FRSPEC_LEGACY=1 MTPLX_FRSPEC_VOCAB=builtin:qwen38-code-64k`, `MTPLX_MLX_CACHE_LIMIT=1G`, `MTPLX_SESSION_BANK_PER_SESSION_MAX_ENTRIES=2` ([engine file](engines/mtplx-upstream-tuned-nobuf.json)); the M1 build's larger Metal command buffers are left out (see below) |
 | **oMLX** | [0.6.4](https://github.com/jundot/omlx/releases/tag/v0.6.4) | latest stable at run time |
@@ -85,6 +85,10 @@ Decode is the mean of the three turns, in tok/s, at 2K / 8K / 32K / 64K / 128K.
   min; a larger `--prompt-cache-gib` may avoid that, but every engine runs at its defaults
   here. It accepts a draft token only when it equals the target's own sample (exact
   decoding), which works at temperature 0 but accepts fewer tokens when sampling.
+- **256K (two engines, one run each):** the M1 build (m1.1) read the prompt in 67.9 min
+  against 87.3 on Splash, decoded 14.5 against 12.9 tok/s and started follow-up turns in
+  3.6 s against 9.3–10.1 s; Splash used 30.4 GB against 51.8 GB
+  ([details](#256k-spot-check-two-engines)).
 - **Not measured:** GPU temperature, power and energy per token. MTPLX engines have been
   reported to run hotter than Splash on M1 during prefill; this benchmark does not check
   that.
@@ -173,6 +177,35 @@ Raw rows: [`results/2026-09-m1max-64gb/rows.jsonl`](results/2026-09-m1max-64gb/r
 per-turn CSV: [`summary.csv`](results/2026-09-m1max-64gb/summary.csv) ·
 environment: [`environment.json`](results/2026-09-m1max-64gb/environment.json) ·
 generated text of every turn: `results/2026-09-m1max-64gb/cells/*/`.
+
+## 256K spot check (two engines)
+
+The two engines that lead at 128K, one run each at 258,048 context tokens (the prompt
+reaches 258K tokens by turn 3, inside both engines' 262,144-token window), on
+2026-09-29: Splash 1.1.0-m1 first, then the MTPLX M1 build at **v2.12.0-m1.1** (see
+the note below the table), so the M1 build ran on the warmer machine. The other engines
+were not run: at 128K they already decode at 4.6–7.4 tok/s, and a 256K first turn would
+take well over an hour each.
+
+| | Splash 1.1.0-m1 | MTPLX M1 build m1.1 |
+|---|---|---|
+| T1 TTFT (cold) | 87.3 min | **67.9 min** |
+| T2 / T3 TTFT | 9.3 s / 10.1 s | **3.6 s / 3.6 s** |
+| decode T1 / T2 / T3 (tok/s) | 11.4 / 14.9 / 12.5 | 14.5 / 14.9 / 14.2 |
+| decode, mean of turns | 12.9 | **14.5** |
+| 3-turn total | 88.5 min | **68.9 min** |
+| peak wired | **30.4 GB** | 51.8 GB |
+| needle | 1/1 | 1/1 |
+
+- Single runs. Each engine's 2K canary before the run: Splash 29.2 tok/s (3.7% below its
+  best of the day), the M1 build 30.0 tok/s (2% below its best m1.1 canary), so the machine
+  was slightly slower for Splash.
+- **v2.12.0-m1.1** (released 2026-09-29) turns off the larger Metal command buffers
+  that v2.12.0-m1 set on M1: they gave decode +6–7% but slowed cold prefill by 2–5% on an
+  idle machine and 13–21% on a busy or power-limited one. m1.1 reads prompts at upstream
+  speed (8K: 54.5 s against 54.3 s upstream and 67.1 s on m1, measured one after
+  another) and decodes 6–8% below m1, with identical text. The 2K–128K tables above are
+  v2.12.0-m1.
 
 ## Sampled decoding (temperature 1.0)
 
