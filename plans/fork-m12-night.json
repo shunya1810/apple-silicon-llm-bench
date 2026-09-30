@@ -1,0 +1,15 @@
+{
+ "rounds": [
+  [
+   "mtplx-fork"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "mt-128k"
+  }
+ ],
+ "cooldown_s": 120,
+ "rest_s": 300,
+ "canary_tolerance": 0.03
+}

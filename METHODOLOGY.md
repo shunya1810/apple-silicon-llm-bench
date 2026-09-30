@@ -133,6 +133,19 @@ the only per-phase measurement.
 - The 128K canaries of this run were 0.2% (M1 build), 2.4% (upstream) below and 1.1%
   (upstream + env) above each engine's best 2K–64K canary; no cell needed a re-run.
 
+## Re-run of the M1 build at v2.12.0-m1.2 (2026-09-30)
+
+- The M1 build's column is v2.12.0-m1.2 (larger Metal command buffers off by default on
+  M1, plus an SSD prompt-cache fix this benchmark does not use), run alone with the same
+  plans (`plans/fork-m12-*.json`, `run_fork_m12.sh`). Before the plans, a 2K probe cell had
+  to show a canary of at least 29.9 tok/s (m1.2 on a cool, idle machine: 30.3–30.6); it
+  read 30.6.
+- A first attempt earlier that afternoon was stopped: canaries of 28.0–29.1 tok/s and a
+  32K cold prefill 5% slower than the day before. Its rows are in
+  `rows-fork-m12-aborted-20260930.jsonl`, not in `rows.jsonl`.
+- The v2.12.0-m1 rows of 2026-09-29 (same session as upstream and upstream + env) stay as
+  `mtplx-fork-m1`, in the main and the sampled results.
+
 ## Sampled scenario
 
 - Greedy decoding at 256 tokens is a matched workload, not how the model is normally

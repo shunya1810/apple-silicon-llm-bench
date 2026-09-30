@@ -1,0 +1,7 @@
+The provided telemetry data exhibits a deterministic, periodic structure spanning 2,635 records. Sensor values follow a consistent downward trend, decreasing by 0.7 units per record. This linear decay causes the sensor values to cycle repeatedly from a peak near 99.6 down to 0.0, after which the cycle resets. Concurrently, the status field cycles through a fixed sequence of five states: nominal, degraded, recovering, offline, and calibrating. This five-state loop shifts with each new record. The zone identifier also follows a deterministic pattern, alternating between 'A' and 'N' prefixes while incrementing the numeric suffix in a specific, repeating arithmetic progression. The dataset contains one irregular entry, "NEEDLE," which disrupts the numerical format but maintains the sequential record count.
+
+Three concrete observations are:
+
+1.  **Linear Sensor Decay**: The sensor value decreases precisely by 0.7 for every subsequent record, creating a predictable sawtooth wave pattern that resets after approximately 143 records.
+2.  **Cyclic Status Transitions**: The status field strictly adheres to a five-step cycle (nominal → degraded → recovering → offline → calibrating), ensuring that every fifth record shares the same status type relative to the sequence start.
+3.  **Deterministic Zone Assignment**: Zone designations are not random; they alternate prefixes (A/N) and increment numeric values in a fixed sequence, meaning specific zones reappear at predictable intervals based on the record index modulo operations.

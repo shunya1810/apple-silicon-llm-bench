@@ -362,7 +362,7 @@ def conversation_chart(th, cells, ctxs, spot=None):
         o.append(f'<text x="20" y="{y + 6}" fill="{th["t1"]}" font-size="13" font-weight="600">'
                  f'{CTX_LABEL[s]} prompt'
                  + (f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">one run each · the M1 build '
-                    f'here is v2.12.0-m1.1</tspan>' if spot and s == spot[0] else '') + '</text>')
+                    f'here is v2.12.0-m1.1 (m1.2 but for an SSD cache fix)</tspan>' if spot and s == spot[0] else '') + '</text>')
         y += 18
         ybot = y + len(engines) * (rowh + 6)
         t = 0.0
@@ -460,14 +460,14 @@ def long_charts(th, cells, ctxs):
             out[e] = row
         return out
 
-    note = ("256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1 "
-            "(dashed), which decodes 6–8% below v2.12.0-m1")
+    note = ("256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1, "
+            "the same as m1.2 but for an SSD cache fix")
     return {
         "decode-256k": line_chart(
             th, "Decode speed, 2K to 256K (8-bit KV)",
             "Qwen3.8-27B, temperature 0 · mean of turns 1–3 · 2K–64K median of 2 rounds, 128K–256K one run · higher is better",
             "decode tok/s", cx, series(lambda e, c: mean_turns(cells, e, c, "decode_tok_s")),
-            note=note, dashed_last=("mtplx-fork",)),
+            note=note),
     }
 
 

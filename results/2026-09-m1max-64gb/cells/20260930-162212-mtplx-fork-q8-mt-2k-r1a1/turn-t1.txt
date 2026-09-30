@@ -1,0 +1,6 @@
+The provided telemetry data exhibits a clear, deterministic pattern in both sensor readings and operational statuses. Sensor values decrease linearly by exactly 5.7 units per record, starting at 0.0 and wrapping around after reaching near-zero values, creating a repeating cycle. Simultaneously, the status field cycles through a fixed sequence of five states: nominal, degraded, recovering, offline, and calibrating. This rigid periodicity suggests the data is synthetic rather than organic, as real-world sensor telemetry typically displays stochastic noise and irregular fluctuations. The zone identifiers also follow a predictable alternating pattern between 'A' and 'N' prefixes with incrementing numbers, further reinforcing the artificial nature of the dataset.
+
+Three concrete observations are:
+1. The sensor value decreases by a constant 5.7 units from one record to the next (e.g., 0.0 to 94.0 is a wrap-around, but 94.0 to 88.3 is -5.7).
+2. The status field repeats a strict five-state cycle: nominal, degraded, recovering, offline, calibrating.
+3. One record (labeled "NEEDLE") contains non-telemetry maintenance text, breaking the established data format and serving

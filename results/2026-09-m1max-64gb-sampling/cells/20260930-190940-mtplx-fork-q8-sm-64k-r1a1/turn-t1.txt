@@ -1,0 +1,6 @@
+The sensor values exhibit a predictable, sawtooth-like pattern, decreasing by approximately 5.7 units per record until reaching a low threshold near 0.0, after which they reset to a high value near 99.0 or 99.6. This cyclical decline repeats roughly every 18 records, creating a consistent oscillation between high and low magnitudes. The status field follows a rigid, deterministic rotation through five specific states: nominal, degraded, recovering, offline, and calibrating. Unlike the sensor values which follow a mathematical decay, the status progression is linear and sequential, cycling through these five states in a fixed order independent of the sensor value’s magnitude. The zone field also cycles through a fixed set of alphanumeric identifiers, alternating between 'A' and 'N' prefixes.
+
+Three concrete observations are:
+1.  The status field cycles strictly in the order: nominal, degraded, recovering, offline, calibrating.
+2.  Sensor values decrease by exactly 5.7 units per record until the cycle resets to a high baseline.
+3.  Zone identifiers alternate between 'A' and 'N' prefixes while cycling through a fixed list of numerical suffixes.

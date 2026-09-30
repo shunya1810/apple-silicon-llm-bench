@@ -1,0 +1,6 @@
+The synthetic telemetry dataset exhibits distinct periodic patterns in both sensor readings and system statuses. Sensor values generally decrease linearly from 0.0 to approximately 2.8 over the first 18 records, then jump significantly to high values (e.g., 96.8) before declining again. This suggests a cyclic or reset-based generation process rather than continuous random noise. The status field follows a strict five-state cycle: nominal, degraded, recovering, offline, and calibrating, repeating every five records. Similarly, the zone identifiers alternate between zones prefixed with 'A' and 'N', with numeric suffixes that also follow a predictable, non-random sequence. These structured variations indicate that the data is generated algorithmically rather than representing organic sensor behavior.
+
+Three concrete observations are:
+1. The status field repeats in a fixed cycle of five: nominal, degraded, recovering, offline, calibrating.
+2. Sensor values drop by exactly 5.7 units per record during the first descending phase (e.g., 0.0 to 94.0 is an initial jump, but subsequent steps like 94.0 to 88.3 show a -5.7 delta).
+3. Every third record (indices 0, 3, 6, etc.) contains an "offline" status, indicating a rigid modular structure in the data generation.

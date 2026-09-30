@@ -1,0 +1,23 @@
+Comparing the "offline" and "nominal" status records reveals distinct differences in both sensor value distributions and zone assignments. Records with an "offline" status (e.g., Record 000003, 000008, 000013) typically feature sensor values that are higher or part of the descending sequence’s mid-to-high range, such as 82.6, 54.1, and 25.6. Conversely, "nominal" records (e.g., Record 000000, 000005, 000010) are situated at the start of the cycle, often holding lower values like 0.0, 71.2, and 42.7, though this varies due to the reset mechanism.
+
+Regarding zones, "offline" statuses consistently occur in zones prefixed with "N" (e.g., N61, A56 is actually 'A' for offline? Wait, let's re-check).
+*Correction*: Let's look closely at the provided data.
+Record 000003: status=offline, zone=N61.
+Record 000008: status=offline, zone=A56.
+Record 000013: status=offline, zone=N51.
+Record 000000: status=nominal, zone=A10.
+Record 000005: status=nominal, zone=N95.
+Record 000010: status=nominal, zone=A90.
+
+Actually, the zone prefix alternates A, N, A, N... regardless of status. Record 0 (A), 1 (N), 2 (A), 3 (N), 4 (A), 5 (N).
+Status cycle: Nominal (0), Degraded (1), Recovering (2), Offline (3), Calibrating (4).
+So:
+Index 0: Nominal, A
+Index 1: Degraded, N
+Index 2: Recovering, A
+Index 3: Offline, N
+Index 4: Calibrating, A
+Index 5: Nominal, N
+Index 6: Degraded, A
+Index 7: Recovering, N
+Index

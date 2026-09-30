@@ -25,15 +25,13 @@
 <text x="638.3" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">256K</text>
 <text x="380.0" y="436" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="252.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 252.0)">decode tok/s</text>
-<polyline points="121.7,168.6 225.0,172.4 328.3,202.5 431.7,221.5 535.0,254.7" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<line x1="535.0" y1="254.7" x2="638.3" y2="291.0" stroke="#3987e5" stroke-width="2" stroke-dasharray="5 4"/>
-<circle cx="121.7" cy="168.6" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 31.8</title></circle>
-<circle cx="225.0" cy="172.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 31.2</title></circle>
-<circle cx="328.3" cy="202.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 27.0</title></circle>
-<circle cx="431.7" cy="221.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 24.3</title></circle>
-<circle cx="535.0" cy="254.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 19.6</title></circle>
+<polyline points="121.7,185.7 225.0,189.4 328.3,213.2 431.7,227.7 535.0,258.8 638.3,291.0" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="121.7" cy="185.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 29.3</title></circle>
+<circle cx="225.0" cy="189.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 28.8</title></circle>
+<circle cx="328.3" cy="213.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 25.5</title></circle>
+<circle cx="431.7" cy="227.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 23.4</title></circle>
+<circle cx="535.0" cy="258.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 19.0</title></circle>
 <circle cx="638.3" cy="291.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 256K: 14.5</title></circle>
-<circle cx="638.3" cy="291.0" r="2.5" fill="#1a1a19"/>
 <polyline points="121.7,226.4 225.0,234.3 328.3,294.6 431.7,332.4 535.0,358.8" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
 <path d="M121.7 220.4L127.7 226.4L121.7 232.4L115.7 226.4Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 23.6</title></path>
 <path d="M225.0 228.3L231.0 234.3L225.0 240.3L219.0 234.3Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 22.5</title></path>
@@ -50,5 +48,5 @@
 <path d="M638.3 296.1L644.3 307.1L632.3 307.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 256K: 12.9</title></path>
 <text x="650.3" y="290.0" fill="#ffffff" font-size="12" font-weight="600">14.5</text><text x="650.3" y="304.0" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
 <text x="650.3" y="320.0" fill="#ffffff" font-size="12" font-weight="600">12.9</text><text x="650.3" y="334.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
-<text x="20" y="452" fill="#c3c2b7" font-size="11">256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1 (dashed), which decodes 6–8% below v2.12.0-m1</text>
+<text x="20" y="452" fill="#c3c2b7" font-size="11">256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1, the same as m1.2 but for an SSD cache fix</text>
 </svg>
