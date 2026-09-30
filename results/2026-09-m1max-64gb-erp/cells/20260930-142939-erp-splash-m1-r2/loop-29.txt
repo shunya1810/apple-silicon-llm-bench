@@ -1,0 +1,9 @@
+We need answer user's request: "In exactly three clear, professional sentences, explain why memory bandwidth (rather than raw compute TFLOPS) is the dominant latency bottleneck during autoregressive token generation in transformer LLMs."
+
+Need exactly three sentences. Need clear professional. Need explain memory bandwidth dominant latency bottleneck during autoregressive token generation. Key points: each token requires loading model weights and KV cache from memory for small batch size, arithmetic intensity low, compute units underutilized; latency per token scales with bytes moved / bandwidth, not FLOPs. Need exactly three sentences. Ensure no semicolon? sentences count. Let's craft 3 sentences.
+
+Sentence 1: During autoregressive generation, each new token requires reading the model weights and the growing key-value cache from memory to perform a single forward pass.
+Sentence 2: Because the batch size per token is typically small, the arithmetic intensity is low, so the GPU's floating-point units are mostly idle while waiting for data.
+Sentence 3: Consequently, per-token latency is governed primarily by how fast bytes can be moved from memory, making memory bandwidth, not peak TFLOPS, the dominant bottleneck.
+
+Check exactly three sentences. Yes. Professional. Could mention

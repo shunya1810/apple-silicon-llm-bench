@@ -1,0 +1,9 @@
+We need to answer user: "In exactly three clear, professional sentences, explain why memory bandwidth (rather than raw compute TFLOPS) is the dominant latency bottleneck during autoregressive token generation in transformer LLMs."
+
+Need exactly three sentences. Clear professional. Need likely mention decode phase: batch size 1, small activation vectors, large weights must be read from memory each token, arithmetic intensity low, compute units underutilized, latency dominated by memory access time/bandwidth. Need exactly three sentences. Ensure no extra. Count sentences carefully.
+
+Sentence 1: "During autoregressive decoding, each new token requires reading the model’s large weight matrices from memory while operating on a small activation vector, so the operation has very low arithmetic intensity."
+Sentence 2: "Because the amount of data moved per token far exceeds the useful arithmetic that can be performed on it, the GPU or accelerator spends most of its time waiting for memory transfers rather than executing FLOPs."
+Sentence 3: "Consequently, memory bandwidth, not peak TFLOPS, sets the per-token latency, especially at small batch sizes where compute cannot be amortized across many tokens."
+
+Check exactly three sentences. Yes. Professional. Could mention latency

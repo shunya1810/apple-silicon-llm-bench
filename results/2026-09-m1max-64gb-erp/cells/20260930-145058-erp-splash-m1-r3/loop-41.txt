@@ -1,0 +1,14 @@
+We need answer user: Write Python function merge_intervals(intervals: list[list[int]]) -> list[list[int]] that merges overlapping intervals. Clean, optimal O(N log N), handle empty lists and negative coordinates, include type annotations and docstring.
+
+Need produce final code likely with explanation. Need ensure correctness. Let's think details.
+
+Function signature: def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:
+Docstring. Implementation:
+if not intervals: return []
+sorted_intervals = sorted(intervals, key=lambda x: x[0])
+merged = [sorted_intervals[0][:]]? Need avoid mutating input? Could use list copy. For each interval in sorted_intervals[1:]: current = merged[-1]; if interval[0] <= current[1]: current[1] = max(current[1], interval[1]); else: merged.append(interval[:])
+return merged
+
+Need consider intervals maybe [start, end] with start > end? Usually intervals valid start <= end. Could normalize? User didn't ask. Negative coordinates okay. If intervals empty return []. If one interval return copy.
+
+Type annotations: list[list[int]] requires Python 3.9+. Could use from

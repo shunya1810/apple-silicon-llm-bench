@@ -1,0 +1,10 @@
+We need answer puzzle. Need solve. Three friends Alice Bob Charlie in row chairs 1-3 left to right. Constraints: Alice never sits next to Bob. Charlie is to right of Alice (higher chair number). Need who sits in chair 1,2,3? Logical deduction step by step.
+
+Let's reason. Positions 1,2,3. Charlie right of Alice: Alice cannot be 3; Charlie cannot be 1 if Alice? Actually Charlie higher number than Alice. Possible (Alice,Charlie) pairs: (1,2), (1,3), (2,3). Bob remaining.
+Alice never next to Bob: positions differ not 1.
+Check possibilities:
+A=1,C=2 => Bob=3. Alice pos1 next to Bob pos3? no (distance 2). Valid.
+A=1,C=3 => Bob=2. Alice pos1 next to Bob pos2 => invalid.
+A=2,C=3 => Bob=1. Alice pos2 next to Bob pos1 => invalid.
+Thus only A=1, C=2, B=3. So chair1 Alice, chair2 Charlie, chair3 Bob.
+Need present

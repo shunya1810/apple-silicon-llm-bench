@@ -1,0 +1,30 @@
+We need answer user's classic bat and ball puzzle. Need provide step-by-step algebraic derivation and final answer. Need final concise but detailed. Let's craft: let ball = x, bat = x + 1.00. Total x + (x+1)=1.10 => 2x+1=1.10 => 2x=0.10 => x=0.05. Bat=1.05. Final ball $0.05. Ensure algebra clear.
+
+
+Let:
+
+- \(x\) = cost of the ball
+- \(x + 1.00\) = cost of the bat, since the bat costs $1.00 more than the ball
+
+The total cost is $1.10, so:
+
+\[
+x + (x + 1.00) = 1.10
+\]
+
+Combine like terms:
+
+\[
+2x + 1.00 = 1.10
+\]
+
+Subtract $1.00 from both sides:
+
+\[
+2x = 0.10
+\]
+
+Divide by 2:
+
+\[
+x

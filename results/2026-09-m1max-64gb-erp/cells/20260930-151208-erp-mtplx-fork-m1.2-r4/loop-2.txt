@@ -1,0 +1,11 @@
+We need answer puzzle. Need solve. Three friends Alice Bob Charlie in chairs 1,2,3 left to right. Constraints: Alice never sits next to Bob. Charlie is to right of Alice (higher chair number). Need who sits in chair 1,2,3? Let's analyze.
+
+Positions 1,2,3. Charlie right of Alice: possible (Alice, Charlie) positions: A1 C2, A1 C3, A2 C3. Bob remaining.
+Constraint Alice not next to Bob: adjacent positions differ by 1.
+Check possibilities:
+A1 C2 -> Bob3. Alice at1, Bob at3 not adjacent (distance2). Valid.
+A1 C3 -> Bob2. Alice at1, Bob at2 adjacent -> invalid.
+A2 C3 -> Bob1. Alice at2, Bob at1 adjacent -> invalid.
+Thus only A1, C2, B3. So chair1 Alice, chair2 Charlie, chair3 Bob.
+Need give logical deduction step by step. Could mention if Charlie right of Alice means strictly higher chair number. Yes.
+Need final concise but detailed. Ensure no hidden ambiguity? "Charlie is to the

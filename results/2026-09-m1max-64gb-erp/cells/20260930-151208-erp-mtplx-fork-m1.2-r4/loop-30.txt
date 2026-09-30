@@ -1,0 +1,47 @@
+We need answer user's simple algebra problem. Need produce final with step-by-step algebraic derivation and final answer. Need be careful: classic answer 5 cents. Let's craft concise but detailed.
+Let:
+
+- \(b\) = cost of the ball in dollars
+- \(t\) = cost of the bat in dollars
+
+We are given two facts:
+
+1. The bat and ball together cost \$1.10:
+
+\[
+b + t = 1.10
+\]
+
+2. The bat costs \$1.00 more than the ball:
+
+\[
+t = b + 1.00
+\]
+
+Substitute the second equation into the first:
+
+\[
+b + (b + 1.00) = 1.10
+\]
+
+Combine like terms:
+
+\[
+2b + 1.00 = 1.10
+\]
+
+Subtract \$1.00 from both sides:
+
+\[
+2b = 0.10
+\]
+
+Divide by 2:
+
+\[
+b = 0.05
+\]
+
+So the ball costs:
+
+\[

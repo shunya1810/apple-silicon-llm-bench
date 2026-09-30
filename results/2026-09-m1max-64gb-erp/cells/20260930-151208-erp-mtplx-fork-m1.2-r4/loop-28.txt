@@ -1,0 +1,7 @@
+We need answer user: "Explain clearly the respective roles and architectural differences between FlashAttention, PagedAttention, and Speculative Decoding in high-performance LLM inference engines."
+
+Need produce clear explanation. Need think through content.
+
+We need cover roles and architectural differences. High-performance LLM inference engines. Need distinguish:
+- FlashAttention: attention kernel optimization, exact attention, IO-aware, tiling, recomputation, reduces HBM traffic, improves memory bandwidth and compute efficiency. It's a layer/kernel-level optimization inside transformer forward pass. Not memory management, not decoding strategy. Works for training/inference, prefill and decode. Variants FA2/FA3. It changes how QKV attention computed, not model architecture or scheduling.
+- PagedAttention: KV cache memory management and attention kernel adaptation for serving. Inspired by OS virtual memory/paging. Stores KV cache in fixed-size blocks/pages, non-contiguous, shared across sequences via copy-on-write for beam search/parallel sampling. Reduces fragmentation and memory waste, enables high batch sizes, continuous batching, prefix caching. It is serving/memory architecture + attention kernel that can read paged KV. It addresses KV cache memory layout and allocation, not compute algorithm per

@@ -222,6 +222,41 @@ take well over an hour each.
   another) and decodes 6–8% below m1, with identical text. The 2K–128K tables above are
   v2.12.0-m1.
 
+## Short prompts, the Splash part 2 conditions
+
+A repeat of benchmark 5 from the "Splash on M1, part 2" post, for the MTPLX M1 build
+(v2.12.0-m1.2) and Splash 1.1.0-m1 only: npanj's five splash-plus prompts on a
+5-minute loop (250 tokens, temperature 0, reasoning xhigh; both engines see the same
+prompt token counts), a 3-minute rest, then one cold 44K prompt. ABBA, two runs each,
+2026-09-30, macmon every second ([`scripts/erp_repro.py`](scripts/erp_repro.py),
+[`run_erp.sh`](run_erp.sh), raw data in
+[`results/2026-09-m1max-64gb-erp/`](results/2026-09-m1max-64gb-erp/)). Means of the two runs:
+
+| | MTPLX M1 build m1.2 | Splash 1.1.0-m1 |
+|---|---|---|
+| decode, 5-minute loop (mean per request) | 31.5 tok/s | **40.7 tok/s** |
+| GPU temperature while looping (mean / max) | 88.4 / 94.5 °C | 90.1 / 92.8 °C |
+| time above 80 °C while looping | 94% | 93% |
+| package power while looping | 47.1 W | 42.0 W |
+| energy per generated token | 1.74 J | **1.17 J** |
+| fans while looping (mean of both) | 3,400 rpm | 1,900 rpm |
+| cold 44K prompt | **364 s (123 tok/s)** | 438 s (103 tok/s) |
+| GPU temperature during that prefill (mean / max) | 85.2 / 97.7 °C | 90.8 / 94.1 °C |
+| engine footprint after the 44K prompt | 29.0 GB (peak 31.1) | see note |
+
+- The same picture as the Splash post: on short prompts Splash decodes 29% faster and
+  uses a third less energy per token, and the MLX-based engine reads a long prompt ~20%
+  faster. The GPU clock stayed at ~1,295 MHz from start to end of every loop (no
+  throttling), on the 100 W adapter with the battery at 93–95%.
+- Temperatures are not comparable with that post's: here the fans ran on macOS's default
+  control, which let both engines sit near 90 °C; that post used a fan curve reaching
+  full speed at 80 °C, under which only Splash stayed below 80. The MTPLX build's GPU
+  sensors peaked higher during prefill (97–98 °C), as that post observed for MTPLX.
+- Energy per token here is package power over the whole loop (including the short
+  prefills) divided by generated tokens.
+- Splash maps its weights from disk, so `footprint` sees only ~4.9 GB of it; its wired
+  memory in the long-context runs above was 22–26 GB.
+
 ## Sampled decoding (temperature 1.0)
 
 Greedy decoding at 256 tokens is a matched workload, not how the model is normally run.
