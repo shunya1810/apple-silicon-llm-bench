@@ -1,0 +1,59 @@
+  ███╗   ███╗ ████████╗ ██████╗  ██╗      ██╗  ██╗
+  ████╗ ████║ ╚══██╔══╝ ██╔══██╗ ██║      ╚██╗██╔╝
+  ██╔████╔██║    ██║    ██████╔╝ ██║       ╚███╔╝ 
+  ██║╚██╔╝██║    ██║    ██╔═══╝  ██║       ██╔██╗ 
+  ██║ ╚═╝ ██║    ██║    ██║      ███████╗ ██╔╝ ██╗
+  ╚═╝     ╚═╝    ╚═╝    ╚═╝      ╚══════╝ ╚═╝  ╚═╝
+
+  Native MTP speculative decoding · Apple Silicon
+
+╭─ MTPLX 2.12.0 ───────────────────────────────────────────────────────────────╮
+│                                                                              │
+│      Model  mtplx-qwen38-27b-optimized-speed-fp16                            │
+│    Profile  turbo                                                            │
+│        API  http://127.0.0.1:18103/v1                                        │
+│       Mode  turbo MTP                                                        │
+│    Browser  http://127.0.0.1:18103/                                          │
+│  Listening  127.0.0.1:18103                                                  │
+│    Loading  /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optim…  │
+│     Warmup  0 tokens                                                         │
+│       Auth  API key: leave blank for localhost                               │
+│       Stop  Ctrl-C                                                           │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+[1/6] Server config ready: http://127.0.0.1:18103/v1
+[2/6] Model resolved: /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optimized-Speed-FP16
+[3/6] Runtime contract verified — profile: turbo
+      Loading the model can take about a minute on first start.
+
+[4/6] Preparing turbo MTP runtime
+[4/6] Checking local acceleration runtime
+      This may take a few seconds.
+[4/6] Runtime checks complete
+[5/6] Loading model weights: /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optimized-Speed-FP16
+      This is the long step; MTPLX is mapping the model into MLX.
+      Model load in progress (this may take a minute).
+[5/6] Model loaded in 3.3s
+[5/6] Installing native-MTP draft head
+[frspec] disabled (MTPLX_FRSPEC_DRAFT=None)
+[5/6] Chat template profile: tokenizer
+[5/6] Context window: 262144 tokens
+[mtplx] dense-decode ceiling auto: 157286 tokens (15% RAM over 65536 B/token, from the model config)
+[5/6] Memory plan: 64G Mac: engine budget 48.0G, weights 19.3G, context 262144, session bank up to 25.7G (yields to 20.5G under long-context load)
+[5/6] GPU residency keepalive: every 1s for 600s after each request
+[mtplx] session-bank budget: 25.7G total (auto: machine memory plan, yields to live KV), 12.9G per-session cap, 24 entries max, model weights 19.3G. Override: MTPLX_SESSION_BANK_MAX_BYTES / MTPLX_SESSION_BANK_PER_SESSION_BYTES (sizes like 12G or 12GiB).
+[6/6] Warmup skipped (--warmup-tokens 0)
+
+MTPLX is ready.
+Chat UI: http://127.0.0.1:18103/
+OpenAI API Base URL: http://127.0.0.1:18103/v1
+Model: mtplx-qwen38-27b-optimized-speed-fp16
+Reasoning history: preserve (policy auto)
+API key: leave blank for localhost
+Health check: http://127.0.0.1:18103/health
+Keep this terminal open. Press Ctrl-C to stop MTPLX.
+[mtplx] compiled-verify prewarm {"buckets": [{"bucket": 1024, "s": 0.144}, {"bucket": 2048, "s": 0.121}, {"bucket": 4096, "s": 0.123}, {"bucket": 8192, "s": 0.123}, {"bucket": 16384, "s": 0.125}, {"bucket": 16592, "s": 0.121}], "skipped": [], "already": [], "elapsed_s": 0.76, "complete": false}
+/Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-v2.12.0-m1.2/mtplx/fast_sampling.py:439: RuntimeWarning: All-NaN slice encountered
+  spill = np.nanmin(cand_val_rows, axis=1) >= cutoff
+non-finite logits request_id=chatcmpl-7a4a25dd41f5428bbb7f6b4aefe3bce6 session=anon-de552e969affd85d: non-finite logits in softmax (nan=248320, inf=0, vocab=248320)

@@ -1,0 +1,2 @@
+{"env": [], "streamed_tokens": 16535, "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite logits (non-finite logits in softmax (nan
+{"env": ["MTPLX_COMPILED_VERIFY_MAX_CONTEXT=12000"], "streamed_tokens": 16529, "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite 

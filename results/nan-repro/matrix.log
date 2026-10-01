@@ -1,0 +1,10 @@
+00:20:55 upstream
+{"env": [], "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite logits (non-finite logits in softmax (nan=248320, inf=0, vocab=248320)); this request failed, its session's cached state was dr
+00:33:46 fork MTPLX_M1_LONG_CONTEXT=0
+{"env": ["MTPLX_M1_LONG_CONTEXT=0"], "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite logits (non-finite logits in softmax (nan=248320, inf=0, vocab=248320)); this request failed, its sess
+00:46:46 fork MTPLX_GQA_MMA=0
+{"env": ["MTPLX_GQA_MMA=0"], "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite logits (non-finite logits in softmax (nan=248320, inf=0, vocab=248320)); this request failed, its session's ca
+00:58:12 fork MTPLX_FRSPEC_DRAFT=0
+{"env": ["MTPLX_FRSPEC_DRAFT=0"], "prompt_tokens": null, "completion_tokens": null, "finish": "error", "error": {"message": "the model produced non-finite logits (non-finite logits in softmax (nan=248320, inf=0, vocab=248320)); this request failed, its session
+01:08:57 fork MTPLX_COMPILED_VERIFY=0
+{"env": ["MTPLX_COMPILED_VERIFY=0"], "prompt_tokens": 62, "completion_tokens": 17500, "finish": "length", "error": null, "nonfinite_lines": 0, "first": []}

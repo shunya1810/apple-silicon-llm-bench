@@ -1,0 +1,313 @@
+## Most serious bug: `None` identity fields are treated as “match anything”
+
+The worst correctness bug is in the candidate-row selection used by both `lookup()` and `lookup_prefix_boundary()`:
+
+- `_candidate_rows()`
+- `_candidate_rows_for_prefix_boundary()`
+
+These methods treat `None` for the identity fields as **no SQL filter** instead of as **the actual stored `NULL` value**. `None` is a legitimate identity value here: “no hidden variant”, “no template hash”, “no draft head identity”, “no policy fingerprint”, etc. But the code currently makes it a wildcard.
+
+That is dangerous because the restore path trusts the selected row and does **not** re-validate those identity columns against the lookup arguments.
+
+---
+
+## Where the bug is
+
+### 1. Optional identity columns are only filtered when non-`None`
+
+In `_candidate_rows()`:
+
+```python
+if hidden_variant is not None:
+    query.append("AND hidden_variant = ?")
+    params.append(str(hidden_variant))
+if template_hash is not None:
+    query.append("AND template_hash = ?")
+    params.append(str(template_hash))
+if draft_head_identity is not None:
+    query.append("AND draft_head_identity = ?")
+    params.append(str(draft_head_identity))
+if policy_fingerprint is not None:
+    query.append("AND policy_fingerprint = ?")
+    params.append(str(policy_fingerprint))
+```
+
+So a lookup like:
+
+```python
+self.lookup(
+    tokens,
+    model_path="...",
+    mtp_enabled=False,
+    hidden_variant=None,
+    template_hash=None,
+    policy_fingerprint=None,
+    ...
+)
+```
+
+produces SQL roughly like:
+
+```sql
+SELECT * FROM entries
+WHERE model_path = ?
+  AND mtp_enabled = ?
+  AND prefix_len <= ?
+ORDER BY prefix_len DESC, last_access_s DESC
+```
+
+There is **no** `hidden_variant IS NULL`, no `template_hash IS NULL`, no `policy_fingerprint IS NULL`, etc.
+
+Therefore it can return rows where those columns are non-`NULL`.
+
+The same pattern exists in `_candidate_rows_for_prefix_boundary()`.
+
+---
+
+### 2. `mtp_history_policy` also becomes a wildcard when `None`
+
+In both candidate methods:
+
+```python
+if mtp_history_policy is None:
+    return rows
+```
+
+This bypasses `_policy_compatible()` entirely.
+
+But `_policy_compatible()` is actually the safer logic:
+
+```python
+def _policy_compatible(entry_policy, lookup_policy):
+    if entry_policy == lookup_policy:
+        return True
+    if entry_policy is None or lookup_policy is None:
+        return False
+    return entry_policy in _COMMITTED_CACHE_POLICIES and lookup_policy in _COMMITTED_CACHE_POLICIES
+```
+
+With the current short-circuit, a lookup with `mtp_history_policy=None` will match entries whose stored policy is `committed`, `last_window`, etc. That is another identity-wildcard bug.
+
+---
+
+## Why this is a correctness bug, not just a performance issue
+
+The cache key is not just `token_ids`. The metadata explicitly includes identity fields:
+
+```python
+identity = {
+    "model_path": ...,
+    "mtp_enabled": ...,
+    "hidden_variant": ...,
+    "template_hash": ...,
+    "mtp_history_policy": ...,
+    "draft_head_identity": ...,
+    "policy_fingerprint": ...,
+    "session_id": ...,
+}
+```
+
+and the entry id / block hashes are derived from those values.
+
+But the lookup path does not re-check those identity fields after selecting a row. `_restore_row()` validates:
+
+- token prefix,
+- format version,
+- MTP epoch sanity,
+
+but it does **not** re-validate `hidden_variant`, `template_hash`, `draft_head_identity`, `policy_fingerprint`, or `mtp_history_policy` against the original lookup request.
+
+So the SQL candidate filter is effectively the only gate.
+
+That means a row captured under:
+
+```python
+hidden_variant="some-variant"
+template_hash="some-template"
+policy_fingerprint="some-policy"
+mtp_history_policy="committed"
+```
+
+can be selected and restored for a request that actually has:
+
+```python
+hidden_variant=None
+template_hash=None
+policy_fingerprint=None
+mtp_history_policy=None
+```
+
+as long as `model_path`, `mtp_enabled`, and the token prefix match closely enough.
+
+---
+
+## When it triggers
+
+It triggers whenever:
+
+1. The store contains an entry with a non-`NULL` value in one of the optional identity columns, **and**
+2. A later lookup passes `None` for that column, **and**
+3. The token prefix is close enough to be considered a candidate.
+
+### Exact lookup example
+
+Stored entry:
+
+```python
+model_path="model-A"
+mtp_enabled=False
+hidden_variant="variant-1"
+template_hash="tmpl-1"
+policy_fingerprint="pol-1"
+token_ids=(12, 34, 56, ...)
+```
+
+New request:
+
+```python
+model_path="model-A"
+mtp_enabled=False
+hidden_variant=None
+template_hash=None
+policy_fingerprint=None
+token_ids=(12, 34, 56, ...)
+```
+
+The query omits the `hidden_variant`, `template_hash`, and `policy_fingerprint` predicates, so the stored entry is returned. `_restore_row()` sees the token prefix matches and restores it.
+
+That is a false hit.
+
+---
+
+### Prefix-boundary lookup example
+
+This is even more dangerous because `lookup_prefix_boundary()` ranks candidates by how many tokens match.
+
+Suppose:
+
+- Correct-identity entry matches 400 tokens.
+- Wrong-identity entry matches 600 tokens.
+
+The wrong-identity row can win the ranking purely because it has a longer matched prefix. Then the system hydrates and returns a cache from the wrong template/policy/variant.
+
+So the bug can turn a miss into a hit, or a smaller correct hit into a larger incorrect hit.
+
+---
+
+## What it costs
+
+This is a silent correctness failure.
+
+Consequences:
+
+- The tier reports `restore_hits` even though the restored state is not identity-compatible.
+- The request appears fast and warm, so the bug is hard to notice.
+- The restored KV/logits/hidden/MTP state may be invalid for the current request identity.
+- The model can generate incorrect outputs.
+- If the wrong state is then used to build further session state, the problem can propagate.
+- In multi-user or multi-template deployments, this is a cache-poisoning / cross-identity restoration hazard.
+- Because prefix lookup ranks by matched length, a wrong-identity row can actively displace the correct row.
+
+This is much more serious than accounting or eviction bugs, because it can restore the wrong prompt state and present it as a valid cache hit.
+
+---
+
+## Minimal patch
+
+`None` should mean “stored column is `NULL`”, not “no filter”.
+
+Add a small helper:
+
+```python
+    @staticmethod
+    def _append_exact_identity(
+        query: list[str],
+        params: list[Any],
+        column: str,
+        value: Any,
+    ) -> None:
+        # None is a legitimate identity value: the column is stored as NULL.
+        if value is None:
+            query.append(f"AND {column} IS NULL")
+        else:
+            query.append(f"AND {column} = ?")
+            params.append(str(value))
+```
+
+Then in `_candidate_rows()`, replace the optional-field blocks:
+
+```python
+if hidden_variant is not None:
+    query.append("AND hidden_variant = ?")
+    params.append(str(hidden_variant))
+if template_hash is not None:
+    query.append("AND template_hash = ?")
+    params.append(str(template_hash))
+if draft_head_identity is not None:
+    query.append("AND draft_head_identity = ?")
+    params.append(str(draft_head_identity))
+if policy_fingerprint is not None:
+    query.append("AND policy_fingerprint = ?")
+    params.append(str(policy_fingerprint))
+```
+
+with:
+
+```python
+self._append_exact_identity(query, params, "hidden_variant", hidden_variant)
+self._append_exact_identity(query, params, "template_hash", template_hash)
+self._append_exact_identity(query, params, "draft_head_identity", draft_head_identity)
+self._append_exact_identity(query, params, "policy_fingerprint", policy_fingerprint)
+```
+
+Do the same in `_candidate_rows_for_prefix_boundary()`.
+
+Also remove the `mtp_history_policy` wildcard short-circuit.
+
+Replace:
+
+```python
+if mtp_history_policy is None:
+    return rows
+compatible: list[sqlite3.Row] = []
+for row in rows:
+    if _policy_compatible(row["mtp_history_policy"], mtp_history_policy):
+        compatible.append(row)
+return compatible
+```
+
+with:
+
+```python
+return [
+    row
+    for row in rows
+    if _policy_compatible(row["mtp_history_policy"], mtp_history_policy)
+]
+```
+
+Do this in both `_candidate_rows()` and `_candidate_rows_for_prefix_boundary()`.
+
+---
+
+## Why this patch is minimal and safe
+
+It preserves the existing identity semantics:
+
+- `None` matches only stored `NULL`.
+- Non-`None` values match only the same stored value.
+- `mtp_history_policy` uses the already-present compatibility rules, but no longer treats `None` as “any”.
+
+If the API genuinely needs a wildcard, that must be an explicit sentinel, for example:
+
+```python
+ANY = object()
+```
+
+and the code would omit the predicate only for that sentinel. `None` should not serve double duty as both “NULL” and “any”.
+
+---
+
+## Optional defense-in-depth
+
+The SQL fix is the minimal correctness patch. A stronger version would also re-validate identity in `_restore_row()` before hydrating, because that is the last gate before returning live restored state. But `_restore_row()` would need the lookup identity arguments passed in. The SQL fix above is the smallest change that prevents the wrong row from being selected in the first place.

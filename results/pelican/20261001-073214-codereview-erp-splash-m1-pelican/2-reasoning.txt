@@ -1,0 +1,1121 @@
+Let me read the code carefully and find the most serious correctness bug.
+
+This is a cold-tier persistence layer for an LLM inference server. Main areas:
+
+1. `put_entry` — encoding on the owner thread, enqueueing `PendingWrite`
+2. Writer loop — `_write_pending` — blob writing, manifest commit
+3. `spill_entry` — streaming write path
+4. `lookup` / `lookup_prefix_boundary` — restoration path
+5. Eviction / orphan cleanup / disk-usage snapshots
+6. Admission control: `_admit_write`, `_release_pending`, backpressure budget, hourly budget
+
+Let me look for bugs.
+
+**Bug candidate 1: double counting of `_pending_bytes` / admission.**
+
+In `put_entry`:
+```python
+estimated_nbytes = int(getattr(entry, "nbytes", 0) or 0)
+if not self._admit_write(estimated_nbytes):
+    return False
+```
+
+`_admit_write` adds `estimated_nbytes` to `self._pending_bytes` if it succeeds. Then on the `ColdEncodeInterrupted` path: `self._release_pending(estimated_nbytes)`. On the exception path: `self._release_pending(estimated_nbytes)`. Good.
+
+Then, after encoding, `pending.pinned_nbytes = max(estimated_nbytes, int(encoded.nbytes))`. If queue is full: `self._release_pending(pending.pinned_nbytes)`.
+
+Hmm — here's a subtle accounting bug: `_admit_write` added `estimated_nbytes` (not `pinned_nbytes`). Then on queue-full, it releases `pending.pinned_nbytes`, which is `max(estimated, encoded)`. So if `encoded.nbytes > estimated_nbytes`, we subtract more than we added. Since `_release_pending` clamps at 0, the accounting can underflow toward zero… actually clamping at 0 is fine — but it means we release more than was admitted, so `_pending_bytes` may go to zero, allowing future admissions more than the budget. Minor accounting imprecision, not the most serious.
+
+More serious: in the writer loop's `finally: self._release_pending(pending.pinned_nbytes)`. This releases `pinned_nbytes` (max of estimated and encoded). But `_admit_write` only added `estimated_nbytes`. So `pinned_nbytes - estimated_nbytes` gets over-released on every successful write where the encoded size exceeds the estimate. Clamped at 0, so it can't go negative, but it drains the budget faster than real, allowing admission of more queued bytes than the budget. Still just a budget imprecision. Not a correctness bug on the persisted data.
+
+Wait — but there's a subtle double-release bug: in `put_entry`, if `ColdEncodeInterrupted` is raised, we release `estimated_nbytes`. But `_admit_write` added `estimated_nbytes`. Fine.
+
+But consider: `_admit_write(estimated_nbytes)` is called with the estimated value. If queue is full, we release `pending.pinned_nbytes` = max(estimated, encoded). If encoded > estimated, we over-release. If later the writer drains… no wait, on queue-full, we don't enqueue. The writer never sees it. So the net effect: we added `estimated`, released `pinned` (larger) → `_pending_bytes` goes lower than actual by `pinned - estimated`. Because of the max(0, ...) clamp, we can't go negative, but over time `_pending_bytes` underestimates the real backlog, allowing over-admission. Just a stats/budget bug.
+
+**Bug candidate 2: `put_entry` enqueues but writer releases — accounting for `task_done`.**
+
+Not a data bug.
+
+**Bug candidate 3: the restore path — the partial decode of `prefix_restore_tokens` in `_restore_row`.**
+
+Let me look at the partial-restore logic:
+
+```python
+partial_restore = (
+    prefix_restore_tokens is not None
+    and not require_exact_prefix
+    and int(prefix_restore_tokens) > 0
+)
+```
+
+For `lookup_prefix_boundary`, `prefix_restore_tokens=int(best[1])` = candidate_matched.
+
+`candidate_matched` = for near_match: `matched` (the common prefix between the lookup tokens and the stored prefix); for block_match: `safe_block` = min(block_aligned(matched), len(prefix), len(tokens)).
+
+Then:
+```python
+boundary_prefix = _payload_boundary_at_or_below(payload_spec, requested_prefix)
+```
+Returns the largest boundary token count that is ≤ requested_prefix.
+
+```python
+if (
+    (has_recurrent and boundary_prefix is None)
+    or not payload_supports_prefix_decode(payload_spec)
+):
+    decoded = decode_payload(...)  # full decode + (presumably) trim upstream?
+else:
+    restore_point = int(boundary_prefix) if boundary_prefix is not None else requested_prefix
+    cache_prefix_len = restore_point if boundary_prefix is not None else restore_point - 1
+```
+
+Hmm — wait, where does the trim happen? For the full decode path with partial restore, `decode_payload(..., include_gdn_boundaries=include_gdn_boundaries)` — decoding the FULL payload. But the caller asked for only `prefix_restore_tokens` tokens… does the full decode path trim to the requested prefix? Let me check: the comment says "cache types whose metadata couples rolling state to their tensors must use the exact decoder plus trim". So presumably session_bank trims. OK.
+
+Then the record is returned with `cache_snapshot_prefix_len=decoded.cache_snapshot_prefix_len` — the caller uses that.
+
+Now, the important question: is there a case where the restored snapshot is *longer* than the tokens the caller believes it has, or *shorter*, or where the KV corresponds to a different token sequence?
+
+Let me think about `near_match` for `lookup_prefix_boundary`: matched = common_prefix_len(tokens, prefix). candidate_matched = matched. gap = len(prefix) - matched, near if 0 <= gap <= gap_limit (8) and matched >= required_match.
+
+So the stored entry's token sequence matches the lookup for the first `matched` tokens but diverges (or the stored is shorter — gap>0 means the stored prefix is longer than the match; if the stored were shorter, gap would be negative… wait, gap = len(prefix) - matched; if len(prefix) < matched, gap is negative and near_match fails; then block_match: safe_block = min(block_aligned(matched), len(prefix), len(tokens)) ≤ len(prefix)). OK.
+
+The decode with `requested_prefix = matched`: `boundary_prefix = _payload_boundary_at_or_below(payload_spec, requested_prefix)` — the largest gdn boundary ≤ matched. Since the stored tokens and the lookup share the first `matched` tokens, a boundary at position `boundary_prefix ≤ matched` is valid — the KV at that boundary corresponds to the same first `boundary_prefix` tokens as the lookup. Good.
+
+If `boundary_prefix is None` and `not has_recurrent`… `restore_point = requested_prefix = matched`, `cache_prefix_len = matched - 1`. Hmm, this is the "non-boundary restore re-forwards token N-1 for new logits" comment. For a cache whose snapshot covers exactly `matched` tokens, the comment claims the decode gives a KV state covering `matched - 1` tokens (i.e., the KV was built after processing `matched-1` tokens, and the snapshot also stores logits for the last token). This is a convention about what the snapshot represents: the cache_snapshot for an entry with N tokens represents the state after processing the first N-1 tokens, plus stored logits for the Nth? Something like that.
+
+But wait — is this convention correct for a *near* match? The stored entry has `len(prefix)` tokens (say M = matched + gap, gap up to 8). The stored cache_snapshot represents M-1 tokens of KV (per the convention). If the lookup requests `matched = M - gap`, then the decode_prefix with `cache_prefix_len = matched - 1`… does `decode_payload_prefix` actually slice the KV to the requested prefix length? For attention KV caches, truncation of KV to a prefix is generally safe (each layer's k/v arrays can be sliced in the sequence dimension) — that's what prefix decoding is for. So decoding with a smaller prefix_len gives a KV covering the first `matched-1` tokens — which matches the lookup tokens. OK.
+
+So where's the bug? Let me think about a block_match where the stored prefix is longer than the lookup tokens (the stored is an extended prefix of the request — a common case: a session was saved with a longer prompt; the user re-runs a slightly shorter prefix or a diverging continuation). Actually, in block_match, safe_block ≤ matched (since safe_block = min(block_aligned(matched), len(prefix), len(tokens)) ≤ matched). Fine.
+
+Hmm, wait. Let me reconsider: is there a case where matched < len(lookup tokens), where the tokens after the match are different, and the decode with a prefix of the *stored* tokens works? Since we slice to ≤ matched tokens, the divergence doesn't matter. Fine.
+
+Let me look at `_payload_boundary_at_or_below` more carefully:
+
+```python
+for record in payload_spec.get("gdn_boundaries") or []:
+    tokens = int(record.get("tokens", 0))
+    if 0 < tokens <= int(prefix_len) and (best is None or tokens > best):
+        best = tokens
+```
+
+The gdn boundaries in the payload spec: each record is presumably a dict {"tokens": n, ...}. OK.
+
+Now, for a *committed* MTP history policy, `mtp_history_prefix_len = max(0, restore_point - 1)`. "Committed MTP cache holds prompt_ids[1:] so its useful prefix is exactly one token shorter than the target cache boundary." OK.
+
+Hmm, this all looks intentionally constructed and self-consistent. Let me look for something more clear-cut.
+
+**Bug candidate 4: `flush()`**
+
+```python
+with self._queue.all_tasks_done:
+    while self._queue.unfinished_tasks:
+        ...
+        self._queue.all_tasks_done.wait(timeout=remaining)
+```
+
+`Queue.all_tasks_done.wait(timeout=remaining)` — the condition variable's wait can wake spuriously, but the loop rechecks unfinished_tasks. Also, if the writer thread is blocked on `self._pause_for_foreground()` for up to 600 seconds, flush can't complete within a 30-second timeout → returns False. That's the documented behavior. Not a correctness bug on the data.
+
+But wait — a subtlety: `cancel_pending()` calls `task_done()` on each dropped item, decrementing `unfinished_tasks`. Fine.
+
+**Bug candidate 5: `archive()` renames the base directory while the writer is running.** `archive` first flushes, then renames the whole base dir, then `_ensure_store()` creates a new dir. But the writer thread might be mid-write (a flush with timeout 10 may return False if writes exceed 10s; then rename happens with items still in the queue!). Actually `flush(timeout_s=10.0)` — if it times out, archive proceeds, renames the directory, and the writer continues writing into the renamed (archived) directory or into a stale path… actually the writer uses `self.base_dir` for the path; the rename moves everything; `_ensure_store()` re-creates base_dir/entries, blobs, manifest.sqlite; but the manifest.sqlite — wait, `_ensure_store` creates the manifest via `self._connect()` which connects to `self.base_dir / "manifest.sqlite"` — a new empty manifest. But pending items in the queue are written to… the writer computes `final_dir = self.base_dir / ...` — that's the new dir. But blobs are already in the old (archived) dir. The blob path check `_blob_path(digest).exists()` — false in the new dir, so the blob is re-written (dedup cache miss) — OK, data is still correct, just wasteful.
+
+But worse: a write in progress in the writer at the moment of rename: `temp_dir.rename(final_dir)` — temp and final are both under `self.base_dir`… if the rename of base_dir happens between mkdtemp and rename(final_dir), final_dir = self.base_dir/.../entry_id is now in the new dir — the rename works. Or if it's mid `_write_blob` — temp file was created before the archive's rename, so… actually paths are computed before the rename; `path.with_name` etc. are Path objects; `temp_path.write_bytes(raw)` — if the directory was moved, the Path points to the same physical location? No — Path is just a string; after `source.rename(candidate)`, the old path `self.base_dir/...` doesn't exist until `_ensure_store` re-creates it. If the writer computes `path` (a string path under base_dir) *before* the archive's rename, then the directory gets moved, then the writer's `path.parent.mkdir(parents=True, exist_ok=True)` re-creates the directory at the old location and writes the blob there — the blob lands in a stray directory outside the archive! And then `temp_path.rename(path)` succeeds (new directory). That blob is orphaned outside the store — a leak, not corruption. And `_ensure_store` inside the writer (Phase 0 under lock) — the writer's next entry will call `_ensure_store` and recreate the structure.
+
+Hmm, but is that "most serious"? Data loss/corruption is worse. Let me look for a bug where wrong data gets restored.
+
+**Bug candidate 6: `_restore_row` — `metadata = dict(row)`**
+
+`sqlite3.Row` → `dict(row)` works. `metadata["format_version"]` etc.
+
+`if require_exact_prefix and lookup_tokens[: len(token_ids)] != token_ids: return None` — the exact lookup checks prefix match. OK.
+
+**Bug candidate 7: dedup of blobs and in-flight claims in the writer.**
+
+In `_write_pending`:
+- `_plan_tensor_blobs` computes digests, checks `self._blob_path(digest).exists()`.
+- `self._claim_inflight(entry_dirs=..., digests=digests)` — all digests of the payload (including ones that already exist on disk).
+- Phase 2 writes missing blobs.
+- Phase 3 inserts the manifest row, then `_release_inflight` in finally.
+
+Orphan cleanup protects blobs in `_inflight_blob_hashes`. OK.
+
+But — here's a real race: in Phase 2, `_write_blob` writes the blob. Then in Phase 3, `temp_dir.rename(final_dir)` — atomic rename of the entry dir containing payload.json. The manifest row is inserted *after* the rename. Between the rename and the insert, the entry dir exists but is not in the manifest → an orphan cleanup that runs in that window would classify the entry dir as an orphan… but `_claim_inflight(entry_dirs=(entry_dir_rel,))` protects it, and the release happens in the `finally` of `_write_pending`, which is *after* `_write_pending_admitted` returns — the insert happens inside `_write_pending_admitted` before the return, so the release is after the insert. Good.
+
+But in `spill_entry`'s `_spill_entry_admitted` — the same pattern: claim before, insert inside the lock, release in finally. Good.
+
+Wait, in `_spill_entry_admitted`, is the claim under `_base_lock`? `self._claim_inflight(entry_dirs=(entry_dir_rel,))` is called under `with self._base_lock:`. Yes.
+
+**Bug candidate 8: `_evict_until_room` — evicting entries whose blobs are in-flight with a concurrent spill/writer.**
+
+It skips entry dirs in `_inflight_entry_dirs`. And `_retire_entry_row` removes the row, removes the entry dir, returns blob hashes; then `_delete_unreferenced_blobs` rechecks `_manifest_blob_hashes` and `_inflight_blob_hashes` before unlinking. OK.
+
+But `_delete_unreferenced_blobs` scans the manifest *without* the lock and records a generation; then re-validates the generation under the lock:
+
+```python
+with self._base_lock:
+    if generation != self._generation_now():
+        continue
+```
+
+If the generation has changed, `continue` — skipping the whole batch of 64, but `index` is not advanced! Looking:
+
+```python
+index = 0
+while index < len(candidates):
+    yield_work()
+    ...
+    observed = self._generation_now()
+    if generation != observed:
+        still_referenced = _manifest_blob_hashes_of(...)
+        generation = observed
+    with self._base_lock:
+        if generation != self._generation_now():
+            continue
+        for digest in candidates[index : index + 64]:
+            ...delete...
+        index += 64
+```
+
+If the generation changed again between releasing… no wait, `observed` is fetched *before* taking the lock; between `observed = self._generation_now()` and acquiring the lock, a mutation may bump the generation. Then `generation != self._generation_now()` → `continue` → the loop repeats, re-fetching observed, rebuilding still_referenced (a full manifest rescan!), and re-validating. So a store that mutates continuously (a heavy write workload) could thrash: each iteration rescan the whole manifest (expensive — reading every entry dir's payload.json! `_manifest_blob_hashes_of` walks the entry directories and parses payloads). And index never advances, so no blobs get deleted while writes continue. That's a liveness/perf issue in `_evict_until_room` → the eviction loop spins on `yield_work()` (which pauses for the foreground) + full manifest rescan, never deleting blobs, never reducing `current`… no wait, `current` was reduced per retired row in the earlier loop. The final check:
+
+```python
+with self._base_lock:
+    return (
+        not self._stop.is_set()
+        and self._current_bytes_for_cap(required) + required <= cap
+    )
+```
+
+`_current_bytes_for_cap` = manifest sum + untracked estimate (subtracting reclaimable if cleanup is running). Even if the blob deletion never completes, the manifest sum went down (rows were retired). So the cap check may pass on manifest bytes alone. OK, no infinite loop — the `for row in rows` loop breaks when current+required ≤ cap, and then `_delete_unreferenced_blobs` might spin… hmm, the while loop: if the generation keeps changing, we rescan and continue forever — an infinite loop in the writer while a concurrent writer keeps mutating the store! Each iteration: yield (pause up to 600s for foreground!), then manifest rescan (walks all entry dirs — 41.7 seconds for 816k files!). If another writer (out-of-process? or the spill path on the owner thread!) is committing entries continuously, `_store_generation` keeps bumping → the deletion loop never deletes a single blob. Wait, does `_generation_now` change on each mutation? `_invalidate_disk_usage_cache` bumps `_store_generation` on every manifest mutation.
+
+But here's the point: the generation check compares `generation` (last set = observed) with `self._generation_now()`. After rescan, `generation = observed` = current value at observation time. If another mutation lands between the observation and the lock, we continue. In a steady stream of writes (each write bumps the generation once per commit), there's a window between observation and lock acquisition. If writes are continuous, there's a high probability of a mutation in that window → thrash. But `yield_work()` is called at the top of each iteration, which in the writer pauses for the foreground — that gives gaps. Still, this is mostly a liveness problem.
+
+Hmm, but wait — a subtler correctness issue: the *validation* `if generation != self._generation_now(): continue` happens under the lock, but the deletion itself (unlink) also happens under the lock. So if the generation is stable at check time, the deletion proceeds under the lock, and no mutation can interrupt… but mutations (`_insert_manifest`, `_retire_entry_row`) also take `_base_lock`. So the check+delete is atomic w.r.t. manifest mutations. Good — but is `_manifest_blob_hashes_of` computed *without* the lock? Yes: "scan without the store lock, yielding between payloads. Validate the generation under the lock before deleting." And if the generation hasn't changed since the scan, the manifest is unchanged (all mutations bump the generation under… wait — is every manifest mutation under `_base_lock`? `_insert_manifest` — in the writer Phase 3, called under `_base_lock` (yes, inside `with self._base_lock:` in `_write_pending_admitted`); in spill, under the lock. `_retire_entry_row` — "removes a small entry record under _base_lock" — called from `_evict_until_room` under the lock, and from `_delete_entry_row` under the lock. `_touch_entry` — no lock, but does it bump the generation? No! `_touch_entry` doesn't call `_invalidate_disk_usage_cache`, so it doesn't bump the generation. Good, since it only changes last_access_s/hits.
+
+But `_archive_orphan_entry_dir` calls `_invalidate_disk_usage_cache` — bumps the generation. Called under the lock. OK.
+
+So the generation is a sound monotonic marker for manifest mutations. The check-then-delete under the lock is sound. Thrash is a perf issue.
+
+**Bug candidate 9: `_delete_entry_row` / `_retire_entry_row` — deleting an entry dir whose payload references a blob that another *live* entry references… handled by the manifest rescan in `_delete_unreferenced_blobs`.** OK.
+
+**Bug candidate 10: `_write_blob`**
+
+```python
+path = self._blob_path(digest)
+if path.exists():
+    return False
+path.parent.mkdir(parents=True, exist_ok=True)
+temp_path = path.with_name(f".{path.name}.tmp-{time.time_ns()}")
+try:
+    temp_path.write_bytes(raw)
+except FileNotFoundError:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path.write_bytes(raw)
+try:
+    temp_path.rename(path)
+except FileExistsError:
+    return False
+return True
+```
+
+Race: two writers (the writer thread + the owner-thread spill can both call `_write_blob` concurrently — the writer writes blobs in Phase 2 without the lock, and the spill writes blobs from its own thread without the lock). Both check `path.exists()` → False. Both mkdir. Both write temp files with *different* names (time_ns is different). Both rename — rename is atomic; the second rename overwrites (on POSIX, rename to an existing path silently replaces; FileExistsError is not raised — that's… hmm, `os.rename` silently overwrites; `Path.rename` on POSIX also overwrites. FileExistsError would only be raised on Windows or when… actually `Path.rename` on POSIX uses `os.rename`, which replaces the destination atomically without error. So the except FileExistsError never fires on POSIX).
+
+Is overwrite a correctness problem? Both wrote the same content (same sha256 digest!) — the digest is a sha256 of the raw bytes. If two processes write the same digest with the same content, the overwrite is harmless. If the digest collides (not in practice with sha256) or the content differs (bug upstream), the overwrite corrupts it. Since the digest = sha256(raw), content is a function of the digest — a same-digest overwrite is a no-op. Harmless.
+
+But — a *reader* of the blob: `read_tensor` checks `path.exists()` then `path.read_bytes()`. Since the rename is atomic, the reader sees either the old or the new — same content either way. OK.
+
+**Bug candidate 11: partial decode of `decode_payload_prefix` for MTP history in `lookup_prefix_boundary` — the committed policy.**
+
+`mtp_history_prefix_len = max(0, restore_point - 1)`, where restore_point = boundary_prefix or requested_prefix. Hmm, if boundary_prefix is not None, restore_point = boundary_prefix; cache_prefix_len = boundary_prefix (boundary restores resume directly at N); mtp prefix = boundary_prefix - 1. The comment says committed MTP holds prompt_ids[1:], so it's one shorter than the target cache boundary. OK.
+
+I can't verify codec semantics — it's outside the scope of this file. The bug is probably self-contained in this file.
+
+**Bug candidate 12: `_candidate_rows` — `prefix_len <= ?`** — for exact lookup. The lookup requires `lookup_tokens[:len(token_ids)] == token_ids`. Fine.
+
+**Bug candidate 13: `stats()` — `manifest_bytes_at_scan = int(usage.get("manifest_physical_bytes_at_scan", row[2]))`.** Fine.
+
+**Bug candidate 14: double increment of `writes_completed`?** In `_writer_loop`, `wrote = self._write_pending(pending); if wrote: self._inc("writes_completed")`. In `_write_pending`, no increment. In spill, `self._inc("writes_completed")` and `self._inc("spill_writes_completed")`. Fine.
+
+**Bug candidate 15: in `put_entry` — `_admit_write(estimated_nbytes)` uses `entry.nbytes` as the estimate. But the pending item pins `max(estimated, encoded.nbytes)`.** As noted, over-release. Let me re-derive: admission adds `estimated`. Writer's finally releases `pinned = max(estimated, encoded)`. So the net change in `_pending_bytes` per completed write = `-(pinned - estimated)` = `-(encoded - estimated)` when encoded > estimated. So `_pending_bytes` *decreases* below its true value with each write where the encoded size exceeds the estimate. Clamped at 0. So the backpressure budget is eroded over time → the queue can hold more than budget bytes → the very memory-blowup problem #145 that was being addressed recurs. That's a real bug, but is it "most serious"? It's a memory pressure bug, not data corruption. The problem says "most serious correctness bug". Let me keep looking for something worse — data corruption on restore, or a write that destroys data.
+
+Wait, let me actually re-verify: is `_admit_write`'s `needed` really `estimated_nbytes` only? Yes:
+
+```python
+needed = max(0, estimated_nbytes)
+...
+self._pending_bytes += max(0, estimated_nbytes)
+```
+
+And `PendingWrite.pinned_nbytes = max(estimated_nbytes, int(encoded.nbytes))`.
+
+The writer loop's finally: `self._release_pending(pending.pinned_nbytes)`.
+
+So yes: if encoded > estimated, we release more than we reserved. If encoded < estimated, we release less than we reserved → `_pending_bytes` *increases* over time in that case… no wait: add estimated, release pinned = estimated (since estimated > encoded → max = estimated). Net zero. Only the encoded > estimated case leaks negative. In practice, `entry.nbytes` is presumably an accurate or conservative estimate of the payload. If `entry.nbytes` (a model-side estimate of KV size) typically exceeds the encoded bytes (post-quantization / post-dedup?), the net is zero. If encoding produces larger bytes (e.g., hidden states, logits), it leaks. Hmm.
+
+Actually wait — there's a *worse* variant: in `put_entry`, if `ColdEncodeInterrupted` or an encode exception happens, we `self._release_pending(estimated_nbytes)` — fine, matches the admission. If the queue is full, we release `pinned_nbytes` — over-release as discussed. So both exit paths in put_entry and the writer's release use inconsistent amounts. The design intent (per the PendingWrite comment) is: "estimate of bytes this write pins in memory until the writer drains it (a deferred payload holds live KV arrays; an encoded one holds the buffer)". So the intended reserved amount is `pinned_nbytes`, but admission reserved `estimated_nbytes`. The mismatch is a genuine accounting bug. But "most serious"? Let me look for something that corrupts data.
+
+**Bug candidate 16: `close()` — `self._queue.put_nowait(None)` can fail with Full** — the writer doesn't notice the stop until it finishes the current item; then checks `self._stop.is_set()` at the top of the loop — `while not self._stop.is_set(): pending = self._queue.get()` — if the stop is set, the loop exits without draining, leaving unfinished tasks. `join(timeout=5)` — fine. On shutdown, queued writes are lost — acceptable for a cache.
+
+**Bug candidate 17: `flush()` waits on `all_tasks_done` — but the writer's `task_done()` is called in finally after each item; the sentinel is also task_done'd. OK.**
+
+Hmm wait, actually there's a real subtlety in `flush` + `cancel_pending`: `cancel_pending` calls `task_done` on dropped items. If a concurrent `flush` is waiting, it sees unfinished_tasks decrement. Fine.
+
+**Bug candidate 18: the `mtp_snapshot_epoch` check in `_restore_row`:**
+
+```python
+mtp_snapshot_epoch = metadata.get("mtp_snapshot_epoch")
+if mtp_snapshot_epoch is not None and int(mtp_snapshot_epoch) != int(metadata["snapshot_epoch"]):
+    self._set_last_miss("ssd_mtp_epoch_mismatch")
+    return None
+```
+
+Fine.
+
+**Bug candidate 19: `lookup_prefix_boundary` — the resident-duplicate shadow check.**
+
+```python
+dup = resident_duplicates.get(str(best[0]["token_hash"]))
+if dup is not None and int(dup.get("prefix_len") or -1) == int(best[3]):
+```
+
+`best[3]` = len(prefix) (the stored prefix length). dup's prefix_len must equal the stored length. Then check MTP coverage. If shadowed, return None (no candidate) — caller falls back to the RAM copy. This is a perf optimization; if the RAM twin is later evicted… the caller has already decided the RAM is usable. OK.
+
+**Bug candidate 20: the `required_match` computation:**
+
+```python
+required_match = min(min_match, max(1, len(prefix) - gap_limit))
+near_match = gap >= 0 and gap <= gap_limit and matched >= required_match
+```
+
+gap = len(prefix) - matched ≥ 0 ⇔ matched ≤ len(prefix). For a stored prefix longer than the match (typical), gap is small. matched ≥ min(min_match, len(prefix)-gap_limit). OK.
+
+But wait — a subtle point: near_match with gap in (0, 8]: the stored tokens diverge from the lookup at position `matched` (since matched = common_prefix_len < len(prefix) means prefix[matched] != tokens[matched]). The entry's token_ids are the stored prefix — the *record* returned has `token_ids = token_ids` (the *stored* tokens, length M = matched + gap). The `ColdPrefixRestoreRecord.matched_tokens = matched`. The caller (session_bank) presumably takes the KV (which covers ≤ matched tokens) and continues with the *lookup's* tokens. The record's token_ids (the stored ones) are used for identity/ledger purposes. This is presumably handled by the caller. Fine.
+
+**Bug candidate 21: `decode_payload_prefix(..., cache_prefix_len=..., mtp_history_prefix_len=..., boundary_prefix_len=boundary_prefix)`.**
+
+Hmm — `cache_prefix_len = restore_point - 1` when there's no boundary; but for a near-match with gap > 0, the stored entry's snapshot was built for M tokens; the decode prefix slices the KV to `requested_prefix - 1 = matched - 1` tokens. Slicing the KV of a *longer* sequence down to a prefix: for full attention, KV is just a per-token array — safe. For GDN/linear-attention with recurrent state, that's what the boundary snapshot is for. The guard `has_recurrent and boundary_prefix is None` forces the full decode. OK, consistent.
+
+**Bug candidate 22: in `put_entry`, the `boundaries` are taken from `entry.gdn_boundaries` as tuples `(int(r[0]), r[1], r[2] if len(r) > 2 else None)` — indexing into `r[0]`, `r[1]` — if a boundary record is a 2-tuple, `len(r) > 2` is False → None. Fine.**
+
+**Bug candidate 23: `_insert_manifest` — `INSERT OR REPLACE`** — replacing an existing row loses `hits` (reset to 0) and `last_access_s` (set to now), and `created_at_s` from the new metadata (new time). For a re-snapshot of the same entry_id (same token_ids + identity + snapshot_epoch → same entry_id!), the row is replaced. Wait — the entry_id includes snapshot_epoch and mtp_snapshot_epoch in the digest, so a new epoch → a new entry_id. Same entry_id means same token_ids + same epochs → the entry is identical; replacement is intended (idempotent write). But: `INSERT OR REPLACE` on a row that's in the manifest deletes and reinserts — if a concurrent restore was reading… the manifest read is a separate connection; SQLite serializes. Fine.
+
+But — a big one: `INSERT OR REPLACE` deletes the old row and inserts a new one, bumping… `_insert_manifest` doesn't call `_invalidate_disk_usage_cache` internally — the callers do (in the writer Phase 3 and in spill). OK.
+
+**Bug candidate 24: Phase 3 of `_write_pending_admitted` — `metadata = dict(pending.metadata)`; then `metadata["logical_nbytes"] = int(logical_bytes)`.**
+
+Wait — `logical_bytes` is computed in Phase 1 under the lock:
+
+```python
+with self._base_lock:
+    ...
+    logical_bytes = sum(int(item["nbytes"]) for item in tensor_blobs.values())
+    if pending_bytes > effective_cap:
+        ...
+        return False
+```
+
+But is `logical_bytes` referenced *after* the `with self._base_lock:` block, in the metadata assignment in Phase 3? Let me check scope: `logical_bytes` is assigned inside the `with self._base_lock:` block — Python scoping is function-level, so `logical_bytes` persists after the block. But — is it assigned before any `return` in that block? The block is:
+
+```python
+with self._base_lock:
+    effective_cap, budget_block = self._effective_write_budget()
+    if budget_block is not None:
+        ...
+        return False
+    with self._stats_lock:
+        ...
+    logical_bytes = sum(...)
+    if pending_bytes > effective_cap:
+        ...
+        return False
+```
+
+If budget_block is not None → return (fine). Otherwise logical_bytes is assigned. Then eviction, then Phase 3 uses `logical_bytes`. OK, no UnboundLocalError.
+
+`metadata["physical_nbytes"] = int(pending_bytes)`, where `pending_bytes = missing_blob_bytes + len(payload_text)`. And `deduped_nbytes = logical - pending` clamped at 0. Hmm — physical = *missing* blob bytes + the payload json. So entries whose blobs all already existed have physical ≈ the payload json size. And `_current_bytes` sums `physical_nbytes if > 0 else nbytes`. Deduped entries have tiny physical — the cap accounting counts them as small. That's the intent (shared blobs are… wait, who pays for the shared blobs?). If entry A and B share blob X, A's row paid for X (at A's write time, X was missing), and B's row pays 0. Fine — X is paid once. If A is later evicted, X is deleted only if unreferenced (B references it). OK.
+
+But a subtle bug in `_plan_tensor_blobs`: `missing_bytes` counts a blob as missing if `not self._blob_path(digest).exists()` — a snapshot-time check, before the write. If a *concurrent spill* (owner thread) writes that blob in between, the writer re-writes it in Phase 2 (`_write_blob` re-checks exists → False → return → dedup count). Harmless.
+
+**Bug candidate 25: the hourly budget — `_written_window` is only appended on *successful* writes; admission checks `written_last_hour + estimated > budget` under the stats lock. Spill: `_admit_hourly` checks, but only appends at the *end* of the spill (after all tensor writes). So multiple concurrent spills? Spill is on the owner thread — presumably one at a time. Writer: multiple pending items are processed sequentially. The admission-time check uses the estimate; the actual physical may differ. Fine — a budget is a heuristic.
+
+**Bug candidate 26 — the real one? Let me look at `put_entry` again, very carefully.**
+
+```python
+should_abort = self.encode_should_abort()
+try:
+    encoded = encode_payload(...)
+except ColdEncodeInterrupted:
+    self._release_pending(estimated_nbytes)
+    ...
+```
+
+Fine.
+
+After encoding:
+```python
+pending = PendingWrite(
+    entry_id=str(metadata["entry_id"]),
+    ...
+    pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)),
+)
+try:
+    self._queue.put_nowait(pending)
+except queue.Full:
+    self._release_pending(pending.pinned_nbytes)
+    ...
+```
+
+Consistent with the earlier analysis.
+
+Now, the writer loop:
+
+```python
+try:
+    self._pause_for_foreground()
+    wrote = self._write_pending(pending)
+    if wrote:
+        self._inc("writes_completed")
+        with self._stats_lock:
+            self._stats["last_write_s"] = time.time()
+            self._written_window.append((time.time(), int(pending.pinned_nbytes)))
+finally:
+    self._release_pending(pending.pinned_nbytes)
+    self._queue.task_done()
+```
+
+Hmm — `self._written_window.append((time.time(), int(pending.pinned_nbytes)))` — the hourly write budget is charged `pinned_nbytes` (max of estimate, encoded logical size) *even when the actual physical write is much smaller* (a dedup hit → physical is tiny). And on the spill path, it appends `physical or logical`. Inconsistent: the budget counts the writer path by *logical* bytes (pinned ≈ encoded logical size), but the actual bytes written to the SSD may be near-zero on a dedup hit. Issue #144 was SSD *wear* — 7 TB written. Charging logical bytes to the wear budget over-counts deduped writes. Heuristic mismatch; not "most serious".
+
+OK, so far the strongest candidates are: (a) the `_pending_bytes` underflow / budget erosion (memory), (b) archive-during-write stranding blobs (leak), (c) some restore-path data bug I haven't found yet. The problem statement emphasizes "save and restore prompt caches on SSD" — "most serious correctness bug… what it costs". Let me dig deeper into the restore path, since a wrong KV restore is *silently wrong inference output* — that's the most serious kind.
+
+Let me re-examine `_restore_row`'s partial restore very carefully.
+
+Setup: the stored entry has `M = len(token_ids)` tokens (the stored prefix). The payload's cache_snapshot corresponds to… what exactly? In an exact restore (`require_exact_prefix=True`), the caller's tokens start with the stored tokens; the decode is full; the KV presumably covers all M tokens (or M-1 by convention, with logits for the last token).
+
+In a partial restore from `lookup_prefix_boundary`, the caller's tokens match the stored for the first `matched` tokens, `matched ≤ M`. `requested_prefix = candidate_matched`:
+- near_match: matched (gap = M - matched ≤ 8)
+- block_match: safe_block ≤ min(block_aligned(matched), M, len(lookup))
+
+Case A: `has_recurrent and boundary_prefix is None` → full decode (`decode_payload`), no trim here. The record has `cache_snapshot_prefix_len = decoded.cache_snapshot_prefix_len` — presumably None or M? Then the caller must handle the trim. The comment says SessionBank decides. OK.
+
+Case B: `not payload_supports_prefix_decode` → full decode, same.
+
+Case C: prefix decode:
+```python
+restore_point = boundary_prefix if boundary_prefix is not None else requested_prefix
+cache_prefix_len = restore_point if boundary_prefix is not None else restore_point - 1
+```
+
+Subcase C1: no gdn boundary ≤ requested (boundary_prefix is None), has_recurrent is False, prefix decode is supported. restore_point = requested_prefix = matched or safe_block. cache_prefix_len = restore_point - 1.
+
+The KV is sliced to cover `restore_point - 1` tokens. The convention: the snapshot's KV covers N-1 tokens, and logits cover the Nth token, for a snapshot of N tokens? The comment: "non-boundary restore re-forwards token N-1 for new logits; boundary restore resumes directly at N." So the returned KV + the stored logits let the caller skip to… The caller gets `cache_snapshot_prefix_len = decoded.cache_snapshot_prefix_len` = presumably restore_point - 1 (or restore_point?). The caller then continues from that prefix with *its own* tokens. Since the stored and the lookup share the first `matched ≥ restore_point` tokens, the sliced KV is consistent with the lookup tokens. Correct, as long as `decode_payload_prefix` actually slices to `cache_prefix_len` and records it.
+
+Subcase C2: boundary_prefix = B ≤ requested. cache_prefix_len = B (the recurrent state at boundary B is exactly the state after B tokens; the KV slice is B). MTP history prefix = B - 1.
+
+Everything hinges on the codec honoring the prefix. The codec is in another module; we have to trust it. So the restore path *in this file* looks carefully written.
+
+Hmm, let me look at the `mtp_history_policy` filter on lookup_prefix_boundary… `_candidate_rows_for_prefix_boundary` filters rows by policy compatibility. Fine.
+
+**Wait — let me look at `lookup` (exact) — `_candidate_rows` requires `prefix_len <= len(tokens)`.** The row's stored prefix must be ≤ the lookup length, and must be an exact prefix. Fine.
+
+Now — is there a bug in how `lookup_prefix_boundary` *uses* the record? It returns `ColdPrefixRestoreRecord(record, matched_tokens=best[1], restore_kind)`. The record's `token_ids` = the stored tokens (length M ≥ matched + … in near-match, M = matched + gap). The caller uses `matched_tokens` for bookkeeping. Fine.
+
+Let me switch tactics: look for a **concurrency bug in the disk-usage snapshot and the cap gate** that could evict *live* entries or delete *live* blobs.
+
+`_current_bytes_for_cap(required)` = `_current_bytes()` (manifest sum of physical) + untracked estimate. `_untracked_bytes_estimate` = managed_file_bytes - database_file_bytes - manifest_at_scan, from the *cached* snapshot. If cleanup is running, subtract the reclaimable.
+
+Scenario: a snapshot taken when the store was small; then many writes commit; each write bumps the generation and marks the snapshot stale, but the snapshot *values* (managed_file_bytes etc.) remain from the old walk. `_untracked_bytes_estimate` uses the old managed_file_bytes and the old manifest_at_scan → delta ≈ 0 (the store was consistent at walk time). So untracked estimate ≈ 0 — the new untracked garbage isn't priced, but the manifest sum is live (accurate). Cap = the max_bytes config. The manifest sum grows with writes; the gate evicts when the manifest sum + required > cap. The untracked garbage from a crash is eventually priced by the next walk. Sound.
+
+Reverse scenario (over-pricing): a snapshot taken *during* garbage creation (torn walk → stale=True, manifest_at_scan = max(before, after)). managed_file_bytes includes garbage; manifest_at_scan is the live manifest. The delta over-prices → the gate evicts live entries unnecessarily. Perf, not corruption. And `stats()` only triggers orphan cleanup from a non-stale snapshot. OK.
+
+**Eviction correctness — `_evict_until_room` skips entries in `_inflight_entry_dirs`.** Who puts in `_inflight_entry_dirs`? Writer (`entry_dir_rel`), spill (`entry_dir_rel`). The entry dir is only referenced by a live write in progress. A *committed* entry being reused by a new snapshot: a new snapshot of the same entry_id (same token_ids+epochs) — the writer's Phase 0 checks `final_dir.exists()` and `_entry_in_manifest` → touches and returns True. But the *claim* happens after Phase 0… in the writer: Phase 0 (exists check + possibly archive the orphan) happens *before* the claim. If two writes of the same entry_id run concurrently (writer + spill, or two writers? there's one writer thread; spill is the owner thread — could overlap with the writer!).
+
+Scenario: writer and spill simultaneously write the same entry_id (a re-snapshot of the same epoch… could happen if the bank snapshots on two triggers).
+- Writer Phase 0: final_dir doesn't exist yet (or exists?)…
+- Both eventually reach Phase 3 under the lock:
+  - First: final_dir exists? (if the other hasn't renamed yet) no → mkdtemp → rename(final_dir) → insert row.
+  - Second: (later, under the lock) final_dir.exists() → yes → `_entry_in_manifest(entry_id)` → yes (first inserted) → `_touch_entry` → return True.
+
+The second's blobs: already written in Phase 2 (content-identical, same digest — since same entry content? not necessarily the same content! Same entry_id means same token_ids + identity + snapshot_epoch + mtp_snapshot_epoch. If the bank re-snapshots the same epoch, the content is presumably identical (deterministic). If the content differed (e.g., different KV for the same prefix — non-determinism?), the digests differ → the second's blobs are different blobs, but its payload.json was never written (returned at the Phase 3 exists check) → the second's blobs are orphaned (garbage) — the entry on disk is from the first writer. The manifest row is the first's. The row's entry_dir points to the first's payload. Consistent. The second's blobs are garbage → later cleaned up. Not corruption.
+
+But a *worse* interleaving: Phase 3's check `if final_dir.exists(): if self._entry_in_manifest(...): touch; return True; self._archive_orphan_entry_dir(...)`. Then mkdtemp + rename. All under `_base_lock`. So the check-then-act is atomic. Good.
+
+And the blob claim: the second writer claims digests *before* Phase 3 (in `_write_pending`, claim before the reclaim). Its blobs were written in Phase 2 — the digests were claimed, so the concurrent `_delete_unreferenced_blobs` (from eviction) doesn't take them. Good.
+
+**What about a blob being deleted between the `_plan_tensor_blobs` existence check and Phase 2's write, and then a reader (restore) using it?** Restore reads the blob for a *committed* entry (payload.json exists + row in manifest). `_delete_unreferenced_blobs` only deletes a digest if it's not in `still_referenced` (a fresh manifest scan) and not in-flight. A committed entry's payload references its blobs → the manifest scan includes them → not deleted. Unless the manifest scan is *torn*… the scan happens without the lock, validated by generation under the lock; a mutation (insert/delete of an entry) bumps the generation → re-scan. `_retire_entry_row` (eviction) deletes the row *under the lock* and bumps the generation (via `_invalidate_disk_usage_cache`). Sequence: blob for entry X (referenced by row X); an evictor retires row X (lock, generation g→g+1), then `_delete_unreferenced_blobs`: scans the manifest (sees no X) at generation g+1; a *restore* of X is in flight — the restore already read payload.json (before the row deletion?) — a restore that has a row handle but whose blob read happens after the blob unlink → FileNotFoundError → caught in `lookup` → restore_failures, miss. That's a race between a concurrent eviction and a restore — a *liveness* hiccup (a miss), not corruption. And the restore is presumably… hmm, actually the restore of an entry being evicted concurrently is inherently racy; a miss is an acceptable outcome. Not the bug.
+
+OK, let me look again at the **`_walk_and_install` generation logic**:
+
+```python
+with self._disk_usage_lock:
+    generation = self._store_generation
+manifest_before = self._current_bytes()
+usage = walk()
+...
+manifest_after = self._current_bytes()
+with self._disk_usage_lock:
+    torn = self._store_generation != generation
+    usage["manifest_physical_bytes_at_scan"] = max(manifest_before, manifest_after)
+```
+
+The comment says the larger of before/after, so an entry committed mid-walk never masquerades as orphan bytes. But what about an entry *deleted* (evicted) mid-walk? Then the walk's file_bytes might include the entry dir/blob before deletion… and `manifest_after` < `manifest_before` → max() picks manifest_before → the delta = managed_file_bytes - ... - manifest_before could be *negative* → clamped at 0 by `max(0, ...)`. Over-pricing? No, it under-reports untracked (clamped 0) — under-pricing is the dangerous direction (the cap gate thinks the store is smaller than it is → disk fills past the cap). But `torn=True` → the snapshot is stale → `stats()` won't trigger cleanup from it, and the next rescan will fix it. And the walk in the *delete mode* (orphan cleanup) *itself* handles orphans with its own protected/generation logic. The cap gate uses `_current_bytes_for_cap` = manifest + untracked estimate (from the snapshot). With a torn snapshot, the untracked delta is… let's see: a deletion mid-walk → the file bytes counted by the walk *may or may not include* the deleted files depending on timing; the manifest delta max() picks before (larger) → untracked = files - db - manifest_before → could be ~0 or slightly off, clamped ≥ 0. The manifest sum is live and accurate. The *actual* untracked garbage that existed before the walk: the walk (dry-run) counted it as orphans and *deleted* it (delete mode) — in delete mode, `usage["orphan_file_bytes"] = 0` is installed. In measurement mode (dry-run), the orphans are counted and *not deleted* → the untracked delta includes them → the gate prices them → the gate triggers `_reclaim_orphans_if_over_cap`. OK.
+
+All this snapshot machinery looks robust. Let me look at `_cleanup_untracked_cache_once` → `_walk_and_install(lambda: self._usage_from_report(self._reconcile_walk(dry_run=False)))`. Delete mode under `_base_lock` per batch, protected by in-flight. `reconcile_store` is in another module — trust it.
+
+Hmm OK. Let me reconsider. The problem says "find the most serious correctness bug. Explain the bug, when it triggers, what it costs, and provide a minimal patch." This smells like a *planted* bug — a specific line that's subtly wrong. Let me scan for something that looks *slightly* off compared to its comments.
+
+1. `_release_pending`: `self._pending_bytes = max(0, self._pending_bytes - max(0, int(nbytes)))`. Fine.
+
+2. In `stats()`: `logical = max(1, int(row[1]))`. Fine.
+
+3. `flush()`:
+```python
+deadline = time.monotonic() + max(0.0, float(timeout_s))
+with self._queue.all_tasks_done:
+    while self._queue.unfinished_tasks:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        self._queue.all_tasks_done.wait(timeout=remaining)
+return True
+```
+Fine.
+
+4. `cancel_pending()`: loops get_nowait; on None, re-puts the sentinel and breaks. But — between the `get_nowait()` of None and the `put_nowait(None)`, the writer might be blocked in `self._queue.get()`… no wait, we *removed* the sentinel from the queue and re-put it. If the writer is already blocked in `get()` and the queue becomes empty, it'll take the re-put sentinel. But if the writer is in the middle of an item (not at get()) — fine, it'll loop and get the sentinel. But: `cancel_pending` re-puts the sentinel; if the queue is *full*… `put_nowait(None)` — after dropping items, there's room. OK.
+
+But — *two* sentinels? `close()` puts one. If a user calls `cancel_pending` before close: takes the sentinel (if any is queued — usually not, since the writer consumed it… actually the sentinel is only put on close). Usually no sentinel is in the queue; the loop breaks on Empty. Fine.
+
+5. **`_writer_loop` — `if pending is None: self._queue.task_done(); break`.** Fine.
+
+6. **The `mtp_enabled` parameter: `1 if mtp_enabled else 0` in the query; the row stores the same. Fine.**
+
+7. **`_candidate_rows` — `prefix_len <= ?` with `len(tokens)`** — hmm, for exact restore, a stored entry with prefix_len ≤ len(lookup) and an exact prefix match. Then `_restore_row` checks `lookup_tokens[:len(token_ids)] == token_ids`. Fine.
+
+8. **`_policy_compatible`**:
+```python
+if entry_policy == lookup_policy: return True
+if entry_policy is None or lookup_policy is None: return False
+return entry_policy in _COMMITTED_CACHE_POLICIES and lookup_policy in _COMMITTED_CACHE_POLICIES
+```
+Both None → equal → True. One None → False. Both committed-ish → True. OK — "last_window" vs "committed" incompatible, presumably because the MTP history content differs. Fine.
+
+9. **`token_hash`** — a full-sequence hash. The `idx_entries_token_hash` index. Used in `lookup_prefix_boundary` for the shadow check. Fine.
+
+10. **`common_prefix_len`** fine.
+
+11. **`block_aligned_prefix_len`** fine.
+
+12. **The resident-duplicate shadow in `lookup_prefix_boundary`**:
+
+```python
+row_has_mtp = (
+    "mtp_full" in row_caps
+    or best[0]["mtp_snapshot_epoch"] is not None
+)
+if (not row_has_mtp) or bool(dup.get("has_mtp_history")):
+    ... shadow ...
+```
+
+The logic: shadow (return no-candidate) only if the cold row's MTP is covered by the resident's. If the row has no MTP (`not row_has_mtp`) → the resident trivially covers → shadow. If the row has MTP, require `dup.has_mtp_history`. Looks right per the doc.
+
+Hmm, but the `dup` lookup is `resident_duplicates.get(str(best[0]["token_hash"]))` — token_hash is the *stored* prefix hash; the dup's prefix_len must equal the stored length. But the *request* matches only part of the stored prefix (matched < M in near/block match)! If the resident twin's prefix_len == M (the stored length) — but the request's tokens only match the first `matched` of M… the caller built `resident_duplicates` as "entries the caller has already proven identity-compatible with this request" — presumably with its own matched logic. If the resident twin covers M tokens and the request is longer/diverging after matched… the caller "proved identity-compatible with this request" — presumably means the resident is a prefix of the request, or a match on its own terms. If the caller's RAM entry matches the request for `matched_ram` tokens, and the shadow logic compares dup.prefix_len (M) with the request… hmm, the record that would be returned has `matched_tokens = best[1]` ≤ M. The caller compares candidates by matched tokens. If the RAM twin is "proven identity-compatible with this request" and is snapshot-able, then skipping the cold hydration is fine — the RAM one is at least as good (the caller's stable sort resolves it). The comment argues this at length. Trust it.
+
+13. **`_evict_until_room` — `rows = list(conn.execute("SELECT ... ORDER BY last_access_s ASC"))`** — LRU. `current = self._current_bytes_for_cap(required)` — includes untracked. Then per row: `garbage.update(self._retire_entry_row(row))`; `current -= int(row["physical_nbytes"] or row["nbytes"] or 0)`.
+
+Wait. Here's something. `row["physical_nbytes"]` — the *stored* physical. For a deduped entry (all blobs pre-existing), physical ≈ the payload json size. But `_current_bytes()` (the manifest sum) uses `physical_nbytes if > 0 else nbytes` — consistent with the decrement… *approximately*. But the initial `current` includes the untracked estimate, which the decrement doesn't touch. Fine.
+
+But a *deeper* issue: `_retire_entry_row` deletes the row and the entry dir, and returns the blob hashes. But if a *concurrent restore* is holding the entry… the restore reads payload.json and blobs *without* taking `_base_lock`. If the eviction deletes the entry dir mid-restore (rmtree) → the restore's blob read gets FileNotFoundError → the restore fails (a miss). Racy but acceptable (a cache miss, not corruption)… *unless* the restore has *already decoded* the snapshot into live arrays and the KV arrays… the blobs are just bytes → decoded into MLX arrays; a blob deletion after the read is harmless. Only a read mid-deletion fails → the exception propagates → `lookup` catches → a miss. OK.
+
+14. **`_retire_entry_row` calls `_invalidate_disk_usage_cache()` — bumps the generation per entry.** And `_delete_unreferenced_blobs` re-validates the generation under the lock — but the *caller* `_evict_until_room` is itself the mutator! Look at the flow:
+
+```python
+for row in rows:
+    yield_work()
+    if self._stop.is_set(): return False
+    with self._base_lock:
+        if str(row["entry_dir"]) in self._inflight_entry_dirs: continue
+        if not self._entry_in_manifest(str(row["entry_id"])): continue
+        garbage.update(self._retire_entry_row(row))   # bumps generation
+        current -= ...
+        self._inc("entries_evicted")
+    if current + required <= cap:
+        break
+self._delete_unreferenced_blobs(garbage, on_yield=yield_work)
+```
+
+`_delete_unreferenced_blobs`:
+```python
+observed = self._generation_now()
+if generation != observed:
+    still_referenced = _manifest_blob_hashes_of(self.base_dir, on_yield=yield_work)
+    generation = observed
+with self._base_lock:
+    if generation != self._generation_now():
+        continue
+    ...delete blobs...
+```
+
+After the loop, the generation is whatever the last retire bumped it to — *stable* (no more mutations from this thread). `observed` == that stable value (no other writers). Then the manifest rescan (walks all entry dirs, yielding) — *during this rescan*, could another writer (the owner-thread spill, or… the writer thread is *in* `_evict_until_room` — it can't also be in `_write_pending`. But the *owner thread* can be in spill or `put_entry`… `put_entry` doesn't mutate the store (enqueue only). Spill *can* commit (insert a row) concurrently! Spill commits → `_invalidate_disk_usage_cache` → generation bump. So during the rescan, if the spill commits, the generation moves. After the rescan, `generation = observed` (old) → under the lock, `self._generation_now()` (new) ≠ → continue → rescan *again*. If spills keep committing (a burst), we rescan forever, deleting nothing. And each rescan walks every entry dir (41.7s for 816k files!) while yielding to the foreground. Hmm — but the rescan *does* yield; and `_delete_unreferenced_blobs` is called from `_evict_until_room` which is called from the writer under no lock… this is a liveness issue: under a sustained commit stream, the writer's eviction spins on full manifest rescans, never deleting blobs, and the *final* check:
+
+```python
+with self._base_lock:
+    return (
+        not self._stop.is_set()
+        and self._current_bytes_for_cap(required) + required <= cap
+    )
+```
+
+`_current_bytes_for_cap` = manifest sum (now lower, since rows were retired) + untracked estimate (from the *old* snapshot, which *includes* the garbage blobs as untracked! The snapshot was taken before the eviction; its managed_file_bytes includes the blobs about to be deleted; the manifest_at_scan is the pre-eviction manifest sum → the delta is ~garbage bytes). So even though the rows are retired, `current` ≈ old manifest - retired + garbage… the garbage blobs are still on disk (not deleted yet) and *are* included in the untracked estimate (delta over the old manifest… let me compute: snapshot: files = F0, manifest = M0, delta D = F0 - db - M0. After retirement of R bytes of rows: manifest = M0 - R. The actual files = F0 - R_dir (entry dirs deleted; blobs still on disk since deletion didn't happen). Untracked estimate = F0 - db - M0 = D (unchanged — it uses the *cached* snapshot, not the live files). So current = (M0 - R) + D. If the cap held pre-eviction: M0 + D + required > cap, and we retired until (M0 - R) + D + required ≤ cap → we break. Then blob deletion spins (if commits continue) and the final check re-evaluates `(M0 - R') + D + required ≤ cap` (R' ≥ R) → passes. So it returns True even without deleting the blobs → the blobs remain as garbage → reclaimed later by the orphan cleanup. The entry *write* proceeds. So the cost is: the write succeeds, the blobs leak until the background cleanup. Not a data bug; a delayed reclamation + possibly a wasted full rescan. Hmm.
+
+But wait — there *is* a real correctness issue in `_delete_unreferenced_blobs`'s validation! Look:
+
+```python
+observed = self._generation_now()
+if generation != observed:
+    still_referenced = _manifest_blob_hashes_of(self.base_dir, on_yield=yield_work)
+    generation = observed
+with self._base_lock:
+    if generation != self._generation_now():
+        continue
+```
+
+The rescan happens *without* the lock, then we check the generation *under* the lock. If the generation changed during the rescan (between the `observed` fetch and the lock), we `continue` and rescan — *correct* (conservative). If the generation is stable, the rescan is coherent with the locked check — the scan started *before* `observed` was fetched… wait, no:
+
+Order: `yield_work(); if stop: return; observed = self._generation_now(); if generation != observed: still_referenced = scan(); generation = observed; with lock: if generation != now: continue; delete...`
+
+The scan happens *after* `observed` is fetched. Between the scan start and end, the manifest might mutate (generation bump). After the scan ends, we take the lock and check `generation != self._generation_now()` — the generation variable is the pre-scan `observed`; if a mutation landed during the scan, the check catches it → rescan. If no mutation landed, the scan is coherent. Sound!
+
+Except — does every manifest mutation bump the generation? `_insert_manifest` — called under the lock; the callers call `_invalidate_disk_usage_cache` (writer Phase 3: yes, after the insert; spill: yes). `_retire_entry_row` calls `_invalidate_disk_usage_cache` (yes). `_archive_entry_row` (yes). `_touch_entry` — no bump, but it doesn't change blob references (only last_access_s/hits) → irrelevant to `_manifest_blob_hashes`. `_archive_orphan_entry_dir` — moves the entry dir (payload.json!) into evicted_entries and bumps the generation. It's called when final_dir exists but is not in the manifest — a crash leftover. Moves the payload → the blob references change (the evicted copy is presumably excluded from the manifest walk? `_manifest_blob_hashes` walks the *manifest* entry dirs). The generation bump covers it.
+
+`_ensure_store` / `_archive_legacy_store_if_needed` — renames the whole base_dir! Bumps the generation? `_archive_legacy_store_if_needed` — no call to `_invalidate_disk_usage_cache`! Hmm, but that's the one-shot legacy archive at startup; a whole-store rename invalidates the disk usage snapshot (the paths moved!). The cached snapshot's `managed_file_bytes` refers to the *old* (archived) store. After the rename + `_ensure_store`'s new creation, the snapshot is *wrong* — it over-prices the new empty store with the legacy store's bytes! And it's *not* stale-marked (no generation bump)… well, `_ensure_store` doesn't bump either. Wait, but `_archive_legacy_store_if_needed` is only called from `_ensure_store`, which is called from `__init__` (before the snapshot exists → the cache is None, so no stale snapshot issue) and from the writer/spill Phase… In the writer: `with self._base_lock: self._ensure_store()` — if the manifest doesn't exist (a fresh store after archive()), hmm, the legacy archive only happens when the manifest exists and has legacy rows. After the rename, `_ensure_store` recreates everything; the *cached* snapshot (if any) is now describing the *archived* directory! And the generation wasn't bumped, so `_manifest_stats_row` will think it's still valid (the generation matches!) and the TTL is… the stats cache is a separate mechanism (the manifest stats cache keyed on the generation). After the rename, the new manifest has 0 rows, but `_manifest_stats_row` may return the *cached* aggregate (same generation!) — the stats temporarily show the old numbers — self-correcting in 5s via the TTL. And `_disk_usage_cache` — `changed = cached.disk_usage_generation != self._store_generation` → False (no bump!) → no rescan is scheduled → the snapshot keeps over-pricing the new store until… `disk_usage_stale`? Not set. Hmm — but the legacy archive is a one-shot at startup; after it, the first `_ensure_disk_usage_snapshot`… the cache is *not* None, so the snapshot is *not* refreshed (the cache exists, generation unchanged → "exact"). The gate over-prices the new store with the legacy bytes → evictions/skips until the TTL-based rescan: `_rescan_interval_elapsed_locked` uses `disk_usage_last_scan_s` and the interval — if the cache is "unchanged", no rescan is ever scheduled! `changed` is False → `if changed and elapsed: start scan`. So the snapshot *never* refreshes!
+
+Wait, is that right? Let me re-verify `_managed_disk_usage`:
+
+```python
+view = dict(cached)
+changed = int(cached.get("disk_usage_generation", -1)) != self._store_generation
+if changed and self._rescan_interval_elapsed_locked(cached, now):
+    self._start_disk_usage_scan_locked()
+```
+
+Yes — a rescan is only scheduled when `changed`. If the generation never moves (the new store is quiet: no writes, no evictions), the stale legacy snapshot persists *forever* → the cap gate over-prices → every write triggers the eviction path / size-cap skips against phantom bytes from the archived legacy store. But: the legacy archive only happens at *startup* (the manifest exists and has legacy rows). At startup, the `__init__` flow: `self._ensure_store()` (which might archive legacy and recreate the store; the `_disk_usage_cache` is None at this point — it's initialized to None in `__init__` *before* `_ensure_store` is called). Let me check the `__init__` order: `self._disk_usage_cache: ... = None` is set *before* `self._ensure_store()`? Yes: the attribute assignments (including `_disk_usage_cache = None`) precede `self._ensure_store()`. So at archive time, the cache is None. After `__init__`, `if self.enabled and self._store_has_content(): self._start_orphan_cleanup(at_start=True)` — the new store has no content → the walk is skipped → no snapshot is installed! Hmm wait, then the first write's `_ensure_disk_usage_snapshot` (cache None, scan not running) → walks synchronously. Fine.
+
+But — `_ensure_store` is called from the *writer* and *spill* too (Phase 0/Phase 1 under the lock, and in the spill pre-admission). If the daemon restarts with a *live* store (the cache is rebuilt in memory — no, in memory, the cache starts None at each process start). A snapshot only exists within a process after the first walk. The legacy archive at startup happens before any walk in that process (the cache is None). So the stale-snapshot-after-archive scenario requires: a snapshot exists (the process has been running), then the manifest disappears / the store is renamed — which only `archive()` does (an admin op) or a crash. `archive()`: flush(10s), rename base_dir → candidate, `_ensure_store()` recreates, sets stats. But it does *not* call `_invalidate_disk_usage_cache()`!! So after `archive()`, the cached `_disk_usage_cache` (the pre-archive walk) is: (a) still not stale-marked (no generation bump), (b) describing the *archived* store. The *new* store is empty. The gate: `_current_bytes_for_cap` = 0 (the new manifest) + the untracked estimate from the *old* snapshot = the entire old store's bytes (managed_file_bytes - db - manifest_at_scan — since the old store was consistent, ≈ 0!!).
+
+Wait — if the pre-archive store was *consistent* (no garbage), the untracked delta ≈ 0 → the over-pricing ≈ 0. The over-pricing only manifests if the store had untracked garbage *and* was archived. Hmm, then it's mild.
+
+But there's a *worse* direction: after archive, the *new* store accumulates writes; each write bumps the generation → `changed` becomes True → a rescan is scheduled once the interval elapses (TTL 30s or 20× the last scan). So it self-corrects within ~30s of the first post-archive write. And in the quiet period, the delta ≈ 0. OK, mild. Not "most serious".
+
+Hmm, I keep finding perf / liveness issues. Let me re-read the write path for a *data* bug…
+
+**`_write_pending` Phase 2:**
+
+```python
+for name, raw in pending.tensors.items():
+    self._pause_for_foreground()
+    if self._stop.is_set():
+        return False
+    blob = tensor_blobs[name]
+    if self._write_blob(blob["sha256"], raw):
+        continue
+    self._inc("deduped_blob_hits")
+```
+
+If `self._stop.is_set()` mid-loop → return False → *some* blobs are written, the entry dir is *not* renamed, the row is *not* inserted. The written blobs are claimed (`_claim_inflight` before, release in finally) — after release, they're garbage → orphan cleanup. OK.
+
+But — `close()` sets `_stop`, then the join(5s). A write aborted mid-Phase-2 leaves partial blobs — fine.
+
+**Now — the real question: does the entry's payload.json reference all blobs, including the deduped ones?** `tensor_blobs` (from `_plan_tensor_blobs`) contains *all* blobs with digests, regardless of whether they exist. The payload includes the `tensor_blobs` map. Restore reads each from the blob path. If a blob was deduped (already existed), it's on disk. If a blob write failed (disk full!)… `_write_blob` — `temp_path.write_bytes(raw)` can raise (OSError) → propagates to the `_writer_loop`'s except → write_failures; the entry is not committed; the blob is partially written? No — write_bytes failure → the temp file is partial/orphan… actually `write_bytes` failure leaves a partial temp file; no cleanup of the temp file! It stays as a `.name.tmp-...` file → untracked garbage → the orphan cleanup eventually. OK.
+
+**Hmm, wait — I should look at `decode` and the `read_tensor` fallback:**
+
+```python
+def read_tensor(name):
+    blob = tensor_blobs.get(name)
+    if blob:
+        path = self._blob_path(str(blob["sha256"]))
+        if not path.exists():
+            raise FileNotFoundError(str(path))
+        return path.read_bytes()
+    path = entry_dir / "tensors" / f"{name}.bin"
+    ...
+```
+
+The fallback is for a legacy layout. Fine.
+
+Let me look at **`_metadata_for_entry`'s entry_id derivation**:
+
+```python
+digest.update(token_hash(token_ids))
+digest.update(json.dumps(identity...))
+digest.update(str(int(getattr(entry, "snapshot_epoch", 0) or 0)))
+digest.update(str(int(getattr(entry, "mtp_snapshot_epoch", 0) or 0)))
+entry_id = digest.hexdigest()[:32]
+```
+
+Note: `int(getattr(entry, "mtp_snapshot_epoch", 0) or 0)` — if mtp_snapshot_epoch is None → `None or 0` → 0 → "0". But the *metadata* field is:
+
+```python
+"mtp_snapshot_epoch": (
+    int(getattr(entry, "mtp_snapshot_epoch"))
+    if getattr(entry, "mtp_snapshot_epoch", None) is not None
+    else None
+),
+```
+
+So the entry_id for mtp_snapshot_epoch=None uses "0" in the digest. And for mtp_snapshot_epoch=0 (a legitimate epoch!), the digest also uses "0"!! So an entry with `mtp_snapshot_epoch=0` and an entry with `mtp_snapshot_epoch=None` have the *same* entry_id (given the same tokens+identity+snapshot_epoch)!
+
+Is `mtp_snapshot_epoch=0` legitimate? `snapshot_epoch` is probably a monotonically increasing counter that *can* be 0 (the first snapshot). Look at the `_restore_row` check:
+
+```python
+mtp_snapshot_epoch = metadata.get("mtp_snapshot_epoch")
+if mtp_snapshot_epoch is not None and int(mtp_snapshot_epoch) != int(metadata["snapshot_epoch"]):
+    miss
+```
+
+So mtp_snapshot_epoch=0 is handled (int comparison). And `_insert_manifest` stores `metadata.get("mtp_snapshot_epoch")` → 0 or None, both stored. SQLite: `mtp_snapshot_epoch INTEGER` — 0 and NULL are distinct.
+
+Collision scenario: Session A's entry: tokens T, identity I, snapshot_epoch=E, mtp_snapshot_epoch=None → entry_id X, payload P1 (no MTP history snapshot in the payload — `mtp_history_snapshot=None`).
+
+Later, the same session (or another session with the same prompt!): same tokens T, same identity I, same snapshot_epoch E, but this time mtp_snapshot_epoch=0 (say MTP was enabled from the start and epoch 0 is its first epoch) → *same* entry_id X! The payload P2 *includes* the mtp_history_snapshot.
+
+The writer's Phase 0: `final_dir.exists()`? If the first write is already committed → `_entry_in_manifest(X)` → True → touch and *skip*. So P2 is never written; the SSD retains P1 (no MTP) — the new snapshot with MTP history is lost. Cost: an MTP restore… the lookup checks `mtp_snapshot_epoch is not None and != snapshot_epoch` — the row says None → the row is fine for a non-MTP request; for an MTP request… the row's mtp is… the lookup doesn't filter by mtp_snapshot_epoch. Hmm, the `mtp_enabled` flag in the query — if the second entry is mtp_enabled=True and the first is False, the query's `mtp_enabled = ?` filter excludes it. So the collision only bites when *other* identity fields are equal, including `mtp_enabled`!
+
+Wait — if `mtp_enabled` is in the identity (it is — the digest includes the full identity dict), then mtp_enabled=True with mtp_snapshot_epoch=None vs 0: an entry with mtp_enabled=True but mtp_snapshot_epoch=None — is that a real case? MTP enabled but the history snapshot is None (a fresh MTP session with no committed history yet? The `mtp_history_policy` is "last_window" vs committed…). If MTP is enabled, `mtp_snapshot_epoch` is presumably *set* (non-None). So the None case ⇔ MTP disabled or no history captured. And mtp_enabled is in the digest → a different mtp_enabled breaks the collision. A collision requires the *same* mtp_enabled, but None vs 0 of mtp_snapshot_epoch. Can mtp_enabled=True with mtp_snapshot_epoch=None? Possibly: the MTP draft history is captured only after the first draft step; a snapshot taken before that → None even with MTP enabled. And a later snapshot with the same snapshot_epoch=0… hmm, `snapshot_epoch` must also match (E vs E). Two snapshots with the same (token_ids, identity, snapshot_epoch) but different MTP history states (None vs 0)? If snapshot_epoch is the main cache's epoch, two snapshots with the same epoch are presumably the same logical snapshot — re-snapshots. If the bank re-snapshots the same epoch at a slightly different MTP state (None → 0), the entry_id collides → the second write is skipped (Phase 0 sees the dir+row) → the SSD retains the *first* (None MTP) payload.
+
+Cost: the restore returns a snapshot whose MTP history is stale/missing for what the bank thinks is the current state… but wait — the *row* also has the same `mtp_snapshot_epoch` (None) since it's the first's row. A lookup with `mtp_history_policy`… the payload has no mtp_history_snapshot → a decode gives None → the session_bank presumably handles a None MTP history gracefully (a draft warm-start miss). So the cost = a missed MTP warm start, not wrong output. Unless the *second* payload (with MTP) is what a request needs and the first (without) is returned with a `mtp_snapshot_epoch=None` row — a restore of a snapshot that's *not* the current one… but they share token_ids and snapshot_epoch; the KV is presumably identical (same epoch ⇒ same state?). Epoch identity suggests the same logical state; the MTP history diff (None vs 0) is a minor draft-cache miss. Still not the most serious.
+
+Hmm, OK wait. Let me step back and reconsider — maybe I should look for something more blatant. Let me re-read the tricky bits once more.
+
+`_plan_tensor_blobs`:
+```python
+for name, raw in tensors.items():
+    if pause_for_foreground:
+        self._pause_for_foreground()
+    digest = hashlib.sha256(raw).hexdigest()
+    blobs[name] = {"sha256": digest, "nbytes": len(raw)}
+    if digest in planned_missing:
+        continue
+    if not self._blob_path(digest).exists():
+        planned_missing.add(digest)
+        missing_bytes += len(raw)
+```
+Fine.
+
+`_write_pending`:
+```python
+pending_bytes = int(missing_blob_bytes + len(payload_text.encode("utf-8")))
+```
+`pending_bytes` = the new bytes this write adds. Used for the cap and for the metadata's `physical_nbytes`. And `metadata["logical_nbytes"] = logical_bytes` (all tensors). `deduped_nbytes = logical - physical`.
+
+Hmm wait, but the *manifest row* for this entry: `physical_nbytes = pending_bytes` = missing blobs + the payload json. But *this* entry's *total* on-disk footprint is the *referenced* blobs (all of them, shared or not) + the payload json. The manifest sum for the cap uses physical → a deduped entry pays ~0. Two entries sharing a 2.5GB blob: first pays 2.5GB, second pays ~0. When the first is evicted, the blob survives (second references) → the second's row still pays ~0 but the blob is real 2.5GB → the manifest sum under-reports the disk! Evict the second → the blob is deleted. So the sum is "first-referenced bytes" — a reasonable amortization (each blob is paid by its first writer). But if the first writer's entry was written *before* the blob existed… by definition it paid. OK, consistent — the blob is paid exactly once in the manifest sum (by whichever entry's row recorded it as missing). *Unless* the blob was written as garbage by a *crashed* write (no row), then a later entry dedupes against it (exists → not missing → pays 0, but the manifest doesn't reference it… wait, the entry's payload references the blob's digest, so `_manifest_blob_hashes` includes it; the blob is *not* garbage). So the blob is paid… by nobody in the manifest sum! The crashed write left the blob; every subsequent deduper pays 0; the manifest sum never includes it; the *only* accounting is the untracked estimate from the disk walk (managed_file_bytes - manifest). So it's priced as "untracked" — the cap gate includes it (via the snapshot). And the orphan cleanup *can't* delete it (the manifest references). So the store holds a blob that is (a) referenced, (b) not in the manifest sum, (c) in the untracked bucket. It's double-safe. The gate prices it via the untracked delta. OK!
+
+The design is really carefully constructed. The planted bug must be something *specific*. Let me look at the small helpers once more, comparing the code with the comments.
+
+`_rescan_interval_elapsed_locked`: interval = max(30, 20 × last_scan_s); `now - last_scan ≥ interval`. The comment says "at least DUTY_DIVISOR × the last scan's own duration has passed, so the walk never occupies more than 1/DUTY of a core". 20× the duration ⇒ 5% duty. OK.
+
+`_walk_and_install` — `if self._stop.is_set() or interrupted: stale=True; return usage` — *but* does *not* install in the cache (returns early before the install block). So an interrupted walk installs *nothing* — the cache retains the *old* snapshot. But `_disk_usage_scan_running` is cleared in the worker's finally. And the cache is unchanged → `changed` is computed vs the old. Fine.
+
+Hmm, wait — actually there *is* something here. In `_walk_and_install`, the early return path for an interrupted walk: `usage["disk_usage_stale"] = True; return usage` — the caller `_refresh_disk_usage_now` returns it. In `_ensure_disk_usage_snapshot`, the result is ignored. Fine.
+
+Now — **`_empty_disk_usage`** is returned when the cache is None in `_managed_disk_usage` — all zeros with `scan_pending=True, stale=True`. In `stats()`: `if managed_file_bytes <= 0 and scan_pending: managed = row[2]` (the manifest sum) — a reasonable fallback.
+
+**The untracked computation in `stats()`:**
+```python
+manifest_bytes_at_scan = int(usage.get("manifest_physical_bytes_at_scan", row[2]))
+stats["untracked_file_bytes"] = max(0, managed_file_bytes - database_file_bytes - manifest_bytes_at_scan)
+```
+Fine.
+
+OK, let me look at the restore path once more with fresh eyes, since data correctness there is the crown jewel.
+
+```python
+metadata = dict(row)
+token_ids = tuple(int(token) for token in json.loads(str(metadata["token_ids_json"])))
+if require_exact_prefix and lookup_tokens[: len(token_ids)] != token_ids:
+    return None
+```
+
+`dict(row)` — a sqlite3.Row converts to a dict of column→value. `metadata["token_ids_json"]` exists. OK.
+
+The partial restore — the *most suspicious line* I've noticed:
+
+```python
+restore_point = (
+    int(boundary_prefix)
+    if boundary_prefix is not None
+    else requested_prefix
+)
+cache_prefix_len = (
+    restore_point
+    if boundary_prefix is not None
+    else restore_point - 1
+)
+```
+
+And `mtp_history_prefix_len = max(0, restore_point - 1)` only for the committed policy.
+
+For a *block* restore where the stored entry M is much longer than the request (a classic: the user resumes a session but the current request is a *prefix* of the stored — e.g., the stored is a 100k-token session, the user's current request is a 4k-token system prompt that matches the first 4k): requested = safe_block (block-aligned matched, ≤ len(tokens)=4k… wait, matched = common_prefix_len(request, stored) = min(len(request), the match run). If the request is a *proper prefix* of the stored (the user re-sent a shorter prompt), matched = len(request), gap = M - len(request) is huge → near_match fails (gap > 8); block_match: safe_block = min(block_aligned(len(request)), M, len(request)) = block_aligned(len(request)). requested = that. Fine — the decode slices the KV to that prefix. The stored KV was built for M tokens; slice to 4k — valid for pure attention; for GDN, boundary or full-decode-and-trim.
+
+Now — is slicing *attention* KV to a prefix *always* valid? The KV cache stores per-layer, per-token k/v. Slicing the sequence dimension to a prefix is valid (each token's k/v depends only on ≤ that token). Yes.
+
+OK so the restore *math* is consistent… assuming `decode_payload_prefix` does the right thing with `boundary_prefix_len` — outside the file.
+
+Alright — maybe the bug is *not* in the restore. Let me reconsider the *admission* accounting bug, since it's the only one I found that's *cleanly wrong* and has a clear cost.
+
+Actually wait. Let me re-verify `put_entry`'s release-on-interrupt against the *admission*:
+
+```python
+estimated_nbytes = int(getattr(entry, "nbytes", 0) or 0)
+if not self._admit_write(estimated_nbytes):
+    return False
+```
+
+_admit_write *also* checks the *hourly* budget: `written_last_hour + max(0, estimated_nbytes) > budget` → skip. Note: the hourly check uses the *estimate*. The writer *charges* `pinned_nbytes` = max(estimated, encoded) on success. So the budget can be *exceeded* (underflow) or *over*-conservative… it's an admission heuristic; fine.
+
+The *backlog* accounting: reserve `estimated`; release `max(estimated, encoded)`. As established: if encoded > estimated, the release exceeds the reservation. With the clamp at 0, `_pending_bytes` asymptotes to 0 despite a full queue → the budget stops capping the queue → issue #145 (50GB pin) recurs precisely when the encoded size exceeds the `entry.nbytes` estimate.
+
+Hmm, but is encoded > estimated *likely*? `entry.nbytes` is "the entry's size" as the bank computes it — presumably an accurate KV byte count. `encoded.nbytes` = the *total* encoded payload = KV + logits + hidden + MTP history + gdn boundaries… it includes *everything* in the payload. If the bank's `nbytes` covers only the KV and the payload adds hidden states (multi-GB) + MTP, then encoded >> estimated routinely → *every* write erodes the budget by (encoded - estimated) → after a handful of writes, `_pending_bytes` is clamped at 0 and the 4GiB backlog budget is a *no-op* → the queue (32 deep) can pin unbounded bytes → the exact memory blowup #145 was fixing. That's a *real* regression with a real cost. But is it "the most serious correctness bug"? It's a resource accounting bug; the "correctness" is that the cache works, but memory can explode. The problem statement frames the tier as "saves and restores prompt caches" and asks for "the most serious correctness bug… what it costs". A silent re-opening of an OOM hole is serious. But let me make sure there isn't something that corrupts *data*.
+
+Let me look at the **`_insert_manifest` column count** — 26 columns, 26 values:
+Columns: entry_id, token_hash, prefix_len, token_ids_json, model_path, mtp_enabled, hidden_variant, template_hash, mtp_history_policy, draft_head_identity, policy_fingerprint, session_id, snapshot_epoch, mtp_snapshot_epoch, capabilities_json, block_size, block_hashes_json, entry_dir, nbytes, logical_nbytes, physical_nbytes, deduped_nbytes, created_at_s, last_access_s, hits, format_version = 26.
+Values: entry_id(1), token_hash(2), prefix_len(3), token_ids_json(4), model_path(5), mtp_enabled(6), hidden_variant(7), template_hash(8), mtp_history_policy(9), draft_head_identity(10), policy_fingerprint(11), session_id(12), snapshot_epoch(13), mtp_snapshot_epoch(14), capabilities_json(15), block_size(16), block_hashes_json(17), entry_dir(18), nbytes(19), logical(20), physical(21), deduped(22), created_at_s(23), time.time()(24), 0(25), VERSION(26). ✓ 26 = 26. OK.
+
+But — does `pending.metadata` have all the keys? From `_metadata_for_entry`: entry_id, format_version, token_hash, prefix_len, token_ids, model_path, mtp_enabled, hidden_variant, template_hash, mtp_history_policy, draft_head_identity, policy_fingerprint, session_id, snapshot_epoch, mtp_snapshot_epoch, capabilities, has_recurrent, gdn_boundary_count, nbytes, block_size, block_hashes, created_at_s, logical_nbytes, physical_nbytes, deduped_nbytes. In the writer Phase 3: `metadata["entry_dir"]` is set; `logical/physical/deduped` are overwritten. All keys the insert uses are present ✓. In spill: `metadata["entry_dir"]` is set; `logical/physical/deduped` are set; `nbytes` is max'd. ✓.
+
+**`_retire_entry_row` reads `row`** — from the `_evict_until_room` SELECT: entry_id, entry_dir, physical_nbytes, nbytes, last_access_s. Uses entry_id, entry_dir, physical_nbytes, nbytes. ✓. And `_entry_blob_hashes(entry_dir)` — walks the dir's payload.json → blobs. If the entry dir is *missing* (already rmtree'd?) → the dir missing → `if entry_dir.exists(): rmtree` is skipped; `blob_hashes = self._entry_blob_hashes(entry_dir)` — computed *before* the rmtree — does the helper handle the missing dir? Probably returns an empty set (it's in the reconcile module — `_entry_blob_hashes_of`). Hmm, the ordering: `blob_hashes = self._entry_blob_hashes(entry_dir)` is computed *before* the rmtree — good (reads the payload first). Fine.
+
+**Let me look at `_touch_entry`** — `UPDATE ... WHERE entry_id = ?` — no lock, no generation bump. The manifest stats cache (generation-keyed) is unaffected (touches don't bump) ✓. But the disk usage snapshot's `manifest_physical_bytes_at_scan` is unaffected ✓ (nbytes doesn't change).
+
+Alright, and **`_ensure_store`'s `_archive_legacy_store_if_needed`** — the `source.rename(candidate)` under `_base_lock` — but the *writer* thread also holds `_base_lock` in Phase 0/3 — serialized ✓. The *reader* (restore) — `_restore_row` does *not* take `_base_lock` at all! It reads payload.json and blobs lock-free. If the legacy archive renames the *whole base_dir* concurrently, the in-flight restore's `path.read_bytes()` → FileNotFoundError (the path moved) → the restore fails gracefully (a miss). OK — a miss, not corruption.
+
+Hmm, wait, is `_restore_row` really lock-free? … yes, no lock. And the eviction's rmtree of the entry dir races with it → a FileNotFoundError → caught by the `lookup`'s try/except → a miss. OK.
+
+So the *data* is never corrupted in these races; at worst, a miss or a miss-classified restore. The design is defensive.
+
+Let me re-scan the *prefix boundary* selection once more — *that* is where a *wrong* restore (a data correctness issue for inference) could hide:
+
+```python
+matched = common_prefix_len(tokens, prefix)
+gap = len(prefix) - matched
+safe_block = min(
+    block_aligned_prefix_len(matched, block_size=block),
+    len(prefix),
+    len(tokens),
+)
+required_match = min(min_match, max(1, len(prefix) - gap_limit))
+near_match = gap >= 0 and gap <= gap_limit and matched >= required_match
+block_match = (
+    bool(allow_block_prefix)
+    and safe_block >= block_min_match
+    and safe_block >= 2
+    and safe_block <= matched
+)
+```
+
+`safe_block <= matched` — always true since block_aligned(matched) ≤ matched. Fine.
+
+candidate_key = (candidate_matched, int(matched), len(prefix)) — max. A longer stored prefix wins on a tie. Fine.
+
+Now — **the near_match case with gap ≥ 1**: the stored diverges from the request at `matched`. requested = matched. The decode (prefix) slices to ≤ matched. But — the record's `token_ids` = the stored M tokens, and the record's `logits` = the *stored* logits for token M-1 (or the boundary's logits)… For the full-decode-and-trim path (has_recurrent, no boundary): `decoded = decode_payload(...)` — full decode of the *stored* entry's logits/hidden — for *its* final token, not the request's token at `matched`! Does the trim (SessionBank-side, per the comment) handle the logits? "SessionBank decides whether that full snapshot can serve the requested match" — presumably it discards the mismatched tail logits. The record has `cache_snapshot_prefix_len` so the caller knows the KV only covers up to… For a full decode with partial restore, `decoded.cache_snapshot_prefix_len` is presumably None (full) — the caller sees a KV of length M (the stored) — and `matched_tokens = matched < M` — the *caller* must trim the KV to matched itself? The comment says "must use the exact decoder plus trim" — the trim is in the caller (session_bank), outside the file. OK — trust the cross-module contract; the file's job is to *not* claim a prefix it can't provide. The `cache_snapshot_prefix_len` field communicates it. Fine.
+
+Honestly, the restore logic in this file is consistent with the documented contracts.
+
+So let me look once more at the *writer loop*'s accounting vs the *queue* — actually wait. Let me re-verify `_release_pending` in the writer's `finally` *combined with* put_entry's release on the interrupt path:
+
+- put_entry: admit(estimated) → [encode interrupted] → release(estimated). No pending item was created. ✓ Net 0.
+- put_entry: admit(estimated) → encode OK → queue full → release(pinned). ✓ (net ≤ 0, the over-release when encoded>estimated — the bug).
+- put_entry: admit(estimated) → encode OK → enqueue. Writer: finally release(pinned). (over-release when encoded>estimated — the bug).
+
+So *every* completed write with encoded > estimated erodes the budget by (encoded - estimated), floored at 0. After ~budget/(excess) writes, the budget is effectively dead. With the default 4GiB budget and, say, 1GiB of excess per entry, ~4 writes kill it. Cost: the multi-GB pin of issue #145 returns — the queue holds up to 32 entries × multi-GB → the measured 35→66GB climb → macOS memory pressure / swap / crash under distinct-prefix churn. *That* is a serious, measurable, user-visible cost. And the fix is one line: charge the *actual* pinned amount.
+
+But wait — is that "the most serious correctness bug"? Let me make one more pass for a *data-corruption* bug, since that would clearly beat a memory accounting bug. Let me look at the *dedup* + *eviction* interaction for *wrong content*…
+
+The blobs are content-addressed by sha256. The *only* way a restore gets wrong content: a payload.json references digest D, but the file at D's path contains content that isn't D's. `_write_blob` only writes raw whose sha256 == D to D's path (the digest is computed from raw). A *reader* never writes. So content integrity holds — *unless* the digest is computed from *different* bytes than are written. In the writer: `digest = hashlib.sha256(raw)` (plan) — the *same* `raw` from `pending.tensors` that's written in Phase 2 ✓. In spill: `digest = hashlib.sha256(raw)` and `tier._write_blob(digest, raw)` — same raw ✓.
+
+*But* — in spill, the raw is produced by the codec's streaming sink `_WriteThroughTensors.__setitem__(name, raw)` — raw is the *encoded bytes of the tensor* (host copy). Then *after* the codec run, the *payload* is assembled from `tensor_blobs` (digests) — and the *payload.json* references the digests. The *actual* tensor *bytes* are *not* in the payload (only the digest) — restore reads from the blob file. ✓ consistent.
+
+In the *writer* path, the payload references the digests; the raw is in `pending.tensors` (in RAM); the blobs are written from there; restore reads the file ✓.
+
+One more: **a blob file *replaced* by a *different* content under the same digest** — impossible with sha256 (collision). A *torn read*? The rename is atomic ✓.
+
+So the data integrity is *solid*. The bug must be the accounting / admission one, or something in the *eviction* that evicts *wrong* entries (evicting a *hot* one instead of a cold one — a perf issue), or the **`_evict_until_room` break condition**:
+
+```python
+current = self._current_bytes_for_cap(required)
+if current + required <= cap:
+    return True
+...
+for row in rows:
+    ...
+    garbage.update(self._retire_entry_row(row))
+    current -= int(row["physical_nbytes"] or row["nbytes"] or 0)
+    ...
+    if current + required <= cap:
+        break
+```
+
+`current` starts as `_current_bytes_for_cap(required)` = manifest + untracked estimate. The decrement is the retired rows' physical. But `_current_bytes()` (the live manifest sum) uses `physical_nbytes if > 0 else nbytes` — the decrement mirrors it ✓.
+
+*But* — `_retire_entry_row` *also* deletes the entry *dir* (a few KB of payload.json) — the *untracked* estimate is unchanged (the snapshot-based). The initial `current` included the untracked; the retired rows' *entry dirs* were *tracked* (in the manifest sum) → the decrement is OK. The retired rows' *blobs* are *not* in the manifest sum if deduped… the `row["physical_nbytes"]` *is* what the row recorded (the missing blobs at write time). Consistent with the sum ✓.
+
+And the *final* recheck uses the live `_current_bytes_for_cap` — accurate ✓.
+
+Alright, here's another thought — **`_current_bytes_for_cap` subtracts the reclaimable when cleanup is running**:
+
+```python
+if untracked_bytes > 0 and self._orphan_cleanup_is_running():
+    untracked_bytes = max(0, untracked_bytes - self._reclaimable_bytes_estimate())
+```
+
+Fine.
+
+Now — **`_reclaim_orphans_if_over_cap`**:
+```python
+current = self._current_bytes() + self._untracked_bytes_estimate()
+if current + required <= cap: return
+if not inline: start cleanup; return
+result = self._run_orphan_cleanup()
+```
+Note: it does *not* apply the running-cleanup subtraction — but it *first* checks `self._orphan_cleanup_is_running()` → returns if running ✓.
+
+And the writer's *Phase 0.5* `_reclaim_orphans_if_over_cap(pending_bytes, inline=True)` runs a *full delete-mode walk* on the *writer* thread per write — "the walk yields to foreground traffic". On a store with 816k files… but it only runs when the store is *over* the cap *and* reclaimable > 0. OK.
+
+Alright, at this point I'm fairly convinced the *planted* bug is the **`_pending_bytes` reservation vs release mismatch** — *or* something I'm overlooking. Let me do one final targeted pass on functions with subtle off-by-one / sign / key errors:
+
+1. `parse_size_bytes` — `"100IB"` → replace("IB","B") → "100B" → no suffix match → float("100B")?? `normalized.endswith` against the suffixes — "100B" ends in "B"… suffix "KB"? no; "B" isn't a suffix (only KB, K, MB, M, GB, G, TB, T) — "100B" ends in "B" but "B" alone isn't in the dict… wait, "100GB" ends in "GB" ✓. "100B" → no suffix → `int(float("100B"))` → ValueError → default ✓. Hmm, but "100B" — ends in… "KB"? no. OK. Edge: "1KB" ✓. Fine.
+
+2. `default_cold_tier_max_bytes` — `shutil.disk_usage(DEFAULT_COLD_TIER_DIR)` — if the dir doesn't exist, disk_usage works on the parent (works with any path) ✓.
+
+3. `detect_total_ram_bytes` fine.
+
+4. `chain_block_hashes` fine.
+
+5. `_payload_boundary_at_or_below` — `payload_spec.get("gdn_boundaries")` — a list of records; `record.get("tokens")` — record is a dict ✓ (presumably; if it were a tuple, .get would fail → AttributeError → caught → continue ✓ defensively).
+
+6. **`_manifest_stats_row`** —
+```python
+with self._disk_usage_lock:
+    generation = self._store_generation
+with self._manifest_stats_lock:
+    cached = ...
+    if cached not None and generation matches and TTL: return cached["row"]
+with self._connect() as conn: fetched = ...
+row = ...
+with self._manifest_stats_lock:
+    self._manifest_stats_cache = {...}
+return row
+```
+Two concurrent stats() calls can both fetch — fine (idempotent). The generation is read *before* the cache check… the generation is *monotonic*; reading it early and then validating the cached generation against it: if the generation *bumped between* the read and the cache check, the cached generation (old) != read (old, read *before* the bump) → equal → we might return the cache even though a bump happened *just after* the read → at most 5s of stale by the TTL ✓ per the comment. Fine.
+
+7. **`stats()`** — `written_last_hour` is computed *under the stats lock* but *not* window-pruned! `_admit_write` and `_admit_hourly` prune; `stats()` sums *all* entries in the deque including >1h old! Look:
+
+```python
+with self._stats_lock:
+    pending_bytes = int(self._pending_bytes)
+    written_last_hour = sum(nbytes for _, nbytes in self._written_window)
+```
+
+*No* pruning in stats()! The deque `_written_window` only grows; pruning happens on the *next admission* (`_admit_write` / `_admit_hourly`). On an *idle* server (the /health poll case — exactly the #280 context!), no admissions occur → the deque is *never* pruned → `stats()["written_bytes_last_hour"]` grows unbounded over *days* of writes, wildly overstating the 1-hour figure. And the memory: the deque retains (timestamp, nbytes) tuples forever — unbounded (small tuples, but on a busy server it's 2.5GB entries × N writes × 24h… each tuple is small ~100 bytes; 100k writes → 10MB — minor). The *reporting* bug: the dashboard's "written_bytes_last_hour" is a lie (a cumulative total), *and* the `write_budget_per_hour_bytes` comparison in the UI looks wrong. Hmm — is that "the most serious"? It's a reporting bug. The *budget* itself is pruned correctly on admission. The cost: the operator sees a bogus figure; possible mis-tuning of the budget. Not data.
+
+Hmm, wait, let me double-check — maybe I misread and there's a prune. In `stats()`:
+
+```python
+with self._stats_lock:
+    pending_bytes = int(self._pending_bytes)
+    written_last_hour = sum(nbytes for _, nbytes in self._written_window)
+```
+
+No prune. Compared to `_admit_hourly` and `_admit_write` which *do* prune. So `stats()` over-reports once the window is stale. *But* — every /health poll calls stats() continuously; if the server writes at all, admissions prune. Only a *write-idle* daemon (the /health-poll-only case) accumulates. The deque of (float, int) — 100k writes → ~2 tuples each ~72 bytes → ~15MB. The *value* is wrong. Medium severity. Not *the* one, I think… unless the *budget* is affected — it isn't (it's pruned on admission).
+
+8. **`_inc`** — `self._stats[key] = ...` — sets new keys (skipped_backlog_bytes etc.) — fine.
+
+9. **`put_entry` — `boundaries` is built *before* the encode; the `encoded` spec is from the codec; the `PendingWrite.payload_spec = encoded.spec`.** Fine.
+
+10. **`DeferredPayload` / `pending.deferred`** — always None now; the writer logs an error and skips. Fine.
+
+11. **`cold_tier.flush` + `archive`**: archive flushes with a 10s timeout; *ignores* the result. If the flush times out (a 2.5GB write with a 600s foreground pause!), archive renames the *live* store *with items still in the queue*. The writer keeps running; the next `_write_pending` Phase 0: `self._ensure_store()` — recreates entries/, blobs/, manifest.sqlite under the *new* base_dir… wait, `self.base_dir` is the *same* Path (the *name* was changed on disk, not the Path object!). After `source.rename(candidate)`, the path `self.base_dir` no longer exists; `_ensure_store` recreates *it* (a new empty dir + a new manifest). The writer's *in-flight* entry (fetched *before* the rename): its `final_dir`/`temp_path` were computed… in `_write_pending` the path is computed *after* the get, *before* the archive — if the archive's rename happens *in between*, the writer's `path.parent.mkdir(parents=True, exist_ok=True)` *recreates the old path* and writes blobs + the entry dir *into a stray directory* (the old base_dir path, now outside the archive and outside the store!). `temp_dir.rename(final_dir)` — works (the parent was just created). Then Phase 3: `self._ensure_store()`? No — Phase 3 doesn't call _ensure_store; it mkdirs temp_parent = self.base_dir/entries/xx — *already created* by the blob mkdir ✓; writes the payload; `self._insert_manifest` — connects to `self.base_dir/manifest.sqlite` — which *doesn't exist* in the stray dir!! `sqlite3.connect` will *create* an empty DB at that path (the manifest path under the stray dir) → then `INSERT INTO entries` → **`sqlite3.OperationalError: no such table: entries`** → propagates → `_writer_loop`'s except → write_failures. So the entry dir + blobs are stranded in the *stray* directory (a new store at the old path, unmanaged), and the *active* store (the recreated one) has *nothing*. Data: the *stray* dir is garbage (the manifest row is missing → the entry is not restorable) — the *write* is lost. And the *next* writer item: Phase 0's `_ensure_store` — `base_dir` *exists* (the stray one!) → skips legacy archive (the manifest exists — an empty one with… wait, `sqlite3.connect` created the file; `_ensure_store`'s CREATE TABLE IF NOT EXISTS creates the entries table in the stray DB ✓; `_archive_legacy_store_if_needed` — the manifest exists, the table exists, the legacy count 0 → no archive). Hmm, *actually* — so the stray dir *becomes* the store?? No wait — the archive already renamed the *old* store to the archive; the writer then resurrected the base_dir path with a new empty manifest… *but* the *active* store that the *rest of the server* (the constructor, the restore path) uses is `self.base_dir` — the *same* Path! Everyone uses `self.base_dir`; the rename moved the *contents*, and the recreation restored the path. So *actually*… let me redo this: `archive()` renames `self.base_dir` → `archive-N`. Then `archive()` itself calls `self._ensure_store()` under the lock, recreating `self.base_dir/{entries,blobs,manifest}` *empty*. So the *active* store is the *new* empty one. The writer's in-flight item, *if* it races *after* the rename but *before* archive's `_ensure_store` (or independently): its mkdir recreates `self.base_dir/...` — the *same* path archive is recreating — *serialized* by the lock? archive's `_ensure_store` is under `_base_lock`; the writer's Phase 0 is *also* under `_base_lock` (with the `self._ensure_store()` inside) — but the *path computation* and the *blob writes* (Phase 2) are *lock-free*. Order: the writer computes `final_dir` (a Path, no IO) → claims → Phase 2 writes blobs: `path.parent.mkdir(parents=True, exist_ok=True)` — if the archive's rename has happened, this *recreates the base_dir/blobs/xx path* (stray… but *then* archive's `_ensure_store` *also* mkdirs the same path — *idempotent*, the *same* dir!). Wait — the rename *moved* the dir; a subsequent mkdir at the old path creates a *new* dir *at that path* — which *is* the active store path (archive recreated it). It's the *same* filesystem location! Of course — a path is a path. After the rename + recreation, `self.base_dir` points to the *new* store; the writer's mkdir/write at `self.base_dir/...` lands in the *new* store. It's *not* a stray dir! I confused myself. The rename moved the *contents* of the base_dir; a new dir at the same path = the new store. The writer's blobs land in the new store's blobs/ ✓, the entry dir ✓, the manifest — `self._insert_manifest` → `self._connect()` → `sqlite3.connect(str(self.base_dir / "manifest.sqlite"))` — the file exists (archive recreated it, with the schema? `_ensure_store` ran *inside* archive under the lock → the table exists ✓). The row is inserted into the *new* manifest ✓. So the *in-flight* write *completes* into the new store! *But* the *queue* still has items whose blobs are… each item's blobs are written from RAM (`pending.tensors`) → fine, *complete* in the new store. The *archive* contains the *pre-archive* store *without* these final entries — fine, they're in the *new* store. Actually… it *works*?! Unless the in-flight write had *already* read `final_dir.exists()` (Phase 0, *before* the rename): it saw the *old* dir *exists* + in manifest → `touch_entry` (old manifest, *still* the active path pre-rename) → returns True — the write is *skipped* (dedup) — but the rename *archived* that entry — and it's *not in the new store*!! **The entry that was "already there" (touch path) is archived away and *never* re-materialized in the new store** — it was deduped, *not* re-written! The `pending.tensors` bytes are in RAM; the touch path discards them (returns True without writing). After the archive, the *new* store lacks that entry → the *next* restore of that session = a *miss* (a full re-prefill). And *worse* — is it *data* loss? The entry is *in the archive* (the operator *asked* for the archive — the admin's cache clear!). Hmm — `archive()` is the admin's op; the *intent* is to move the store out of the way. A *queued* write completing into the *new* store while its "already exists" twin is archived — *consistent* with the archive semantics? The operator's archive + a *fresh* store — a *queued* write that deduped against the pre-archive store is *lost* from the active store. But that's *admin*-triggered; the cost is a bounded cache miss. *Not* the *most* serious.
+
+OK. Time to *decide*. Ranking the candidates:
+
+A. **`_pending_bytes` reserve/release mismatch** (reserve `estimated` at admit; release `max(estimated, encoded)` everywhere) → the backlog budget erodes to 0 → the #145 unbounded memory pin returns. *Real*, *cleanly* identifiable, *serious* cost (measured 35→66GB, pressure, swap), *minimal* patch. It's a *correctness* bug in the admission accounting — the *very* mechanism the comment touts.
+
+B. **`stats()`'s unpruned `_written_window` sum** → a bogus `written_bytes_last_hour` + unbounded deque growth on an idle daemon. *Real* but milder.
+
+C. **mtp_epoch None vs 0 entry_id collision** → a re-snapshot with a *different* MTP history is silently dropped (the Phase 0 touch path). *Real* in principle; cost = a stale MTP draft cache / a missed warm start; *needs* a plausible None→0 with the same epoch. Actually wait — let me reconsider: is it really the same entry_id? Digest input: token_hash + identity JSON + snapshot_epoch + (mtp_snapshot_epoch or 0 → "0" for both None and 0). Yes, a collision. And the *skip* path: writer Phase 0: `final_dir.exists() and _entry_in_manifest(entry_id)` → touch → return True → the *new* payload is *discarded*. The *row* retains the old `mtp_snapshot_epoch=None` and the old payload. For a *subsequent* *lookup* with the same params, the *old* payload is restored — with *no* MTP history (or *different* KV? no — same snapshot_epoch+tokens ⇒ same main KV; only the MTP *part* *differs*). Cost: a *missed* MTP warm start; *also* — the *hourly budget / stats* are fine. *Also* — `capabilities` / `mtp_full` in the row may *differ* (the *new* entry might have an `mtp_full` capability the old row *lacks*) → `lookup_prefix_boundary`'s shadow logic uses the *row*'s caps → *may* fail to shadow correctly. Mild.
+
+D. **The archive-race dedup loss** — admin-triggered, bounded.
+
+E. **The evictor's rescan thrash** — liveness / perf.
+
+The *most serious* with a *minimal* patch and a *clear* cost: **A** — the backlog budget erosion. Let me *pin* the fix precisely.
+
+*Intended* semantics (from the PendingWrite comment): `pinned_nbytes` = "the *estimated* bytes this write pins in memory until the writer drains it". The *budget* should bound the sum of `pinned_nbytes` of *queued* items. *Current* code: admission *reserves* `entry.nbytes` (the *bank*'s estimate), the item *pins* `max(entry.nbytes, encoded.nbytes)`, and *release* uses the item's `pinned_nbytes`. The *reservation* and the *release* must *match*. Two *minimal* fix options:
+
+Option 1: in `put_entry`, *after* encoding, *adjust* the reservation: `self._release_pending(estimated_nbytes)`… no — *cleanest*: in `put_entry`, *top up* the reservation by (pinned - estimated) *before* the enqueue, i.e., re-reserve the *actual* amount. But the admission check (budget check) was *done* against the estimate; the *top-up* may *exceed* the budget — that's *OK* per the existing "admitted_oversized_alone" precedent (a *single* entry may *exceed* the budget; the *budget* bounds *accumulation*). Hmm, but a *top-up* that *exceeds* the budget without re-checking = *re-admitting* — *dangerous*: the budget exists to *stop* accumulation. *Better*: reserve the *actual* *pinned* amount *at admission* — but the *pinned* isn't known *until* the encode *finishes* (the encode is *after* the admit!). The *sequence*: admit(estimated) → encode (expensive, may *interrupt*) → enqueue. The *actual* size is only known *after* the encode. So the *correct* *minimal* patch: on *all* *release* paths, release *exactly* what was *reserved* (`estimated`), and *separately* account the *excess*… hmm, but then the *budget* *under-counts* the *real* pin (the queue *holds* *pinned* > *reserved* bytes → the *budget* *under-estimates* → still *erodes* in the *other* *direction* — *over-admission* of *total* pin, *slowly*). *Wait*: if we *reserve* estimated and *release* estimated: the *budget* tracks the *sum of estimates*; the *real* pin = the *sum of max(estimated, encoded)* ≥ the *sum of estimates* → the *real* pin can *exceed* the *budget* by the *excess* — a *bounded* *over* *per item* but *unbounded* *across* 32 items. The *current* *code*'s *release* of *pinned* at *least* *keeps* the *ledger* ≤ *reality* *after* the *release*… the *problem* is the *release* *exceeds* the *reservation* → the *ledger* *goes* *negative* (clamped) → *future* *admissions* *see* *room* that *doesn't* *exist* → *over-admission*. *Versus* *releasing* the *reservation*: the *ledger* *equals* the *sum of estimates* of *queued* items; the *real* pin ≥ the *ledger* → *conservative* *under-count* → *slight* *over-admission* *bounded* by the *per-item* *excess* × 32. Hmm — *neither* is *exact*. The *exact* *fix*: *reserve* the *actual* *pinned* amount — *i.e.*, *move* the *budget* *check* to *after* the encode, or *top-up* the *reservation* by the *excess* *before* the enqueue (a *top-up* *that* *fails* the *budget* → *skip* the *write*? *That* *changes* *semantics*: an *entry* *whose* encoded size *exceeds* the *budget* is *now* *rejected* *after* *paying* the *encode* cost — *wasteful* but *correct*… *and* *contradicts* the *oversized-alone* *precedent* (a *lone* *oversized* *entry* is *admitted*).
+
+The *truly* *minimal* *correct* *patch* that *preserves* *all* *the* *documented* *policies* (the *budget* *bounds* the *queued* *bytes*; an *oversized-alone* is *admitted*): *make* the *release* *match* the *reservation*. *That* *is*, in the writer *loop* *and* in *put_entry* *queue-full*, *release* the *amount* *that* *was* *reserved* — *which* is *estimated*, *not* *pinned*. *But* the *PendingWrite* *dataclass* *has* *no* *field* for the *reserved* amount… `pinned_nbytes` is *both* the *budget* *key* *and* *the* *stats* *key*. The *smallest* *change*: *add* *a* *`reserved_nbytes`* field? *That's* a *dataclass* *change* — *still* *minimal*. *Or*: *set* *`pinned_nbytes = max(...)`* *and* in *the* *release* paths *release* `min(pinned_nbytes, ...)`… *ugly*.
+
+Hmm, *wait* — *maybe* *the* *intended* *design* is *the* *opposite*: *admission* *should* *reserve* *pinned* — *but* *pinned* *isn't* *known* *yet*… *actually* — *can* we *know*? `encoded.nbytes` *is* *known* *after* the *encode*. What *if* the *fix* is: *admit* *with* the *estimate*; *then* *after* the *encode*, *if* *pinned > estimated*, *top-up*: *check* `self._pending_bytes - estimated + pinned <= budget` (i.e., *re-admit* the *delta*); if it *fails* → *drop* the *write* (a *skipped_backlog_bytes*). *And* *on* *all* *paths* *release* *pinned* (the *current* *release* *then* *becomes* *correct*!). *That* *makes* the *ledger* *exact*: *every* *queued* item *reserves* *pinned*; *every* *release* *releases* *pinned*. *The* *top-up* *happens* *before* the *put_nowait* (the *same* *owner* *thread* — *the* *stats* *lock* *is* *fine*). *And* the *interrupt/exception* *paths* *release* *estimated* (the *only* *thing* *reserved* *at* that *point*) ✓ *already* *so*. *The* *queue-full* *path* *releases* *pinned* — *correct* *once* the *top-up* *has* *happened* ✓. The *writer* *releases* *pinned* ✓. *That* *is* the *coherent* *minimal* *patch*: *one* *small* *block* in *`put_entry`* *between* the *encode* *and* the *enqueue*.
+
+Let me *write* it:
+
+```python
+        pending = PendingWrite(
+            entry_id=str(metadata["entry_id"]),
+            token_ids=token_ids,
+            metadata=metadata,
+            payload_spec=encoded.spec,
+            tensors=encoded.tensors,
+            pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)),
+        )
+        # The admission above reserved entry.nbytes, but the queued item pins
+        # max(entry.nbytes, encoded.nbytes): top up the reservation to the
+        # actual pinned size, otherwise every write whose encode outgrows the
+        # bank's estimate over-releases at drain and the backlog budget
+        # erodes to zero (re-opening #145).
+        top_up = pending.pinned_nbytes - estimated_nbytes
+        if top_up > 0 and not self._admit_write_delta(top_up):  # hmm
+```
+
+*Cleaner*: *refactor* `_admit_write` *to* *take* the *delta*? The *minimal* *patch* in *the* *review* *should* *be* *simple* to *explain*. *Alternative* *formulation* — *change* *the* *two* *release* sites *to* *release* *the* *reserved* amount: *but* the *writer* *only* *knows* *pinned*… *we'd* *need* to *store* the *reserved* amount. *So* *either* *way* *touches* the *dataclass* or *adds* a *top-up*. The *top-up* *approach* *keeps* the *dataclass* *untouched* and *makes* *the* *ledger* *exact*. I *like* it. *Let* me *also* *handle* the *hourly* *budget* *delta*? The *hourly* *budget* is *charged* at *completion* with *pinned* (the *writer* appends *pinned*); the *admission* *checked* with the *estimated*. The *top-up* *should* *also* *re-check* the *hourly* *budget* *for* the *delta* — *otherwise* the *hourly* *budget* *also* *under-counts* *writes* *where* encoded>estimated… but the *hourly* *charge* *at* *completion* *uses* *pinned* — *so* *the* *budget* *self-corrects* *retroactively* (the *charge* *is* the *true* *amount*; the *admission* *check* *is* *just* *early* *screening*). For the *backlog*, the *reservation* *is* the *gate*. So the *top-up* *only* *needs* to *guard* the *backlog* *budget*. *Simple* *version*:
+
+```python
+        if pending.pinned_nbytes > estimated_nbytes:
+            with self._stats_lock:
+                # Re-admit the difference between the bank's estimate and the
+                # actual pinned payload; over-releasing it at drain would
+                # erode the backlog budget (reopening #145).
+                if self._pending_bytes - estimated_nbytes + pending.pinned_nbytes > self._backlog_budget_bytes:
+                    self._release_pending(estimated_nbytes)
+                    self._stats["skipped_backlog_bytes"] = ...
+                    return False
+                self._pending_bytes += pending.pinned_nbytes - estimated_nbytes
+```
+
+Hmm — *but* *the* *oversized-alone* *policy*: a *lone* *entry* *larger* *than* the *budget* was *admitted* *at* *admit* time *if* the *queue* *was* *empty*. At *top-up* time, `self._pending_bytes` *includes* the *estimated* we *just* *added*; if the *queue* *is* *still* *empty* *of* *others*… *re-checking* the *budget* *with* *pinned* *would* *reject* *a* *lone* *oversized* *entry* that *admit* *already* *admitted* (because *at* *admit*, `_pending_bytes` *was* *0* *before* *our* *estimated*… *no* wait: *admit* *added* the *estimated*; *then* the *encode*; *then* the *top-up* *sees* `_pending_bytes = estimated (+ others)`; *if* *pinned > budget* *and* *no* *others* → `0 - estimated + pinned > budget`? *admit* *passed* because *`_pending_bytes`* (pre-add, *0*) + *estimated* ≤ *budget* *or* *oversized-alone* *(`_pending_bytes` *0* → *admit* *any* *size*). *At* *top-up*: `_pending_bytes - estimated + pinned = 0 - estimated + pinned = pinned - estimated`. If *pinned* = 8GiB, *budget* 4GiB, *estimated* = 1GiB → *admit*: *0* + 1 ≤ 4 ✓ *admitted*; *top-up*: *8 - 1 = 7 > 4* → *rejected* → *we* *discard* a *lone* *entry* *that* the *oversized-alone* *policy* *explicitly* *wants* *to* *admit*! *Contradiction*. *So* the *top-up* *must* *also* *apply* the *oversized-alone* *exception*: *allow* *the* *top-up* *if* the *queue* *would* *be* *lone*… *the* *writer* *has* *drained* *to* *unknown*; *we* *can* *check* `self._queue.qsize()`… *racy* *but* *the* *intent*: *the* *budget* *bounds* *accumulation*; *a* *lone* *oversized* *is* *OK*. *Simpler* *and* *safer* *minimal* *patch* *that* *avoids* *re-admission* *semantics* *entirely*: **release *exactly* *the* *reserved* amount** — *i.e.*, *make* the *reservation* and *the* *release* *symmetric*: the *writer* *and* *queue-full* *release* *`estimated`*, *not* *`pinned`*. *But* *the* *writer* *needs* *`estimated`*… *PendingWrite* *has* *it* *implicitly*? `pinned_nbytes = max(estimated, encoded)` — *if* *encoded < estimated*, *pinned == estimated* ✓; *if* *encoded > estimated*, *pinned > estimated* ✗. *So* *store* *the* *estimate*: *add* *a* *`reserved_nbytes`* field *defaulting* *to* *`pinned`*… *one* *line* *in* the *dataclass* + *one* *in* *the* *constructor* + *the* *release* *sites* *use* *it. *And* *the* *ledger* *tracks* *the* *sum* of *estimates* — *a* *lower* *bound* on the *real* *pin* → *conservative* *under-count* (a *mild* *over-admission* *bounded* *by* the *excess*), *but* *never* *negative* / *eroded* → the *budget* *keeps* *meaning*. *And* *the* *comment* on *`pinned_nbytes`* says *it* *estimates* *the* *pin*… *the* *stats* *`writer_backlog_bytes`* *reports* *`_pending_bytes`* — *with* *estimates* it *under-reports* *the* *real* *RAM* *pin* — *hmm*, *the* *dashboard* *lie* *in* *the* *safe* *direction*? *Under-reporting* *memory* *is* *worse* *for* *the* *operator* *than* *over-reporting*… *ugh*.
+
+*OK*, *let* me *think* *about* *which* *direction* *the* *real* *fix* *in* the *upstream* *project* *would* *take* — *and* *what* *the* *review* *question* *expects*. The *planted* *bug* *is* *almost* *certainly* *the* *asymmetry* *itself* (reserve *estimated* / *release* *pinned*), *and* the *expected* *patch* *is* *to* *make* *them* *match*. *The* *cleanest* *matching* *that* *preserves* *both* *documented* *policies* (an *exact* *budget* on the *queued* *bytes* *including* *oversized-alone*) *is* *the* *top-up* *with* *the* *oversized-alone* *carried* *over*: *i.e.*, *re-run* *the* *same* *admission* *decision* *against* *the* *delta*. *Note*: *the* *oversized-alone* *branch* *in* *`_admit_write`* *fires* *when* *`_pending_bytes`* *before* *addition* *is* *0*. *For* the *delta*: *`_pending_bytes`* *before* *top-up* *includes* *our* *estimated* (+ *others* queued). *If* *others* == 0 *and* our *estimated* *was* *admitted* *alone*… *the* *delta* *top-up* *with* *the* *same* *rule* (*`_pending_bytes`* *≤* *estimated* *≈* "alone") *→* *admit* *the* *delta* *unconditionally*? *Getting* *convoluted*.
+
+*Let* me *reconsider*: *maybe* the *simpler* *and* *intended* *fix* *is* *the* *opposite* — *the* *reservation* *should* *be* *pinned*: *move* *the* *budget* *check* *after* the *encode*. *Look* at the *cost* of *that*: *admit* *currently* *gates* *before* the *encode* — *the* *encode* *is* the *expensive* *part* (the *2.5GB* *eval+copy*); *admitting* *after* the *encode* *means* *a* *write* *that* *will* *be* *rejected* *by* the *budget* *still* *pays* the *full* *encode* — *a* *waste* *the* *current* *design* *avoids* (a *cheap* *pre-filter). *So* the *design* *deliberately* *admits* *on* *the* *estimate* *early*. *The* *bug* *is* *that* the *release* *doesn't* *mirror* *that*. *So* the *intended* *fix* = *release* *the* *reserved* amount = *`estimated`*. *And* *the* *`writer_backlog_bytes`* *stat* *will* *report* *the* *sum of* *estimates* — *and* *the* *`pending.pinned_nbytes`* *comment* *can* *be* *re-worded*. *The* *real* *RAM* *pin* *is* *`pinned`*; *the* *budget* *ledger* *is* *the* *estimate* — *a* *documented* *under-approximation* — *fine*.
+
+*But* *the* *writer* *needs* *`estimated`* *on* the *PendingWrite*. *The* *dataclass* *is* *frozen*; *add* *a* *field*:
+
+```python
+@dataclass(frozen=True)
+class PendingWrite:
+    ...
+    pinned_nbytes: int = 0
+    reserved_nbytes: int = 0   # what _admit_write charged to _pending_bytes
+```
+
+*Constructor* in *put_entry*: `reserved_nbytes=max(0, estimated_nbytes)`… *and* *the* *writer* *finally*: *`self._release_pending(pending.reserved_nbytes)`*; *queue-full*: *`self._release_pending(estimated_nbytes)`* (*already* *so* ✓ *no* *change*); *interrupt/exception*: *`_release_pending(estimated_nbytes)`* ✓ *no* *change*. *So* the *patch* = *one* *field* + *one* *argument* + *one* *line* in *the* *writer* + *a* *comment*. *That's* *minimal* *and* *correct*: *the* *ledger* *is* *now* *exactly* *the* *sum of* *reserved* amounts; *every* *item* *releases* *what* *it* *reserved*; *the* *clamp* *can* *never* *fire* *spurious* *room*.
+
+*Wait* — *one* *more* *check*: *is* *there* *any* *other* *place* *`_pending_bytes`* *is* *touched*? *grep*: *`__init__`* *0*; *`_admit_write`* *+=*; *`_release_pending`* *-=*; *`stats`* *reads*; *put_entry* *releases* (×2); *writer* *finally* *releases*. *That's* *all*. ✓ *And* *cancel_pending*: *drops* *items* *without* *releasing* *`_pending_bytes`*!!! *Look*:
+
+```python
+def cancel_pending(self) -> int:
+    dropped = 0
+    while True:
+        ...
+        dropped += 1
+        self._queue.task_done()
+    ...
+```
+
+*It* *never* *calls* *`_release_pending`* *on* *dropped* items!! *The* *docstring* *says* *it's* *used* *by* "the *admin* *cache*-*clear* *quiesce*": *drop* *queued* writes. *The* *writer* *thread* — *is* it *still* *running*? *The* *quiesce* *drops* *items* *directly* from the *queue* and *marks* *task_done* — *the* *writer* *never* *sees* them *→* *their* *`_pending_bytes` *reservation* is *never* *released* *→* *`_pending_bytes`* *stays* *at* *the* *sum of* *dropped* items *forever* *→* *`_admit_write`* *rejects* *all* *future* writes *as* *skipped_backlog_bytes* *→* **the *SSD* *tier* *is* *permanently* *bricked* *for* *writes* *until* *process* *restart*** (the *clamp* *in* *release* *can't* *recover* *it, *because* *no* *release* *happens*). *This* *is* *a* *much* *more* *serious* *bug* *than* *the* *erosion*: *a* *one-shot* *admin* *op* *kills* *the* *tier*. *Wait* — *verify*: *does* *the* *writer* *release* *on* *items* *it* *hasn't* *got*? *No* — *release* *happens* *in* *the* *writer's* *finally* *only* *after* *a* *`get()`. *A* *dropped* item *is* *consumed* *by* *`cancel_pending` *itself*. *So* *yes*: *the* *reservation* *leaks* *permanently*. *Cost*: *after* *an* *admin* *cache* *clear* (a *documented* *use*), *`_pending_bytes`* *=* *the* *dropped* *bytes* (a *few* *GiB* — *the* *budget* *is* 4GiB) *→* *every* *subsequent* *`put_entry`* *fails* *admission* (the *queue* *is* *empty* *but* *`_pending_bytes`* *is* *already* *≥* *budget* *→* *the* *oversized-alone* *branch* *requires* *`_pending_bytes`* `<= 0` *→* *fails*) *→* *`skipped_backlog_bytes`* *ticks* *silently* → *the* *SSD* *cold* *tier* *never* *persists* *anything* *again* *→ *every* *session* *re-prefills* *after* *the* *clear* *+ *restart*… *actually* *worse*: *the* *clear* *is* *usually* *followed* *by* *re-activity; *the* *user* *expects* *the* *tier* *to* *repopulate; *it* *doesn't; *the* *only* *trace* is *a* *counter. **And* *the* *interaction* *with* *bug* *A*: *`_release_pending`* *clamps* *at* *0* — *normal* *drain* *of* *the* *remaining*… *there* *are* *no* *remaining* *items* (all *dropped*). *The* *leak* *is* *permanent.
+
+*Hmm* — *but* *wait*: *is* *`cancel_pending` *really* *the* *most* *serious*? *Let* me *re-read* *the* *docstring*: *"Used* *by* *the* *admin* *cache*-*clear* *quiesce*:" — *a* *documented* *code* *path*. *The* *fix* *is* *one* *line*: *`self._release_pending(pending.pinned_nbytes)`* *in* *the* *drop* *loop* (*or* *`estimated`* — *see* *below*). *Now*, *which* *amount*? *The* *reservation* *was* *`estimated`*. *The* *item* *pins* *`pinned`*. *For* *ledger* *consistency* *with* *admission*, *release* *the* *reserved* = *`estimated`*. *But* *the* *dataclass* *only* *stores* *`pinned`*. *Ugh* — *the* *same* *duality*. *For* *the* *minimal* *patch*, *releasing* *`pinned`* *is* *at* *least* *a* *real* *upper* *bound* on *what* *was* *reserved*… *it* *can* *over-release* *into* *the* *clamp* — *harmless* (the *clamp* *bounds* it; *the* *worst* *case* *creates* *a* *tiny* *bit* *of* *spurious* *room* — *far* *better* *than* *a* *permanent* *brick). *Actually*, *for* *the* *cancel* *fix*, *either* *amount* *un-bricks*; *the* *asymmetry* *bug* *A* *affects* *normal* *drain* *separately.
+
+*So* *now* I *have* *two* *candidates* *for* *"#1"*:
+- *B1*: *`cancel_pending`* *leaks* *`_pending_bytes`* → *a* *one-shot* *admin* *op* *permanently* *disables* *writes* *to* the *tier* (until *restart).
+- *A*: *the* *reserve/release* *asymmetry* → *the* *budget* *erodes* *over* *time* under *normal* *churn* → *the* *#145* *memory* *blowup* *returns.
+
+*Which* *is* "*the* *most* *serious* *correctness* *bug*"? *B1* *is* *a* *total* *functional* *outage* *of* the *tier's* *core* *purpose* (persistence), *triggered* *by* *a* *documented* *admin* *operation*, *permanent* *for* the *lifetime* of *the* *process*, *silent* (a *counter* *only), *with* *a* *one-line* *fix. *A* *is* *a* *gradual* *degradation* *of* a *safety* *limit*. *B1* *is* *more* *serious*. *Also* — *B1* *has* *a* *second* *victim*: *the* *`writer_backlog_bytes`* *stat* *reports* *the* *leak* *to* *the* *dashboard* *as* *a* *growing* *backlog* *that* *never* *drains* — *the* *operator* *sees* *a* *phantom* *4GiB* *backlog* *forever. *And* *it* *can* *combine*: *a* *clear* *mid-churn* *leaks* *a* *partial* *sum*.
+
+*Wait* — *let* me *verify* *B1* *is* *really* *as* *I* *say* *by* *re-reading* *`_admit_write`* *once* *more*:
+
+```python
+needed = max(0, estimated_nbytes)
+if self._pending_bytes + needed > self._backlog_budget_bytes:
+    if self._pending_bytes <= 0:
+        ... admit alone ...
+    else:
+        skipped_backlog_bytes += 1
+        return False
+```
+
+*After* *the* *leak*: *`_pending_bytes`* = *L* (0 < L ≤ budget *typically* — *the* *dropped* *items* *were* *each* *admitted* *when* the *ledger* *was* *lower*; *L* ≤ *budget* *roughly… *actually* *L* *can* *exceed* *budget*? *Each* *admission* *checked* *ledger+needed ≤ budget* (or *alone). *So* *at* *admit* *time*, *the* *sum* ≤ *budget* + *max alone* *excess*. *The* *writer* *drains* *some* *before* *the* *clear* → *ledger* *drops*; *the* *clear* *drops* the *rest* *without* *releasing* → *L* = *the* *sum of* *what* *was* *queued* *at* *clear* *time* ≤ *budget* (+ *excess). *So* *L* *is* *usually* *in* (0, budget] *→* *`_pending_bytes + needed > budget` *for* *any* *needed* > *budget* - L; *and* *the* *alone* *branch* *requires* *L ≤ 0* *→* *fails*. *A* *small* *entry* (a *100KB* estimate): *L* + 100KB ≤ budget? *If* *L* = budget *exactly* *→* *no*. *A* *realistic* *clear* *drops* *several* *GiB* *of* *items* → *L* ≈ *budget* → *almost* *everything* *fails; *small* *writes* *may* *squeak* *through* *if* *L* < *budget*. *Essentially* *the* *tier* *is* *bricked. ✓
+
+*Also* *check*: *does* *anything* *else* *release* *on* *cancel*? *The* *writer *thread* *for* *those* *items*: *it* *never* *gets* *them*. *`task_done`* *only* *affects* *queue* *accounting. *No* *release. ✓ *B1* *confirmed.
+
+*Now* — *is* *there* *an* *even* *more* *serious* *bug* I *should* *prefer*? *Data* *corruption *would* *be* *worse*. I *haven't* *found* *any*; *the* *content-addressing* *and* *atomic* *renames* *protect* *restores. *The* *restore* *path* *can* *at* *worst* *miss* (a *FileNotFoundError* *→* *a* *miss). *The* *entry_id* *collision* (C) *at* *worst* *serves* a *stale* *MTP* *draft* *cache* — *the* *main* *KV* *is* *identical* *by* *epoch*; *the* *MTP* *history* *None* *vs* *0*… *hmm*, *actually* *can* *the* *payload* *differ* *in* the *main* *KV*? *Same* *token_ids* *+* *same* *snapshot_epoch* *⇒* *the* *bank* *asserts* *the* *same* *state; *the* *codec* *encodes* *the* *live* *arrays* — *if* *the* *live* *arrays* *were* *mutated* *between* *two* *snapshots* *of* *the* *same* *epoch* (a *donation* *reuse* — *the* *exact* *scary* *case* *from* *#169*!), *the* *payloads* *differ*, *but* the *entry_id* *is* *the* *same* → *Phase 0* *touches* *and* *skips* → *the* *SSD* *retains* the *first* *encoding* — *if* *the* *first* *was* *corrupted* (a *donated* *page* *mutated* *between* *the* *snapshot* *and* the *encode*… *but* the *encode* *is* *now* *on* the *owner* *thread* *at* *enqueue* — *the* *gap* *is* *small), *the* *corruption* *is* *retained* *and* *the* *legitimate* *re-encode* *is* *discarded. *But* *that* *requires* the *bank* *to* *re-put* *the* *same* *epoch* — *a* *duplicate* *snapshot* *of* *the* *same* *epoch* — *a* *bank-side* *no-op* *in* *principle. *C* *is* *a* *latent* *sharp* *edge* (the *None*/0 *digest* *aliasing *is* *genuinely* *wrong* — *two* *distinct* *logicals* *share* an *ID), *but* *its* *trigger* *and* *cost* *are* *softer* *than* *B1*. *I* *could* *mention* *it* *as* a *runner-up* *in* *a* *note. *The* *question* *asks* *for* *the* *single* *most* *serious* *bug* — *I* *should* *commit* *to* *one*.
+
+*Decision*: *the* *most* *serious* = *`cancel_pending`* *leaking* *the* *backlog* *ledger* → *a* *permanent*, *silent* *write* *outage* *of* the *cold* *tier* *after* *a* *routine* *admin* *cache* *clear*. *Cost*: *every* *future* *`put_entry`* *is* *rejected* (a *`skipped_backlog_bytes`* *counter* *ticks; *the* *dashboard* *shows* a *phantom* *backlog* *at* *budget* *forever) → *no* *session* *is* *ever* *persisted* *again* → *every* *restart* *re-prefills* *all* *sessions* (for *a* *coding-agent* *fleet* that's *minutes* *of* *TTFT* *per* *session* — *the* *exact* *pain* the *tier* *exists* *to* *erase), *until* the *daemon* *is* *restarted. *The* *fix* *is* *one* *line* (+ *a* *note* on *the* *amount*). *And* — *since* *the* *ledger* *amount* *is* *dual* (reserve *estimated* / *pin* *`pinned`), *the* *patch* *should* *release* *what* *was* *reserved*; *but* *the* *item* *only* *carries* *`pinned`*… *for* the *minimal* *patch*, *release* *`pending.pinned_nbytes`* — *hmm*, *that* *re-introduces* *bug* A *in* the *cancel* *path* (an *over-release* *into* the *clamp* — *harmless* for *cancel*, *since* *there's* *no* *queue* *left). *But* *the* *clean* *minimal* *fix* *for* *both* *at* *once* *is* *to* *record* the *reserved* amount *on* the *item. *Let* me *frame* the *patch* as: *add* *`reserved_nbytes`* *to* *PendingWrite*, *set* it *in* *put_entry*, *release* *it* in *the* *writer's* *finally* *and* in *cancel_pending*. *That* *fixes* *B1* *and* *A* *together* — *one* *coherent* *minimal* *patch. *I *like* *it* *because* *it* *makes* the *ledger* *exactly* *the* *sum of* *live* *reservations* *under* *all* *three* *fates* (drain, *cancel*, *drop-on-full).
+
+*Let* me *write* the *patch* *precisely*:
+
+```python
+@dataclass(frozen=True)
+class PendingWrite:
+    entry_id: str
+    token_ids: tuple[int, ...]
+    metadata: dict[str, Any]
+    payload_spec: dict[str, Any] | None
+    tensors: dict[str, bytes]
+    deferred: DeferredPayload | None = None
+    created_at_s: float = field(default_factory=time.time)
+    # Bytes this write charged to _pending_bytes at admission (the bank's
+    # entry.nbytes estimate). _release_pending must always release exactly
+    # this amount, whatever the encode ended up pinning.
+    reserved_nbytes: int = 0
+    # Estimated bytes this write pins in memory until the writer drains it ...
+    pinned_nbytes: int = 0
+```
+
+*Wait* — *the* *field* *order*: *`pinned_nbytes`* *has* *a* *default*; *adding* *a* *defaulted* *field* *after* *it* *is* *fine*. *Existing* *construction* *sites* *use* *keywords* ✓.
+
+*In* *put_entry*:
+```python
+pending = PendingWrite(
+    ...,
+    pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)),
+    reserved_nbytes=max(0, estimated_nbytes),
+)
+```
+
+*Queue-full* *path*: *`self._release_pending(pending.reserved_nbytes)`* (*replaces* *`pending.pinned_nbytes`). *The* *interrupt/exception* *paths* *already* *release* *`estimated_nbytes`* ✓ *unchanged.
+
+*Writer* *loop*:
+```python
+finally:
+    self._release_pending(pending.reserved_nbytes)
+    self._queue.task_done()
+```
+
+*cancel_pending*:
+```python
+if pending is None: ... break
+dropped += 1
+self._release_pending(pending.reserved_nbytes)   # <-- *the* *fix*
+self._queue.task_done()
+```
+
+*Hmm* — *is* *`reserved_nbytes`* *read* *anywhere* *else*? *The* *`pinned_nbytes`* *is* *used* in *the* *writer* *for* the *`_written_window`* *charge* *and* in *the* *log* — *keep* *`pinned`* *for* *those* (a *charge* *at* *completion* *in* *logical* *bytes* *is* *a* *wear* *heuristic; *fine). *Also* *the* *`_written_window`* *charge* *using* *`pinned`* — *keep.
+
+*Wait*, *one* *concern* *with* *releasing* *`reserved`* (the *estimate) *in* *the* *writer*: *the* *`_pending_bytes`* *now* *tracks* *the* *sum of* *estimates* *of* *queued* items. *The* *budget* *check* *(`ledger + needed ≤ budget`) *then* *bounds* the *sum of* *estimates* — *the* *real* *pin* *is* *`max(est, enc)`* *per item → *the* *real* *pin* *can* *exceed* *the* *budget* *by* *the* *excess*. *Is* *that* *acceptable*? *The* *budget's* *stated* *purpose* (the *`__init__` *comment): *"every* *queued* *write* *pins* *its* *payload* … *cap* *the* *pinned* *bytes*" — *the* *intent* *is* *to* *bound* *the* *real* *pin*. *Releasing* *`reserved`* *makes* the *ledger* *a* *lower* *bound* on the *pin* → *a* *mild* *under-enforcement. *Releasing* *`pinned`* *makes* *it* *an* *upper* *bound* *but* *erodes* *toward* *0* (bug *A). *The* *true* *fix* *for* *the* *stated* *intent* *is* the *top-up* *approach* (an *exact* *ledger* on *`pinned`), *but* *it* *re-admits* *after* the *encode* (an *oversized-alone* *interaction* *+ *a* *discard* *after* *a* *paid* *encode* — *arguably* *worse*). *Given* the *question* *demands* *a* *minimal* *patch* for *the* *most* *serious* *bug*, I *choose* *the* *reserved* *field* *fix* *and* *note* *the* *trade-off* in *a* *line* (the *ledger* *is* *a* *lower* *bound; *to* *make* *it* *exact*, *top-up* — *but* *the* *asymmetry* *and* *the* *leak* *are* *what* *we* *fix). *Actually* — *hmm*, *let* me *reconsider *one* *more* *time* *whether* *to* *release* *`pinned`* *instead* *in* *the* *writer* *only*… *no*: *symmetry* *is* *the* *point; *the* *clamp* *handles* *the* *rest. *Done: *reserved* *it* *is.
+
+*Actually*, *wait* — *a* *simpler* *framing* *of* the *same* *fix* *that* *doesn't* *add* *a* *field*: *the* *writer* *finally* *and* *cancel* *release* *`min(pending.pinned_nbytes, ...)`*? *The* *writer* *can't* *know* *the* *estimate* *without* *a* *field. *So* *the* *field* *it* *is. *Or* *recompute* *the* *estimate* from *`pending.metadata`*? *The* *metadata* *has* *`nbytes`* = *max(entry.nbytes, payload_nbytes)* — *not* *the* *original* *estimate* (*it's* *overwritten* *in* *`_metadata_for_entry`* *as* *`nbytes = max(getattr(entry,nbytes), payload_nbytes)`)… *the* *original* *`entry.nbytes` *is* *unrecoverable. *So* *the* *field* *is* *required. ✓
+
+*Now*, *for* *completeness* *of* the *explanation*, *the* *trigger*: *"the* *admin* *cache*-*clear* *quiesce*" — *a* *`cancel_pending`* *call* *while* *writes* *are* *queued* (i.e., *the* *normal* *case*: *the* *operator* *clears* *the* *RAM* *bank* *while* the *SSD* *writer* *still* *has* *backlog* — *which* *is* *precisely* *when* *the* *backlog* *matters*). *The* *leak* *amount* = *the* *sum of* *the* *reserved* *bytes* of *dropped* items. *After* *that*, *`_pending_bytes`* *never* *returns* *to* *0* (no *code* *path* *releases* *it: *the* *dropped* items *never* *reach* *the* *writer's* *finally). *Consequence* *chain*: *admission* *fails* *→* *`skipped_backlog_bytes`* *+1* *per* *put* *→* *no* *new* *SSD* *entries* *→ *the* *`stats` *`writer_backlog_bytes`* *shows* a *phantom* *budget-sized* *backlog* *with* *`writer_queue_depth`* == 0 *— *a* *confusing* *pair* *that* *at* *least* *hints* at *the* *ledger* *leak* *to* *a* *careful* *operator* (a *queue* *depth* of *0* *with* a *full* *backlog* — *I* *should* *mention* *this* *as* *the* *only* *trace* in *the* *dashboard). *Cost*: *the* *tier* *is* *dead* *for* the *process* *lifetime; *the* *operator* *must* *restart* the *daemon* (a *disruption); *and* *the* *real* *user* *cost* = *re-prefills* (the *#305* *514s* *TTFT* *class) *for* *every* *session* *after* *the* *clear* *until* *the* *restart.
+
+*Also* *worth* *one* *line* *each* in *a* "runners-up" *note*: *(i)* *the* *reserve/release* *asymmetry* *on* *normal* *drain* (*bug* A) — *fixed* *by* *the* *same* *patch*; *(ii)* *the* *unpruned* *`_written_window`* *sum* *in* *`stats()`* (a *bogus* *1-hour* *figure* *on* *an* *idle* daemon — *a* *two-line* *prune); *(iii)* *the* *`mtp_snapshot_epoch`* *None*/0 *entry_id* *aliasing* (a *`digest.update` *of* *`"0"`* *for* *both) — *a* *silent* *drop* *of* a *re-snapshot* *via* *the* *Phase 0* *touch* path. *The* *question* *says* "*find* *the* *most* *serious* *correctness* *bug*" *—* *singular* — *so* *I* *lead* *with* *B1* *and* *fix* *it* (+ *the* *A* *symmetry *that* *the* *fix* *requires), *then* *briefly* *flag* *(ii)/(iii)* *as* *secondary* *findings* *so* the *review* *is* *complete. *Keep* *it* *tight.
+
+*Let* me *also* *re-verify* *the* *sentinel* *handling* in *`cancel_pending`* *for* *completeness* of *the* *patch*: *the* *loop* *breaks* *on* *None* *without* *releasing* *anything* ✓ (a *None* *never* *reserved* *bytes) — *my* *fix* *only* *adds* *a* *release* *on* *real* items ✓. *And* *the* *`put_nowait` *re-insertion* *of* the *sentinel* *before* *the* *break* ✓ *unchanged.
+
+*One* *more* *sanity* *check* on *B1* *severity* *versus* *the* *"most* *serious* *correctness* *bug*"*: *is* *a* *leaked* *budget* *ledger* a "*correctness* *bug*"? *Yes* — *the* *admission* *control* *is* *part* of *the* *component's* *contract* (*"cap* the *pinned* *bytes, *drop* *new* *writes* *beyond* *it"); *a* *permanent* *false* *positive* *from* *a* *documented* *operation* *breaks* the *component's* *primary* *function* (persistence) *silently. *It's *the* *kind* of *bug* *that* *turns* "a* *cache* *that* *survives* *restarts*" *into* "a* *cache* *that* *dies* *on* *every* *maintenance* *action". *Good. *I'm *confident.
+
+*Also* — *a* *small* *verification* *that* *`_release_pending`* *with* *`reserved`* *is* *thread-safe*: *it* *takes* *`_stats_lock`* ✓; *`cancel_pending` *runs* *on* *an* *admin* *thread; *the* *writer* *releases* *on* *its* *own* *thread* — *a* *dropped* item *is* *never* *released* *twice* (the *writer* *never* *gets* *it; *the* *`task_done` *inside* *cancel* *marks* *the* *queue* *done* *so* *a* *concurrent* *`flush`* *can* *see* *it* ✓; *and* *a* *concurrent* *`cancel_pending`* *call*? *Two* *admins* *simultaneously: *the* *`get_nowait`* *loop* — *the* *item* *is* *consumed* *once* (a *queue* *get* *is* *atomic) → *released* *once* ✓.
+
+*Cost* *quantification* for *the* *answer*: *default* *budget* *4GiB; *a* *clear* *during* *a* *churn* *window* *typically* *drops* *several* *GiB* *of* *queued* *writes* (the *`cancel` *docstring's* *own* *example*: *a* *128k* *entry* *≈* *multi-GB) → *the* *ledger* *is* *pinned* *near* *budget* *forever* → *admission* *fails* *for* *all* *but* *the* *smallest* *estimates* (those *where* *ledger+needed ≤ budget* — *a* *narrow* *sliver) → *effectively* *the* *tier* *is* *off* *for* writes; *the* *stats* *lie* (*a* *backlog* *at* *budget* *with* *an* *empty* *queue); *the* *only* *recovery* = *a* *process* *restart. *And* *the* *user-visible* *cost* = *the* *re-prefill* *TTFT* *hit* *for* *every* *session* *after* *the* *clear* (the *tier* *is* *exactly* *the* *thing* *that* *was* *supposed* *to* *restore* *them* *cheaply).
+
+*Now* *to* *write* the *answer*: *a* *bug* *statement*, *a* *mechanism* (the *ledger* *is* *charged* *at* *admit*, *debited* *only* *on* *the* *writer* *finally; *cancel* *bypasses* *it), *the* *trigger* (a *`cancel_pending` *during* *a* *cache* *clear* *with* *a* *non-empty* *queue* — *the* *documented* *use), *the* *cost* (a *permanent*, *silent* *write* *outage* + *phantom* *stats* + *re-prefills; *a* *restart* *required), *a* *minimal* *patch* (a *`reserved_nbytes`* *field* + *release* *sites* — *which* *also* *closes* *the* *drain-time* *over-release *erosion), *and* *brief* *notes* *on* *the* *two* *secondary* *findings. *Keep* *the* *patch* *minimal* *and* *diff-shaped. *Format*: *headings*, *a* *short* *code* *block*; *no* *need* for *the* *entire* *file. *Length: *medium* — *this* *is* *a* *code* *review* *deliverable; *aim* for *tight* *prose* + *the* *diff.

@@ -1,0 +1,639 @@
+The user wants an SVG of a pelican riding a bicycle. Let me create a creative and detailed SVG illustration. I should think about the composition:
+
+1. Bicycle — wheels, frame, handlebars, pedals, saddle
+2. Pelican — body, head, large distinctive beak with a gular pouch, wings, legs pedaling
+3. Additional touches for interest — motion lines, sun, clouds, ground, road, maybe a small bird on the handlebars or a basket with fish
+
+Let me design the coordinates carefully:
+
+Canvas: 800x600 viewBox
+
+Background: sky gradient, sun, clouds, ground/road
+
+Bicycle:
+- Rear wheel: center (250, 440), radius 70
+- Front wheel: center (530, 440), radius 70
+- Frame: connecting points
+  - Bottom bracket (pedal axis): (400, 440)
+  - Saddle: (310, 330)
+  - Handlebar head: (500, 330)
+  - Frame lines:
+    - Rear hub (250,440) to seat tube top (330, 350)
+    - (330,350) to bottom bracket (400,440)
+    - Bottom bracket (400,440) to head tube (495,340)
+    - Seat tube top (330,350) to head tube (495,340)
+    - Front hub (530,440) to head tube (500,335)
+  - Chainring at bottom bracket, pedal crank
+  - Handlebars at top of head tube
+  - Saddle on top of seat post
+
+Actually, let me make a better bike with standard geometry:
+- Rear wheel center: (240, 450), r=75
+- Front wheel center: (560, 450), r=75
+- Bottom bracket: (380, 450)
+- Seat cluster (top of seat tube): (340, 345)
+- Head tube top: (520, 335)
+- Seat post extends to saddle at (330, 330)
+- Handlebars at (525, 315)
+
+Frame paths:
+- Chainstay: rear hub (240,450) → bottom bracket (380,450)
+- Seat stay: rear hub (240,450) → seat cluster (340,345)
+- Seat tube: bottom bracket (380,450) → (345,345)
+- Top tube: (345,350) → (515,340)
+- Down tube: (380,450) → (520,345)
+- Fork: (520,345) → front hub (560,450)
+- Stem/handlebar: (518,338) → (512,315), handlebar path
+
+Pelican:
+- Sits on saddle at ~(330, 330)
+- Body: large rounded mass, white/light color, center at (310, 270), elliptical-ish
+- Tail feathers: back left
+- Neck: S-curve from body to head
+- Head at (430, 130)? Let me think. The pelican faces right (same direction as travel).
+- Big beak pointing forward (right), with pouch hanging below.
+- Wings on side of body, possibly one wing raised for balance, or held close to body
+- Legs: from body down to pedals. Pedal positions: crank arms from bottom bracket (380,450), radius ~45. One pedal at front-bottom, one at back-top.
+
+Crank angle: let's put one crank at 45° down-forward: pedal at (380+45cos(45°), 450+45sin(45°)) ≈ (412, 482). Other crank at opposite: (348, 418).
+
+Pelican legs:
+- Right leg (near side): hip at (320, 300), knee bent, foot on pedal (412, 482)
+- Left leg (far side): foot on pedal (348, 418)
+
+Pelican foot is an orange webbed foot gripping the pedal.
+
+Colors:
+- Pelican body: white (#fff or #fdfdfd), soft gray shadow (#e8e4dc)
+- Beak: orange (#f5a623 / #ff9f1c), pouch darker orange
+- Feet: orange
+- Eyes: black with white highlight
+- Wing: light gray shading
+- Bicycle: red frame (#e63946), dark tires (#2b2b2b), rim (#8d8d8d), chain gray, seat dark, handlebar
+
+Background:
+- Sky: gradient from light blue to brighter
+- Sun: upper left, yellow with rays
+- Clouds: white ellipses
+- Ground: green grass, road (gray path) with dashes
+- Motion lines behind bike
+
+Let me write the SVG:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ec8f7"/>
+      <stop offset="1" stop-color="#e8f7ff"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe27a"/>
+      <stop offset="1" stop-color="#ffd23f"/>
+    </radialGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+  
+  <!-- sun -->
+  <g transform="translate(110,110)">
+    <g stroke="#ffd23f" stroke-width="8" stroke-linecap="round">
+      <line x1="-58" y1="0" x2="-74" y2="0"/>
+      ... rays
+    </g>
+    <circle r="46" fill="url(#sun)"/>
+  </g>
+```
+
+For the rays I can use a group of 8 lines with rotation. Let me generate them with transform rotate on lines.
+
+Clouds: group of white ellipses at opacity 0.9.
+
+Ground:
+- Grass: rect from y=505 to 600, green (#7cbf5a)
+- Road: darker gray rect from y=505? Actually the wheels touch the ground at y=525 (wheel center 450 + radius 75 = 525). So the ground line at y=525. Let me set the top of the road/ground at y=525.
+- Road: rect y=525 to 600, fill #9aa5b1 (asphalt)? Or make the lower part grass with a road strip. Simpler: ground strip is a light tan road #b08968 with dashed line at center y=560? Hmm, wheels are at 525, road is 525-600.
+
+Add distant hills: gentle green curves behind the ground line.
+
+Motion lines: horizontal dashes behind the bike, on the left.
+
+Bicycle details:
+- Wheels: outer tire circle r=75 stroke dark width 12? Better: circle r=75 fill none stroke #2b2d31 stroke-width 14 (tire), inner rim circle r=62 stroke #cfd4da width 4, spokes: lines from hub to rim.
+- Hub: circle r=8 fill #4a4f55.
+- Spokes: 8 lines per wheel. Use a group with rotation.
+
+Frame: stroke #e63946 width 12, stroke-linecap round, fill none.
+Chain: line from bottom bracket (380,450) to rear hub (240,450), with small circles: chainring circle r=20 at (380,450), cassette circle r=10 at (240,450). Chain line stroke #6b7280 width 4 dashed? Use 2 lines (top and bottom of chain) for simplicity: (380,432) to (240,441), and (380,468) to (240,459). Hmm, more simply: a single line width 6 with stroke-dasharray to suggest links.
+
+Crank arms: line from (380,450) to pedal (412,482) and to (348,418). Pedals: small rounded rect at pedal positions.
+
+Seat: dark rounded shape at (330,325): an ellipse or path.
+Handlebar: line from (518,338) to (508,312), then a curve.
+
+Pelican:
+Let me define the body. Sitting on the saddle (330,325). Body center ~(315, 270). Pelican body is fairly large. Let me draw the body as a path:
+
+Body: round, from chest (right side, forward) to tail (left, rear). Something like:
+M 360 240 (chest top)
+C 380 270, 370 310, 330 325 (chest curving down to under saddle)
+C 290 335, 250 320, 235 290 (rear underside)
+C 225 260, 240 225, 275 210 (rear back)
+C 310 195, 345 205, 360 240
+Z
+
+Tail: pointed feathers extending back-down-left from body rear: a triangle-ish shape from (240,270) to (195,250), (230,300).
+
+Neck: S-curve. Head at (430,120) area. Neck goes up from chest (355,225) and curves:
+Neck as a thick stroke path? Better to fill shape. Can draw neck as a filled shape connecting head and body:
+
+Path: M 350 240 (body front top) C 360 200, 380 190, 400 170 ... hmm, pelican neck is long with S-curve. Let me make the head at (440,130), beak pointing right and slightly down.
+
+Alternative approach: draw pelican facing right, head raised. Neck path:
+M 345 245 (top of chest)
+C 365 215, 400 205, 405 170 (going up)
+C 407 150, 415 140, 430 132 (to head)
+then the head is a circle at (440,128) r=22.
+
+To make the neck a filled shape with width, I can use a thick stroke line with round caps: a path M 350 245 Q 405 205 432 138, stroke white, width ~30. This works well and is smooth.
+
+Head: circle at (438,126) r 24, white.
+Beak: pelican beak is long, pointing right slightly down. Upper beak: path from (452,118) to (560,140), tapering. Pouch: drooping curve from base of beak (455,135) to beak tip (560,140), with control that sags to (515,175).
+
+Upper beak shape:
+M 450 114
+L 562 138 (top of beak tip)
+L 556 148
+L 452 136
+Z
+Something like that — a long wedge.
+
+Pouch (throat pouch):
+M 452 136
+C 470 175, 510 185, 548 150
+L 556 148
+L 562 138? hmm.
+
+Let me do: pouch path: M 450 134 C 465 180, 520 190, 556 146 L 452 134 Z, fill slightly darker orange (#f08c1a), with the upper beak overlaid on top.
+
+Eye: circle at (444,118) r 4.5 black, white highlight r 1.5.
+
+Wings: on body, folded wing shape: a path with a lighter gray fill over the body, with a few feather lines. Also flapping a raised wing? A raised wing might overlap the neck; better to keep wings folded against body for a clear look. Actually a small raised back wing would be cute, but I'll keep folded with feather details.
+
+Wing path:
+M 300 215
+C 265 220, 245 245, 250 275
+C 255 300, 280 315, 310 310
+C 330 305, 340 285, 335 260
+C 330 235, 320 220, 300 215
+Z
+Fill #e9e5da, no stroke, plus a few stroke lines for feathers.
+
+Legs:
+- Hip position under body: near-side hip at (315, 300). Far-side hip at (335, 295), drawn before body (far leg behind).
+- Far leg to far pedal (348, 418): path with stroke #f28c1b width 10: M 335 300 L 340 360 L 348 415 (slight bend). Foot: webbed foot at pedal.
+- Near leg to near pedal (412, 482): M 315 305 L 320 380? Let me make the knee: hip (318,305), knee (330, 395), ankle (405, 478). Use polyline stroke width 11 round joins.
+
+Feet: webbed triangle-ish foot on pedal: at (412,482): small orange path; a pedal rounded-rect at (412,482) fill #3a3f44 width 30 height 8 centered, rotated along the pedal axis? Keep pedals horizontal: rect x 392 y 478 w 40 h 9 rx 3.
+
+Webbed foot shape: path M 395 470 L 428 476 L 410 462 Z ... hmm. Let me make a simple triangle foot: M 396 479 L 428 479 L 414 461 Z fill #f28c1b, with a line for the webbed foot.
+
+Order of drawing:
+1. Background (sky, sun, clouds, hills, ground, road, dashes, motion lines)
+2. Far leg (behind bike? actually far leg is behind the bike frame) — draw far leg + far pedal before bike.
+3. Bike (wheels, frame, chain, crank, seat, handlebar)
+4. Pelican body, tail, wings, near leg, near foot, neck, head, beak, eye
+5. Far foot should also be visible above the pedal (the pedal is drawn with the bike; far foot can be drawn after bike too, on top). Simpler: draw both pedals with bike; draw far leg before bike (the leg is behind), then draw far foot on top after bike. Or just draw far foot after bike as well.
+
+Actually the far leg should appear behind the bike frame; the foot above the pedal. Draw the far leg+foot in front of the bike group, and draw the far pedal (part of bike) on top of the foot? Pedals are small; if I draw the pedal on top of the foot, it'll look like the foot is behind the pedal — that's not right. Better: far foot on top of pedal: draw far leg (only legs) before bike, then draw far foot after bike. Split shape.
+
+Similarly, near foot on top of near pedal, drawn with pelican.
+
+Crank: near crank arm to (412,482), far crank to (348,418).
+
+Let me finalize crank angle: 45°. cos45=sin45≈0.707. 45*0.707≈31.8. So near pedal (380+32, 450+32)=(412,482). Far (348,418). Good.
+
+Chainring: circle r=19 at (380,450), stroke dark.
+
+Chain: 2 lines: top from (380,433) to (240,443); bottom from (380,467) to (240,457). Stroke #565c63 width 4, plus cassette circle r=10 at rear hub.
+
+Seat: pelican sits on saddle: a saddle path at (330,325): M 305 328 C 310 318, 345 316, 352 326 C 354 331, 340 336, 322 336 C 312 336, 304 333, 305 328 Z fill #2f3337. Seat post: line from (330,335) to (340,352)? Wait, top of seat tube is (340,345); saddle at (328,326). Seat post line from (332,332) to (342,347).
+
+But the pelican's body sits on top of the saddle, overlapping: the pelican's underside at y≈325-330 covers the top of the saddle. Good.
+
+Handlebar: line from (518,338) to (508,312), then a handlebar path: M 508 312 C 505 300, 512 294, 522 296, stroke #2f3337 width 7. Grip small.
+
+Front fork: from (520,345) to (560,450). Head tube short: line (516,352) to (524,336)? Simplify: down tube to (518,342), fork to hub.
+
+Wheel spokes: group: for each wheel, 4 lines through center (diameter) rotated 0, 45, 90, 135. Stroke #cfd4da width 3. Plus hub circle.
+
+Let me define spokes with a <g> per wheel:
+<g stroke="#c9ced4" stroke-width="3">
+ <line x1="-62" y1="0" x2="62" y2="0"/>
+ <line ... 45°: endpoints ±(62cos45,62sin45)=±43.8 → (44,44)
+ ... etc.
+</g> inside a translate.
+
+Tire: circle r=75 fill none stroke #23262b stroke-width 13. Rim: circle r=63 stroke #d7dce2 width 4 fill none. Inner rim maybe #9aa2ab.
+
+Shadow under bike: ellipse at (400, 528) rx 190 ry 12 fill rgba(0,0,0,0.15).
+
+Ground: rect y=525 h=75 fill #8fc96a? and road: actually make a road: a rect y=525 to 600 fill #a57f52 (dirt) — hmm. Let's do grass with a road: road = rect y=525 h=75 fill #98a1ab; a lighter grass strip at the bottom? That's odd.
+
+Design: background ground = grass from y=500 (with hills) to 600. Road = horizontal band rect y=525 to 585, fill #7d8790, white dashed center line at y=555, plus the bike wheels touch 525... but the road top edge is where the wheels are. Then y=585-600 is grass again. That looks like a road passing through a field. Good:
+- Hills: 2 gentle green mounds behind horizon y~500-525.
+- Grass base: rect y=520 h=80 fill #83c15f... let me put grass at top y=515 to hide the junction.
+- Road: rect y=525 h=60 fill #8b95a1, with a top edge line? Add a slightly darker top edge.
+- Dashed line: at y=553, stroke white width 5, dasharray "28 22", opacity .8.
+
+Motion lines: left of bike: 3 rounded lines at y=300, 360, 420, x=120 to 200, stroke #ffffff? White with opacity 0.7, plus shorter blue ones.
+
+Clouds: 2-3 puffs: group of ellipses, white, opacity .95.
+
+Sun rays: 8 lines.
+
+Also, add a few small birds in the sky (simple "m" shapes) — cute.
+
+Text? No text needed. Maybe no text; the request is just the image. No caption. Keep it clean.
+
+Now let me write out all the coordinates concretely and double-check the overlaps.
+
+Bike geometry summary:
+- Rear hub R = (240, 450)
+- Front hub F = (560, 450)
+- Bottom bracket B = (380, 450)
+- Top of seat tube / seat cluster S = (338, 344)
+- Top of head tube H = (516, 336)
+- Saddle center ≈ (328, 326)
+- Crank: near pedal P1 = (412, 482), far P2 = (348, 418)
+- Handlebar top ≈ (508, 310)
+
+Frame paths (stroke #e63946, width 12, linecap round, linejoin round, fill none):
+1. Chainstay + seatstay as one: M 240 450 L 338 344 L 380 450 (seat tube) — chainstay is along y 450 from 240→380: M 240 450 L 380 450; seat stay M 240 450 L 338 344; seat tube M 380 450 L 338 344.
+2. Top tube: M 338 344 L 516 336
+3. Down tube: M 380 450 L 516 336
+4. Fork: M 516 336 L 560 450
+5. Head/stem: M 516 336 L 506 312
+
+Chain and drivetrain (draw after frame so chainring is visible):
+- Cassette: circle cx240 cy450 r10 fill #565c63
+- Chainring: circle cx380 cy450 r19 fill none stroke #565c63 width 5
+- Chain: path M 380 432 L 240 441 M 380 468 L 240 459 stroke #565c63 width 4
+- Cranks: M 380 450 L 412 482 (near) stroke #2f3337 w 8; M 380 450 L 348 418 (far) w 8, drawn before the near crank.
+- Pedals: rect centered at (412,482): x 394 y 478 w 36 h 8 rx 3 fill #2f3337. Far pedal at (348,418): x 330 y 414 w 36 h 8.
+
+Wheel group:
+Rear:
+<g transform="translate(240,450)">
+  <circle r="75" fill="none" stroke="#23262b" stroke-width="13"/>
+  <circle r="63" fill="none" stroke="#d7dce2" stroke-width="4"/>
+  <g stroke="#c2c8cf" stroke-width="3">
+    <line x1="-63" y1="0" x2="63" y2="0"/>
+    <line x1="63" y1="0" x2="-63" y2="0"/> same...
+
+Just 4 lines: (±63,0),(0,±63),(±44,±44) → lines through center: 4 lines:
+  <line x1="-63" y1="0" x2="63" y2="0"/>
+  <line x1="0" y1="-63" x2="0" y2="63"/>
+  <line x1="-44" y1="-44" x2="44" y2="44"/>
+  <line x1="-44" y1="44" x2="44" y2="-44"/>
+  <circle r="8" fill="#4a4f55"/>
+</g>
+Same for front at 560,450.
+
+To avoid duplication, define a <g id="wheel"> in defs and <use>.
+
+Wheel rotation: maybe rotate the spokes a bit for dynamic feel: transform="translate(240 450) rotate(20)".
+
+Pelican shapes:
+
+Tail (draw before body):
+M 252 262 C 225 258, 200 262, 182 278 C 205 288, 228 296, 252 300 C 244 288, 244 274, 252 262 Z fill #f4f1e8? Tail feathers slightly gray: fill #eceadf stroke #d8d3c4? Let me make the tail 3 pointed feathers:
+M 258 258 L 186 268 L 244 284 L 196 300 L 258 306 ... this is a zigzag. Let me make it a fan:
+M 260 260 C 235 252, 205 252, 184 266 C 208 272, 232 278, 254 284 C 234 286, 210 294, 194 306 C 222 310, 248 306, 266 298 Z — messy. Simpler: one smooth tail:
+M 262 256 C 228 250, 196 258, 180 274 C 198 290, 230 300, 262 300 C 252 285, 252 270, 262 256 Z fill #e9e5d8.
+Then 2 stroke lines for feather separation.
+
+Body:
+M 362 232
+C 384 258, 380 305, 340 324
+C 305 340, 262 330, 240 302
+C 222 278, 228 240, 258 218
+C 288 196, 340 200, 362 232 Z
+fill #ffffff stroke #d9d4c6? Let me use a very light fill #fdfcf8 with a subtle stroke #e0dbcd width 2 for definition against a white cloud? Body is over sky, no problem.
+
+Add shading under body: path fill #efe9da at opacity .8 along lower:
+M 340 324 C 305 340, 262 330, 240 302 C 262 318, 305 328, 340 318 Z approximately.
+
+Wing (over body):
+M 322 224
+C 292 216, 258 228, 248 254
+C 240 278, 252 304, 282 314
+C 306 320, 330 310, 338 288
+C 346 264, 340 238, 322 224 Z
+fill #f1ede1 stroke #d9d3c2 width 2.
+Feather lines: 3 curved strokes:
+M 330 240 C 300 246, 276 258, 264 276
+M 334 258 C 305 264, 284 274, 272 290
+M 332 278 C 306 282, 288 290, 278 300
+stroke #d9d3c2 width 2.5 fill none.
+
+Neck (stroke path, white, width 30, round caps):
+M 352 246 C 386 224, 408 200, 424 160 C 428 148, 430 140, 433 132
+Hmm, the stroke path of width 30 gives a uniform width neck — a pelican neck is slightly thicker at the base. Uniform is OK for a stylized look. Stroke color same as body #fdfcf8, no outline — but white neck over sky is fine; maybe add a subtle stroke? Can't outline a stroke path with round caps. Alternative: draw the neck as a filled shape. Let me make a filled neck:
+
+Neck shape (front edge and back edge):
+Back edge from body: start at (332, 232)? Let me think: chest front is around (362,232). Neck comes out of upper-front of chest around (350, 228). Head at (436, 126).
+
+Filled neck:
+M 336 252
+C 360 236, 384 218, 398 190
+C 406 172, 410 156, 410 138   (back edge, going up to lower-left of head)
+C 418 122, 434 112, 452 114   (top of head, into head region — will be covered by head circle)
+C 448 140, 452 160, 458 178   (front edge going down, under the beak)
+C 440 196, 414 226, 396 252
+C 376 262, 354 264, 336 252 Z
+
+Head circle at (442,122) r 24 overlaps the top of neck. Beak attaches at right of head.
+
+Head: circle cx 442 cy 120 r 23 fill #fdfcf8. Slight crown: covered.
+
+Eye: cx 447 cy 114 r 4.5 #23262b; highlight cx 448.5 cy 112.5 r 1.5 white.
+
+Beak:
+Upper beak: M 452 108 L 566 132 L 560 146 L 452 128 Z? Wait, top of head is cy 120; beak base around y 108-130 at x 455. Let me set base: at x=456: top y=107, bottom y=131. Tip at (568, 134): top (568,131), bottom (562,142). Upper beak path:
+M 456 107 C 500 114, 545 124, 568 131 L 561 143 C 535 135, 495 127, 456 130 Z
+fill #f59e0b... Pelican beak is orange: #f6a21e. No stroke.
+Nozzle line: stroke along bottom of upper beak? Add a subtle darker line: M 456 130 C 495 127, 535 135, 561 143 stroke #d97f0e width 2? That's the seam between upper beak and pouch.
+
+Pouch: from base below beak (456,131) sagging to tip (561,143):
+M 456 131 C 470 172, 512 184, 561 143 L 561 143
+Close along beak seam: C 535 135, 495 127, 456 130 Z
+fill #ef8f12 (slightly darker), opacity 1.
+Also pouch shading: a small inner path #e07d0c.
+
+Nostril: small line on top of beak: M 468 114 L 492 118 stroke #d97f0e width 2? Optional, cute.
+
+Check: tip of beak x=568 exceeds front wheel (cx 560) horizontally but at y ~130 it's high above the wheel (wheel top at 375) so no collision.
+
+Head/handlebar collision: head at (442,120); handlebar at (506,310) — clear. Beak bottom (pouch lowest ~y 184 at x~505) vs. handlebar top (508,310) — clear (126px gap). Good.
+
+Legs:
+Near leg: hip (312, 302). Knee (322, 385). Ankle (400, 470). Then foot to pedal (412,482).
+Draw as a path with stroke #f29410 width 11 linecap round linejoin round fill none:
+M 312 302 C 314 340, 316 360, 324 384 C 344 402, 372 436, 396 466
+Then a small line for the lower leg to the foot? The foot shape covers the end:
+Foot: webbed foot on the pedal at (412,482):
+M 396 470 L 430 480 C 432 486, 428 489, 420 488 L 398 486 C 392 484, 390 477, 396 470 Z — a blob. Add webbed foot lines: 2 short lines from (402,486) to toes: toe (424,486). Hmm.
+
+Let me simplify the foot: a triangle-ish path:
+M 394 478 L 432 484 L 404 462 Z fill #f29410 no stroke, and a webbed line M 408 472 L 424 480 stroke #d97f0e 2. The pedal rect is at y 478-486 below the foot blob? The foot should sit on top of the pedal: top of pedal is 478. The foot occupies y 462-484 overlapping top of pedal. Let me draw foot after the pedal → foot on top. Good.
+
+Near ankle connects to foot at ~(400,468), inside the foot shape. Good.
+
+Far leg (behind bike): hip (338, 292) — hidden by body? Hip should be inside the body area: body bottom is around x 330 at y 324. Far hip (335, 296) is inside body — good, leg emerges from behind body lower area.
+Path: M 336 296 C 342 330, 344 356, 346 378 C 348 396, 348 408, 348 418
+stroke #d97f0e (darker, far side) width 11.
+Far foot on pedal (348,418): similar triangle: M 330 414 L 366 419 L 342 400 Z fill #d97f0e. Draw after bike (over pedal) — but this is in front of body? The far foot is on top of the far pedal on the left side; body is above; no overlap issue. Draw far foot after bike group, before pelican? Far foot at (348,418) vs bike frame: chainstay is at y450 from x240-380; foot at y~400-419 is above the chainstay line? At x=348 the chainstay is at y=450, so foot (400-419) is above the line — no overlap. Seat tube from (380,450) to (338,344): at y 418, x ≈ 380 - (42/106)*(32) ≈ 380-12.6=367. Foot is at x 330-366 — close, slight overlap possible; if foot is on top, no problem (leg in front? should be behind). If the far foot is drawn before the bike, then the seat tube crosses over the foot — physically the leg is on the far side so the frame is in front: correct occlusion! So draw far leg+foot entirely before bike group.
+
+Similarly, far crank arm and pedal are in front of the far foot? No: the crank + pedal are on the left (far) side of the bike; the far foot is on top of the pedal. Layering: far leg (behind everything) < bike (frame, wheels, crank, pedals) < near leg/foot (in front of bike) < pelican body, etc.
+
+But wait: if the far pedal is drawn with the bike, it will cover the far foot. Physically, the pedal is part of the left crank, and the left foot wraps on top of the pedal (toe above, heel below) — in a 2D side view, the foot overlaps the pedal. So draw the far foot after the bike to be on top. The far leg stays behind the bike frame. That's typical cartoon style. Let me do that: far leg (stroke) in front of bike; far foot after bike (before or after pelican? far foot at (348,418); pelican body is above y 340; near leg stroke goes from hip (312,302) to (396,466) — could cross near the far foot (348,418)? The path of the near leg at y 418: x ~ 370 or so. No crossing. Order: bike → far foot → pelican (tail, body, wing, near leg, near foot, neck, head, beak, eye). Good.
+
+Pedal orientation: keep horizontal rects.
+
+Pedal 1: rect x=394 y=477 width=36 height=9 rx=3 fill #2b2f34.
+Pedal 2: rect x=330 y=413 width=36 height=9 rx=3 fill #2b2f34.
+
+Crank 1: line 380,450 → 412,482 stroke #2b2f34 width 8 round.
+Crank 2: 380,450 → 348,418 stroke #3a3f45 width 8 (far, slightly lighter/behind? draw far crank before chainring?) Draw the far crank first (behind), then chain+ring, then near crank on top.
+
+Chainring: circle 380,450 r 19 fill #f7d354? Actually a gold chainring would be nice: fill #f2c14e stroke #2b2f34 4. Cassette: circle 240,450 r 9 fill #98a1ab stroke #2b2f34 3.
+Chain: 2 lines: (380,431)→(240,441) and (380,469)→(240,459): but tangents to the r19 ring: top y = 450-19=431; to r9 cassette: y=450-9=441. Bottom 469 → 459. stroke #4d5560 width 4. Draw chain before chainring? Ring on top of chain is fine.
+
+Also little chain dots: stroke-dasharray "2 6" on the chain lines for a link feel, width 5, color #5a626c, over the base line? Overkill; a solid line is OK. Use a dasharray for fun: chain line stroke #59616b width 4.5 dasharray "6 4".
+
+Seat post: line (334,332) → (340,346) stroke #2b2f34 width 7. Saddle:
+M 304 326 C 312 316, 344 314, 354 324 C 358 330, 348 335, 330 336 C 316 337, 303 333, 304 326 Z fill #2b2f34.
+Top of saddle at y≈316; bottom of pelican at ~324-330 → pelican sits on it. Draw saddle before pelican so pelican overlaps its front top? Saddle visible behind pelican front (right of pelican's back). Pelican body bottom extends to x 340; saddle extends to 358: a bit of the nose is visible. Good.
+
+Head tube/stem: line (516,336) → (506,310) stroke #e63946? Red for the stem width 10. Handlebar: path M 506 310 C 502 296, 510 288, 522 290 stroke #2b2f34 width 8 fill none; grip: circle (524,290) r 5 #2b2f34? Or a small line with a round cap already. Add a bell: circle (512,296) r 4 #f2c14e with a stem? Cute: small gold bell on bar: circle at (500,300) r 4.5 fill #f2c14e stroke #b8860b 1.5, plus a tiny line. Hmm, maybe skip bell to avoid clutter. Add a front light? Keep bell — adorable.
+
+Kickstand? None.
+
+Water bottle on down tube? Down tube goes from (380,450) to (516,336): a bottle roughly perpendicular at midpoint (448,393)... rotated rect. Skip — pelican has a big body near that area? Body is at x≤380 so tube is clear. Bottle: small rotated rect. Direction of down tube: angle = atan2(336-450, 516-380) = atan2(-114,136) ≈ -40°. A bottle is perpendicular: placed at (452,398) with 40+90=130° rotation? Getting fussy; skip bottle. Add a small "1" number plate? Skip.
+
+Handlebar basket with fish! Charming: a small wicker basket mounted in front of handlebars at (540, 300)? Overlaps with front wheel upper area (top of wheel y=375, x 485-635). A basket at (540,300) floats over the fork. Mount on stem, front: basket center (545, 296): trapezoid path: M 522 284 L 570 284 L 562 314 L 530 314 Z fill #d9a05b stroke #a9713a 3; weave lines: horizontal lines; a fish tail poking out: (545,282): a fish: ellipse + triangle tail in silver-blue #8fd0e8? A fish in a basket adds storytelling (pelican riding and carrying a fish). But the beak is above at y~130-145, tip x568 — pouch bottom ~184 at x 505; basket top 284: no overlap. Fork is at (516,336) to (560,450): basket bottom 314 vs fork top 336: floats 22px above head tube — add a small mount line from stem (516,336) to basket bottom (528,314): line stroke #a9713a width 4? Or just attach the basket to the stem visually: move basket down: y 292-322; stem top (506,310) is close. Let me set basket: M 520 288 L 568 288 L 560 318 L 528 318 Z. Attach: line (508,308) → (530,318) width 5 #8a5a2b. Fish: small fish poking up: body ellipse cx 540 cy 284 rx 10 ry 6 fill #7fc8e8, tail triangle M 548 284 L 560 278 L 560 290 Z, eye dot. Slightly rotated. Cute!
+
+Also, a small fish jumping behind? Motion: a fish in the basket is enough.
+
+Motion lines:
+<g stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.7">
+ <line x1="150" y1="330" x2="215" y2="330"/>
+ <line x1="120" y1="390" x2="190" y2="390"/>
+ <line x1="150" y1="450" x2="205" y2="450"/>
+</g>
+Plus 2 shorter blueish ones: #bfe3ff.
+
+Hmm, motion lines at x150-215: rear wheel spans x165-315 (center 240 r75). Lines would overlap the wheel region at y330? Rear wheel at y 330: top of wheel 375 → line at y 330 is above wheel top, OK. At y390, x120-190: wheel left edge x165 → overlap at x165-190. Draw lines in front of bike (background layer) so wheel covers them: fine, they'd peek out from behind the wheel — that's a natural motion effect. At y450 x150-205: wheel occupies x165-315 → hidden mostly behind wheel (drawn first) leaving a stub on the left x150-165. Shift left: x1 100. Good: keep them in the background layer.
+
+Birds in the sky: 2 small "v" paths: M 620 120 q 10 -8 20 0 q 10 -8 20 0 stroke #6b7c93 width 3 fill none, at (600,120) and (660,150) with scaling.
+
+Sun at (105,105) r 44; rays 8 lines from r54 to r74, width 7 #ffd23f opacity .9. Rotate the group for style: transform rotate(12).
+
+Clouds:
+Cloud 1 at (330,95): ellipses: (330,100,rx38,ry20) hmm group:
+<g fill="#ffffff" opacity="0.95">
+  <ellipse cx="320" cy="102" rx="34" ry="18"/>
+  <ellipse cx="352" cy="92" rx="30" ry="20"/>
+  <ellipse cx="382" cy="104" rx="32" ry="16"/>
+</g>
+Cloud 2 at (640,210) similar smaller; cloud 3 at (520,60)? Also, the sun is at upper left. Place clouds at (300,95), (620,190), (720,80)? Keep 2-3.
+
+Hills: path M 0 525 C 120 480, 260 480, 400 522 ... two overlapping mounds fill #a8d98a and #8cc46a:
+M 0 525 C 140 470, 300 476, 470 525 Z fill #b5e096
+M 380 525 C 520 468, 700 476, 800 525 Z fill #9cd47c
+Grass base rect y 518 h 82 fill #7fc25e (below hills, road overlays).
+Road: rect x0 y524 w800 h62 fill #8a93a0; top edge line: rect y524 h5 fill #6f7885? Add curb: line y525 stroke? OK:
+<rect x="0" y="524" width="800" height="62" fill="#8a93a0"/>
+<rect x="0" y="524" width="800" height="6" fill="#77808d"/>
+Dashes: <line x1="0" y1="555" x2="800" y2="555" stroke="#f4f7fa" stroke-width="5" stroke-dasharray="30 26" opacity="0.85"/>
+Grass bottom strip: rect y586 h14 fill #7fc25e.
+
+Bike shadow: ellipse cx 400 cy 527 rx 200 ry 10 fill #000 opacity .12 (draw after road, before bike).
+
+Wheel bottom at 525 = road top 524: perfect contact.
+
+Sun:
+<g transform="translate(108,108)">
+ <g stroke="#ffcf3f" stroke-width="8" stroke-linecap="round" opacity="0.9">
+  8 lines: (0°): x1 54 x2 76; use transform rotate(n*45) on each line:
+  <line x1="54" y1="0" x2="76" y2="0"/>
+  <line x1="54" y1="0" x2="76" y2="0" transform="rotate(45)"/>
+  ... rotate 90, 135, 180, 225, 270, 315
+ </g>
+ <circle r="44" fill="#ffd23f"/>
+ <circle r="36" fill="#ffe066"/>
+</g>
+
+Clouds:
+<g fill="#fff" opacity="0.95">
+ <g> <!-- cloud A at (330,95) -->
+  <ellipse cx="316" cy="100" rx="34" ry="17"/>
+  <ellipse cx="348" cy="90" rx="28" ry="19"/>
+  <ellipse cx="378" cy="101" rx="30" ry="15"/>
+ </g>
+ <g opacity="0.9"> cloud B (620,175)
+  <ellipse cx="612" cy="180" rx="28" ry="14"/>
+  <ellipse cx="638" cy="172" rx="24" ry="15"/>
+  <ellipse cx="662" cy="182" rx="24" ry="12"/>
+ </g>
+ cloud C (712,78) smaller
+  <ellipse cx="704" cy="82" rx="24" ry="12"/>
+  <ellipse cx="726" cy="74" rx="20" ry="13"/>
+  <ellipse cx="746" cy="84" rx="20" ry="10"/>
+</g>
+
+Birds:
+<g stroke="#5f7290" stroke-width="3" fill="none" stroke-linecap="round">
+ <path d="M 585 132 q 9 -8 18 0 q 9 -8 18 0"/>
+ <path d="M 648 108 q 7 -6 14 0 q 7 -6 14 0" opacity="0.8"/>
+</g>
+Check cloud A extends to x ~408; birds at 585-621 and 648-676, y 108-132: cloud B at (612-686, 158-196): birds above cloud B, clear. OK.
+
+Sunbeams: 8 rotated lines.
+
+Hills:
+<path d="M 0 524 C 120 470, 280 474, 430 524 Z" fill="#b7e29b"/>
+<path d="M 330 524 C 480 462, 690 470, 800 524 Z" fill="#a5d983"/>
+Grass: <rect x="0" y="512" width="800" height="88" fill="#8ecf68"/> — wait, this rect covers the hills (drawn after). Order: grass rect first, hills after (hills rise above grass top 512, bottom 524 aligns with road top). Hills drawn after grass overlap up to 524. Then road covers 524-586, grass bottom strip 586-600.
+So: grass rect y512; hill path 1 (bottom 524); hill path 2; road rect 524-586; curb rect 524-530; dash line 556; grass strip rect 586-600.
+
+Grass tuft details: a few short grass blades: paths stroke #6fb351 width 3: M 60 518 l 4 -10 M 70 518 l 5 -8 ... on grass area at left and right bottom strip. Also small flowers: circle r3 #ffd23f at (90,595) with a green stem. Cute; add 2-3.
+
+Shadow: ellipse cx 400 cy 527 rx 205 ry 9 fill #1c2733 opacity 0.15 — draw after road, before far leg. Hmm, shadow should be under the wheels: wheels at x 165-315 and 485-635. rx 205 covers 195-605: spans both wheels. Good.
+
+Also, a slight shadow ellipse under each wheel? A single wide one is fine.
+
+Distant small trees? Skip.
+
+Let me re-check front fork and down tube merge: head tube (516,336) is the origin of both fork and down tube and stem — standard.
+
+Rear dropouts: fine.
+
+Now, wheel <use>: define in defs:
+<g id="wheel">
+  <circle r="75" fill="none" stroke="#262a30" stroke-width="13"/>
+  <circle r="62" fill="none" stroke="#d8dde3" stroke-width="4"/>
+  <g stroke="#c3c9d1" stroke-width="3" stroke-linecap="round">
+    <line x1="-62" y1="0" x2="62" y2="0"/>
+    <line x1="0" y1="-62" x2="0" y2="62"/>
+    <line x1="-44" y1="-44" x2="44" y2="44"/>
+    <line x1="44" y1="-44" x2="-44" y2="44"/>
+  </g>
+  <circle r="8" fill="#4a5158"/>
+  <circle r="3" fill="#262a30"/>
+</g>
+Uses: <use href="#wheel" transform="translate(240 450) rotate(18)"/> and translate(560 450) rotate(-30). (rotate for a dynamic spoke.)
+Note: href works in SVG2; for compatibility use xlink:href. Include xmlns:xlink and xlink:href.
+
+Tire with stroke centered at r75: outer 81.5 → bottom 531.5, top 368.5. Road top 524: outer bottom 531.5 slightly sinks into road (7.5px) — visually OK (contact). Good.
+
+Sunbeams 8 lines.
+
+All set — write the code. Let me make sure all tags are closed properly and attributes quoted. Add a <desc>.
+
+Let me mentally spell out the entire document to sanity-check syntax, then output.
+
+Also viewBox 800x600, width/height attributes optional; include for direct display.
+
+Final answer: brief intro sentence + svg code block + maybe 1-2 bullet points of notes. Keep concise.
+
+Length: fine.
+
+Let me write out the final code:
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 600" width="800" height="600">
+  <title>Pelican riding a bicycle</title>
+  <desc>A white pelican with a big orange beak pedals a red bicycle along a sunny country road, with a fish in the front basket.</desc>
+
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#79c4f2"/>
+      <stop offset="0.6" stop-color="#b9e3fa"/>
+      <stop offset="1" stop-color="#eaf8ff"/>
+    </linearGradient>
+    <g id="wheel">
+      <circle r="75" fill="none" stroke="#262a30" stroke-width="13"/>
+      <circle r="62" fill="none" stroke="#d8dde3" stroke-width="4"/>
+      <g stroke="#c3c9d1" stroke-width="3" stroke-linecap="round">
+        <line x1="-62" y1="0" x2="62" y2="0"/>
+        <line x1="0" y1="-62" x2="0" y2="62"/>
+        <line x1="-44" y1="-44" x2="44" y2="44"/>
+        <line x1="44" y1="-44" x2="-44" y2="44"/>
+      </g>
+      <circle r="8" fill="#4a5158"/>
+      <circle r="3" fill="#262a30"/>
+    </g>
+  </defs>
+
+  <!-- sky -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+
+  <!-- sun -->
+  <g transform="translate(108 108)">
+    <g stroke="#ffcf3f" stroke-width="8" stroke-linecap="round" opacity="0.9">
+      <line x1="56" y1="0" x2="78" y2="0"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(45)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(90)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(135)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(180)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(225)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(270)"/>
+      <line x1="56" y1="0" x2="78" y2="0" transform="rotate(315)"/>
+    </g>
+    <circle r="44" fill="#ffd23f"/>
+    <circle r="35" fill="#ffe066"/>
+  </g>
+
+  <!-- clouds -->
+  <g fill="#ffffff">
+    <g opacity="0.95">
+      <ellipse cx="318" cy="100" rx="34" ry="17"/>
+      <ellipse cx="350" cy="90" rx="28" ry="19"/>
+      <ellipse cx="380" cy="101" rx="30" ry="15"/>
+    </g>
+    <g opacity="0.9">
+      <ellipse cx="612" cy="182" rx="28" ry="13"/>
+      <ellipse cx="638" cy="173" rx="23" ry="15"/>
+      <ellipse cx="662" cy="183" rx="23" ry="11"/>
+    </g>
+    <g opacity="0.85">
+      <ellipse cx="706" cy="82" rx="24" ry="11"/>
+      <ellipse cx="728" cy="74" rx="20" ry="13"/>
+      <ellipse cx="748" cy="84" rx="18" ry="9"/>
+    </g>
+  </g>
+
+  <!-- birds -->
+  <g stroke="#5f7290" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M 585 132 q 9 -8 18 0 q 9 -8 18 0"/>
+    <path d="M 655 106 q 7 -6 14 0 q 7 -6 14 0" opacity="0.8"/>
+  </g>
+
+  <!-- motion lines -->
+  <g stroke-linecap="round">
+    <g stroke="#ffffff" opacity="0.7" stroke-width="7">
+      <line x1="70" y1="318" x2="148" y2="318"/>
+      <line x1="90" y1="392" x2="168" y2="392"/>
+      <line x1="64" y1="468" x2="140" y2="468"/>
+    </g>
+    <g stroke="#a5d8f7" opacity="0.8" stroke-width="5">
+      <line x1="112" y1="355" x2="168" y2="355"/>
+      <line x1="84" y1="428" x2="150" y2="428"/>
+    </g>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="512" width="800" height="88" fill="#8ecf68"/>
+ 

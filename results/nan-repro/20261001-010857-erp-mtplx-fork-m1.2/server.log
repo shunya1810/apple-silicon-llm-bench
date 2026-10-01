@@ -1,0 +1,58 @@
+  ███╗   ███╗ ████████╗ ██████╗  ██╗      ██╗  ██╗
+  ████╗ ████║ ╚══██╔══╝ ██╔══██╗ ██║      ╚██╗██╔╝
+  ██╔████╔██║    ██║    ██████╔╝ ██║       ╚███╔╝ 
+  ██║╚██╔╝██║    ██║    ██╔═══╝  ██║       ██╔██╗ 
+  ██║ ╚═╝ ██║    ██║    ██║      ███████╗ ██╔╝ ██╗
+  ╚═╝     ╚═╝    ╚═╝    ╚═╝      ╚══════╝ ╚═╝  ╚═╝
+
+  Native MTP speculative decoding · Apple Silicon
+
+╭─ MTPLX 2.12.0 ───────────────────────────────────────────────────────────────╮
+│                                                                              │
+│      Model  mtplx-qwen38-27b-optimized-speed-fp16                            │
+│    Profile  turbo                                                            │
+│        API  http://127.0.0.1:18103/v1                                        │
+│       Mode  turbo MTP                                                        │
+│    Browser  http://127.0.0.1:18103/                                          │
+│  Listening  127.0.0.1:18103                                                  │
+│    Loading  /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optim…  │
+│     Warmup  0 tokens                                                         │
+│       Auth  API key: leave blank for localhost                               │
+│       Stop  Ctrl-C                                                           │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+[1/6] Server config ready: http://127.0.0.1:18103/v1
+[2/6] Model resolved: /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optimized-Speed-FP16
+[3/6] Runtime contract verified — profile: turbo
+      Loading the model can take about a minute on first start.
+
+[4/6] Preparing turbo MTP runtime
+[mtplx] profile env override: MTPLX_COMPILED_VERIFY=0 (profile turbo default 1; operator env wins)
+[4/6] Checking local acceleration runtime
+      This may take a few seconds.
+[4/6] Runtime checks complete
+[5/6] Loading model weights: /Users/nakano/.mtplx/models/Youssofal--Qwen3.8-27B-MTPLX-Optimized-Speed-FP16
+      This is the long step; MTPLX is mapping the model into MLX.
+      Model load in progress (this may take a minute).
+[proj-fusion] groups=attn,gdn gdn=48 attn=17 mlp=0 skipped=1 max_fused_rows=4 freed=3.08GiB reasons=['attn: already fused']
+[5/6] Model loaded in 3.0s
+[5/6] Installing native-MTP draft head
+[frspec] install report: {'installed': True, 'n': 103887, 'vocab_rows': 248320, 'bits': 4, 'group_size': 64, 'mode': 'affine', 'bytes_ratio': 0.4184, 'source': 'configured_draft_head', 'output_mode': 'full', 'legacy_swap': True, 'elapsed_s': 0.021}
+[5/6] Chat template profile: tokenizer
+[5/6] Context window: 262144 tokens
+[mtplx] dense-decode ceiling auto: 157286 tokens (15% RAM over 65536 B/token, from the model config)
+[5/6] Memory plan: 64G Mac: engine budget 48.0G, weights 19.3G, context 262144, session bank up to 25.7G (yields to 20.5G under long-context load)
+[5/6] GPU residency keepalive: every 1s for 600s after each request
+[mtplx] session-bank budget: 25.7G total (auto: machine memory plan, yields to live KV), 12.9G per-session cap, 24 entries max, model weights 19.3G. Override: MTPLX_SESSION_BANK_MAX_BYTES / MTPLX_SESSION_BANK_PER_SESSION_BYTES (sizes like 12G or 12GiB).
+[6/6] Warmup skipped (--warmup-tokens 0)
+
+MTPLX is ready.
+Chat UI: http://127.0.0.1:18103/
+OpenAI API Base URL: http://127.0.0.1:18103/v1
+Model: mtplx-qwen38-27b-optimized-speed-fp16
+Reasoning history: preserve (policy auto)
+API key: leave blank for localhost
+Health check: http://127.0.0.1:18103/health
+Keep this terminal open. Press Ctrl-C to stop MTPLX.
+{"event": "mtplx_openai_generation", "prompt_tokens": 62, "completion_tokens": 17500, "max_tokens": 17500, "effective_max_tokens": 17500, "finish_reason": "length", "elapsed_s": 672.321228, "tok_s": 26.067109, "end_to_end_tok_s": 26.029224, "seed": 539023894, "attempts": 1, "blank_retries": 0, "text_preview": "The user is asking for an SVG of a pelican riding a bicycle. This is a fun, creative task. Let me think about how to mak"}

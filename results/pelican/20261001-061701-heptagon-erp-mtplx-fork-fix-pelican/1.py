@@ -1,0 +1,617 @@
+import math
+import tkinter as tk
+from dataclasses import dataclass
+from typing import List, Tuple, Optional
+
+# ----------------------------------------------------------------------------
+# Geometry / physics constants
+# ----------------------------------------------------------------------------
+WIDTH = 900
+HEIGHT = 900
+CENTER_X = WIDTH / 2.0
+CENTER_Y = HEIGHT / 2.0
+
+R_HEPT = min(WIDTH, HEIGHT) * 0.42
+BALL_RADIUS = max(14, int(R_HEPT * 0.055))
+
+N_BALLS = 20
+N_SIDES = 7
+
+# 360 degrees per 5 seconds
+HEPT_OMEGA = 2.0 * math.pi / 5.0
+
+GRAVITY = 1600.0          # px / s^2
+RESTITUTION = 0.82        # wall / ball impact material
+FRICTION = 0.30           # Coulomb friction coefficient for contacts
+AIR_DRAG = 0.15           # linear velocity damping per second
+SPIN_DRAG = 0.40          # angular velocity damping per second
+
+SUBSTEPS = 12
+COLLISION_ITERS = 5
+
+WALL_CORRECTION = 0.85
+BALL_CORRECTION = 0.80
+SLOP = 0.01
+
+# Material bounce-height constraint:
+# rebound speed is clamped so that h = v^2 / (2g) does not exceed R_HEPT.
+# Significant wall impacts are also kept above BALL_RADIUS height.
+MAX_BOUNCE_HEIGHT = R_HEPT
+MIN_BOUNCE_HEIGHT = float(BALL_RADIUS)
+
+MAX_BOUNCE_SPEED = math.sqrt(2.0 * GRAVITY * MAX_BOUNCE_HEIGHT)
+MIN_BOUNCE_SPEED = math.sqrt(2.0 * GRAVITY * MIN_BOUNCE_HEIGHT)
+
+MAX_SPEED = MAX_BOUNCE_SPEED
+MAX_OMEGA = 25.0
+
+COLORS = (
+    "#f8b862", "#f6ad49", "#f39800", "#f08300",
+    "#ec6d51", "#ee7948", "#ed6d3d", "#ec6800",
+    "#ec6800", "#ee7800", "#eb6238", "#ea5506",
+    "#ea5506", "#eb6101", "#e49e61", "#e45e32",
+    "#e17b34", "#dd7a56", "#db8449", "#d66a35",
+)
+
+
+# ----------------------------------------------------------------------------
+# Ball model
+# ----------------------------------------------------------------------------
+@dataclass
+class Ball:
+    number: int
+    color: str
+    x: float = 0.0
+    y: float = 0.0
+    vx: float = 0.0
+    vy: float = 0.0
+    omega: float = 0.0      # spin, rad/s
+    angle: float = 0.0      # visual rotation, rad
+    inv_m: float = 1.0
+    inv_I: float = 1.0
+    oval: Optional[int] = None
+    text: Optional[int] = None
+
+
+# ----------------------------------------------------------------------------
+# Small vector helpers
+# ----------------------------------------------------------------------------
+def closest_on_segment(
+    px: float,
+    py: float,
+    ax: float,
+    ay: float,
+    bx: float,
+    by: float,
+) -> Tuple[float, float, float]:
+    """
+    Return (qx, qy, t) where q is the closest point on segment a-b to p.
+    t is the clamped parametric position on the segment: 0 at a, 1 at b.
+    """
+    abx = bx - ax
+    aby = by - ay
+    denom = abx * abx + aby * aby
+
+    if denom < 1e-12:
+        return ax, ay, 0.0
+
+    t = ((px - ax) * abx + (py - ay) * aby) / denom
+    if t < 0.0:
+        t = 0.0
+    elif t > 1.0:
+        t = 1.0
+
+    return ax + abx * t, ay + aby * t, t
+
+
+# ----------------------------------------------------------------------------
+# Main simulation
+# ----------------------------------------------------------------------------
+class HeptagonSimulation:
+    def __init__(self, root: tk.Tk) -> None:
+        self.root = root
+        self.root.title("20 Balls in a Spinning Heptagon")
+        self.root.resizable(False, False)
+
+        self.canvas = tk.Canvas(
+            root,
+            width=WIDTH,
+            height=HEIGHT,
+            bg="#2a1a10",
+            highlightthickness=0,
+        )
+        self.canvas.pack()
+
+        self.theta = 0.0
+        self.balls: List[Ball] = []
+
+        self._make_balls()
+        self._make_items()
+
+        self.root.after(16, self._tick)
+
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
+    def _make_balls(self) -> None:
+        """
+        The 20 balls are released from a compact cluster centered at the
+        heptagon center. A perfectly degenerate zero-area start with 20
+        identical overlapping balls is numerically unstable, so the cluster
+        is used as a physical release configuration with center of mass at
+        the heptagon center.
+        """
+        self.balls.clear()
+
+        # Non-overlapping compact ring, centered at the heptagon center.
+        ring_radius = BALL_RADIUS / math.sin(math.pi / N_BALLS)
+        inv_I = 2.0 / (BALL_RADIUS * BALL_RADIUS)  # uniform disk: I = 0.5 m r^2
+
+        for i in range(N_BALLS):
+            a = i * 2.0 * math.pi / N_BALLS
+            x = CENTER_X + ring_radius * math.cos(a)
+            y = CENTER_Y + ring_radius * math.sin(a)
+
+            b = Ball(
+                number=i + 1,
+                color=COLORS[i],
+                x=x,
+                y=y,
+                vx=0.0,
+                vy=0.0,
+                omega=0.0,
+                angle=0.0,
+                inv_m=1.0,
+                inv_I=inv_I,
+            )
+            self.balls.append(b)
+
+    def _make_items(self) -> None:
+        self.font = ("Helvetica", max(8, int(BALL_RADIUS * 0.72)), "bold")
+
+        verts, _ = self._heptagon_state(0.0)
+        pts: List[float] = []
+        for x, y in verts:
+            pts.extend((x, y))
+
+        self.poly_id = self.canvas.create_polygon(
+            pts,
+            outline="#6b3410",
+            width=6,
+            fill="#f7e3c8",
+        )
+
+        for b in self.balls:
+            r = BALL_RADIUS
+            b.oval = self.canvas.create_oval(
+                b.x - r,
+                b.y - r,
+                b.x + r,
+                b.y + r,
+                fill=b.color,
+                outline="#7a3a00",
+                width=2,
+            )
+            b.text = self.canvas.create_text(
+                b.x,
+                b.y,
+                text=str(b.number),
+                font=self.font,
+                fill="#ffffff",
+                angle=math.degrees(b.angle),
+            )
+
+    # ------------------------------------------------------------------
+    # Heptagon state
+    # ------------------------------------------------------------------
+    def _heptagon_state(
+        self,
+        theta: float,
+    ) -> Tuple[List[Tuple[float, float]], List[Tuple[float, float]]]:
+        """
+        Return vertices and inward edge normals for the current heptagon angle.
+        """
+        verts: List[Tuple[float, float]] = []
+        step = 2.0 * math.pi / N_SIDES
+
+        for i in range(N_SIDES):
+            a = theta + i * step
+            verts.append(
+                (
+                    CENTER_X + R_HEPT * math.cos(a),
+                    CENTER_Y + R_HEPT * math.sin(a),
+                )
+            )
+
+        norms: List[Tuple[float, float]] = []
+        for i in range(N_SIDES):
+            ax, ay = verts[i]
+            bx, by = verts[(i + 1) % N_SIDES]
+
+            mx = (ax + bx) * 0.5
+            my = (ay + by) * 0.5
+
+            nx = CENTER_X - mx
+            ny = CENTER_Y - my
+            nl = math.hypot(nx, ny)
+
+            if nl < 1e-12:
+                nx, ny = 1.0, 0.0
+            else:
+                nx /= nl
+                ny /= nl
+
+            norms.append((nx, ny))
+
+        return verts, norms
+
+    # ------------------------------------------------------------------
+    # Collision: ball vs rotating heptagon
+    # ------------------------------------------------------------------
+    def _collide_wall(
+        self,
+        b: Ball,
+        verts: List[Tuple[float, float]],
+        norms: List[Tuple[float, float]],
+    ) -> None:
+        # Find the most violated inward half-plane constraint.
+        min_s = math.inf
+        best_i = 0
+        best_q = (CENTER_X, CENTER_Y)
+        best_t = 0.0
+
+        for i in range(N_SIDES):
+            ax, ay = verts[i]
+            bx, by = verts[(i + 1) % N_SIDES]
+            nx, ny = norms[i]
+
+            # Signed distance from ball center to this edge's inward normal.
+            s = (b.x - ax) * nx + (b.y - ay) * ny
+
+            qx, qy, t = closest_on_segment(b.x, b.y, ax, ay, bx, by)
+
+            if s < min_s:
+                min_s = s
+                best_i = i
+                best_q = (qx, qy)
+                best_t = t
+
+        # Ball center is allowed to be at least BALL_RADIUS inside every edge.
+        if min_s >= BALL_RADIUS:
+            return
+
+        i = best_i
+
+        # Choose a better normal near vertices by averaging adjacent inward normals.
+        if best_t < 0.05:
+            n1 = norms[(i - 1) % N_SIDES]
+            n2 = norms[i]
+        elif best_t > 0.95:
+            n1 = norms[i]
+            n2 = norms[(i + 1) % N_SIDES]
+        else:
+            n1 = norms[i]
+            n2 = norms[i]
+
+        nx = n1[0] + n2[0]
+        ny = n1[1] + n2[1]
+        nl = math.hypot(nx, ny)
+
+        if nl < 1e-12:
+            nx, ny = norms[i]
+        else:
+            nx /= nl
+            ny /= nl
+
+        # Positional correction.
+        pen = BALL_RADIUS - min_s
+        if pen > 0.0:
+            corr = min(pen, 6.0 * BALL_RADIUS) * WALL_CORRECTION
+            b.x += nx * corr
+            b.y += ny * corr
+
+        # Velocity of the rotating wall point at the contact location.
+        qx, qy = best_q
+        rx = qx - CENTER_X
+        ry = qy - CENTER_Y
+        vwx = -HEPT_OMEGA * ry
+        vwy = HEPT_OMEGA * rx
+
+        # Relative velocity of ball center with respect to the wall point.
+        rvx = b.vx - vwx
+        rvy = b.vy - vwy
+        vn = rvx * nx + rvy * ny
+
+        normal_impulse = 0.0
+
+        # Normal impulse with restitution and bounce-height material clamp.
+        if vn < -1e-6:
+            desired = -RESTITUTION * vn
+
+            # Do not allow rebound speed corresponding to height > R_HEPT.
+            if desired > MAX_BOUNCE_SPEED:
+                desired = MAX_BOUNCE_SPEED
+
+            # Keep significant impacts above one ball radius in bounce height.
+            pre_h = (vn * vn) / (2.0 * GRAVITY)
+            if pre_h > MIN_BOUNCE_HEIGHT and desired < MIN_BOUNCE_SPEED:
+                desired = MIN_BOUNCE_SPEED
+
+            # Replace only the normal component of the relative velocity.
+            t_vx = rvx - vn * nx
+            t_vy = rvy - vn * ny
+
+            b.vx = vwx + desired * nx + t_vx
+            b.vy = vwy + desired * ny + t_vy
+
+            normal_impulse = (desired - vn) * b.inv_m
+
+        # Contact point on the ball relative to the ball center.
+        dx = best_q[0] - b.x
+        dy = best_q[1] - b.y
+        d = math.hypot(dx, dy)
+
+        if d > 1e-9:
+            crx = dx / d * BALL_RADIUS
+            cry = dy / d * BALL_RADIUS
+        else:
+            # If numerically degenerate, assume the normal inside direction.
+            crx = -BALL_RADIUS * nx
+            cry = -BALL_RADIUS * ny
+
+        # Tangent basis.
+        tx = -ny
+        ty = nx
+
+        # Ball contact-point velocity, including spin.
+        cvx = b.vx - b.omega * cry
+        cvy = b.vy + b.omega * crx
+
+        relx = cvx - vwx
+        rely = cvy - vwy
+        wt = relx * tx + rely * ty
+
+        cr_t = crx * ty - cry * tx
+        k = b.inv_m + cr_t * cr_t * b.inv_I
+
+        if k > 1e-12 and normal_impulse > 0.0:
+            jt = -wt / k
+            max_jt = FRICTION * normal_impulse
+
+            if abs(jt) > max_jt:
+                jt = max_jt * (1.0 if jt > 0.0 else -1.0)
+
+            if jt != 0.0:
+                b.vx += jt * tx * b.inv_m
+                b.vy += jt * ty * b.inv_m
+                b.omega += (crx * (jt * ty) - cry * (jt * tx)) * b.inv_I
+
+    # ------------------------------------------------------------------
+    # Collision: ball vs ball
+    # ------------------------------------------------------------------
+    def _collide_balls(self) -> None:
+        balls = self.balls
+        n = len(balls)
+
+        for i in range(n):
+            bi = balls[i]
+
+            for j in range(i + 1, n):
+                bj = balls[j]
+
+                dx = bj.x - bi.x
+                dy = bj.y - bi.y
+                d = math.hypot(dx, dy)
+
+                if d >= 2.0 * BALL_RADIUS:
+                    continue
+
+                if d > 1e-9:
+                    nx = dx / d
+                    ny = dy / d
+                else:
+                    # Deterministic fallback for perfectly coincident centers.
+                    ang = (i - j) * 2.399963
+                    nx = math.cos(ang)
+                    ny = math.sin(ang)
+
+                # Positional correction.
+                pen = 2.0 * BALL_RADIUS - d
+                corr = max(0.0, pen - SLOP) * BALL_CORRECTION * 0.5
+
+                bi.x -= nx * corr
+                bi.y -= ny * corr
+                bj.x += nx * corr
+                bj.y += ny * corr
+
+                # Relative center velocity.
+                rvx = bj.vx - bi.vx
+                rvy = bj.vy - bi.vy
+                vn = rvx * nx + rvy * ny
+
+                normal_j = 0.0
+
+                # Normal impulse.
+                if vn < -1e-6:
+                    jn = -(1.0 + RESTITUTION) * vn / (bi.inv_m + bj.inv_m)
+
+                    px = jn * nx
+                    py = jn * ny
+
+                    bi.vx -= px * bi.inv_m
+                    bi.vy -= py * bi.inv_m
+                    bj.vx += px * bj.inv_m
+                    bj.vy += py * bj.inv_m
+
+                    normal_j = jn
+
+                # Contact vectors from each ball center to the contact point.
+                r1x = BALL_RADIUS * nx
+                r1y = BALL_RADIUS * ny
+                r2x = -BALL_RADIUS * nx
+                r2y = -BALL_RADIUS * ny
+
+                # Contact-point velocities including spin.
+                c1x = bi.vx - bi.omega * r1y
+                c1y = bi.vy + bi.omega * r1x
+
+                c2x = bj.vx - bj.omega * r2y
+                c2y = bj.vy + bj.omega * r2x
+
+                relx = c2x - c1x
+                rely = c2y - c1y
+
+                # Tangent basis.
+                tx = -ny
+                ty = nx
+
+                wt = relx * tx + rely * ty
+
+                c1t = r1x * ty - r1y * tx
+                c2t = r2x * ty - r2y * tx
+
+                k = (
+                    bi.inv_m
+                    + bj.inv_m
+                    + c1t * c1t * bi.inv_I
+                    + c2t * c2t * bj.inv_I
+                )
+
+                if k > 1e-12 and normal_j > 0.0:
+                    jt = -wt / k
+                    max_jt = FRICTION * normal_j
+
+                    if abs(jt) > max_jt:
+                        jt = max_jt * (1.0 if jt > 0.0 else -1.0)
+
+                    if jt != 0.0:
+                        # Impulse on i is +P, impulse on j is -P.
+                        p_x = jt * tx
+                        p_y = jt * ty
+
+                        bi.vx += p_x * bi.inv_m
+                        bi.vy += p_y * bi.inv_m
+
+                        bj.vx -= p_x * bj.inv_m
+                        bj.vy -= p_y * bj.inv_m
+
+                        bi.omega += (r1x * p_y - r1y * p_x) * bi.inv_I
+
+                        jx = -p_x
+                        jy = -p_y
+                        bj.omega += (r2x * jy - r2y * jx) * bj.inv_I
+
+    # ------------------------------------------------------------------
+    # Simulation step
+    # ------------------------------------------------------------------
+    def step(self, dt: float) -> None:
+        sdt = dt / SUBSTEPS
+
+        for _ in range(SUBSTEPS):
+            self.theta += HEPT_OMEGA * sdt
+            verts, norms = self._heptagon_state(self.theta)
+
+            # Integrate forces.
+            for b in self.balls:
+                b.vy += GRAVITY * sdt
+
+                drag = max(0.0, 1.0 - AIR_DRAG * sdt)
+                b.vx *= drag
+                b.vy *= drag
+
+                spin_drag = max(0.0, 1.0 - SPIN_DRAG * sdt)
+                b.omega *= spin_drag
+
+                b.x += b.vx * sdt
+                b.y += b.vy * sdt
+                b.angle += b.omega * sdt
+
+            # Resolve collisions iteratively.
+            for _ in range(COLLISION_ITERS):
+                for b in self.balls:
+                    self._collide_wall(b, verts, norms)
+
+                self._collide_balls()
+
+            # Safety / material speed clamp.
+            for b in self.balls:
+                if not (
+                    math.isfinite(b.x)
+                    and math.isfinite(b.y)
+                    and math.isfinite(b.vx)
+                    and math.isfinite(b.vy)
+                    and math.isfinite(b.omega)
+                    and math.isfinite(b.angle)
+                ):
+                    b.x, b.y = CENTER_X, CENTER_Y
+                    b.vx, b.vy = 0.0, 0.0
+                    b.omega = 0.0
+                    b.angle = 0.0
+                    continue
+
+                speed = math.hypot(b.vx, b.vy)
+                if speed > MAX_SPEED:
+                    scale = MAX_SPEED / speed
+                    b.vx *= scale
+                    b.vy *= scale
+
+                if b.omega > MAX_OMEGA:
+                    b.omega = MAX_OMEGA
+                elif b.omega < -MAX_OMEGA:
+                    b.omega = -MAX_OMEGA
+
+                if b.angle > 2.0 * math.pi or b.angle < -2.0 * math.pi:
+                    b.angle %= 2.0 * math.pi
+
+    # ------------------------------------------------------------------
+    # Rendering
+    # ------------------------------------------------------------------
+    def _draw(self) -> None:
+        verts, _ = self._heptagon_state(self.theta)
+        pts: List[float] = []
+        for x, y in verts:
+            pts.extend((x, y))
+
+        if self.poly_id is not None:
+            self.canvas.coords(self.poly_id, *pts)
+
+        for b in self.balls:
+            if b.oval is None or b.text is None:
+                continue
+
+            r = BALL_RADIUS
+            self.canvas.coords(
+                b.oval,
+                b.x - r,
+                b.y - r,
+                b.x + r,
+                b.y + r,
+            )
+
+            self.canvas.coords(b.text, b.x, b.y)
+            self.canvas.itemconfig(b.text, angle=math.degrees(b.angle))
+
+    # ------------------------------------------------------------------
+    # Animation loop
+    # ------------------------------------------------------------------
+    def _tick(self) -> None:
+        if not self.root.winfo_exists():
+            return
+
+        self.step(1.0 / 60.0)
+        self._draw()
+
+        self.root.after(16, self._tick)
+
+
+# ----------------------------------------------------------------------------
+# Entry point
+# ----------------------------------------------------------------------------
+def main() -> None:
+    root = tk.Tk()
+    HeptagonSimulation(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

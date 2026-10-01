@@ -1,0 +1,54 @@
+## The bug: `cancel_pending()` disposes of queued writes without releasing their backlog‑budget reservations
+
+The whole admission scheme in this file rests on one ledger invariant:
+
+- `_admit_write()` charges `_pending_bytes += estimated_nbytes` (under `_stats_lock`) before a write is encoded/enqueued.
+- Every disposition of a `PendingWrite` must discharge that charge via `_release_pending()`.
+
+There are exactly three dispositions, and two of them discharge:
+
+- `put_entry` failure paths (encode interrupted / serialize error / `queue.Full`) → `self._release_pending(...)` ✓
+- `_writer_loop.finally` → `self._release_pending(pending.pinned_nbytes)` ✓
+- **`cancel_pending()` → `task_done()` only, no `_release_pending()` ✗**
+
+```python
+dropped += 1
+self._queue.task_done()          # reservation for this item is never released
+```
+
+A `PendingWrite` can reach the queue's drain loop or `cancel_pending` — but if `cancel_pending` grabs it, the writer's `finally` never runs, so the bytes it reserved in `_pending_bytes` are pinned there **for the life of the process**. Nothing else ever resets `_pending_bytes` (not `archive()`, not `close()`).
+
+### When it triggers
+
+On its own documented use: the admin cache‑clear quiesce. And that's exactly the moment the writer queue is *not* empty — you clear the RAM bank after churn, which is what fills the writer backlog with multi‑GB `PendingWrite` items (the docstring's own 128k‑token example). So every item `cancel_pending` drops leaks its reservation.
+
+### What it costs
+
+- After one clear, `_pending_bytes` is stuck at ~the queued bytes at clear time. Every later `put_entry` fails `_admit_write` with `_pending_bytes + needed > budget` → `skipped_backlog_bytes`, and is **silently dropped forever**.
+- The #384 oversized‑alone escape is also dead, because it requires `_pending_bytes <= 0`.
+- With the 4 GiB default budget, a single clear with a few queued multi‑GB entries leaks the entire budget → the tier refuses *all* writes, big or small, for the rest of the daemon's lifetime, and the leak compounds monotonically on repeated clears.
+- It masquerades as a healthy cache: restores still work, `writes_enqueued` just freezes, and the only traces are counters. The one tell is in `stats()`: `writer_backlog_bytes > 0` with `writer_queue_depth == 0` and no recent `last_write_s` — a stuck "backlog" that no writer will ever drain. The practical cost is exactly the failure this tier exists to prevent: every session re‑prefills on every restart (minutes of TTFT on the coding‑agent sessions), with no log line to explain it.
+
+### Minimal patch
+
+Each item is discharged by exactly one of the two drain paths, so no double‑release is possible:
+
+```python
+            dropped += 1
+            # Discharge this item's backlog reservation: it never reaches
+            # the writer loop, whose finally is the only other release
+            # site. Without this the charge sticks in _pending_bytes
+            # forever and every later put_entry is skipped_backlog_bytes.
+            self._release_pending(pending.pinned_nbytes)
+            self._queue.task_done()
+```
+
+(Releasing `pinned_nbytes` is safe: the over‑release versus the original `estimated` charge just clamps to 0 via `_release_pending`, which is the correct resting state once the queue is empty.)
+
+### Same ledger, second imbalance (worth fixing alongside)
+
+`_admit_write` books `entry.nbytes`, but every release site discharges `pinned_nbytes = max(entry.nbytes, encoded.nbytes)`. Whenever the encoded payload (KV + logits + hidden + GDN‑boundary tensors) exceeds the entry's estimate — the common case — the writer over‑releases and the clamp‑to‑0 makes the #145 backlog cap systematically under‑bound the RAM actually pinned by the queue. The clean fix is to make the ledger exact: give `PendingWrite` a `reserved_nbytes` field (set to the admitted estimate in `put_entry`) and release `pending.reserved_nbytes` in all three sites — or, after the encode in `put_entry`, promote the reservation to `pinned_nbytes` and drop the write if the promoted total exceeds the budget.
+
+### Why not the concurrency machinery
+
+I stressed the scary-looking paths first — blob deletion racing restores, temp‑dir orphan sweeps racing phase‑3 commits, in‑flight protection, the generation re‑validation in `_delete_unreferenced_blobs` and the reconcile pass. They hold: deletions are generation‑checked under `_base_lock`, commits bump the generation under the lock, commits are atomic rename + manifest insert, and the worst race a restore can hit is a clean `FileNotFoundError` → counted miss. The defect is in the byte ledger, not the locking.

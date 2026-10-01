@@ -1,0 +1,75 @@
+
+
+## The bug: the writer-backlog byte ledger is reserved one way and released another, so the 4 GiB backlog cap stops capping anything
+
+### What it does
+
+In `put_entry` the admission control reserves **`entry.nbytes`** (the RAM-tier estimate) before encoding:
+
+```python
+estimated_nbytes = int(getattr(entry, "nbytes", 0) or 0)
+if not self._admit_write(estimated_nbytes):   # _pending_bytes += estimated
+    return False
+...
+pending = PendingWrite(..., pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)))
+```
+
+But **both release sites free `pending.pinned_nbytes`, not the reserved amount**:
+
+- `put_entry`, queue-full path: `self._release_pending(pending.pinned_nbytes)`
+- `_writer_loop`, `finally`: `self._release_pending(pending.pinned_nbytes)`
+
+And `_release_pending` clamps at zero:
+
+```python
+self._pending_bytes = max(0, self._pending_bytes - max(0, int(nbytes)))
+```
+
+So every write whose **encoded payload is larger than `entry.nbytes`** — which is the norm for this v3 format: `pinned = max(estimated, encoded.nbytes)` and `encoded.nbytes` includes the interior recurrent (GDN) boundary snapshots, `hidden`, and `logits` that the RAM-side `nbytes` does not account for, and is **0** for live-ref/oversized entries (the very entries the `spill_entry` comments call out) — subtracts *more* from `_pending_bytes` than was ever added to it. The pool drains to the `max(0, …)` floor within a few such writes and then stays pinned at 0, while the queue keeps holding the actual buffers.
+
+### When it triggers
+
+Any sustained `put_entry` churn where `encoded.nbytes > entry.nbytes`: recurrent models (boundaries inflate the encode), entries carrying `hidden`/`logits`, and especially live-ref sessions reporting `nbytes=0`. With the default 32-deep queue, the *effective* pinned backlog can reach depth × budget (~128 GiB) while the ledger reads 0.
+
+### What it costs
+
+This breaks the exact invariant the code comments claim to protect: issue #145 measured live memory climbing 35 → 66 GB "while the bank ledger stayed flat" and added this byte cap as the fix. The asymmetric release silently re-breaks it:
+
+- the backlog budget admits multi-GB snapshots freely until the queue is physically full,
+- macOS memory-pressure banner / swap, and ultimately **jetsam-killing the whole inference daemon mid-turn** — every session re-prefills, in-flight generation lost,
+- `stats()["writer_backlog_bytes"]` reports the false low `_pending_bytes`, so the dashboard actively masks the problem.
+
+### Minimal patch
+
+Reservation must be reconciled to `pinned` the moment the encoded size is known (admission still has to happen *before* the encode, since it is the only thing that stops a rejected write from paying for a minutes-long encode; the fix is to top up, not to move admission):
+
+```python
+    def _top_up_pending(self, nbytes: int) -> None:
+        """Bring the backlog reservation up to the true pinned size.
+
+        put_entry reserves entry.nbytes before encoding (admission must
+        precede the encode), but both release sites free
+        pinned_nbytes = max(estimated, encoded_nbytes).  Reconcile here so
+        a release can never subtract more than was reserved (#145: the
+        backlog cap must actually cap the backlog)."""
+        with self._stats_lock:
+            self._pending_bytes += max(0, int(nbytes))
+```
+
+and in `put_entry`, after `pending` is constructed (i.e. after the encode `try/except`, so a failed/interrupted encode never tops up):
+
+```python
+        pending = PendingWrite(
+            entry_id=str(metadata["entry_id"]),
+            ...
+            pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)),
+        )
+        if pending.pinned_nbytes > estimated_nbytes:
+            self._top_up_pending(pending.pinned_nbytes - estimated_nbytes)
+```
+
+Now every path balances exactly: encode fails → releases `estimated` (nothing topped up); queue full → reserved `estimated + (pinned − estimated) = pinned`, releases `pinned`; writer drains → releases `pinned`. The lone-oversized-admit branch in `_admit_write` also gets correct behavior for free: the queue behind a huge in-flight write is properly blocked instead of refilled against a zeroed ledger.
+
+### Why this over the other suspects
+
+I audited the rest of the file and the dangerous-looking races are actually closed: the eviction/blob-deletion paths can't remove a live reference (inflight claims + manifest-generation revalidation under `_base_lock`, generation bumped on every insert/delete), `rename`-based commits are atomic under the lock, and the `matched_tokens` vs `cache_snapshot_prefix_len` under-coverage in `lookup_prefix_boundary` is a documented consumer contract (the record carries the true coverage). The ledger asymmetry is the one self-contained invariant violation with a catastrophic, self-masking cost.

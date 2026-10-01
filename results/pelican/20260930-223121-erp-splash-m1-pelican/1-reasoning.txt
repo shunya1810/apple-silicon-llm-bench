@@ -1,0 +1,1101 @@
+The user is asking for an SVG of a pelican riding a bicycle. Let me think about how to make this.
+
+Pelican characteristics:
+- Long beak with pouch
+- Round body
+- White/gray feathers
+- Webbed feet
+- Long neck
+
+Bicycle:
+- Two wheels
+- Frame
+- Pedals
+- Handlebar
+- Saddle (seat)
+- Chain
+
+Let me plan the SVG:
+1. Background (sky, maybe ground/road)
+2. Bicycle:
+   - Two wheels with spokes
+   - Frame (diamond shape)
+   - Handlebar
+   - Seat
+   - Pedals and crank
+   - Chain
+3. Pelican:
+   - Body (oval, white with gray wing accents)
+   - Neck (S-curve going up)
+   - Head (small circle)
+   - Beak (long, with pouch below)
+   - Eye
+   - Wing (can be positioned on handlebar or on seat)
+   - Legs/feet on pedals (webbed feet)
+
+Let me set up coordinates. SVG viewBox is 0 0 800 600.
+
+Ground at y=500.
+
+Bicycle:
+- Rear wheel center: (250, 460), radius 80
+- Front wheel center: (550, 460), radius 80
+- So wheels touch ground at y=540. Adjusting: wheel radius 80, center y=460, bottom at 540. Ground at 540.
+
+Actually, let me make viewBox 800x600, ground line at y=520. Wheel radius 90? That's big. Let's use radius 85, centers at y=435, bottom 520.
+
+- Rear wheel: (240, 435), r=85
+- Front wheel: (560, 435), r=85
+
+Frame:
+- Bottom bracket (crank center): around (380, 435)
+- Seat tube: from bottom bracket up-back to seat: (330, 300)
+- Top tube: from top of seat tube (330, 305) to head tube (510, 310)
+- Down tube: from bottom bracket (380, 435) to head tube (515, 330)
+- Head tube: sloped, from (510, 305) to (530, 360), fork from (530, 360) to front wheel center (560, 435)
+- Chainstay: from rear wheel hub (240, 435) to bottom bracket (380, 435)
+- Seat stay: from rear wheel hub (240, 435) to top of seat (330, 305)
+
+Handlebar: from top of head tube (510, 305) up to (505, 270), then curve for the bar.
+
+Seat: at (330, 300), saddle is a small shape.
+
+Crank: circle at (380, 435), radius 12; pedals—crank arm to pedal. Let's make a pedal at an angle: pedal at (380+45cos(-30°), 435+45sin(-30°))... more simply: pedal 1 at (420, 405) (up-forward), pedal 2 at (340, 465) (down-back). Actually, in side view, pedals are roughly vertical: one at (380+35, 435+...) hmm.
+
+In side view, the crank arms are foreshortened. Common cartoon style: one pedal forward and down, one back and up. Let me make a crank arm from (380,435) to pedal at (415, 460), and the other to (345, 410). Pedal is a small rectangle.
+
+Pelican:
+- Sitting on the seat at (330, 300). Body oval centered around (310, 270)? Body should sit above/on the seat.
+- Body: oval centered at (300, 260), rx 75, ry 55.
+- Tail feathers at the rear.
+- Neck: S-curve rising from upper front of body. Pelican faces right (toward the handlebars).
+- Neck: starts near upper front of body (345, 235), curves up to head at (420, 120).
+- Head: circle at (425, 115), r 22.
+- Beak: long, from head forward-down. Upper beak: from (440, 105) to (560, 135), thin. Pouch: big curve from below the beak to (555, 150) back to head (445, 125).
+- Eye: (428, 108).
+- Wings: one wing on the seat (far side, gray, behind body, maybe raised), other wing on the handlebar (white with gray outline). Actually, a pelican riding a bicycle—usually one wing grips the handlebar. The other wing might be raised in a wave.
+- Legs: from lower body to pedals. Legs orange/yellow, webbed feet. One foot on each pedal.
+
+Let me think about leg positions:
+- Pedal positions: (415, 460) and (345, 410). Pelican body is around (300, 260), lower body near (300-320, 310).
+- Near leg (right leg, viewer's left? actually the near side leg should be the left leg... in side view we see one leg clearly, the far leg is partially hidden). Let me draw:
+  - Far leg: from lower body (330, 300) to upper pedal (345, 410), foot on pedal.
+  - Near leg: from lower body (315, 305) to lower pedal (415, 460). This will be a long stretch. Hmm, pelican legs are thin. Let me route: hip at (320, 300), knee bent.
+
+Actually, let me rethink. The saddle is at (330, 300). Pelican body center at (295, 255) or so, rx 70 ry 50. Bottom of body is around y=305. Hip is around (320, 295).
+
+Near leg to lower pedal (415, 460): draw a two-segment path: hip (320, 295) → knee (360, 370) → foot (415, 455). Then webbed foot on top of pedal (415, 460).
+
+Far leg to upper pedal (345, 410): hip (325, 290) → knee (335, 355) → foot (343, 408). Foot on top of pedal (345, 410).
+
+Webbed feet: a fan shape with three toes.
+
+Wing on handlebar: handlebar around (500, 270)? Let me decide the top of head tube and the handlebar. Head tube: top at (515, 300). Stem up to (510, 270). Bar curves to (495, 265). Hmm, let me make the bar at around (500, 268).
+
+Wing from body (310, 250) up and forward to hand/wing tip at (495, 268). Wing is a long shape. Draw as a path: starts at shoulder (300, 245), curves forward, tip at (495, 268) grabbing the bar, then comes back below to (310, 280). That's a big wing. Could work.
+
+Alternatively, more simply: one wing raised, the other on the bar. Let me include both: far wing (gray, raised behind body in a wave), near wing (white, extends to handlebar).
+
+Beak pouch: pelicans have a distinctive pouch. Let me make sure it's visible.
+
+Color scheme:
+- Body: white (#FFFFFF), gray outline (#9AA5B1 or #8B9DA7), wing gray (#C7D3DB / #AEBEC9).
+- Beak: orange (#F2994A / #E8833A), pouch in darker orange (#D97A2B) or slightly different shade.
+- Feet: orange (#F2994A).
+- Eye: black.
+- Bicycle: frame red (#E0453A) or teal. Let's do red frame, dark wheels (#2E3A46), spokes lighter, tires dark.
+- Background: sky gradient light blue, sun, clouds, green ground/grass, road line.
+
+Let me carefully build the coordinates.
+
+ViewBox: 0 0 800 600.
+
+Background:
+- Sky: rect 0,0,800,600 fill url(#sky), gradient #CDEBF5 to #EAF7FC.
+- Sun: circle (680, 90) r 45, fill #FFE08A, could also do lighter halo.
+- Clouds: a few ellipse groups at (150, 100), (420, 70), (620, 160)? Keep light.
+- Ground: rect from y=520 to 600, fill #A8D5A2 (grass). Road: darker band? Let me make the ground green grass, and a road path: rect y=505 to 535, fill #8C8C9E? Actually, wheels touch at y=520. Let me make a road band from 520 to 560, fill #9AA0AA, with a white dashed center line at y=540. Hmm but then grass would be below the road? Simpler: grass from 520 down. Or: grass 520-600, plus a subtle road band 520-550.
+
+Actually simpler and cleaner: ground = grass from y=515 to 600. Add a dirt/road path? Add a subtle shadow ellipse under the bicycle.
+
+Ground: rect y=515 height 85 fill #9ED08F. Maybe two greens for depth: back band slightly darker.
+
+Bicycle details:
+
+Wheels:
+- Rear: center (240, 435), tire r=85 (stroke dark #2B3A46, stroke-width 10, fill none or fill light #E8F1F5?). Cartoon style: fill tire with dark ring: circle r=85 fill none stroke #2B3A46 stroke-width 11. Inner rim: circle r=72 stroke #7E8B99 width 4? Then spokes: lines from center to rim, 8 or 12 spokes, stroke #8593A1 width 3. Hub: circle r=8 fill #445.
+- Front: same at (560, 435).
+
+Spokes: let me generate at 30° intervals (12 spokes) — or 8 for simplicity with 45° spacing. Can write lines with precomputed coordinates.
+
+Rear wheel center (240,435), spoke length 72 (to rim r=72):
+- 0°: (312, 435)
+- 45°: (290.9, 485.9) → 240+72cos45=240+50.9=290.9; 435+50.9=485.9
+- 90°: (240, 507)
+- 135°: (189.1, 485.9)
+- 180°: (168, 435)
+- 225°: (189.1, 384.1)
+- 270°: (240, 363)
+- 315°: (290.9, 384.1)
+
+Front wheel center (560,435):
+- 0°: (632, 435)
+- 45°: (610.9, 485.9)
+- 90°: (560, 507)
+- 135°: (509.1, 485.9)
+- 180°: (488, 435)
+- 225°: (509.1, 384.1)
+- 270°: (560, 363)
+- 315°: (610.9, 384.1)
+
+Could reduce to 8 spokes per wheel. That works.
+
+Frame (stroke #E14B3B, stroke-width 9, linecap round):
+- Chainstay: M 240 435 L 380 435
+- Seat tube: M 380 435 L 330 295
+- Seat stay: M 240 435 L 330 300
+- Down tube: M 380 435 L 512 318
+- Top tube: M 330 300 L 512 318 — hmm, top tube should be nearly horizontal from seat cluster (330, 300) to head tube top (512, 318). OK.
+- Head tube: M 512 318 L 528 355? Let me set head tube from (510, 310) to (530, 358), stroke width 10.
+- Fork: from bottom of head (530, 358) to front hub (560, 435). Stroke width 7, maybe same red or darker.
+- Seat post: from (330, 295) to (327, 272), stroke #4A5560 width 6.
+- Saddle: at (325, 268): path or rounded rect: e.g. ellipse-ish: M 300 268 Q 325 258 350 268 Q 328 278 300 268 fill #2B3A46. Or just a path like a rounded shape.
+- Stem + handlebar: from top of head (510, 310) up to (505, 285), then bar: curve to (480, 278)? Let's do: stem line M 510 310 L 506 286. Handlebar: path M 506 286 C 500 270, 488 266, 474 268 — like a cruiser bar sweeping back. Actually the wing tip should grip the bar. Let me place grip area at (480, 270).
+- Crankset: circle at (380, 435) r=13 fill #4A5560; chainring circle r=20 stroke #4A5560 width 3, fill none? Chainring is bigger: r=22.
+- Chain: line from top of chainring to rear hub area: M 380 413 L 240 427? And bottom M 380 457 L 240 443? Rear cog r=13. Chain as 2 lines, stroke #4A5560 width 3.5.
+- Crank arms: M 380 435 L 418 462 (near, to lower pedal), M 380 435 L 342 408 (far, to upper pedal). Stroke #333 width 6.
+- Pedals: rect centered at (422, 465) width 26 height 7, rx 3, fill #333; at (338, 405) same. Let me align: pedal 1 (422, 464), pedal 2 (338, 406).
+
+Wait, the crank arm goes to pedal (418,462), and pedal rect centered at (422, 465). Pedal is horizontal under the foot. OK.
+
+Kickstand? No.
+
+Basket? Cute: small basket at front of the bar? Maybe skip to keep it clean. Could add a small flag on the rear. Skip; let me add a few speed lines behind to show motion. Actually "riding" implies motion — add 3 short lines behind the rear wheel.
+
+Pelican:
+
+Body: oval cx=295 cy=252 rx=72 ry=52, slightly rotated (-8°). White fill #FFFFFF, stroke #94A3B2 width 3.
+
+Tail: at rear upper: path of a few pointed feathers around (225, 220): M 235 225 L 190 205 L 228 240 ... let me make 3 tail feather tips.
+
+Neck: S-curve. Body upper front around (340, 225). Neck goes up and forward to head. Head at around (420, 118). Neck path as a thick stroke? Better to draw neck as a shape: draw as filled path with 2 curves. Or use a thick stroke (width ~26, white with outline?) — outline is hard with strokes. Let me draw neck as a filled path:
+
+Neck shape: starts from front of body (345, 240).
+- Path: M 330 262 C 355 235, 350 205, 372 180 C 388 162, 400 150, 405 128 (front edge going up)... then across top of head, then back down rear edge: C 398 158, 372 168, 358 190 C 342 215, 330 232, 300 245 Z — something like that. Hmm, let me think of an S-shaped neck: pelican's neck often curves: chest going up, neck bending. Simplify: neck as curved thick shape from (340, 245) to (415, 125).
+
+Let me define neck as a filled path:
+M 322 268
+C 352 248, 352 210, 375 185   (front/chest edge going up)
+C 388 171, 398 158, 402 138   (up to head front)
+L 432 132                     (top of head to connect; head circle will cover)
+C 424 168, 412 185, 396 200   (back edge going down)
+C 376 222, 360 240, 340 262    (down to back of body)
+Z
+
+Hmm, this creates a tapered neck. Head circle will cover the joint. Let me draw head as circle centered at (424, 118) r 21.
+
+Neck connects at head bottom (424, 139). So end of neck near (405-430, 128-140). OK.
+
+Alternatively simpler: use a single smooth path with stroke-width 24 for the neck with white stroke and outline? Can't easily outline. Filled path is fine; I'll tweak.
+
+Actually, common trick: draw neck as a path with stroke and draw the same path with a slightly wider darker stroke first for the outline effect. That works! Draw path M 335 260 C 360 235, 355 200, 380 172 C 395 155, 408 145, 415 130 as stroke #94A3B2 width 30, then same path with stroke #FFFFFF width 24. That creates an outlined neck.
+
+And head: circle (424, 118) r 20 fill white stroke #94A3B2 3.
+
+Top of head crest: small bump on top: tiny path or circle.
+
+Eye: circle (429, 111) r 3.5 fill #2B3A46. (Eye toward front since beak is on the right side, facing right.)
+
+Beak: facing right.
+- Upper beak: from (438, 108) to tip (560, 138): path M 436 104 Q 500 108 560 136 L 556 146 Q 498 128 440 122 Z, fill #F2994A. More simply: draw upper beak as elongated shape: M 437 102 L 560 132 Q 566 138 558 143 L 441 121 Q 432 112 437 102 Z. Hmm.
+
+Let me define: base of beak at head right side around (440, 115). Tip at (565, 140).
+
+Upper beak shape:
+M 438 104
+L 566 134   (top edge, slightly upward then downward—straight is fine)
+L 566 142   (tip edge)
+L 441 124
+Q 432 114 438 104
+Z
+Fill #F4A03C? Orange. Let me use #F2994A for beak, #E6893B for pouch.
+
+Pouch: big curve from base below to tip:
+M 441 124
+L 566 142    (join along bottom of upper beak? Actually pouch is below upper beak; top edge of pouch = bottom edge of upper beak)
+Then curve down from tip: Q 555 185 505 196 Q 465 200 444 152 Z
+Fill #E6893B or #EF9B4E. Pouch should bulge down. Let me define:
+M 441 124 L 566 142 Q 552 190 498 198 Q 452 198 440 150 Z.
+
+Hmm, pouch shape: starts at lower base (441, 124), follows to tip (566,142), then big curve back to base forming the pouch: C 550 195, 480 205, 444 158 Z. That makes a rounded pouch bulge below the beak.
+
+Head is (424,118) r20, so beak base at x≈440-445 overlaps with head edge (head right edge is 444). Good.
+
+Beak length: 440→566 = 126 px, long. Good, pelican's beak is long. Beak tip (566, 138) is in front of handlebar (bar around (480,270)). No collision.
+
+Wing:
+- Far wing (behind body, on far side): raised, gray. Draw in front of body: path from shoulder (270, 220) up and back: M 275 235 Q 210 180 235 150 Q 260 175 300 210 ... a raised wing like a wave. Let me do: M 280 230 C 225 205, 205 165, 230 135 C 250 160, 285 190, 310 205 Z fill #B9C7D2. It'll peek behind the body.
+- Near wing (on the handlebar): from shoulder (300, 240) extending down forward to the bar (480, 270): path: M 298 232 C 360 225, 430 245, 478 268 C 430 285, 355 285, 305 285 C 290 270, 290 248, 298 232 Z fill #FFFFFF stroke #94A3B2 3. The wing tip at (478, 268) grabs the bar. Could add finger lines at the tip. Let me add 2-3 short lines near the tip.
+
+Hmm wait — if the wing extends to the bar at (480, 270) and the beak tip is at (566, 138), that's fine, no overlap.
+
+Legs:
+- Far leg (to upper pedal (338, 405)): leg path from hip (330, 292) to foot (338, 402). Stroke #F2994A width 8 (with outline? maybe just orange stroke; could use 2-pass trick: width 11 darker #D97E2B then 7 #F2994A). Slightly bent: M 330 292 L 336 350 L 338 402. Far foot: webbed foot on pedal (338, 405), drawn in darker orange (#D9832B) to show far side. Far foot is drawn in front of frame? Order matters.
+
+Layering plan (back-to-front draw order):
+1. Background (sky, sun, clouds, ground, speed lines)
+2. Far wing (behind body)
+3. Far leg + far foot + far pedal? Pedal is part of bike. Bicycle frame/wheels first, then far leg? The far leg should appear to be behind the frame? The far leg is on the far side, so the bicycle frame is in front of it. So order: background → far wing → far leg + far foot → bicycle (wheels, frame, crank, near pedal) → body → near leg + near foot (above pedals? Foot goes on top of pedal, draw foot after pedal) → neck/head/beak → near wing on top.
+
+Hmm but the far foot must be on top of the far pedal. If we draw the far pedal together with the bicycle (in front of the far foot), the foot would be in front of the pedal — that would look like the foot is in front of the pedal, not on top of it. In cartoon side view this is often fudged; acceptable. Actually better: draw far leg+foot after the bicycle but before the near leg. Then the far foot overlaps on top of the far pedal correctly. The far leg would then slightly overlap the frame (chainstay area) — the leg goes from hip (330, 292) down to (338, 402), mostly above the frame's seat tube? The seat tube is (380,435) to (330,295). The leg line at (330,292)→(338,402) passes near the seat tube. Slight overlap is OK, cartoonish. Or make the far leg slightly forward: hip (332, 290) → knee (340, 350) → (345, 402). That'd be fine.
+
+Wait, actually I should double-check the pelican's sitting position: saddle at (325, 268). Pelican body bottom should sit on saddle: body oval center (295, 252) ry 52 → bottom at y=304, at x=295. At x=325 (saddle), bottom of ellipse: dy = 52*sqrt(1-((325-295)/72)^2) = 52*sqrt(1-0.1736)=52*0.909=47.3 → y=252+47.3=299. Saddle top is around y=268. So body bottom (299) is below the saddle top (268) — pelican overlaps the saddle, which is actually correct (sitting on it), but body would cover the whole saddle, and the seat post too. Hmm, pelican body bottom at saddle x is ~299, saddle at 268 — pelican's bottom edge is 30px below the saddle top. That means the saddle is completely inside the body. Slightly too low maybe. Let me raise the pelican: body center at (290, 245)? Bottom at saddle x: same offset. Instead, let me lower the saddle: seat post from (330, 295) to (326, 262), saddle at y=262, then body bottom near saddle is 299... still inside.
+
+Hmm, actually it's fine — pelican's body will hide the saddle since it sits on it. The saddle just peeks at the rear. Honestly it looks good if the saddle peeks a bit. Let me place saddle at (315, 265) or so, and pelican body center at (290, 248) rx 70 ry 50. Body bottom at x=315: dx=25, (25/70)²=0.1276, sqrt(0.872)=0.934, dy=46.7 → bottom 294.7. Saddle top edge ~262. So saddle top 262 is inside body (which extends to 295 at that x). Body covers saddle. Not visible.
+
+Alternative: shift pelican back so it sits with rear on the saddle? Or make pelican smaller relative to bike? Cartoon bikes are often bigger. Let me shrink pelican slightly and place bottom just above saddle.
+
+Let me redo: saddle top at (325, 268). Pelican body: center (295, 235), rx 65, ry 48. Bottom at x=325: dx=30, (30/65)²=0.213, sqrt(0.787)=0.887, dy=42.6 → y=277.6. Slightly below saddle top 268 → pelican sinks ~9px into saddle.
+
+Rear of saddle at x=300 or so: saddle shape 300 to 350. Pelican bottom at x=300: dx=5, ~dy 47.9 → 283. Saddle rear at (300,268): pelican edge at 283 > 268, still covering. Hmm the pelican is sitting with bottom above saddle — in 2D side view, pelican's bottom curve just needs to touch saddle top line. So I want pelican bottom at y≈268 around x 310-335.
+
+Pelican bottom y = cy + ry*sqrt(1-((x-cx)/rx)²). Want ≈268 at x=320. With cx=290: dx=30, rx=65 → 0.887*ry. cy + 0.887ry = 268. If ry=48: cy = 268 - 42.6 = 225.4. Let me set body center (290, 225), rx 68, ry 48. At x=320: dx=30, (30/68)²=0.195, sqrt=0.897, dy=43.1 → bottom 268. 
+
+But then pelican is higher — top of body at 177. Neck goes from body top (around (330, 195)?) up to head. Let me recompute neck: chest point around (335, 190) on body. Body upper-front area: x=335: dx=45, (45/68)²=0.44, sqrt(0.56)=0.748, dy=35.9 → top at y=189. Yes, chest top around (335, 189).
+
+Head target around (420, 110). Neck path from (335, 195) with S-curve to (418, 118).
+
+Neck: M 332 205 C 360 195, 368 165, 390 145 C 402 134, 410 128, 416 120 — using 2-pass stroke trick. Length check: body edge at (332, 205)? At x=332 on body: dx=42, (42/68)²=0.384, sqrt=0.785, dy=37.7 → top y=187. Point (332, 205) is inside body. Good, neck starts from inside body and curves up to head.
+
+Head: circle (423, 112), r 19.
+
+Beak: base at right of head ~(440, 110). Tip at (560, 135).
+
+- Upper beak: M 436 100 L 558 130 Q 566 136 558 141 L 439 118 Q 430 108 436 100 Z — wait, upper beak should be thin: top edge from (437, 101) to (558, 130), bottom edge from tip back to (440, 117). Let me write:
+M 437 101 C 480 108, 530 122, 558 130 L 556 141 C 515 131, 468 124, 440 120 Q 431 111 437 101 Z. Fill #F5A03C... let me pick #F2994A.
+
+- Pouch: M 440 120 L 556 141 C 545 178, 500 194, 462 186 C 448 182, 438 150, 440 120 Z. Fill #E8893A (slightly darker) or lighter? Pouch is often drawn in slightly darker/orangey color. Use #EF9B4E? Let me use #E68A3E.
+
+Hmm actually pouch: after tip (556,141), big curve down and back: C 540 185, 480 198, 452 170 C 442 158, 438 135, 440 120 Z. Let me write a plausible smooth pouch.
+
+- Small nostril line? Skip.
+- Head crest: small tuft on top: path M 415 96 Q 420 84 430 88 Q 424 92 423 97 Z or small circle. Optional.
+
+Eye: (428, 106), r 3.5, dark.
+
+Far wing raised (behind body, in front of background, behind everything else of the pelican): around shoulder (255, 190), pointing up-left. Path: M 270 205 C 215 190, 190 150, 205 112 C 225 140, 260 165, 295 180 Z fill #AEBEC9 no stroke or darker. It'll peek from behind body's upper rear.
+
+Near wing to bar: shoulder (300, 215) to grip (480, 268). Path:
+M 298 205
+C 360 195, 440 225, 483 262    (upper edge going to bar)
+C 487 270, 483 278, 474 280    (rounded tip)
+C 420 292, 345 288, 302 268    (lower edge back to body)
+C 288 250, 288 220, 298 205 Z
+Fill white, stroke #94A3B2 width 3. Add feather lines: 2 curved lines inside wing.
+
+Wing tip (480, 270) should align with handlebar grip (480, 268-272). Set handlebar curve so grip end is at (478, 270).
+
+Handlebar: stem from top of head tube (510, 310) to (505, 283); bar path M 505 283 C 502 272, 492 266, 478 270. Bar stroke #333 width 6, and grip circle at (478, 270) r 4.
+
+Now let me verify head tube and fork: top of head tube at (510, 310); top tube from (330, 300) to (510, 310); down tube from (380, 435) to (512, 312). Fork: from (516, 328) down... wait, head tube is short: from (510,310) to (524, 350) (sloped down and forward). Fork from (524, 350) to front hub (560, 435). Stroke red width 8.
+
+Seat tube: (380, 435) to (330, 295). Top tube from (330, 297) to (510, 309). Seat stay: (240, 435) to (332, 300). Chainstay: (240,435) to (380,435).
+
+Saddle: seat post from (330, 295) up to (327, 266); saddle shape: path M 300 268 Q 326 258 352 267 Q 330 280 300 268 Z fill #2B3A46. Pelican body covers most; rear tip peeks from pelican? Pelican covers x 222-358 in the middle. At y=268, body extends in x from 290±68*sqrt(1-(43/48)²)... (268-225)=43, (43/48)²=0.8, sqrt(0.2)=0.447, half-width=30.4 → at y=268, body is at x 259.6 to 320.4. So saddle front (x=326-352) at y~266-268 is visible in front of pelican! And rear (300-320) is covered. Good — saddle front peeks out.
+
+Hmm wait, that means pelican's bottom edge at y=268 only extends to x=320. Saddle top is around 264-268 in x 326-352, visible. Pelican looks like it's perched on the rear of the saddle.
+
+Legs from body bottom: near leg hip at (310, 265)? At y=265, body: dy=40, (40/48)²=0.694, sqrt(0.306)=0.553, half-width 37.6 → x 252 to 327. So (310, 265) is near lower front edge. Good.
+
+Near leg: M 310 262 L 355 360 L 412 458 — hmm knee. Leg should bend at knee: hip (310, 262), knee around (365, 350), foot (415, 458). Path M 310 262 L 368 350 L 414 456. Two-pass stroke: dark outline 12 then orange 8? Orange legs, with a darker outline #D9832B. Actually let me keep it simpler: single stroke #F2994A width 8, rounded caps. Cartoon can be OK with no leg outline since it contrasts with background (frame behind?). Let me check what's behind near leg path: (310,262) to (368,350): it passes through the frame area — seat tube (380,435)-(330,295): at y=350 seat tube x is 330+ (380-330)*(350-295)/(435-295)= 330+50*55/140=330+19.6=349.6. Leg at y=350 is x=368. So leg is to the right of seat tube — passes above the down tube? Down tube is (380,435) to (510,310): at y=350 x=510-(130/125)*... parametrize: direction from (510,310) to (380,435): dy=125, dx=-130. At y=350: t=(350-310)/125=0.32, x=510-130*0.32=510-41.6=468. So at that height, leg (368) is to the left of the down tube (468). Between the seat tube and down tube — open frame triangle area, background is visible. Orange on light blue sky — fine. Then from knee (368,350) to foot (414,456): passes near crank (380,435): the line from (368,350) to (414,456): at y=435, t=(435-350)/106=0.802, x=368+46*0.802=404.8. Crank at 380 — leg is to right of crank, going to pedal (422,464). Crosses chain? Chain at y~413-457 goes 380→240 on left side. No. OK.
+
+Foot on pedal: pedal rect centered at (422, 466) (w 28, h 7). Foot: webbed foot on top of pedal centered (422, 460): path M 405 458 L 438 458 L 448 466 L 402 466 Z plus toe notches? Webbed foot shape: rounded triangle: M 404 456 Q 422 448 440 456 L 446 464 Q 422 470 398 464 Z — foot slightly bigger than pedal? Pedal is w 28 (408-436). Foot spans 398-446 — 48 wide. Reasonable: foot is a bit bigger. Let me shape the foot as a fan:
+M 408 452
+Q 424 446 440 452
+L 452 464
+L 396 464
+Z
+Plus 2 vertical toe lines from top of webbing. Fill #F2994A no stroke? With slight stroke #D9832B width 2.
+
+Far leg: hip (322, 258) → knee (342, 340) → foot (340, 402). Far foot on top of upper pedal (338, 406): pedal rect centered (338, 405) (w 24, h 6, far is smaller, drawn first? Far pedal is part of bike, drawn with crank). Far foot darker orange #DE8633.
+
+Order: ... bike (including both pedals and cranks) → far leg + foot (darker, in front of bike? Far leg should be behind bike frame). Ugh, order conflicts: far leg behind frame but far foot on top of far pedal. Compromise: draw far leg and far foot, then bike, then near leg/foot. Then far foot gets hidden behind... no — draw far leg+foot after bike and before near leg, then far leg would be in front of frame in the region where they cross. Does far leg cross frame? Far leg path (322,258)→(342,340)→(340,402): at y=295 seat tube x=330, leg x≈ 322+ (342-322)*(295-258)/(340-258)=322+20*0.451=331. Close to seat tube (330). Slight touch. At y=300: seat tube x=333.6; leg x=333.2. Basically coincident — leg rides along seat tube, looks like it's in front of it. Acceptable; actually pelican's legs in front of the frame is more common in cartoons (near leg) — but this is the far leg... viewers won't mind. Or, move far leg slightly left to make it clearly behind: hip (318, 258) → knee (338, 340) → (338, 402). Seat tube vs leg: at y=300, seat tube x=333.6, leg x≈318+20*(42/82)=328.3 — leg is to left of seat tube, and behind (bike drawn after? no, bike drawn before far leg per plan)...
+
+Wait, order decision: draw far leg in front of bike (behind frame). Then far leg hidden in places where it crosses frame — that's actually more correct for a far-side leg (far leg passes behind the frame? actually no — far leg is on far side of bike, so bike frame is between viewer and far leg → far leg hidden by frame where they overlap). Yes! So: draw far leg + foot in front of bike. Then far foot gets covered by near bike parts only where they overlap — far pedal is at (338,405): far foot on top of it at (338, 399): foot drawn before pedal → foot would be behind pedal. Foot should be on top of pedal (foot on pedal). If pedal is a horizontal bar and foot sits on top, then foot bottom ≈ pedal top. Draw foot slightly above pedal top, and overlap is minimal. If pedal is drawn after (on top), then the top edge of pedal covers bottom 1-2px of foot — fine.
+
+So: far leg from hip (318, 256) down to (338, 398), foot on top of pedal 2 at (338, 402) with top y≈398: pedal 2 rect: x 327 to 349 (w 22), y 401 to 408 (h 7, centered 404.5), so pedal top y=401. Foot bottom y≈402 to overlap pedal top by 1px. Good.
+
+Crank to far pedal: (380,435) → (338, 405). And near crank: (380,435) → (422, 464).
+
+Hmm wait, far pedal is upper-rear (338, 405)? That's upper-left of crank. And near pedal is lower-front (422, 464): lower-right. Pedal positions: crank arms are opposite: (338,405) vs (422,464): midpoint = (380, 434.5) ≈ crank center (380,435).
+
+Now near foot on pedal 1 (422, 464): pedal 1: w 30, x 407-437, y 461-468. Foot above: bottom y=462. Foot shape around (422, 455):
+M 404 450 Q 422 442 440 449 L 450 462 L 394 462 Z? Toe webbing pointing forward (right). Let me make it a fan: M 402 461 L 448 461 L 440 452 Q 420 444 406 452 Z. Add toe lines.
+
+OK. Tail feathers: at rear of body (222, 225): 3 pointed feathers going up-left:
+M 232 210 L 180 180 L 226 228 L 178 205 ... let me do: a single path with two spikes: M 238 214 L 186 178 L 224 232 L 184 208 L 236 246 Q 250 240 254 224 Z hmm. Let me simplify: 2 small triangles:
+path1: M 240 212 L 184 176 L 228 236 Z fill #C7D3DB
+path2: M 244 232 L 188 210 L 236 252 Z fill #B9C7D2
+These point to upper-left and left. Body left edge is x=222 (cx290 - rx68). Tail at (222-235, 210-250). Good.
+
+Speed lines behind (motion): 3 rounded lines at (120-160, 300/340/380)? Rear wheel left edge is at 240-85=155. Lines: M 100 330 L 150 330, M 80 370 L 145 370, M 100 410 L 150 410, stroke #B8D8E8 or white, width 6, linecap round. Place in front of bike (behind).
+
+Sun (690, 95) r 42 fill #FFD976, halo circle r 58 fill #FFE9AD opacity 0.5.
+
+Clouds:
+Cloud 1 group (140, 110): ellipses (0,0,40,22), (35,-8,32,20), (70,2,36,18) fill white opacity .9.
+Cloud 2 (430, 75) smaller.
+Cloud 3 (640, 190)? near sun; skip or put at (600, 170).
+
+Grass details: some small blade shapes or dots on ground. Road: maybe a path band: rect 0, 522, 800, 26 fill #7F8A99, with white dashes at y=535: rects w 40 h 5 spaced apart. Hmm but wheels touch ground at 520 — road top should be at 520: rect y=520 h=28 fill #8792A3; grass below 548? Then most of the lower 600-548 is grass. Dashes y=532, white, opacity .8, x 40,140,240,... w 44 h 6 rx 3. Wait, wheels touch at y=520 (520 = 435+85). Tire stroke width 11 → tire extends to 525.5. So road top at 518 so tire bottom sinks slightly into road. Set road rect at y=518.
+
+Hmm, shadow below wheels: ellipse (240, 522) rx 95 ry 10 fill rgba dark opacity .12; same for front. Or one long shadow beneath whole bike: (400, 522) rx 300 ry 12 opacity 0.10.
+
+Ground: grass rect y=518? No — grass fills below the road. Let's do: grass from y=512 to 600 (whole lower part). Road band from 518 to 552. Actually road should visually be at same level: road y 518-552, grass everywhere else (512-600 minus road). Draw grass rect (0,512,800,88) #A5D68F... then road rect (0,518,800,34) #8A94A6. Then road edges: slightly darker line at top of road? Fine.
+
+Hmm wheel bottoms at 520+5.5 (tire stroke half)= 525.5? Circle r=85 stroke-width 11: outer edge = 85+5.5=90.5 → tire outer bottom at 435+90.5=525.5. So wheels sink into road (top 518) 7.5px? Looks like it's rolling — good, contact at ~525 visually. Shadow ellipse at y=527.
+
+Let me re-verify bike geometry consistency:
+- Rear hub (240,435), front hub (560,435). Wheelbase 320. Wheel r85. OK.
+- BB (380,435): 140 in front of rear hub — on the line between hubs (same y) — fine.
+- Seat cluster (330,295): seat tube (380,435)→(330,295). OK.
+- Head tube top (510,310), bottom (524,350). Fork (524,350)→(560,435): angle check: dx=36, dy=85. Fork is steep, reasonable.
+- Top tube (330,297)→(510,310) slight slope. Down tube (380,435)→(510,312). Seat stay (240,435)→(332,300).
+
+Frame red #E14B3B, width 9, round caps. Fork maybe slightly darker red or same. Fork width 7.
+
+Chainring: circle (380,435) r 21 stroke #55606E width 4 fill none; hub cap r 9 fill #55606E. Rear cog: circle (240,435) r 12 stroke #55606E 3.
+Chain: top: M 380 414 L 240 423; bottom: M 380 456 L 240 447. stroke #55606E width 3.5. Hmm, chainring r21: top at y=414, bottom at 456; cog r12: top 423, bottom 447. OK.
+
+Now let me verify pelican parts vs bike:
+- Body (290,225) rx68 ry48: extends x 222-358, y 177-273.
+- Saddle top ~264-270, front part x 326-352: visible in front of pelican? Pelican at y=268: half-width = 68*sqrt(1-(43/48)²)= 68*sqrt(1-0.8007)=68*0.4464=30.4 → x 259.6-320.4. So saddle visible from x 320-352. Pelican sits slightly back on saddle. OK.
+- Near wing extends to (483, 262): crosses above frame's top tube? Wing lower edge at x 400: wing path lower edge is at (483,278) to (302,268) via C 420 292, 345 288 → lower edge dips to about y=288-292 around x 345-420. At x=430, top tube y ≈ 297 + (510-430)/(510-330)*(310-297)= 297 + (80/180)*13 = 302.8. Wing lower edge ~285 → above top tube. Wing doesn't cover frame much. Good.
+- Near wing crosses down tube? Down tube is at (380,435) to (510,310): at x=460 y = 310 + (510-460)/130*125? Parametrize from top (510,310): going down to (380,435): at x=460, t=(510-460)/130=0.385, y=310+0.385*125=358. Wing at x=460: upper edge ~? wing upper edge from (298,205) C(360,195)(440,225)(483,262): at x=460 y≈252; lower edge at x=460 y≈283. So wing is at y 250-283; down tube at x=460 is at y=358. No overlap.
+- Beak tip (558, 135): in front of head tube/fork area (510-560, 310-435) — beak is at y~100-190, way above. No collision.
+- Head (423,112) r19: no conflict.
+- Neck passes through (335,190) to (416,120) area: does it cross top tube (at x 380 y~301)? No, neck is higher. Good.
+
+Far wing raised: from behind shoulder (270, 200) to tip at upper-left (205, 112)? Path M 268 205 C 210 195, 185 152, 202 110 C 222 138, 258 168, 292 182 Z — drawn in front of body. Peeks out on upper-left of body. Cute "wave".
+
+Let me also add small "V" feather lines on near wing:
+M 330 232 C 370 232, 420 248, 458 266 and M 322 252 C 360 254, 410 268, 452 280, stroke #B9C7D2 width 2.5.
+
+Chest feathers? Skip.
+
+Now let me write the neck path properly. Neck as a filled shape (to be able to outline it). Let me design:
+- Front/chest edge: from (318, 240) on body... actually let's start from inside body (315, 235) and go up: C 340 220, 348 190, 368 168 C 382 152, 396 140, 405 124 → end at head lower-front.
+- Head circle covers upper part.
+- Rear edge: from (425, 122) C 416 142, 400 158, 384 176 C 364 200, 350 225, 338 252 → back to body.
+- Close with a line back to start (inside body so hidden).
+Path: M 315 235 C 340 218, 348 190, 368 168 C 383 151, 397 139, 406 122 L 428 128 C 419 146, 404 162, 388 180 C 368 203, 352 226, 340 254 Z. Head circle at (423,112) r19: bottom at (423, 131). Neck top edge ends at (406,122)-(428,128): overlaps with head bottom. Good.
+
+Fill #FFFFFF stroke #94A3B2 width 3.
+
+Body should be drawn after neck? If body is after neck, the body outline would cross neck... usually: draw neck first, then body on top (body outline hides neck base). But body stroke would show a line at the neck-body joint. If I draw neck in front of body, neck's lower part gets hidden by body fill+stroke; joint is clean since the neck base tucks into the top of body. Yes: neck in front of body.
+
+But far wing should be in front of neck (it's on the far side). Order: far wing → far leg/foot (with leg in front of body but behind bike? ugh).
+
+Complete order (back to front):
+1. defs (gradients)
+2. Sky rect
+3. Sun, clouds
+4. Grass, road, dashes, shadow ellipse
+5. Speed lines
+6. Far wing
+7. Far leg + far foot (behind bike)
+8. Bicycle (wheels with spokes, chain, frame, fork, head tube, stem/bar, seat post, saddle, crank, pedals, chainring, cog)
+9. Tail feathers
+10. Neck
+11. Head (circle) + crest
+12. Beak (pouch first? pouch behind upper beak: draw pouch then upper beak)
+13. Eye
+14. Body?? Wait — body is after neck per above, but body before tail? Tail behind body: draw tail in front of body. And near leg + near foot after body, and near wing after body.
+
+Reorder: 6. Far wing → 7. Far leg+foot → 8. Bike → 9. Tail → 10. Neck → 11. Body → 12. Head → 13. Beak → 14. Eye → 15. Near leg+foot → 16. Near wing.
+
+Wait, near leg: from hip on lower body — should appear in front of body? Leg starts from inside body bottom; if I draw leg after body, the top of leg (hip) is visible on top of body — a bit odd but common; better to start hip slightly below body edge so the junction hides? If leg drawn after body, junction shows. To hide, draw leg in front of body? But then bike (in front of body) is behind leg — near leg should be in front of bike (near side). Near leg crosses near pedal area? Near leg goes to near pedal at (422,464) — foot must be on top of pedal, and pedal is drawn with bike. If leg is behind bike: leg is behind frame (wrong for near side) but foot is behind pedal (wrong). Hmm.
+
+Options: draw bike, then leg, then body on top of leg's upper part to hide hip junction. Body is big; hip at (310, 262) is inside body (at x=310, body extends: at y=262 dy=37, (37/48)²=0.5967, sqrt(0.4033)=0.635, half-width=43.2 → x 246.8-333.2; yes 310 is inside). So: bike → near leg+foot → body (covers hip) → tail? Tail is behind body but can be in front of leg. → neck (in front of body? neck should be behind body per earlier: yes, draw neck before body).
+
+Revised order: far wing → far leg/foot → bike → near leg+foot → tail → neck → body → head → beak → eye → near wing.
+
+Wait, near leg before tail/neck/body: body covers leg top. Tail at rear (222-235, 200-250) — doesn't touch near leg. Neck in front of body. OK.
+
+But hmm — near leg drawn in front of body, but body is in front of... yes, body will be drawn after, covers hip.
+
+Also: near wing after body — covers part of body's front. Wing from shoulder (298, 205) to bar (483, 262). Shoulder at (298, 205): inside body? At y=205 on body: dy=20, (20/48)²=0.1736, sqrt=0.909, half-width=61.8 → x 228.2-351.8; yes inside.
+
+Also, is the wing on top of the near leg? Wing lower edge dips at y~288-292 around x 345-420; near leg at x=368 is at y=350. Wing lower edge (288) vs leg (350) — no overlap, wing is above leg. Good, order not critical, but wing last.
+
+Beak: draw pouch then upper beak. And head in front of beak? Beak base overlaps head edge: draw head, then beak on top (beak base covers head right edge). Yes.
+
+Also let me double-check pouch vs wing: pouch is around y 120-195, x 440-556. Wing upper edge at x 440: y≈? Wing upper C from (298,205)(360,195)(440,225)(483,262): at x=440 y≈225. Pouch bottom is ~195. No overlap.
+
+Eye at (428, 106): head circle (423,112) r19 → head spans x 404-442, y 93-131. Eye is inside, near front. Good.
+
+Crest: small: M 414 95 Q 419 84 429 88 Q 423 91 421 97 Z fill #E8E1D8? Or gray. Use #C9B99A? Let me do a small tuft in off-white/gray: fill #D7DEE5? Hmm, pelican crest is often small. Let me keep simple: path M 412 97 Q 417 85 428 89 Q 421 92 419 98 Z fill #C7D3DB. OK.
+
+Far wing color #AEBEC9; near wing white with #94A3B2 outline; body white with #94A3B2 outline.
+
+Wait — near wing white with outline: its lower edge crosses in front of body, and the outline is visible — that's fine (wing on top of body is visible with a line). Good.
+
+Beak color: upper #F2994A, pouch #E8893B? Slightly darker pouch. Or a lighter pouch #F7B267. Pelican pouch is often drawn slightly darker or same. Let me use #E88A3C for pouch, #F49D4C for upper. With a slight stroke #C9702E? Maybe no stroke, or thin. Let me add a thin stroke #D07C2F width 2 on pouch only, none on upper beak... actually let's make upper beak without stroke, and pouch with a thin stroke.
+
+Nictitating membrane line? Skip.
+
+Also let me add a small smile? No.
+
+Wheels: tire: circle r 85, stroke #2B3A46, width 11, fill #F2F7FA (light fill so spokes on light background). Then rim: circle r 73 stroke #7E8B99 width 3 fill none. Spokes: 8 lines from hub to r 73: for rear (240,435):
+- (313,435), (291.6,486.6), (240,508), (188.4,486.6), (167,435), (188.4,383.4), (240,362), (291.6,383.4)
+cos45*73 = 51.63. So: 240±51.6 = 291.6/188.4; 435±51.6 = 486.6/383.4. r at 0°: 240+73=313. Top: 435-73=362. Bottom 508.
+Front (560,435): 633/560/487, ±: 560±51.6=611.6/508.4; 435±51.6 = 486.6/383.4.
+Spokes stroke #8A98A6 width 2.5. Hub circle r 8 fill #37424E.
+
+Rotate spokes to look dynamic? Can rotate spoke group by some angle: transform="rotate(20 240 435)" for fun. Sure, let me rotate front by 35°, rear by 80°, etc. Nice touch.
+
+Chain details fine.
+
+Handlebar: stem from (510,310) to (506,286); bar: M 506 286 C 503 275 493 268 479 271, stroke #333C46 width 6, round caps. Grip: circle (479,271) r 4.5 fill #22282F? Wing covers the grip — draw bar, wing covers. OK.
+
+Also add rear rack with fish? Fun: small fish in rear rack? Might complicate. Let me skip fish; maybe a small "fish" icon in a pouch?? no, keep it clean.
+
+Also let me add subtle cheeks or beak pouch strap? Pelicans are fine.
+
+Title/desc for accessibility: <title>Pelican riding a bicycle</title>.
+
+Sun rays? Just simple circle + halo.
+
+Cloud shape: use path or grouped ellipses. Let me write 2-3 clouds with ellipses in a <g fill="#FFFFFF" opacity="0.85">.
+
+Ground details: small grass tufts: paths like M 60 560 Q 62 548 64 560; a few tufts. Or small circles. Let me add 3 tufts.
+
+Dashed lines: y=534, rects at x = 30, 150, 270, 390, 510, 630, 750, w 48, h 6, rx 3, fill #F5F7FA opacity .9. Road band y 518-552 (#8A94A6). Hmm wait, wheels sink to 525.5; road top at 518. Dash y center 535 (below wheels? wheels at 240 and 560 — dash below would be hidden? Dashes at 150, 270... at 270: wheel spans 155-325 — dash 246-294 partially under rear wheel (rear wheel extends to x 155-325? rear wheel spans x 155-325 yes). Dash at 246-294 is below wheel area (road y 518-552; wheel bottom 525.5) — dash y 534-540 is below tire bottom, visible. OK fine.
+
+Let me reconsider: road color #8792A3 vs sky/ground fine.
+
+Shadow: ellipse (400, 526) rx 310 ry 11 fill #1F2937 opacity 0.10 — covers area under bike; drawn after road, before bike.
+
+Also re-verify front wheel vs fork/handlebar: fork from (524,350) to (560,435) — front wheel r85 at (560,435): fork end at hub. Good.
+
+Head tube (510,310)-(524,350) width 11, red.
+
+Top tube: (330,297) to (510,308). Down tube: (380,435) to (508,312). Hmm, let me set: down tube (380,435) to (509,312).
+
+Frame color: #E14B3B; fork also #E14B3B width 7? Maybe fork slightly darker #C93A2E. Let me keep same red and width 7.
+
+Seat post #37424E width 6 from (330,295) to (327,266). Saddle: path M 299 267 Q 325 257 353 266 Q 340 277 312 275 Q 302 273 299 267 Z fill #2B3A46. Pelican covers rear part.
+
+Now near wing: let me ensure it reads as wing (feather scallops along bottom edge?). Bottom edge can have 2-3 scallop bumps:
+M 298 205
+C 355 193, 438 222, 484 261
+C 489 269, 485 279, 475 281
+C 448 291, 415 289, 390 291
+C 362 292, 330 288, 303 269
+C 287 250, 288 221, 298 205 Z
+Feather lines:
+M 325 235 C 370 236, 425 252, 462 268 (stroke #B9C7D2 w 2.5, fill none)
+M 316 255 C 355 258, 405 272, 448 283 (same)
+
+Also small wing tip fingers: 2 short lines at (470-485, 268-278): M 468 266 L 486 262? Skip, the tip curve is enough. Actually "gripping bar": 3 small bumps at tip? Simple: small dark circle for grip in front of wing? Bar is behind wing. Fine.
+
+Tail:
+M 240 212 L 182 176 L 226 238 Z fill #C7D3DB
+M 246 234 L 186 214 L 238 256 Z fill #B9C7D2
+Plus maybe a 3rd: M 252 252 L 204 248 L 250 268 Z? Keep to 2-3. Draw before body; body rear at x=222. Tail base around (226-246, 210-256) — tucks under body (covered by body's left edge? body at y=225 spans 222-358. Tail triangle from x 182 to 240,250 — part behind body (x>222 covered). Good.
+
+Hmm wait: tail drawn after bike and before body — tail is near (182-250, 176-260). Does tail overlap anything in bike? Top tube is at y~297+ — no. Rear wheel: wheel top at 362. No. Good.
+
+Far leg: stroke: 2-pass: first #C97B2F width 11, then #E88A3C? Actually far leg is darker: single #D9832B width 8? With rounded joints: use polyline path M 316 258 L 338 338 L 337 398. Then far foot: on top of far pedal (338, 401 top): foot: M 322 398 L 354 398 L 360 406 L 316 406 Z? A small webbed fan: M 320 406 L 358 406 L 350 397 Q 338 393 327 397 Z fill #D9832B. Foot bottom at 406 = pedal top area (pedal y 401-408) — foot overlaps pedal top. Far foot drawn before bike (with far leg), so pedal is drawn on top and covers lower part of foot. Slight offset is fine.
+
+Hmm wait — far foot should sit on top of far pedal (338, 405 center). Foot y 393-406, pedal 401-408: foot covers 393-406, pedal top edge 401-406 — foot bottom overlaps pedal top. If pedal drawn after (on top), the top part of pedal (401-408) will be above the foot bottom (393-406) where they overlap → visible as foot on pedal. Foot width 316-360 vs pedal 327-349: foot is wider. Looks like foot on pedal.
+
+Far pedal (338,405): rect x=327, y=401, w=22, h=7, rx=2, fill #333C46.
+Near pedal (422,464): rect x=406, y=460, w=32, h=8, rx=2.5, fill #22282F? Let me do #2B333D.
+
+Near foot on top of near pedal (top y=460): foot: M 400 461 L 446 461 L 436 450 Q 420 443 408 450 Z — webbing pointing forward-down? Actually let me make webbed foot: rounded back heel and pointed front with webbing lines:
+M 402 461 Q 398 452 408 449 Q 422 443 436 450 L 448 461 Z fill #F2994A stroke #D07C2F width 1.5? Then toe lines: M 420 452 L 426 461, M 430 451 L 438 460 stroke #D07C2F width 1.5.
+
+Near leg: 2-pass stroke: pass 1 #D07C2F width 12, pass 2 #F2994A width 8: path M 308 260 L 366 348 L 414 452 (leg to foot). Rounded caps/joins.
+
+Wait, near leg knee: hip (308,260) → knee (366,348) → ankle (414,452). Foot at (422, 455) or so. OK.
+
+Let me check near leg vs seat tube: seat tube at (380,435)-(330,295). Leg segment 1 (308,260)-(366,348): at y=300: x=308+58*(40/88)=308+26.4=334.4; seat tube at y=300: 333.6. Leg ≈ same x — leg passes just to right of seat tube (334 vs 333.6 — essentially on top of it). Since leg is drawn after bike, leg is in front of seat tube — visually leg is right in front of frame tube. A bit coincidental but visually fine (leg in front of frame = near side, correct!). Actually that's good: near leg in front of frame.
+
+Leg segment 2 (366,348)-(414,452): passes near BB (380,435)? At y=435: x=366+48*(87/104)=366+40.1=406 — right of BB, fine.
+
+Crank arm near (380,435)-(422,464) vs leg: leg at y=452 x=414; crank is 435-464. Leg passes just above foot. OK.
+
+Chain: (380,414)-(240,423) and (380,456)-(240,447) — leg is at x≥308, no conflict with chain. Good.
+
+Now let me assemble the SVG. Size: viewBox="0 0 800 600", no fixed width/height or width="800". Add xmlns.
+
+Gradients: sky: linearGradient top #BFE6F2 → bottom #EAF7FB.
+
+Let me also reconsider pouch curve to make it look good:
+Pouch path: M 440 119 L 557 140 C 549 178, 505 199, 466 191 C 448 187, 438 152, 440 119 Z
+Let me check smoothness: from tip (557,140) control (549,178): goes down; end at (466,191). Then C 448 187, 438 152, 440 119: back to base. Pouch depth ~50px below beak line. Beak bottom edge is at base (440,119) to tip (556,141) — pouch bulges to y≈193 at x~500. Nice droopy pouch.
+
+Upper beak: M 436 101 C 482 106, 528 120, 557 129 L 557 141 C 521 131, 470 122, 440 118 Q 431 109, 436 101 Z. Fill #F49D4C. Hmm base: head at (423,112) r19: right edge at y 112 is x=442. Beak base x 436-440 — inside head area, good overlap.
+
+Nostril: tiny line M 462 112 L 476 114 stroke #C9702E width 2? Optional, add.
+
+Pouch stroke: #D07C2F width 2, linejoin round.
+
+Also let me confirm beak tip vs sun (690,95) r42: sun is far away. Fine.
+
+Neck path (filled): M 315 236 C 341 219, 350 191, 369 168 C 384 151, 398 139, 407 121 L 429 128 C 420 147, 405 163, 389 181 C 369 204, 353 227, 341 255 Z.
+Fill white, stroke #94A3B2 width 3. Bottom ends (315,236)/(341,255) inside body (at y 236-255 body: at y=236 dy=11 → half-width ≈ 68*sqrt(1-0.0526)=65.4 → x 224.6-355.4; point (315,236) inside ✓; at y=255 dy=30, (30/48)²=0.39, sqrt(0.61)=0.781, half-width=53.1 → x 236.9-343.1; point (341,255) is inside ✓ (341<343.1)). Good, base hidden by body.
+
+Top of neck near (407,121)-(429,128): head circle (423,112) r19 bottom is (423,131). Neck top edge from (407,121) to (429,128) — head covers (head at x 404-442, y 93-131: covers area near x~418-429? Point (407,121): inside head? Distance from (423,112): sqrt(16²+9²)=18.4 < 19 ✓ inside. Point (429,128): distance sqrt(6²+16²)=17.1 ✓ inside. Great, head covers top of neck.
+
+Head in front of beak: beak base covers right side of head. Order: body → head → beak → eye. Eye at (428, 106): beak upper edge is near x 428 y ≈? Beak top from (436,101) to... at x=436 y=101; eye at (428,106) — head right edge... beak starts at x 431+ so eye at x=428 is left of beak start ✓ visible.
+
+Hmm wait, beak top at base is at (436, 101); beak bottom edge at base Q 431 109 → base is around (432-440, 101-119). Eye at (428,106): just left of beak base ✓.
+
+Crest on top of head: M 413 96 Q 417 85 428 88 Q 422 92 420 98 Z fill #C7D3DB.
+
+Now near wing shape — let me reconsider so it looks like a wing pointing from shoulder to bar. Wing upper edge from (298,205) via C(355,193)(438,222) to (484,261). Then tip curve C(489,269)(485,279)(475,281). Then lower edge back: C(448,291)(415,289)(390,291) C(362,292)(330,288)(303,269) C(287,250)(288,221)(298,205) Z. This gives a wing about 25-35px thick. Slightly tapered. OK.
+
+But wing at x 298-303 near shoulder — inside body (at y 205-269): at y=269 body: dy=44, (44/48)²=0.84, sqrt(0.16)=0.4, half-width=27.2 → x 262.8-317.2. Wing point (303,269): inside (303<317) ✓. At y=288 body: dy=63>48 — below body, wing lower part at y 288-292 is in front of frame/saddle area — fine.
+
+Wing stroke #94A3B2 width 3, fill #FFFFFF.
+
+Also let me reconsider far wing: M 268 206 C 212 196, 186 152, 203 110 C 224 139, 259 170, 293 184 Z, fill #B7C6D1. Peeks from behind body's upper left (body top at x~250-300 is around y 180-200). Body top at x=270: dx=20, (20/68)²=0.0865, sqrt=0.956, dy=45.9 → top y=179. Far wing upper edge from (268,206) going up... its tip at (203,110) is well above body top → visible ✓. At x=270 wing is at y 206 (base) — base is hidden by body (at y=206 inside body: dy=19, (19/48)²=0.157, half-width 62.3 → x 227.7-352.3 ✓). Good.
+
+Speed lines:
+M 96 320 L 152 320; M 76 368 L 150 368; M 96 416 L 148 416. Rear wheel left edge at 155. Stroke #CFE8F0? Let me do white opacity .8 width 7 round caps. On grass/sky background... y 320-416 is above ground 512 → sky background. White lines on light blue sky, subtle ✓.
+
+Clouds:
+g1 translate(120,95): ellipse 0 0 42 22; 34 -10 34 20; 66 0 38 18; -28 4 30 16.
+g2 translate(415,70) scale .8: same shape.
+g3 translate(628,175) scale .6.
+Fill #FFFFFF opacity 0.85. But sun at (690,95): cloud 3 at (628,175) OK.
+
+Grass tufts:
+M 90 585 Q 93 570 96 585 M 100 585 Q 104 566 108 585 — stroke #7FB776? Let me do a few:
+path d="M 84 588 Q 88 566 92 588 Z" etc. Simpler: 3 small "V" tufts in darker green stroke:
+d="M 70 588 Q 74 570 78 588" stroke #7CBA72 width 4 fill none linecap round — a few at (70), (150), (660), (730) on grass (road is at 518-552, so tufts below at y 570+ or above 518). Let me place tufts at y 575-590 area and near top 500-516 (grass band above road: 512-518 thin—no). Let me place tufts in the lower grass: (80, 592), (160, 578), (650, 585), (730, 572).
+
+Dashes on road y=530 h 6: rects at x 20, 130, 240, 350, 460, 570, 680 w 46 fill #F2F5F8 opacity .85 rx 3.
+
+Road: rect (0,518,800,36) #8A94A6. Also add slightly darker line on road top? Skip.
+
+Ground grass: rect (0,512,800,88) #A2D493? And a slightly darker strip at top (horizon): rect (0,512,800,8) #8FC281? Optional.
+
+Shadow ellipse (395, 527) rx 300 ry 11 #1F2937 opacity .10.
+
+Also shadow under pelican? It's part of bike; covered.
+
+Let me verify front wheel right edge: 560+90.5=650.5 < 800 ✓. Sun (690,95) r 42: 648-732, above, fine. Cloud near (628,175) — near beak tip (557,135)? Cloud 3 center (628,175) with small scale — beak tip 557 — cloud spans about 600-660... doesn't overlap. OK.
+
+Beak tip (557,135) — check overlap with cloud 2 (415,70) scale .8: spans x ~ 415±(70*.8)=359-471, y 70±20 → none.
+
+Head top y=93 — fine.
+
+Now let me also double-check that pelican's body doesn't awkwardly cover the seat cluster: body's lower front (358? at y 250 body right edge: dy=25, (25/48)²=0.271, sqrt(0.729)=0.854, half-width 58.1 → x up to 348.1 at y=250; at y=260: dy=35, .531, sqrt(.469)=.685, hw=46.6 → x up to 336.6). Seat cluster at (330,295): body at y=273 (bottom) only at x=290. Body bottom near (330): dy= sqrt(1-((330-290)/68)²)=sqrt(1-0.346)=0.809*48=38.8 → y=263.8. So body at x=330 reaches down to y≈264 — above seat cluster 295 ✓ doesn't cover. Saddle (299-353, 257-277): overlaps with body? Body at x=330 y≥? body edge y=263.8; saddle top at x 330 is ~258-265: part of saddle might be inside body bottom area... Body at x=330 exists at y 178 (top: cy - 38.8=186.2)... wait body at x=330: (330-290)/68=0.588, (0.588)²=0.346, sqrt(1-0.346)=0.809, dy=38.8 → body spans y 186.2-263.8 at x=330. Saddle at x=330: y 258-277 area (Q curve). So saddle region at x=330 y 258-263.8 overlaps with body (body extends to 263.8). So saddle slightly sinks into body rear — as intended (pelican sits on saddle). Saddle front (x 340-353): body at x=345: dx=55, (55/68)²=0.655, sqrt=0.587, dy=28.2 → body y 196.8-253.2. Saddle at x=345: y~262-268 → below body bottom (253.2) ✓ visible. Good: saddle front peeks from pelican.
+
+Also near wing covers part of saddle? Wing lower edge at x 303-390 is y~269-291 — wing covers part of saddle front (353?)? At x=353 wing: lower edge y≈289-291, upper edge ~? Upper at x=353 ≈ 197-205. Wing fills in between at y 197-290 at x=353. Saddle at x 353 y 262-266 → inside wing area → covered by wing. Hmm! Saddle front is hidden by wing. That's OK actually — wing sweeps over; saddle peeks where? At x 326-352, wing lower edge is 288-292 (below saddle 266) and upper edge is 195-210 (above saddle) → wing covers whole saddle region at those x! So saddle invisible... Wing is drawn last and covers. Hmm — visually: white wing sweeping from body to handlebar — that's fine even if it hides saddle (pelican on seat, wing on top of seat area). But wait, does wing also cover part of pelican body? Wing at x 298-358 (body range at that y...) wing y range 205-292; body at x=300-358 y 177-273 — wing covers lower-right of body. That's intended (wing on top of body).
+
+But hmm, wing lower edge at y~290 at x 345 — that's above top tube (y~302) — so wing floats just above frame — fine.
+
+Is it weird that the wing completely covers where pelican sits? Pelican's lower body + wing reads as "pelican with wing sweeping to bar" — standard cartoon. OK.
+
+Alternatively, raise wing a bit: lower edge to ~280. Meh, let me keep.
+
+Now let me confirm beak vs near wing top edge: wing upper at x 440 y≈222; pouch bottom ~191 at x 500... pouch at x 480: bottom edge y≈? Pouch bottom from (557,140) C(549,178)(505,199)(466,191): at x~500 y≈195. Wing at x=500: upper edge y≈? Upper curve (298,205)C(355,193)(438,222)(484,261): at x=500 outside range (ends at 484). So wing ends at 484; pouch at x 484: y≈196. Wing top near tip (484,261) — 65px below pouch (196). No overlap ✓.
+
+Neck right edge vs pouch left edge: neck rear edge max x ~429 (at top); pouch starts at x≥438 ✓.
+
+Beak vs handlebar/stem: bar at (479-506, 268-286); beak at y 101-141 ✓.
+
+I think geometry works. Let me also check that far wing tip (203,110) and cloud 1 (120,95): cloud 1 spans x ~ 120±(66+?) ellipses: -28..66 → 92-186, y 70-120. Far wing tip 203,110 — near cloud 1 edge (186). Slight proximity, OK, not overlap.
+
+Sun at (690,95): beak tip (557,135) far away. ✓
+
+Now let me write out all the coordinates cleanly.
+
+Defs:
+- linearGradient id="sky" x1=0 y1=0 x2=0 y2=1: stops #BEE7F4 → #EDF8FC.
+- Maybe no other gradient needed.
+
+Structure:
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-labelledby="title">
+<title id="title">A pelican riding a bicycle</title>
+<defs>...</defs>
+
+<!-- Sky -->
+<rect width="800" height="600" fill="url(#sky)"/>
+<!-- Sun -->
+<circle cx="690" cy="95" r="58" fill="#FFE9A8" opacity="0.55"/>
+<circle cx="690" cy="95" r="40" fill="#FFD867"/>
+<!-- Clouds -->
+<g fill="#FFFFFF" opacity="0.9">
+  <g transform="translate(120,95)">
+    <ellipse cx="0" cy="0" rx="42" ry="22"/>
+    <ellipse cx="36" cy="-10" rx="34" ry="20"/>
+    <ellipse cx="68" cy="2" rx="38" ry="18"/>
+    <ellipse cx="-30" cy="6" rx="30" ry="15"/>
+  </g>
+  <g transform="translate(418,66) scale(0.8)">... same ellipses ...</g>
+  <g transform="translate(636,178) scale(0.55)">...</g>
+</g>
+
+<!-- Ground -->
+<rect x="0" y="512" width="800" height="88" fill="#A3D394"/>
+<rect x="0" y="518" width="800" height="36" fill="#8A94A6"/>
+<g fill="#F2F5F8" opacity="0.9">
+  <rect x="18" y="530" width="46" height="6" rx="3"/>
+  ... x=128, 238, 348, 458, 568, 678 ...
+</g>
+Grass tufts
+<ellipse cx="398" cy="528" rx="300" ry="11" fill="#1F2937" opacity="0.10"/>
+
+Wait — road rect covers 518-554 and grass below 554; shadow at 528 on road ✓.
+
+Tufts (after shadow):
+<g stroke="#7CBA72" stroke-width="4" fill="none" stroke-linecap="round">
+ <path d="M 84 596 Q 88 574 92 596"/>
+ <path d="M 96 596 Q 100 578 104 596"/>
+ <path d="M 664 588 Q 668 566 672 588"/>
+ <path d="M 676 588 Q 680 570 684 588"/>
+ <path d="M 150 576 Q 154 556 158 576"/>? y 556 is below road (554) barely... place at (150, 578): Q ... 558. OK.
+</g>
+
+<!-- Speed lines -->
+<g stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity="0.8">
+ <path d="M 92 322 H 152"/>
+ <path d="M 74 368 H 150"/>
+ <path d="M 94 414 H 148"/>
+</g>
+
+Hmm these are in front of pelican's far wing etc. Fine.
+
+<!-- Far wing -->
+<path d="M 268 206 C 212 196 186 152 203 110 C 224 139 259 170 293 184 Z" fill="#B7C6D1"/>
+
+<!-- Far leg + foot -->
+<path d="M 316 258 L 338 338 L 337 398" fill="none" stroke="#D9832B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 320 406 L 358 406 L 350 397 Q 338 392 328 397 Z" fill="#D9832B"/>
+Wait, far foot: pedal top at y=401; foot should sit on top: foot shape y 392-406: bottom at 406 overlaps pedal (401-408) — but pedal is drawn after → pedal covers foot bottom 401-406 → foot visually on top of pedal ✓. Foot: M 318 405 L 356 405 L 348 395 Q 337 390 327 395 Z.
+
+<!-- Bicycle -->
+Rear wheel:
+<g>
+ <circle cx="240" cy="435" r="85" fill="#EAF3F8" stroke="#2B3A46" stroke-width="11"/>
+ <circle cx="240" cy="435" r="73" fill="none" stroke="#7E8B99" stroke-width="3"/>
+ <g stroke="#8A98A6" stroke-width="2.5" transform="rotate(22 240 435)">
+   <line x1="240" y1="435" x2="313" y2="435"/>
+   <line x1="240" y1="435" x2="291.6" y2="486.6"/>
+   <line x1="240" y1="435" x2="240" y2="508"/>
+   <line x1="240" y1="435" x2="188.4" y2="486.6"/>
+   <line x1="240" y1="435" x2="167" y2="435"/>
+   <line x1="240" y1="435" x2="188.4" y2="383.4"/>
+   <line x1="240" y1="435" x2="240" y2="362"/>
+   <line x1="240" y1="435" x2="291.6" y2="383.4"/>
+ </g>
+ <circle cx="240" cy="435" r="8" fill="#37424E"/>
+</g>
+Front wheel same at 560 (rotate 58):
+lines x2: 633, 611.6, 560, 508.4, 487, 508.4, 560, 611.6 with y2 435,486.6,508,486.6,435,383.4,362,383.4.
+
+Chain (before frame? chain behind frame tubes is fine):
+<circle cx="240" cy="435" r="12" fill="none" stroke="#55606E" stroke-width="3"/>
+<circle cx="380" cy="435" r="21" fill="none" stroke="#55606E" stroke-width="4"/>
+<path d="M 380 414 L 240 423 M 380 456 L 240 447" stroke="#55606E" stroke-width="3.5" fill="none"/>
+
+Frame:
+<g stroke="#E14B3B" stroke-width="9" stroke-linecap="round" fill="none">
+ <path d="M 240 435 L 380 435"/>   chainstay
+ <path d="M 380 435 L 330 295"/>   seat tube
+ <path d="M 240 435 L 332 300"/>   seat stay
+ <path d="M 380 435 L 509 312"/>   down tube
+ <path d="M 330 297 L 510 309"/>   top tube
+ <path d="M 510 310 L 524 350"/>   head tube
+ <path d="M 524 350 L 560 435" stroke-width="7"/>  fork
+</g>
+Stem:
+<path d="M 510 310 L 506 285" stroke="#333C46" stroke-width="7" stroke-linecap="round"/>
+Handlebar:
+<path d="M 506 285 C 503 274 492 267 478 271" stroke="#333C46" stroke-width="6" fill="none" stroke-linecap="round"/>
+Grip circle (478,271) r 4 fill #22282F (wing will cover—draw anyway)
+Seat post: <path d="M 330 295 L 327 265" stroke="#37424E" stroke-width="6" stroke-linecap="round"/>
+Saddle: <path d="M 299 267 Q 326 257 353 266 Q 341 278 312 276 Q 302 273 299 267 Z" fill="#2B3A46"/>
+
+Crank arms + pedals:
+<path d="M 380 435 L 338 405" stroke="#333C46" stroke-width="6" stroke-linecap="round"/>  far
+<rect x="327" y="401" width="22" height="7" rx="2" fill="#333C46"/> far pedal
+<path d="M 380 435 L 422 464" stroke="#22282F" stroke-width="7" stroke-linecap="round"/> near
+<rect x="406" y="460" width="32" height="8" rx="2.5" fill="#22282F"/> near pedal
+BB cap: <circle cx="380" cy="435" r="8" fill="#333C46"/>
+
+Wait — far pedal (327-349, 401-408) drawn here (with bike) will cover far foot bottom (318-358, 390-405) where overlap y 401-405 — foot bottom line 405 vs pedal top 401: pedal rect top 401 → covers foot area 401-405. Foot visible at 390-401 + sides. Looks like foot on top of pedal ✓.
+
+Hmm, but far foot was drawn earlier (in front of bike) — pedal on top of foot bottom — good.
+
+<!-- Pelican body group -->
+Tail:
+<path d="M 242 210 L 184 176 L 228 238 Z" fill="#C7D3DB"/>
+<path d="M 248 232 L 190 214 L 240 256 Z" fill="#B7C6D1"/>
+<path d="M 252 252 L 206 250 L 250 268 Z" fill="#C7D3DB"/>  — hmm 3rd tail lower. Actually body bottom at x=252: dy = sqrt(1-(38/68)²)*48 = sqrt(1-0.313)*48 = 0.829*48=39.8 → y 185-265. So (252,252) is inside body ✓, tail tip (206,250) visible ✓.
+
+Neck:
+<path d="M 315 236 C 341 219 350 191 369 168 C 384 151 398 139 407 121 L 429 128 C 420 147 405 163 389 181 C 369 204 353 227 341 255 Z" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+
+Body:
+<ellipse cx="290" cy="225" rx="68" ry="48" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3" transform="rotate(-6 290 225)"/>
+Rotation? Adds a tilt; then my "inside" calc is slightly off but fine (small angle). Hmm rotation might misalign the saddle contact by a few px — acceptable. Let me skip rotation to keep contact calc valid. Keep plain.
+
+Head:
+<circle cx="423" cy="112" r="19" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+Crest: <path d="M 412 97 Q 416 85 428 88 Q 421 92 419 98 Z" fill="#C7D3DB"/>
+
+Pouch:
+<path d="M 440 119 L 557 140 C 549 178 505 199 466 191 C 448 187 438 152 440 119 Z" fill="#E88A3C" stroke="#D07C2F" stroke-width="2"/>
+
+Upper beak:
+<path d="M 436 101 C 482 106 528 120 557 129 L 557 141 C 521 131 470 122 440 118 Q 430 109 436 101 Z" fill="#F49D4C"/>
+Nostril: <path d="M 460 112 L 476 115" stroke="#D07C2F" stroke-width="2" stroke-linecap="round"/>
+
+Eye: <circle cx="428" cy="105" r="3.6" fill="#22303C"/> + small white glint? skip.
+
+Hmm, head top at 93, eye at 105, crest at 85-98 — crest overlaps eye? Crest is x 412-428, eye at 428,105 — crest bottom at ~98, above eye ✓.
+
+Near leg + foot:
+<path d="M 308 260 L 366 348 L 414 452" fill="none" stroke="#D07C2F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 308 260 L 366 348 L 414 452" fill="none" stroke="#F2994A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+Foot:
+<path d="M 400 461 L 448 461 L 437 449 Q 421 442 407 449 Z" fill="#F2994A" stroke="#D07C2F" stroke-width="2" stroke-linejoin="round"/>
+Toes: <path d="M 419 451 L 425 461 M 431 451 L 439 460" stroke="#D07C2F" stroke-width="2" stroke-linecap="round"/>
+
+Wait, foot heel (400,461): pedal spans x 406-438; foot spans 400-448 — 6px and 10px overhang on each side. Fine.
+
+But foot bottom at y=461 vs pedal top 460: foot overlaps pedal top by 1px... foot path bottom edge y=461 = pedal top (460) +1 → foot is right on top of pedal, drawn after pedal ✓ (near leg/foot is drawn after bike). ✓
+
+Near wing (last):
+<path d="M 298 205 C 355 193 438 222 484 261 C 489 269 485 279 475 281 C 448 291 415 289 390 291 C 362 292 330 288 303 269 C 287 250 288 221 298 205 Z" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+Feather lines:
+<path d="M 326 234 C 372 235 428 251 464 268" stroke="#B9C7D2" stroke-width="2.5" fill="none"/>
+<path d="M 318 254 C 358 257 410 272 452 284" stroke="#B9C7D2" stroke-width="2.5" fill="none"/>
+
+Wing tip at (484,261)/(475,281): bar grip at (478,271) — wing covers grip ✓ looks like it's gripping.
+
+Hmm — wing tip at (484,261) is slightly right of grip end (478,271); bar curve: M 506 285 C 503 274 492 267 478 271 — bar sweeps from (506,285) to (478,271). Wing tip circle-ish covers (475-484, 261-281) → covers bar end ✓.
+
+One more check: near wing top edge at x=484 is y=261; pouch at x=484: pouch bottom edge ~y 190; no collision ✓.
+
+Also neck rear edge vs near wing: wing upper at x 369 is y≈? (298,205) via C to (484,261): at x=369 y≈201-205. Neck at x=369: (369,168) is on neck path... neck front edge (369,168): above wing (201). Neck continues to (389,181), (341,255): neck lower part at x 341-389 y 181-255 — wing at x 341-389: upper y~200-215, so wing covers neck lower part?? Wing drawn last → covers part of neck (341-389, 205-255 area) with wing body. Hmm — that means wing crosses in front of neck base. Is that visually OK? Pelican's near wing sweeping from shoulder forward — crossing in front of neck base would hide where neck meets body. Neck is at chest, and wing at shoulder is behind chest... Actually, drawing wing after neck would put wing in front of neck where they overlap. Overlap region: wing spans x 298-484, y ~193-292; neck spans roughly x 315-429, y 121-255. Overlap: x 315-429 ∩ wing y range... At x=360 wing is at y ~197 (upper) to ~290 (lower); neck at x=360: between front edge ~y 172 and rear edge ~y 210? Neck path at x 360: front edge passes (369,168)→(389,181)→(341,255)... neck at x 355: front edge y≈185, rear edge y≈230. So neck at x=355 is at y 185-230. Wing at x=355: y 197-290. Overlap y 197-230 → wing covers part of lower neck.
+
+Is that bad? It would look like wing on top of chest/neck — plausible (wing in front of chest). Hmm, but the neck might look chopped. To be safe, draw near wing in front of neck? Then wing base (at shoulder) is on top of body, and neck on top of wing. But then wing (drawn in front of neck) is behind neck — near wing behind neck is slightly wrong but barely noticeable; the wing→bar section doesn't intersect neck. Neck area x 315-429, y 121-255; wing upper edge from (298,205) C(355,193)... at x=380 wing upper y≈205; neck at x=380 is at y ~165-215 (front edge ~172? rear ~205). Overlap small. Drawing wing in front of neck: neck covers part of wing's inner edge — visually: neck rising in front of wing — also plausible.
+
+Actually, most readable: wing goes from shoulder forward along the top-front of the body, and neck rises up from chest above the wing. If I draw wing after body but before neck: neck (white) on top of wing (white) — outline of neck separates. Wing outline stroke would cross behind neck. Hmm, in front-of-body: body → wing → neck → head... but then neck outline cuts across wing — visible line. Either choice has an outline crossing.
+
+Or shorten the wing so it doesn't reach behind the neck: make wing start from body's lower front, sweep down along the front of body (lower edge near body edge) to the bar — the wing runs along the chest, not crossing neck. Wing upper edge from (305, 235) C(380, 225) (450, 245) (484, 261): at x 341-389 wing upper y≈228-245; neck lower part at x 355 is y 185-230 → wing upper (228) is just below neck lower (230) at x=355... close. At x=380: wing upper ≈ 238; neck at x=380: y 168-212 → no overlap (238 > 212) ✓. At x=355: neck bottom 230, wing top 228 → tiny 2px overlap. Acceptable.
+
+Let me reshape near wing lower:
+M 302 228
+C 365 214, 445 238, 484 261
+C 489 269, 485 279, 475 281
+C 445 291, 405 290, 372 288
+C 340 286, 310 276, 302 228? — closing curve back to start. Hmm, the C 340 286 310 276 302 228 — from (372,288) to (302,228) via controls (340,286),(310,276): smooth. Then Z.
+Let me write: d="M 302 228 C 365 214 445 238 484 261 C 489 269 485 279 475 281 C 445 291 405 290 372 288 C 338 286 300 262 302 228 Z"
+
+Check wing thickness at x=360: upper ~219, lower ~287 → 68px thick — too thick? A wing is thick, but 68px is a lot relative to body ry48. Hmm. Let me bring lower edge up: lower edge back from tip (475,281): C 440 285 400 282 368 276 C 336 270 300 258 302 228 Z. Then at x=360: lower ~277, upper ~219 → 58. Still thick. Let me compress upper edge lower: upper M 302 232 C 360 220 440 240 484 261 → at x 360 upper ≈ 224; lower at x 360 ≈ 275 → 51px. Meh.
+
+Alternatively make wing sleeker with lower edge closer to upper: lower: C 445 278 405 272 370 266 C 338 260 302 252 302 232 Z. At x=360: upper 222, lower ~268 → 46px. Tapered to shoulder. Good enough — wing is broad near shoulder, thinner... actually real pelican wings are broad. Let me accept ~40-50px.
+
+Final wing: d="M 302 232 C 360 220 440 240 484 261 C 489 269 485 279 475 281 C 445 280 405 274 370 267 C 338 260 302 254 302 232 Z"
+At x=302: (302,254) to (302,232) = 22px — tapers at shoulder ✓.
+
+Feather lines:
+M 330 244 C 380 246 435 258 468 268
+M 322 258 C 365 260 415 270 455 279
+Hmm at x=330 wing: upper ~227, lower ~252 → line at 244 is inside ✓; at x=322: wing y ~229-251; line 2 at x=322 y=258 — below lower edge (251)? Just below — adjust: M 326 256 C 368 258 418 268 456 278. At x=326 lower edge ≈ 253... y 256 just below. Hmm — let me make feather line 2: M 332 256 C 372 258 420 268 458 277. At x=332: wing lower ~254? Upper 226... 256 slightly below lower edge (~253). These small imperfections are visually acceptable since the lines are inside the wing mostly; even 2px offset not noticeable. Let me eyeball to keep both lines clearly inside: line 1 M 335 240 C 385 243 438 256 470 267; line 2 M 340 254 C 385 257 430 266 462 276. At x=340: wing 225-256: 254 inside ✓. At x=470: wing ~261-280: 267 inside ✓. At x=462: wing 259-280: 276 inside ✓.
+
+Wing vs saddle (299-353, 257-277): wing lower at x 310-353: ~255-258... wing is now y 232-256 or so at x 302-353 → wing lower edge ~255-262 vs saddle 257-277: wing slightly overlaps saddle top → saddle mostly still visible (its bottom 268-277) ✓. Pelican body at x 330-353 y to 264 — wing lower ~258-262 is inside body area — wing is on top of body edge... at x=353 body: dy = sqrt(1-(63/68)²)=sqrt(1-0.858)=0.377*48=18.1 → body y 207-243. Wing at x=353: 232-256 or so → wing upper 232 overlaps body (up to 243): wing in front of body edge ✓ good (wing on top of body). At x=302: body at x=302: dx=12, .031, sqrt .984*48=47.2 → y 178-272; wing 232-254 inside body ✓.
+
+Neck vs wing: neck lower part at x 341-389 y ~181-255; wing upper at x 341-389 ≈ 224-236. Neck lower (255 at x 341) > wing upper (224) → neck's lower part extends below wing upper → wing (drawn after? or before?) — draw wing before neck (so neck on top of wing base). Then neck's white covers wing's upper line in x 341-389 area — wing's outline stroke would be hidden behind neck... then wing's upper edge disappears behind neck — that reads as wing behind neck ✓ good, and neck is fully visible.
+
+Order: ...body → near wing → neck → head → beak → eye → near leg+foot?
+
+Wait, near leg: I decided earlier to draw near leg in front of body (so body covers hip junction). But wing also in front of body. Relative: leg vs wing? Leg is at x 308-414, y 260-452; wing lower part at x 308-370 y~254-267. Leg upper (308,260)-(366,348): at x=366 leg y=348; wing at x 366 y up to 268 or so → no overlap (leg is well below wing) ✓. At x=308: leg y=260; wing at x=308: y 232-256 → leg top just below wing bottom ✓ no overlap.
+
+So safe order: body → near wing → neck → head → crest → pouch → beak → nostril → eye; and near leg+foot can be either in front of body or after — in front of body (for hip hide) is safer. But wait: near leg in front of body, then body, then wing, then neck — leg is at x 308-414; wing at x 302-484 y 220-281; leg top y≥260 at x≤366 — wing bottom at x 308-366 ≈ 256-268 → leg (308,260) is below wing bottom (256) at x=308? Leg point (308,260): wing at x=308 spans y 232-254 (from lower edge (302,254)) → 260 > 254, below wing ✓ no overlap. Leg segment to (366,348): at x=366 y=348 well below wing. ✓. So no wing/leg collision.
+
+Final draw order:
+1. Background elements
+2. Far wing
+3. Far leg + foot
+4. Bike (rear wheel, front wheel, chain+cog+ring, frame, fork, stem, bar, grip, seat post, saddle, crank, pedals, BB)
+5. Tail feathers
+6. Near leg + foot
+7. Body
+8. Near wing + feather lines
+9. Neck
+10. Head
+11. Crest
+12. Pouch, upper beak, nostril
+13. Eye
+
+Wait: neck after wing ✓; but near leg (6) in front of body (7) ✓ hip hidden. But near leg (6) vs tail (5)? Tail is at x 184-252, leg at x≥308 ✓.
+
+Hmm — one thing: tail drawn (5) in front of near leg (6) — no overlap, either order fine.
+
+Also far wing (2) vs speed lines (background) fine.
+
+Also: neck (9) vs bike frame? Neck at x 315-429, y 121-255. Top tube at y ~297-310 ✓ none. Saddle (257-277) vs neck lower (341,255)? Neck end at (341,255) — saddle at x 341 y ~262-268 → neck lower tip 255 is just above saddle ✓ no overlap.
+
+All good. Let me also check if pouch bottom (max ~199 at x 466-505) doesn't hit top of front wheel (350)? None.
+
+Let me write out the front wheel spokes with rotate(58 560 435).
+
+Also double check spoke endpoints for front wheel: center (560,435):
+- (633, 435)
+- (611.6, 486.6)
+- (560, 508)
+- (508.4, 486.6)
+- (487, 435)
+- (508.4, 383.4)
+- (560, 362)
+- (611.6, 383.4)
+
+Rear: center (240,435):
+- (313,435), (291.6,486.6), (240,508), (188.4,486.6), (167,435), (188.4,383.4), (240,362), (291.6,383.4)
+
+Wheel fill #EAF3F8 (light) — but spokes on light fill, then tire ring. Actually the fill of the tire circle covers the inside; spokes drawn after will appear on top of the fill ✓. Rim circle after spokes ✓. Order inside wheel group: filled circle (tire), spokes, rim, hub.
+
+Hmm wait: rim (r73, stroke 3) after spokes will overlap with spoke ends ✓.
+
+Ground: also add a lighter horizon strip? Let's keep as is.
+
+Also double-check the near wing tip curve: C 489 269 485 279 475 281 — tip rounded ✓.
+
+I think the design is solid. Let me write the final SVG code. Keep it tidy with comments.
+
+One more consideration: pouch path start M 440 119 L 557 140 — that straight line is shared with beak bottom edge (beak bottom is from (557,141) via C 521 131 470 122 440 118 back) — pouch top edge is straight L but beak bottom is curved → small gap? Beak bottom edge: (557,141) C 521 131, 470 122, (440,118): at midpoint x~498: curve y ≈ 127 or so. Pouch top straight line from (440,119) to (557,140): at x=498: y = 119 + (58/117)*21 = 119+10.4=129.4. Beak bottom at x=498: bezier at C(521,131)(470,122): at t=0.5: point = 0.125*P0+0.375*P1+0.375*P2+0.125*P3, P0=(557,141) P1=(521,131) P2=(470,122) P3=(440,118): y = 0.125*141+0.375*131+0.375*122+0.125*118 = 17.6+49.1+45.8+14.75=127.25; x = 0.125*557+0.375*521+0.375*470+0.125*440 = 69.6+195.4+176.25+55 = 496.25. So beak bottom at (496,127); pouch top at x=496: 119+ (56/117)*21=119+10.1=129.1. Beak bottom (127) is slightly above pouch top (129) → 2px gap → sliver of sky peeking through. To be safe, let me make pouch top a slightly lower straight line: M 440 121 L 558 142 — at x=496: 121+(56/118)*21=131 → below beak bottom 127 ✓ overlap. And beak drawn after pouch ✓ covers. Let me set pouch: M 440 121 L 558 142 C 550 178 506 199 466 191 C 448 186 438 152 440 121 Z.
+
+Similarly beak covers pouch top ✓.
+
+Also head (r19 at (423,112)) is in front of beak: beak base Q 430 109 — head covers x≤442; beak base is at 430-440 ✓ tucks under head? beak drawn after head → beak base covers head edge. Beak base left edge at x~431-436: overlaps with head (up to x 442) ✓ no gap: beak at (436,101)...(430,109) curve... head edge at y 105: x = 423+sqrt(19²-7²)=423+17.6=440.6. Beak covers 430-440 at y 105? Beak at y=105: top edge from (436,101) C(482,106)... at y=105 x is ~445 or so. Hmm beak top edge is at y 101-106 from x 436 to 482 — at y=105: x≈450+. So beak top edge at (450,105) but head edge at (440,105) → gap between head edge (440) and beak top (450) at y=105? Beak shape: top edge from (436,101) to (557,129): at y=105: x ≈ 436 + (557-436)*(4/28)*ish ≈ 436+17=453? Beak fill between top and bottom edges: at y=105, beak spans from top edge x (~445?) to... hmm beak is a sliver; at y=105 its cross-section: top edge at y=105 → x_top = ?; bottom edge at y=105: bottom is from (440,118) going up? Beak bottom edge: (557,141) C(521,131)(470,122)(440,118) Q(430,109)(436,101) — the Q at base! I had "Q 430 109 436 101" as the left end of upper beak — that's the base curve. So beak shape: M 436 101 C 482 106 528 120 557 129 L 557 141 C 521 131 470 122 440 118 Q 430 109 436 101 Z. At y=105: top edge: t: y=101+... top C from (436,101) with controls (482,106),(528,120) to (557,129): at t=0.06: y ≈ 101+ 3*0.06*(5)? Roughly x≈436+0.06*~50=439, y≈101+2=103; at t=0.12: x≈442, y≈105.5. So top edge passes (442,105). Base Q: (440,118) via Q(430,109) to (436,101): point at y=105: t: y(t)=118+2t(109-118)... y(t) = (1-t)²*118+2t(1-t)*109+t²*101: at t=0.5: 0.25*118+0.5*109+0.25*101 = 29.5+54.5+25.25=109.25; at t=0.7: 0.09*118+0.42*109+0.49*101=10.6+45.8+49.5=105.9; x(t)=0.09*440+0.42*430+0.49*436=39.6+180.6+213.6... wait 0.49*436=213.6, 0.42*430=180.6, 0.09*440=39.6 → 433.8. So base edge at (433.8,105.9). So at y≈105 beak is at x 434-442 → overlaps with head (edge 440.6) by ~7px? 434-442 vs head x ≤ 440.6: yes 434-440.6 is inside head ✓ overlap ✓ no gap.
+
+Pouch at y 119-121: x 438-440 → head at y=120: x = 423+sqrt(19²-8²)=423+17.2=440.2 → pouch base (438-440) is inside head edge ✓ barely. Pouch drawn after head ✓ covers.
+
+OK good.
+
+Final check on crest path and eye: eye (428,105) r3.6 → top y=101.4; crest bottom ~98 → clear ✓.
+
+Let me write it all out.
+
+Also one subtle: near leg 2-pass stroke (D07C2F w12 then F2994A w7): the dark undercoat shows as 2.5px outline around leg ✓.
+
+Near foot: fill #F2994A stroke #D07C2F width 2 ✓.
+
+Let me write out coordinates rounded to 1 decimal.
+
+Final SVG code:
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <title>A pelican riding a bicycle</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B9E4F2"/>
+      <stop offset="1" stop-color="#EAF7FC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky & sun -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <circle cx="690" cy="95" r="58" fill="#FFE9A8" opacity="0.55"/>
+  <circle cx="690" cy="95" r="40" fill="#FFD867"/>
+
+  <!-- Clouds -->
+  <g fill="#FFFFFF" opacity="0.9">
+    <g transform="translate(120,95)">
+      <ellipse cx="0" cy="0" rx="42" ry="22"/>
+      <ellipse cx="36" cy="-10" rx="34" ry="20"/>
+      <ellipse cx="68" cy="2" rx="38" ry="18"/>
+      <ellipse cx="-30" cy="6" rx="30" ry="15"/>
+    </g>
+    <g transform="translate(418,66) scale(0.8)">
+      <ellipse cx="0" cy="0" rx="42" ry="22"/>
+      <ellipse cx="36" cy="-10" rx="34" ry="20"/>
+      <ellipse cx="68" cy="2" rx="38" ry="18"/>
+      <ellipse cx="-30" cy="6" rx="30" ry="15"/>
+    </g>
+    <g transform="translate(636,178) scale(0.55)">
+      <ellipse cx="0" cy="0" rx="42" ry="22"/>
+      <ellipse cx="36" cy="-10" rx="34" ry="20"/>
+      <ellipse cx="68" cy="2" rx="38" ry="18"/>
+      <ellipse cx="-30" cy="6" rx="30" ry="15"/>
+    </g>
+  </g>
+
+  <!-- Ground, road, grass tufts -->
+  <rect x="0" y="512" width="800" height="88" fill="#A3D394"/>
+  <rect x="0" y="518" width="800" height="36" fill="#8A94A6"/>
+  <g fill="#F2F5F8" opacity="0.9">
+    <rect x="18" y="531" width="46" height="6" rx="3"/>
+    <rect x="128" y="531" width="46" height="6" rx="3"/>
+    <rect x="238" y="531" width="46" height="6" rx="3"/>
+    <rect x="348" y="531" width="46" height="6" rx="3"/>
+    <rect x="458" y="531" width="46" height="6" rx="3"/>
+    <rect x="568" y="531" width="46" height="6" rx="3"/>
+    <rect x="678" y="531" width="46" height="6" rx="3"/>
+  </g>
+  <g stroke="#7CBA72" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M 84 596 Q 88 574 92 596"/>
+    <path d="M 98 596 Q 102 578 106 596"/>
+    <path d="M 152 580 Q 156 560 160 580"/>
+    <path d="M 662 590 Q 666 568 670 590"/>
+    <path d="M 676 590 Q 680 572 684 590"/>
+    <path d="M 728 574 Q 732 556 736 574"/>
+  </g>
+
+  <!-- Shadow -->
+  <ellipse cx="398" cy="528" rx="300" ry="11" fill="#1F2937" opacity="0.1"/>
+
+  <!-- Speed lines -->
+  <g stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity="0.8">
+    <path d="M 92 322 L 152 322"/>
+    <path d="M 74 368 L 150 368"/>
+    <path d="M 94 414 L 148 414"/>
+  </g>
+
+  <!-- Far wing -->
+  <path d="M 268 206 C 212 196 186 152 203 110 C 224 139 259 170 293 184 Z" fill="#B7C6D1"/>
+
+  <!-- Far leg & foot -->
+  <path d="M 316 258 L 338 338 L 337 398" fill="none" stroke="#D9832B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 318 405 L 356 405 L 348 395 Q 337 390 327 395 Z" fill="#D9832B"/>
+
+  <!-- Bicycle -->
+  <g>
+    <!-- Rear wheel -->
+    <circle cx="240" cy="435" r="85" fill="#EAF3F8" stroke="#2B3A46" stroke-width="11"/>
+    <g stroke="#8A98A6" stroke-width="2.5" transform="rotate(22 240 435)">
+      <line x1="240" y1="435" x2="313" y2="435"/>
+      <line x1="240" y1="435" x2="291.6" y2="486.6"/>
+      <line x1="240" y1="435" x2="240" y2="508"/>
+      <line x1="240" y1="435" x2="188.4" y2="486.6"/>
+      <line x1="240" y1="435" x2="167" y2="435"/>
+      <line x1="240" y1="435" x2="188.4" y2="383.4"/>
+      <line x1="240" y1="435" x2="240" y2="362"/>
+      <line x1="240" y1="435" x2="291.6" y2="383.4"/>
+    </g>
+    <circle cx="240" cy="435" r="73" fill="none" stroke="#7E8B99" stroke-width="3"/>
+    <circle cx="240" cy="435" r="8" fill="#37424E"/>
+
+    <!-- Front wheel -->
+    <circle cx="560" cy="435" r="85" fill="#EAF3F8" stroke="#2B3A46" stroke-width="11"/>
+    <g stroke="#8A98A6" stroke-width="2.5" transform="rotate(58 560 435)">
+      <line x1="560" y1="435" x2="633" y2="435"/>
+      <line x1="560" y1="435" x2="611.6" y2="486.6"/>
+      <line x1="560" y1="435" x2="560" y2="508"/>
+      <line x1="560" y1="435" x2="508.4" y2="486.6"/>
+      <line x1="560" y1="435" x2="487" y2="435"/>
+      <line x1="560" y1="435" x2="508.4" y2="383.4"/>
+      <line x1="560" y1="435" x2="560" y2="362"/>
+      <line x1="560" y1="435" x2="611.6" y2="383.4"/>
+    </g>
+    <circle cx="560" cy="435" r="73" fill="none" stroke="#7E8B99" stroke-width="3"/>
+    <circle cx="560" cy="435" r="8" fill="#37424E"/>
+
+    <!-- Chain & cog & ring -->
+    <circle cx="240" cy="435" r="12" fill="none" stroke="#55606E" stroke-width="3"/>
+    <circle cx="380" cy="435" r="21" fill="none" stroke="#55606E" stroke-width="4"/>
+    <path d="M 380 414 L 240 423 M 380 456 L 240 447" stroke="#55606E" stroke-width="3.5" fill="none"/>
+
+    <!-- Frame -->
+    <g fill="none" stroke="#E14B3B" stroke-width="9" stroke-linecap="round">
+      <path d="M 240 435 L 380 435"/>
+      <path d="M 380 435 L 330 295"/>
+      <path d="M 240 435 L 332 300"/>
+      <path d="M 380 435 L 509 312"/>
+      <path d="M 330 297 L 510 309"/>
+      <path d="M 510 310 L 524 350"/>
+      <path d="M 524 350 L 560 435" stroke-width="7"/>
+    </g>
+
+    <!-- Stem & handlebar -->
+    <path d="M 510 310 L 506 285" stroke="#333C46" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 506 285 C 503 274 492 267 478 271" fill="none" stroke="#333C46" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="478" cy="271" r="4" fill="#22282F"/>
+
+    <!-- Seat post & saddle -->
+    <path d="M 330 295 L 327 265" stroke="#37424E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 299 267 Q 326 257 353 266 Q 341 278 312 276 Q 302 273 299 267 Z" fill="#2B3A46"/>
+
+    <!-- Cranks & pedals -->
+    <path d="M 380 435 L 338 405" stroke="#333C46" stroke-width="6" stroke-linecap="round"/>
+    <rect x="327" y="401" width="22" height="7" rx="2" fill="#333C46"/>
+    <path d="M 380 435 L 422 464" stroke="#22282F" stroke-width="7" stroke-linecap="round"/>
+    <rect x="406" y="460" width="32" height="8" rx="2.5" fill="#22282F"/>
+    <circle cx="380" cy="435" r="8" fill="#333C46"/>
+  </g>
+
+  <!-- Pelican -->
+  <!-- Tail -->
+  <path d="M 242 210 L 184 176 L 228 238 Z" fill="#C7D3DB"/>
+  <path d="M 248 232 L 190 214 L 240 256 Z" fill="#B7C6D1"/>
+  <path d="M 252 252 L 206 250 L 250 268 Z" fill="#C7D3DB"/>
+
+  <!-- Near leg & foot -->
+  <path d="M 308 260 L 366 348 L 414 452" fill="none" stroke="#D07C2F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 308 260 L 366 348 L 414 452" fill="none" stroke="#F2994A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 400 461 L 448 461 L 437 449 Q 421 442 407 449 Z" fill="#F2994A" stroke="#D07C2F" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M 419 451 L 425 461 M 431 451 L 439 460" stroke="#D07C2F" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Body -->
+  <ellipse cx="290" cy="225" rx="68" ry="48" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+
+  <!-- Near wing on handlebar -->
+  <path d="M 302 232 C 360 220 440 240 484 261 C 489 269 485 279 475 281 C 445 280 405 274 370 267 C 338 260 302 254 302 232 Z" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+  <path d="M 335 240 C 385 243 438 256 470 267" fill="none" stroke="#B9C7D2" stroke-width="2.5"/>
+  <path d="M 340 254 C 385 257 430 266 462 276" fill="none" stroke="#B9C7D2" stroke-width="2.5"/>
+
+  <!-- Neck -->
+  <path d="M 315 236 C 341 219 350 191 369 168 C 384 151 398 139 407 121 L 429 128 C 420 147 405 163 389 181 C 369 204 353 227 341 255 Z" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+
+  <!-- Head -->
+  <circle cx="423" cy="112" r="19" fill="#FFFFFF" stroke="#94A3B2" stroke-width="3"/>
+  <path d="M 412 97 Q 416 85 428 88 Q 421 92 419 98 Z" fill="#C7D3DB"/>
+
+  <!-- Beak -->
+  <path d="M 440 121 L 558 142 C 550 178 506 199 466 191 C 448 186 438 152 440 121 Z" fill="#E88A3C" stroke="#D07C2F" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M 436 101 C 482 106 528 120 557 129 L 557 141 C 521 131 470 122 440 118 Q 430 109 436 101 Z" fill="#F49D4C"/>
+  <path d="M 460 112 L 476 115" stroke="#D07C2F" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="428" cy="105" r="3.6" fill="#22303C"/>
+</svg>
+
+Wait — issue: near wing drawn in front of neck: wing upper edge at x 341-389 y≈222-235; neck passes through that area (at x 369 neck y ~168-210?)... let me re-verify if neck actually intersects the wing region. Neck path: front edge (315,236) C(341,219)(350,191)(369,168) → (384,151)(398,139)(407,121). Rear edge: (429,128) C(420,147)(405,163)(389,181) → (369,204)(353,227)(341,255).
+
+At x=369: front edge y=168; rear edge: rear curve passes (369,204). So neck at x=369 spans y 168-204. Wing at x=369: upper ≈? Upper edge C(360,220)(440,240): at x 369 y≈222-226. So neck (168-204) is entirely above wing top (222) at x=369 ✓ no overlap!
+
+At x=353: neck: front edge y≈191 (at x 350 y=191); rear edge at x 353 y≈227. Neck spans 191-227. Wing at x=353: upper ≈ 221-224. → Slight overlap at 221-227 (6px). Neck drawn after wing → neck slightly covers wing top — no problem, looks like wing behind neck base.
+
+At x=341: neck rear edge 255; front edge? front edge at x 341 y≈219. Neck spans 219-255; wing at x=341: upper ≈ 224, lower ≈ 258?? lower edge at x 341: from (370,267) C(338,260)(302,254)(302,232): at x=341 y≈258. Wing spans 224-258. Neck spans 219-255 → nearly overlaps — wing covers neck lower part at x=341?? but neck is drawn after wing (neck later) → neck covers wing. So at x 338-353 wing top is hidden behind neck. Visually: wing tip region near shoulder is behind neck. Fine.
+
+Hmm wait, but I said wing should be in front of neck? Earlier I concluded to draw wing in front of neck (neck after wing) so neck is on top of wing base — and current order: wing (8) → neck (9) → yes neck after ✓.
+
+All consistent.
+
+One more: pouch stroke #D07C2F width 2 — pouch outline. Upper beak no stroke — beak/pouch boundary shows via color difference (F49D4C vs E88A3C) ✓.
+
+Also pouch outline on the left side (440,121)-(438,152) area — near head... pouch left edge x 438-440 vs head edge at y 130 x≈433.5 (head at y=130: sqrt(19²-18²)=sqrt(337-324)=3.6 → x=426.6). Wait head at y=130: dy=18 → dx=sqrt(361-324)=6.1 → right edge x=429.1. Pouch left edge at x 438-440 > 429 → no overlap with head at that y; pouch left is a 1-2px floating edge with stroke — fine, pouch tapers to beak base, looks like pouch attached.
+
+Also let me re-verify near foot vs pedal 1: pedal 1 rect x 406-438 y 460-468. Foot at x 400-448, y 442-461: foot bottom edge (y 461) vs pedal top 460 → foot slightly overlaps pedal top ✓ foot is on top of pedal ✓. Foot drawn after pedal (pelican group after bike) ✓.
+
+And near leg bottom (414,452) vs foot top (442-449): leg ends at 452, foot top edge is at y 442-449 area x 407-437 — leg endpoint (414,452) is inside foot ✓ connects.
+
+Far foot (318-356, 390-405) vs far pedal (327-349, 401-408): overlap y 401-405, x 327-349 ✓. Far leg end (337,398) is inside foot top (395-405)? Foot top edge y 390-397 (Q 337 390 327 395): at x=337 y≈391.5. Leg end 398 → slightly below foot top edge, inside foot ✓.
+
+Great. I'm fairly confident in the layout. Let me also verify that the whole pelican is within canvas: top of crest 85, wing/neck fine.
+
+I'm fairly confident in the layout. Let me also verify the whole pelican fits in canvas: top of crest 85 ✓.
+
+Also verify the far wing doesn't look like a floating blob: base at (268,206)-(293,184) is hidden behind body (body at y 206 is 227-353 → x 268-293 inside ✓; at y=184: body dy=41, .728, sqrt(.272)=.52, hw 35.4 → 254.6-325.4; point (293,184) inside ✓). Good.
+
+Speed line at y=322: passes behind rear wheel? Lines x≤152, wheel from 155 → just to left ✓.
+
+Final: let me provide brief explanation and the SVG code. Maybe with 1-2 sentences about the elements. Keep it short.

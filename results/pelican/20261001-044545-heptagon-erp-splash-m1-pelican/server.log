@@ -1,0 +1,9 @@
+Splash model incoai/Qwen3.8-27B-Splash is already installed in /Users/nakano/Library/Application Support/Splash/models/incoai/Qwen3.8-27B-Splash
+04:45:48 Loading · incoai/Qwen3.8-27B-Splash
+04:45:49 Chat template · renders later system messages in place
+04:45:49 Kernel policy for GPU family 7 with 32 cores.
+04:46:10 Ready · incoai/Qwen3.8-27B-Splash · context 256K · http://127.0.0.1:18104
+04:46:12 Done · input 58 · cached 0 · output 16 · TTFT 0.7s · 65.6 tok/s
+05:28:47 Done · input 445 · cached 32 · output 62,637 · TTFT 3.1s · 24.5 tok/s
+06:14:58 Done · input 445 · cached 416 · output 63,504 · TTFT 0.4s · 22.9 tok/s
+06:14:58 Stopping · releasing engine resources

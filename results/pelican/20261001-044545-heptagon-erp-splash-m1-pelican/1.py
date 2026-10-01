@@ -1,0 +1,721 @@
+import math
+import tkinter as tk
+from dataclasses import dataclass, field
+from typing import List, Tuple
+
+
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
+
+WIDTH = 800
+HEIGHT = 800
+CENTER_X = WIDTH / 2.0
+CENTER_Y = HEIGHT / 2.0
+
+CIRCUM_RADIUS = 350.0
+
+BALL_COUNT = 20
+BALL_RADIUS = 16.0
+
+GRAVITY = 600.0
+
+# 360 degrees every 5 seconds
+WALL_OMEGA = math.radians(72.0)
+
+#
+# Material / restitution
+#
+# With e = 0.55, a fall through the largest possible distance (~2R) gives:
+#     rebound height ~= e^2 * fall height ~= 0.3025 * 2R ~= 0.605R
+# which is below the heptagon radius and, for the normal drops, well above
+# one ball radius.
+#
+WALL_RESTITUTION = 0.55
+BALL_RESTITUTION = 0.70
+
+WALL_FRICTION = 0.30
+BALL_FRICTION = 0.10
+
+AIR_DRAG = 0.15
+ANG_DRAG = 0.25
+
+# Safety clamp so the rebound height can never exceed the heptagon radius.
+MAX_BOUNCE_HEIGHT = CIRCUM_RADIUS * 0.98
+MAX_BOUNCE_VY = math.sqrt(2.0 * GRAVITY * MAX_BOUNCE_HEIGHT)
+
+MAX_SPEED = 1500.0
+MAX_ANGULAR = 60.0
+
+FIXED_DT = 1.0 / 240.0
+MAX_SUBSTEPS = 8
+
+LINE_WIDTH = 3
+
+COLORS = (
+    "#f8b862",
+    "#f6ad49",
+    "#f39800",
+    "#f08300",
+    "#ec6d51",
+    "#ee7948",
+    "#ed6d3d",
+    "#ec6800",
+    "#ec6800",
+    "#ee7800",
+    "#eb6238",
+    "#ea5506",
+    "#ea5506",
+    "#eb6101",
+    "#e49e61",
+    "#e45e32",
+    "#e17b34",
+    "#dd7a56",
+    "#db8449",
+    "#d66a35",
+)
+
+
+# -----------------------------------------------------------------------------
+# Digit drawing: 7-segment style line glyphs
+# -----------------------------------------------------------------------------
+#
+# Tkinter text items cannot be rotated directly, so the numbers are drawn as
+# line segments. Rotating the ball therefore rotates the visible number.
+
+DIGIT_SEGMENTS = {
+    0: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (-0.7, -1.0, -0.7, 0.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, -0.7, 1.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    1: [
+        (0.0, -1.0, 0.0, 1.0),
+    ],
+    2: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (-0.7, 0.0, -0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    3: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    4: [
+        (-0.7, -1.0, -0.7, 0.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (0.7, 0.0, 0.7, 1.0),
+    ],
+    5: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (-0.7, -1.0, -0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    6: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (-0.7, -1.0, -0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (-0.7, 0.0, -0.7, 1.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    7: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (0.7, -1.0, 0.7, 1.0),
+    ],
+    8: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (-0.7, -1.0, -0.7, 0.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (-0.7, 0.0, -0.7, 1.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+    9: [
+        (-0.7, -1.0, 0.7, -1.0),
+        (-0.7, -1.0, -0.7, 0.0),
+        (0.7, -1.0, 0.7, 0.0),
+        (-0.7, 0.0, 0.7, 0.0),
+        (0.7, 0.0, 0.7, 1.0),
+        (-0.7, 1.0, 0.7, 1.0),
+    ],
+}
+
+
+# -----------------------------------------------------------------------------
+# Ball model
+# -----------------------------------------------------------------------------
+
+@dataclass
+class Ball:
+    label: str
+    color: str
+    x: float
+    y: float
+
+    vx: float = 0.0
+    vy: float = 0.0
+    angle: float = 0.0
+    angular_vel: float = 0.0
+
+    radius: float = BALL_RADIUS
+    mass: float = 1.0
+    inertia: float = 0.5 * BALL_RADIUS * BALL_RADIUS
+
+    scale: float = 0.0
+    glyph_segments: List[Tuple[float, float, float, float]] = field(default_factory=list)
+
+    ellipse_id: int = -1
+    line_ids: List[int] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        # Moment of inertia for a disk-like ball.
+        self.inertia = 0.5 * self.radius * self.radius
+
+        # Number glyphs are drawn as rotating line segments.
+        self.scale = self.radius * (0.55 if len(self.label) == 1 else 0.40)
+
+        segments: List[Tuple[float, float, float, float]] = []
+        digits = [int(ch) for ch in self.label]
+        spacing = 1.55
+
+        for pos, digit in enumerate(digits):
+            cell_x = (pos - (len(digits) - 1) / 2.0) * spacing
+
+            raw_segments = DIGIT_SEGMENTS[digit]
+
+            # Center each digit glyph horizontally inside its cell.
+            xs = []
+            for x1, y1, x2, y2 in raw_segments:
+                xs.append(x1)
+                xs.append(x2)
+
+            center_x = (min(xs) + max(xs)) * 0.5
+
+            for x1, y1, x2, y2 in raw_segments:
+                x1c = x1 - center_x
+                x2c = x2 - center_x
+                segments.append(
+                    (
+                        (cell_x + x1c) * self.scale,
+                        y1 * self.scale,
+                        (cell_x + x2c) * self.scale,
+                        y2 * self.scale,
+                    )
+                )
+
+        self.glyph_segments = segments
+
+
+# -----------------------------------------------------------------------------
+# Geometry helpers
+# -----------------------------------------------------------------------------
+
+def compute_vertices(theta: float) -> List[Tuple[float, float]]:
+    verts: List[Tuple[float, float]] = []
+    for i in range(7):
+        a = theta + 2.0 * math.pi * i / 7.0
+        verts.append(
+            (
+                CENTER_X + CIRCUM_RADIUS * math.cos(a),
+                CENTER_Y + CIRCUM_RADIUS * math.sin(a),
+            )
+        )
+    return verts
+
+
+def compute_edges(theta: float) -> List[Tuple[float, float, float, float, float, float, float]]:
+    """
+    Returns edges as:
+    (x0, y0, ax, ay, a_len2, nx, ny)
+
+    where:
+    - (x0, y0) is the edge start
+    - (ax, ay) is the edge vector
+    - a_len2 = |edge|^2
+    - (nx, ny) is the inward unit normal
+    """
+    verts = compute_vertices(theta)
+    edges: List[Tuple[float, float, float, float, float, float, float]] = []
+
+    for i in range(7):
+        x0, y0 = verts[i]
+        x1, y1 = verts[(i + 1) % 7]
+
+        ax = x1 - x0
+        ay = y1 - y0
+        a_len2 = ax * ax + ay * ay
+
+        mx = (x0 + x1) * 0.5
+        my = (y0 + y1) * 0.5
+
+        nx = CENTER_X - mx
+        ny = CENTER_Y - my
+        norm = math.hypot(nx, ny)
+
+        if norm > 1e-9:
+            nx /= norm
+            ny /= norm
+        else:
+            nx = 0.0
+            ny = 1.0
+
+        edges.append((x0, y0, ax, ay, a_len2, nx, ny))
+
+    return edges
+
+
+# -----------------------------------------------------------------------------
+# Collision: ball vs rotating heptagon
+# -----------------------------------------------------------------------------
+
+def apply_wall_collision(
+    ball: Ball,
+    edges: List[Tuple[float, float, float, float, float, float, float]],
+    omega: float,
+    position_only: bool,
+) -> None:
+    r = ball.radius
+    x = ball.x
+    y = ball.y
+    vx = ball.vx
+    vy = ball.vy
+    w = ball.angular_vel
+
+    mass = ball.mass
+    mass_inv = 1.0 / mass
+    inv_I = 1.0 / ball.inertia
+
+    for x0, y0, ax, ay, a_len2, nx, ny in edges:
+        # Signed distance to the edge line. Positive means inside.
+        d = (x - x0) * nx + (y - y0) * ny
+
+        if d < r:
+            # Closest point on the finite edge segment.
+            if a_len2 > 1e-12:
+                t = ((x - x0) * ax + (y - y0) * ay) / a_len2
+            else:
+                t = 0.0
+
+            if t < 0.0:
+                t = 0.0
+            elif t > 1.0:
+                t = 1.0
+
+            qx = x0 + ax * t
+            qy = y0 + ay * t
+
+            # Position correction.
+            push = r - d
+            x += nx * push
+            y += ny * push
+
+            if position_only:
+                continue
+
+            # Recompute contact point after correction.
+            if a_len2 > 1e-12:
+                t = ((x - x0) * ax + (y - y0) * ay) / a_len2
+                if t < 0.0:
+                    t = 0.0
+                elif t > 1.0:
+                    t = 1.0
+                qx = x0 + ax * t
+                qy = y0 + ay * t
+
+            # Velocity of the rotating wall at the contact point.
+            qx_rel = qx - CENTER_X
+            qy_rel = qy - CENTER_Y
+            wall_vx = -omega * qy_rel
+            wall_vy = omega * qx_rel
+
+            rvx = vx - wall_vx
+            rvy = vy - wall_vy
+
+            vn = rvx * nx + rvy * ny
+
+            if vn < 0.0:
+                # Normal impulse.
+                jn = mass * (1.0 + WALL_RESTITUTION) * (-vn)
+
+                tx = -ny
+                ty = nx
+
+                vt = rvx * tx + rvy * ty
+
+                # Tangential slip at the contact point.
+                #
+                # Contact point on the ball is at -r*n.
+                # For tangent t = (-ny, nx), the ball surface velocity
+                # contributes -w*r in the tangent direction.
+                s = vt - w * r
+
+                if abs(s) > 1e-8:
+                    denom = mass_inv + (r * r) * inv_I
+                    jt_un = -s / denom
+
+                    jt_max = WALL_FRICTION * jn
+                    if jt_un > jt_max:
+                        jt = jt_max
+                    elif jt_un < -jt_max:
+                        jt = -jt_max
+                    else:
+                        jt = jt_un
+                else:
+                    jt = 0.0
+
+                # Apply impulse.
+                vx += jn * mass_inv * nx + jt * mass_inv * tx
+                vy += jn * mass_inv * ny + jt * mass_inv * ty
+
+                # Angular impulse from friction.
+                w += -jt * r * inv_I
+
+    ball.x = x
+    ball.y = y
+    ball.vx = vx
+    ball.vy = vy
+    ball.angular_vel = w
+
+
+# -----------------------------------------------------------------------------
+# Collision: ball vs ball
+# -----------------------------------------------------------------------------
+
+def resolve_ball_collisions(balls: List[Ball]) -> None:
+    if not balls:
+        return
+
+    n = len(balls)
+    r = balls[0].radius
+    min_dist = 2.0 * r
+    min_dist2 = min_dist * min_dist
+    slop = 0.02
+
+    for i in range(n):
+        bi = balls[i]
+
+        for j in range(i + 1, n):
+            bj = balls[j]
+
+            dx = bj.x - bi.x
+            dy = bj.y - bi.y
+            dist2 = dx * dx + dy * dy
+
+            if dist2 >= min_dist2:
+                continue
+
+            if dist2 > 1e-12:
+                dist = math.sqrt(dist2)
+                nx = dx / dist
+                ny = dy / dist
+            else:
+                # Degenerate overlap: choose a deterministic pseudo-normal.
+                dist = 1e-9
+                ang = float(i * 7 + j * 13) * 0.37
+                nx = math.cos(ang)
+                ny = math.sin(ang)
+
+            penetration = min_dist - dist
+            correction = max(penetration - slop, 0.0) * 0.8
+
+            if correction > 0.0:
+                cx = 0.5 * correction * nx
+                cy = 0.5 * correction * ny
+
+                bi.x -= cx
+                bi.y -= cy
+                bj.x += cx
+                bj.y += cy
+
+            # Contact points:
+            #   ball i contact point = +r*n
+            #   ball j contact point = -r*n
+            vi_cx = bi.vx - bi.angular_vel * r * ny
+            vi_cy = bi.vy + bi.angular_vel * r * nx
+
+            vj_cx = bj.vx + bj.angular_vel * r * ny
+            vj_cy = bj.vy - bj.angular_vel * r * nx
+
+            rvx = vj_cx - vi_cx
+            rvy = vj_cy - vi_cy
+
+            vn = rvx * nx + rvy * ny
+
+            if vn < 0.0:
+                inv_mi = 1.0 / bi.mass
+                inv_mj = 1.0 / bj.mass
+                inv_ii = 1.0 / bi.inertia
+                inv_ij = 1.0 / bj.inertia
+
+                # Normal impulse.
+                jn = -(1.0 + BALL_RESTITUTION) * vn / (inv_mi + inv_mj)
+
+                tx = -ny
+                ty = nx
+
+                vt = rvx * tx + rvy * ty
+
+                # Tangential friction impulse.
+                denom_t = inv_mi + inv_mj + (r * r) * inv_ii + (r * r) * inv_ij
+                jt_un = -vt / denom_t
+
+                jt_max = BALL_FRICTION * jn
+                if jt_un > jt_max:
+                    jt = jt_max
+                elif jt_un < -jt_max:
+                    jt = -jt_max
+                else:
+                    jt = jt_un
+
+                # Apply impulses.
+                bi.vx += -jn * inv_mi * nx - jt * inv_mi * tx
+                bi.vy += -jn * inv_mi * ny - jt * inv_mi * ty
+
+                bj.vx += jn * inv_mj * nx + jt * inv_mj * tx
+                bj.vy += jn * inv_mj * ny + jt * inv_mj * ty
+
+                # Angular changes.
+                bi.angular_vel += -jt * r * inv_ii
+                bj.angular_vel += -jt * r * inv_ij
+
+
+# -----------------------------------------------------------------------------
+# Stability clamps
+# -----------------------------------------------------------------------------
+
+def clamp_ball(ball: Ball) -> None:
+    speed2 = ball.vx * ball.vx + ball.vy * ball.vy
+    max_speed2 = MAX_SPEED * MAX_SPEED
+
+    if speed2 > max_speed2:
+        s = math.sqrt(speed2)
+        f = MAX_SPEED / s
+        ball.vx *= f
+        ball.vy *= f
+
+    if ball.vy > MAX_BOUNCE_VY:
+        ball.vy = MAX_BOUNCE_VY
+    elif ball.vy < -MAX_BOUNCE_VY:
+        ball.vy = -MAX_BOUNCE_VY
+
+    if ball.angular_vel > MAX_ANGULAR:
+        ball.angular_vel = MAX_ANGULAR
+    elif ball.angular_vel < -MAX_ANGULAR:
+        ball.angular_vel = -MAX_ANGULAR
+
+    if ball.angle > 1000.0 or ball.angle < -1000.0:
+        ball.angle %= 2.0 * math.pi
+
+
+# -----------------------------------------------------------------------------
+# Setup helpers
+# -----------------------------------------------------------------------------
+
+def create_balls() -> List[Ball]:
+    """
+    The balls are released from the heptagon center.
+
+    A tiny golden-spiral offset is used only to avoid the numerical singularity
+    of all 20 balls having exactly the same coordinates at t = 0.
+    """
+    balls: List[Ball] = []
+
+    for i in range(BALL_COUNT):
+        a = math.sqrt(i + 0.5) * 2.399963229728656
+        off = math.sqrt(i + 0.5) * 9.0
+
+        x = CENTER_X + off * math.cos(a)
+        y = CENTER_Y + off * math.sin(a)
+
+        balls.append(
+            Ball(
+                label=str(i + 1),
+                color=COLORS[i],
+                x=x,
+                y=y,
+            )
+        )
+
+    return balls
+
+
+def setup_graphics(canvas: tk.Canvas, balls: List[Ball]) -> int:
+    # Heptagon polygon.
+    zeros = [0.0] * 14
+    heptagon_id = canvas.create_polygon(
+        *zeros,
+        fill="#1b2030",
+        outline="#e8e8e8",
+        width=4,
+    )
+
+    # Ball ellipses.
+    for b in balls:
+        r = b.radius
+        b.ellipse_id = canvas.create_oval(
+            b.x - r,
+            b.y - r,
+            b.x + r,
+            b.y + r,
+            fill=b.color,
+            outline="#101010",
+            width=2,
+        )
+
+    # Number glyph lines, created after ellipses so they remain visible.
+    for b in balls:
+        for _ in b.glyph_segments:
+            b.line_ids.append(
+                canvas.create_line(
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    fill="white",
+                    width=LINE_WIDTH,
+                    capstyle="round",
+                )
+            )
+
+    return heptagon_id
+
+
+# -----------------------------------------------------------------------------
+# Main application
+# -----------------------------------------------------------------------------
+
+def main() -> None:
+    root = tk.Tk()
+    root.title("Spinning Heptagon with 20 Bouncing Balls")
+    root.resizable(False, False)
+
+    canvas = tk.Canvas(
+        root,
+        width=WIDTH,
+        height=HEIGHT,
+        bg="#101014",
+        highlightthickness=0,
+    )
+    canvas.pack()
+
+    balls = create_balls()
+    heptagon_id = setup_graphics(canvas, balls)
+
+    theta = -math.pi / 2.0
+    accumulator = 0.0
+    last_ms = root.winfo_milliseconds()
+
+    def step(dt: float) -> None:
+        nonlocal theta
+
+        theta = (theta + WALL_OMEGA * dt) % (2.0 * math.pi)
+        edges = compute_edges(theta)
+
+        linear_drag = math.exp(-AIR_DRAG * dt)
+        angular_drag = math.exp(-ANG_DRAG * dt)
+
+        # Integrate balls.
+        for b in balls:
+            b.vy += GRAVITY * dt
+
+            b.vx *= linear_drag
+            b.vy *= linear_drag
+            b.angular_vel *= angular_drag
+
+            b.x += b.vx * dt
+            b.y += b.vy * dt
+            b.angle += b.angular_vel * dt
+
+        # Ball vs rotating heptagon.
+        for b in balls:
+            apply_wall_collision(b, edges, WALL_OMEGA, position_only=False)
+
+        # Ball vs ball, iterated for stability.
+        for _ in range(3):
+            resolve_ball_collisions(balls)
+
+        # Final wall containment after ball-ball corrections.
+        for _ in range(2):
+            for b in balls:
+                apply_wall_collision(b, edges, WALL_OMEGA, position_only=True)
+
+        # Safety clamps.
+        for b in balls:
+            clamp_ball(b)
+
+    def draw() -> None:
+        verts = compute_vertices(theta)
+        coords: List[float] = []
+        for px, py in verts:
+            coords.append(px)
+            coords.append(py)
+
+        canvas.coords(heptagon_id, *coords)
+
+        for b in balls:
+            r = b.radius
+            canvas.coords(
+                b.ellipse_id,
+                b.x - r,
+                b.y - r,
+                b.x + r,
+                b.y + r,
+            )
+
+            ca = math.cos(b.angle)
+            sa = math.sin(b.angle)
+
+            for lid, (x1, y1, x2, y2) in zip(b.line_ids, b.glyph_segments):
+                sx1 = b.x + x1 * ca - y1 * sa
+                sy1 = b.y + x1 * sa + y1 * ca
+                sx2 = b.x + x2 * ca - y2 * sa
+                sy2 = b.y + x2 * sa + y2 * ca
+
+                canvas.coords(lid, sx1, sy1, sx2, sy2)
+
+    def loop() -> None:
+        nonlocal accumulator, last_ms
+
+        now = root.winfo_milliseconds()
+        dt = (now - last_ms) / 1000.0
+        last_ms = now
+
+        if dt <= 0.0:
+            dt = 0.0
+        elif dt > 0.1:
+            dt = 0.1
+
+        accumulator += dt
+
+        steps = 0
+        while accumulator >= FIXED_DT and steps < MAX_SUBSTEPS:
+            step(FIXED_DT)
+            accumulator -= FIXED_DT
+            steps += 1
+
+        # If the system is very slow, drop excess accumulated time.
+        if steps == MAX_SUBSTEPS:
+            accumulator = 0.0
+
+        draw()
+        root.after(16, loop)
+
+    loop()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

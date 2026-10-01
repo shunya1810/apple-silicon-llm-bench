@@ -1,0 +1,1926 @@
+We need answer user asks: Write a Python program showing 20 balls bouncing inside spinning heptagon. Need provide code single file, allowed libs tkinter math numpy dataclasses typing sys. Need implement collision detection/response. Need likely provide complete code. We need analyze physics and design robust program.
+
+We need satisfy requirements:
+- 20 balls same radius.
+- numbered 1 to 20.
+- all balls drop from heptagon center when starting.
+- colors specified 20.
+- affected by gravity and friction, bounce off rotating walls realistically. collisions between balls.
+- material determines impact bounce height will not exceed radius of heptagon, but higher than ball radius. Need interpret: coefficient of restitution chosen so maximum rebound height (vertical?) from impact does not exceed heptagon circumradius? "impact bounce height will not exceed the radius of the heptagon, but higher than ball radius." Maybe set restitution e such that after bounce with typical drop from center? Need ensure bounce height (maybe vertical rebound) constrained between ball radius and heptagon radius. We can define restitution = sqrt(2*max_bounce_height/impact_drop_height?) But varying. Simpler: use coefficient restitution e = sqrt(2*(R - ball_radius? maybe R?)/R?)? They say bounce height not exceed radius of heptagon, higher than ball radius. If ball drops from center to floor distance approx R - r? Impact speed sqrt(2g h). Rebound height = e^2 h. Need e^2*h between r and R for h maybe max h. Choose e so e^2 * (max fall height) <= R and > r. If max fall height ~ R - r (from center to bottom? Actually center to bottom wall distance = R - r). If e^2=0.4, rebound height 0.4h <= 0.4R < R and >? if h small maybe lower than r. But they may mean material bounce height (coefficient) such that when impact from max height, rebound height between r and R. Could choose restitution 0.8? h_max maybe R-r, rebound=0.64(R-r) maybe <R and >r if R>>r. We need pick values. "material of all the balls determines that their impact bounce height will not exceed the radius of the heptagon, but higher than ball radius." Maybe set restitution to 0.6? We can mention in code comment. Need likely acceptable.
+- All balls rotate with friction, numbers indicate spin. Need angular velocity for balls, affected by tangential friction on wall and ball-ball? Number rotation visible. When balls touch wall, tangential relative velocity produces torque changing spin and tangential velocity. Ball-ball collisions can transfer angular velocity too (friction). Implement simple friction impulse for contacts.
+- Heptagon spinning around center, speed 360 deg / 5 sec = 72 deg/s = 0.4π rad/s.
+- Heptagon size large enough to contain all balls. Need choose dimensions. 20 balls same radius. Need arrange? All drop from center. If all at center overlap? "All balls drop from heptagon center when starting." Could mean initial position at center? If exactly same center impossible overlaps. Maybe start near center with small offsets? Requirement says all balls drop from heptagon center. Could place all at center? They will immediately collide and spread due to collision resolution, but overlap. Better start at center with tiny random offsets? But exact center may be okay if using collisions to push apart; but deterministic? We can initialize at center with small circular offsets to avoid singular overlaps, but then not exactly center. Could place all at center? The program shows; overlap at start but simulation resolves. Since all same radius, impossible to contain 20 non-overlapping at exact center. The requirement likely means they are dropped from center area. Could initialize in a small cluster around center, maybe a circle/packing with radius small, or all at center with zero velocity and let solver separate. To be safe, start positions on a small circle radius e.g. 0.1*ball_radius? But requirement says all balls drop from heptagon center. We can say they start at center and an infinitesimal deterministic jitter to avoid exact overlap. In code maybe positions = center + small offsets based on index (like circle radius 0.2). They still effectively center. Or all exactly center and collision resolution pushes them; but can cause instability. Use small offsets and comment.
+- No pygame; use tkinter canvas. Allowed numpy etc. Single file.
+
+Need design robust physics:
+Use fixed timestep? tkinter after loop. Use substeps for stability. Balls inside rotating heptagon.
+
+Coordinate system: Canvas coordinates y down. Gravity positive y (down). Heptagon center at canvas center, radius R (circumradius). Sides: regular heptagon with 7 vertices at angles theta0 + k*2π/7. It rotates with angular velocity omega (positive maybe clockwise? In screen y down, positive angle math maybe clockwise? Need consistent). We can implement transform to heptagon local coordinates: For a ball at world pos p relative center, local angle = atan2(y - cy, x - cx) - heptagon_angle. Distance to each side in local coordinates. The heptagon interior is set of points with dot(n_i, q) <= apothem, where n_i are inward normals? For regular polygon centered origin, sides have outward normals at angles phi_i = theta0 + i*2π/7? Actually vertices angles maybe. Side i midpoint angle = vertex angle + π/7? For regular polygon, outward normal to side i points at angle side_mid. Interior constraint: q · n_out_i <= apothem. For containment, if q·n_i > apothem - r -> collision.
+
+For rotating wall, wall velocity at contact point: v_wall = omega × r_vec (2D: (-omega*y, omega*x) if omega rad/s, in standard x right y up; but screen y down? If we use math with y down, cross product sign? In 2D, angular velocity scalar ω (positive counterclockwise in coordinate system). Velocity of point at r is ω k × r = (-ω y, ω x) in right-handed coordinates with z out. In screen y down, coordinate system left-handed? But if we just use same formula with y down and positive ω as counterclockwise in screen? It will rotate according to drawing? Need consistency: canvas draws polygon angle increasing = clockwise visually because y down. We can define heptagon_angle increasing, vertices at angle; drawing x=cx+R*cos, y=cy+R*sin. As angle increases, polygon rotates clockwise on screen. The velocity of material point in this coordinate system? If parameter θ(t)=θ0+ωt, point local fixed in polygon? World position = R[cos(α+θ), sin(α+θ)], derivative = R[-ω sin(α+θ), ω cos(α+θ)] = (-ω y, ω x) relative center. This formula works in canvas coordinates (y down) for increasing θ as drawn. Good. So use v_wall = omega * perp(p_rel) where perp = (-y, x) if omega positive (clockwise screen). If omega negative, counterclockwise.
+
+Collision with rotating side:
+For each side i outward normal n (unit). Constraint g = q·n - apothem. For ball radius r, penetration if g > -r? Let's define signed distance from center plane: d = q·n. Inside if d < apothem. Ball collides if d > apothem - r. Penetration depth = d - (apothem - r). Contact point on ball: c = q - r*n? Wait outward normal from polygon side. If ball center too far outward, penetration along n. The closest point on side plane is q - d*n? Actually plane at apothem along n; closest point = q - (d - apothem)*n? But if d>apothem-r, ball overlaps plane. The contact point on ball surface = q - r*n (since n outward, ball center displaced outward; surface point toward wall is q - r n). But if side finite segment, need check if contact point projection within side segment. For convex polygon, if ball is outside near vertex, side-plane test may not suffice; need check distance to edges segments or vertices. For rotating regular polygon, balls can hit corners. We need realistic collision off rotating walls including edges. We can implement distance to polygon boundary: for each edge segment, compute closest point to ball center, if distance < r collision with that edge. For a convex polygon and ball, checking all edges (segments) for closest point is okay. But for containment, if ball center outside polygon, closest boundary point might be edge or vertex. If center inside and near side, closest point on segment may be side or vertex. We can handle all edges: for each segment A-B, compute closest point P on segment to center, vector from P to center? Need define collision normal. If distance < r and center is outside relative to polygon? We need avoid collisions when center deep inside and near vertex? For a ball inside convex polygon, if distance from center to any edge segment < r, it's colliding with that edge. Normal should point from closest boundary point to ball center, i.e. n = (center - P)/dist. This is inward normal (toward center) for side, or from vertex to center for corner. This handles corners. But if center inside but the closest point on segment is beyond segment? That's vertex. Good. Need ensure if center is outside? It shouldn't be if containment solved, but can happen; closest segment still gives push inward. For rotating wall velocity at contact point P (world position) = ω × (P - center) (perp). But P on polygon boundary (segment). For side, P is projection point. For vertex, P is vertex. Use that.
+
+Collision response with moving wall:
+Relative velocity v_rel = v_ball - v_wall at contact. Normal component vn = dot(v_rel, n) where n points from wall to ball (inward). If vn < 0 (moving into wall), apply impulse.
+With restitution e: desired normal relative velocity after = -e vn. For infinite mass wall, impulse j = -(1+e) vn * m along n? Actually v' = v + (j/m)n. Need j/m = -(1+e)vn. So v += - (1+e)vn n. For tangential friction: relative tangential velocity vt_vec = v_rel - vn n. Friction impulse magnitude μ * |jn|? For ball also spin: contact relative velocity includes ball surface velocity due to spin: v_contact_ball = v + ω_ball × r_contact? In 2D, angular velocity scalar, radius vector from ball center to contact point = -r*n (since n from wall to ball, contact point on ball = center - r*n). Surface velocity = v + ω × rc. Cross in 2D scalar: ω × rc = ω * perp(rc) with perp? If coordinate y down and positive spin? Need choose. For a ball with angular velocity s (positive counterclockwise in coordinate system?), surface velocity at rc = s * (-rc_y, rc_x) if using standard right-hand but screen? If rc = -r*n, perp(rc) = -s? Let's derive sign so number rotation matches? We can define angular velocity positive clockwise? Need consistency for drawing rotation of number. Tkinter canvas doesn't rotate text easily; can use create_text with angle? Need draw number rotated. We can implement draw ball with number rotated using text angle? Tkinter text has angle option? Yes create_text has angle (degrees) rotates text? It rotates around anchor? We can use create_oval and create_text with angle= -angle*180/pi? Need know. For spin, use angle state for number. If positive angle increases clockwise? Tkinter angle: degrees, rotation is counterclockwise? In Tk canvas, positive angle rotates clockwise? I think canvas angle is degrees, positive rotates clockwise (due y down?). We can just use ball.angle_deg = degrees of rotation, draw text with angle=-angle_deg? Need maybe not critical, but number indicates spin. We can set ball.spin (rad/s) and ball.angle += spin*dt. Draw number with angle = -math.degrees(ball.angle) maybe to appear rotating with positive spin. Need choose physical torque signs.
+
+Simpler: implement angular dynamics with scalar angular velocity, and drawing rotates text by -angle (so positive spin counterclockwise? We'll see). For friction, use sign conventions consistently. Could avoid complex tangential spin friction? Requirement: All balls rotate with friction, numbers can indicate spin. Need implement spin from friction. We can implement spin update on wall contact and ball-ball contact using relative surface velocity. Also maybe rolling resistance damping.
+
+Ball-ball collisions:
+Equal mass, radius r. For pair i,j, vector d = pos_j - pos_i, dist, overlap = 2r - dist. If overlap > 0. Normal n = d/dist from i to j. Position correction: separate by overlap/2 along n. Relative velocity v_rel = v_j - v_i. vn = dot(v_rel, n) (negative if approaching). Apply equal/opposite impulse: For no friction, jn = -(1+e_ball)*(vn)/2 (since mass equal, each gets ±jn). v_i -= jn n? Let's derive: impulse on i = -J, on j=+J where J = j*n? If vn = (v_j - v_i)·n. To make after normal relative = -e vn, impulse magnitude J = -(1+e)vn / (1/m_i + 1/m_j) = -(1+e)vn/(2/m). Then v_i -= J/m n? v_j += J/m n. If m=1, delta = J n; v_i -= delta, v_j += delta. Since vn negative, J positive? vn<0 => -(1+e)vn >0, J positive. v_i -= positive n (i pushed opposite from j), v_j += positive n. Good.
+
+Friction between balls with spin:
+At contact point for i: rc_i = r_i * n (from i center to contact toward j). For j: rc_j = -r_j * n.
+Surface velocity of i at contact: v_i + ω_i × rc_i. j: v_j + ω_j × rc_j. Relative surface velocity = (v_j + ω_j×rc_j) - (v_i + ω_i×rc_i). Normal component should be vn? If rc are along n, ω×rc perpendicular to n, so normal same. Tangential relative velocity t_vec = rel_surface - (rel_surface·n)n. Apply friction impulse Jt = -min(μ |Jn|, |Jt|) * t_dir? Need update velocities and angular velocities.
+For ball-ball equal mass: friction impulse on i = -Jt_vec, on j=+Jt_vec. Torque on i = rc_i × J? In 2D torque scalar = cross(rc, impulse) = rc_x*F_y - rc_y*F_x (z). For i impulse Fi = -Jt, torque_i = cross(rc_i, Fi); for j Fj = Jt, torque_j = cross(rc_j, Fj). Angular accel = torque/I. Choose I = 0.5 m r^2 (solid disk) or maybe 0.4? We'll use 0.5.
+Need clamp Jt by Coulomb: |Jt| <= μ * |Jn| (for normal impulse magnitude). For wall, Jn known, friction impulse on ball = -Jt with cap μ|Jn|, and torque = cross(rc, impulse) (rc = contact vector from ball center = -r n). Angular velocity update += torque/I.
+Also rolling resistance: small damping of spin? Maybe optional. "rotate with friction" could mean spin caused by friction and damped. We can apply small angular damping each frame.
+
+Gravity and friction: gravity accelerates downward. Air resistance? Could add small linear damping to settle. Friction with walls affects spin. Need stable.
+
+Restitution: For wall and ball-ball? "material of all the balls determines that their impact bounce height will not exceed radius... higher than ball radius." Likely wall restitution. Use coefficient of restitution e = 0.55? Need choose. Heptagon radius large. Let's choose canvas 800x800, heptagon radius R=330, ball radius r=12? 20 balls area? 20*π144=9048, heptagon area ~ (7/4)R^2 tan(π/7) ≈? 330^2=108900*1.737? Wait area regular n: (n/4)R^2 tan(π/n). For n=7, 7/4*108900*tan(25.714°=0.481)=915*108900? Let's calculate: 1.75*108900=190575; *0.481=91647. 20 balls area 9048, fine. Need large enough. Maybe R=340, r=14. Could use window 900x900, R=400, r=16. 20 balls packing not issue. "large enough to contain all balls" yes.
+
+Start from center: If 20 balls at center with radius 16, cluster. Need heptagon large. Could start in a small hexagonal pack centered at center with spacing 2r to avoid huge overlap. But requirement all drop from center; if we pack around center, not all at center. Could set initial positions all exactly center; then solver will separate. But with 20 exact overlaps, pair distances zero, normal undefined. Need handle zero distance with deterministic jitter. We can initialize exact center but assign tiny random/deterministic offset if dist=0. To satisfy, maybe set all positions to center, but before first physics, if same position apply small offset based on index. We can comment "infinitesimal deterministic offsets to resolve exact coincidence". That's acceptable.
+
+Need implement robust collision detection: Balls vs edges segments. For each ball, for each of 7 edges, compute closest point on segment (A,B) to center. If dist < r, collision. But need ensure we don't collide with edge when ball center is inside and closest point is on segment but the ball is actually on the opposite side? Distance is unsigned; if center inside, closest point on boundary can be less than r for any side near. The normal from closest point to center is inward, correct. If center outside near vertex, normal from vertex to center may point outward? Actually if center outside polygon near a vertex, closest point is vertex, vector from vertex to center points outward (away from interior). But we want normal from wall to ball? If ball outside, to push it into interior, normal should be from contact point to ball center? That would push further out, wrong. Need detect side of polygon. Better use signed distance / polygon containment. Since balls should be inside, we can rely on center inside? But after large dt may go outside. For robust, compute closest point on polygon boundary and also determine if center is inside polygon. If outside, normal should be from boundary to center? Wait for collision with wall, ball outside, contact point on boundary, the ball should be pushed inward, i.e. normal from ball center to wall? Let's define n as direction from wall to ball? For inside collision, wall is below/left, n inward (from wall into interior) equals from contact point to ball center. For outside collision, to push into interior, n should be from ball center to contact point? Actually if ball outside a convex polygon, the closest point P on boundary; vector from P to C points outward, vector from C to P points inward. We want impulse pushing ball inward, i.e. along C->P? But our response expects n from wall to ball (inward) and v_rel normal negative when moving into wall. For outside, n_wall_to_ball would be P->C (outward); moving into wall means velocity dot n <0? If n outward, ball moving inward (toward polygon) has v·n <0? Example side at x=1, interior x<1, outward n=(1,0), ball outside x>1 moving left v_x<0, dot n <0, applying impulse +n pushes right (wrong). So for outside need n = P->C? Wait if interior x<1, to push ball inward, direction is (-1,0) = C->P? If P at x=1, C x=2, C->P = (-1,0). That is from ball to wall. So normal for response should point from ball to wall? Let's standardize.
+
+Maybe better define contact normal n as direction from ball center to boundary (wall) for collision, i.e. the direction to push ball opposite? Many solvers define normal from A to B. Let's choose n = from ball center to closest boundary point (wall). Then ball should be pushed in -n. Penetration if dist < r. Relative velocity at contact: ball surface vs wall. The normal component of relative velocity along n? If n points from ball to wall, moving into wall means ball velocity dot n > 0 (toward wall). Then restitution: set v_rel·n after = -e * v_rel·n (negative, away from wall). Impulse on ball in direction -n with magnitude? Let jn = -(1+e) * vrel_n? If vrel_n positive, jn negative; impulse on ball = jn * n? That pushes negative n. Could be.
+
+But for inside side, n = from center to side outward? For side interior, closest point P on side, C inside, vector C->P is outward normal (from interior to wall). So n is outward normal (toward wall). Then moving into wall is v·n >0. Impulse -n pushes inward. This is intuitive: n is outward normal from ball to wall. Then wall velocity v_wall. Relative velocity v_rel = v_ball - v_wall. v_rel_n = dot(v_rel, n). If v_rel_n > 0 (approaching), impulse on ball = -(1+e) v_rel_n * n (mass 1). This pushes inward. Friction tangential uses same.
+
+For ball-ball, we can use n from i to j, apply impulses accordingly.
+
+For polygon, if center outside, closest point P, vector C->P points inward (towards polygon), n = (P-C)/dist. If ball outside and moving toward polygon, v·n? Example side x=1, interior x<1, ball outside x=2, P x=1, C->P=(-1,0). Moving into wall left v_x<0, dot n = (-)*(-1)? v=(-1,0), n=(-1,0), dot=1 >0, good. Impulse -(1+e)*1*n = +1,0? Wait -n = (1,0) pushes outward? Let's compute: n = (-1,0). Impulse = -coef * n = (1,0) pushes right, wrong. Hmm if n from ball to wall, for outside side x=1, n=(-1,0). To push ball into interior (left), impulse should (-1,0) = n, not -n. For inside side x=1, ball x=0, P x=1, n=(1,0). To push inward (left), impulse -n=(-1,0). So direction depends on whether ball center inside or outside? That suggests normal should always point from wall to ball (interior side) for response, not from ball to wall. Let's revisit.
+
+Standard collision: normal n points from object to world? If constraint C >=0? For a ball inside a closed polygon, the wall is a constraint that ball must stay inside. The outward normal from polygon side n_out points outside. The signed distance of center to side: s = apothem - C·n_out (positive inside). If s < r collision. Contact normal for ball should be n_out? Actually to push ball inward, apply impulse along -n_out. The relative velocity into wall is dot(v - v_wall, n_out) >0. Impulse = -(1+e) * vn * n_out. This works for inside. If ball center outside near side, C·n_out > apothem, s negative; closest side maybe. n_out still outward; ball is outside, but moving into wall? If ball outside x=2 side x=1, n_out=(1,0). v into wall left v_x<0 => vn<0. Formula with vn>0 only? It would not correct if vn<0. If we condition on penetration and vn > 0? For outside, ball may be moving out (vn>0) or in (vn<0). To restore inside, need push inward regardless? But if outside and moving inward (vn<0), should allow pass? It shouldn't be outside; we can teleport/correct. We can ensure ball never outside by substeps and constraints; if outside, force position inside and set velocity inward. Could handle by checking inside polygon: if outside, compute closest point and push to inside, set velocity component into interior. But easier: keep containment robust so centers remain inside (or at least not far outside). Then n_out method fine.
+
+Using edge segment closest point, for center inside, vector P->C? For side, P->C = inward (opposite n_out). But if we use n_out from polygon side, not necessarily equal to normalized C-P? For side yes; for vertex, n_out? For vertex collision, the normal should be from vertex to ball center (inward) for response? If ball inside near vertex, P=vertex, C-P points inward (from vertex to ball). Wall velocity at vertex. To push away from vertex into interior, impulse along C-P (inward). This is normal from wall to ball. Condition relative velocity along n (wall to ball): if v_rel·n < 0 (moving toward wall/vertex). Apply impulse along n. This is simpler. For inside, n = (C-P)/dist (from wall to ball). If vn < 0, impulse = -(1+e)*vn n (positive along n). Good. For outside, this n points outward (if P->C outward), and moving into wall vn? Example outside side x=2, P x=1, C-P=(1,0) outward. v left v=(-1,0), vn=-1 <0, impulse = -(-1)*n = n=(1,0) outward wrong. But if we ensure inside, okay. Could if outside, invert n? Maybe robust: determine if center inside polygon; if inside, n = P->C; if outside, n = P->C? We need push inside, so if outside, n should be C->P (from ball to wall) and condition? Let's define response general: We want normal n_response pointing in the direction we will push the ball (the direction of applied impulse). For inside, push away from wall = P->C. For outside, push into interior = P? Actually if outside near side, push toward P = C->P. This is not same formula. But if ball outside, we can first project position to inside and set velocity zero normal. We can just avoid outside by enough substeps.
+
+Alternative: Use polygon half-space constraints (sides) with outward normals, robust for center inside. It handles corners? Not vertices exactly but for convex polygon if center inside, violating a side means collide with side; if near corner, multiple sides violated? At corner inside, both adjacent sides may be close; using both side halfspaces can push. But if ball hits exact vertex from inside, both side normals contribute, resulting normal bisector. That's okay. Could avoid segment closest point. But realistic corner collisions? The side plane extension may cause collision when ball is inside but outside side plane? For a convex polygon, interior is intersection of halfspaces. If center inside, it satisfies all d_i <= apothem. Ball collision if d_i > apothem - r. If near a vertex, two sides may be within r; resolving both yields a push roughly inward from corner. This is stable. It doesn't need finite segment checks because center inside. If center outside, some side d_i may be > apothem but the side whose halfspace is violated might not be closest; but can project. However using all sides with normal outward and impulse -(1+e)*vn*n_out (if vn>0) pushes inward for inside. If outside, vn could be <0 and condition fails; but position correction can push inside. We can add if center outside (violates any halfspace deeply), push back to satisfy constraints (no restitution maybe) and adjust velocity.
+
+Maybe easiest and robust: Represent heptagon as 7 planes with outward normals n_i (unit) at distance apothem from center. The ball is contained if for all i, dot(q, n_i) <= apothem - r. Penetration p_i = dot(q,n_i) - (apothem - r). If p_i > 0, collision with side i. Contact point for wall velocity: closest point on side plane within edge? We can use projection onto side plane and clamp to segment to get actual contact point. The normal is -n_i (inward) for impulse? Let's define n_out = n_i. Ball should be pushed along -n_out. Relative velocity v_rel = v - v_wall. vn = dot(v_rel, n_out). If vn > 0, approaching outward. Apply impulse to v: v += -(1+e)*vn * n_out. Position correction: q -= p_i * n_out (move inward). Friction tangential with normal n = -n_out (direction of impulse) or use n_out and tangential. Contact point on ball for spin: rc = r * n_out? Wait n_out points from polygon center to outside side. Ball center q; contact point on ball at q + r * n_out? If side is outside, ball surface point toward wall is q + r*n_out (since n_out points to wall). The radius vector from ball center to contact point is r*n_out. Wall velocity at contact point world = ω × (contact_point - center). But contact point on wall is maybe projection of q onto side plane (and clamped to segment). The actual contact point on ball = q + r*n_out, but if side finite and clamped, direction may not exactly n_out for vertex. For side plane method, use rc = r*n_out.
+
+This halfspace method is simpler and stable. Does it handle corners? If ball near corner, it may violate two sides; applying both side impulses can produce effective corner bounce. But the contact point for each side plane may be outside the actual edge segment? For a regular polygon, if center inside and near corner, projection onto a side plane may lie outside the edge segment. The ball might actually collide with vertex, not side extension. If we apply side plane normal when projection outside segment, it may push incorrectly (using extended side). Example near vertex, ball may be close to vertex but side projections beyond endpoints; both side extensions can push but maybe okay? Could produce too much push. We can incorporate segment check: For each side, compute closest point on segment to ball center; if distance < r and the closest point is on the segment interior, use side normal n_out; if closest point is endpoint (vertex), use vertex normal (from vertex to ball center) or maybe skip to vertex handling. But we can implement distance to edges and classify. Need robust but not too complex.
+
+Let's design a function ball_polygon_collisions(ball):
+- q = ball.pos - center.
+- For each edge i from vertices v_i to v_{i+1} (local coordinates rotated? We can compute world vertices or transform ball to local frame). Better compute in local polygon frame: ball local pos = rotate(q, -heptagon_angle). Edges fixed. Outward normals fixed. For each edge, get closest point P on segment to local center q. dist = |q-P|. If dist < r:
+   - Determine if closest point is interior of segment (not endpoint). We can use parameter t. If 0 < t < 1: side contact. Normal in local coords n = outward normal of edge (or normalize q-P? For interior, q-P is inward (from side to ball) = -outward? Let's be careful. Edge vertices around polygon CCW? In canvas coords angle increasing clockwise; polygon orientation maybe clockwise. Outward normal can be precomputed. For interior side, vector from P to q = -n_out * dist (if q inside). So inward normal = (q-P)/dist = -n_out. The impulse direction should be inward (away from wall) = n_wall_to_ball = (q-P)/dist. We'll call n_contact = (q-P)/dist (from wall to ball). For side interior, n_contact = -n_out.
+   - If closest point is endpoint (vertex), n_contact = (q-P)/dist (from vertex to ball). This is inward for inside. Good. For outside, q-P may outward, but we assume inside; if outside maybe problematic. Could if center outside polygon (point_in_polygon false), invert n_contact? But let's add robust inside check: if not point_in_polygon(q, vertices): then use n_contact = (P-q)/dist? But impulse direction? We can just project position to inside by setting q = P + (P - q) *? Let's think. If outside, the ball should be moved to P - ? Actually if outside near side, P is boundary, vector P-q points inward (from ball to wall? wait q outside x=2, P x=1, P-q = (-1,0) inward). The direction to push is P-q. So impulse direction = P-q = - (q-P). Thus if outside, n_push = (P-q)/dist. If inside, n_push = (q-P)/dist. This is simply n_push = sign? We can determine inside using dot(q,n_out) < apothem - epsilon for all sides. If inside, n_push = (q-P)/dist; if outside, n_push = (P-q)/dist. But for outside near vertex, P-q inward. Good.
+   - However relative velocity condition: For inside, n_push is from wall to ball. Approaching wall means v_rel·n_push < 0. For outside, n_push is from ball to wall (inward). Approaching wall? If outside moving into polygon, v·n_push >0? Example outside x=2, P-q = (-1,0), v left = (-1,0), dot=1 >0. Applying impulse along n_push? If we use impulse = - (1+e) * dot(v_rel, n_push) * n_push? For outside, dot positive, impulse = -positive * n_push = opposite n_push (outward), wrong. If use same formula with condition depending on inside/outside? To avoid complexity, assume inside. Could enforce position inside strongly so outside not happen. Use substeps and position correction. We can also if outside set velocity normal to point inward and no bounce.
+
+Maybe implement simpler: Always ensure after position correction center satisfies all halfspaces (inside). Use halfspace constraints for position correction. For collision response, use side normals only when center inside. If outside, just project to inside and set velocity zero normal (inelastic) or reflect inward. But outside rare.
+
+Could use a generic signed distance field (SDF) for convex polygon: find closest point P on boundary and inside boolean. The signed distance = dist if inside else -dist. The normal for constraint (gradient of distance) is (P - q)/dist? Let's define SDF positive inside? For inside, dist positive, normal gradient = (q-P)/dist? Actually distance to boundary inside increases moving inward, gradient points inward = (q-P)/dist. For outside, distance (positive distance) gradient points outward? If signed distance positive inside, outside negative, gradient = (P-q)/dist (points inward) maybe. For collision, we need push in direction of gradient of signed distance (increases signed distance, into interior). Let s = signed distance from center to boundary (positive inside, negative outside). If s < r? Wait if inside, signed dist = distance to boundary (positive). Ball collision if signed_dist < r. If outside, signed_dist negative < r always. Gradient ∇s points toward increasing signed distance (inside) = (q-P)/dist if inside, (P-q)/dist if outside. We can compute sign via point_in_polygon. Then n = ∇s (unit). Penetration = r - s (if s < r). For response, relative velocity v_rel; if dot(v_rel, n) < 0 (moving to decrease signed distance, toward boundary/out), apply impulse along n. This works for inside and outside! Let's test outside side x=2, boundary x=1, signed s=-1, gradient n = (P-q)/dist = (-1,0) (inward). Ball moving left v=(-1,0), dot(v,n)=1 >0 (moving to increase signed distance, into interior), so no bounce; position correction pushes inward? If outside and moving further out v=(1,0), dot=-1 <0, bounce/impulse along n (left) inward. If outside but moving inward, we still need position correction to remove penetration (s negative, penetration r - s > r) and maybe no bounce. Good. For inside near side x=0, boundary x=1, s=1, n=(1,0) outward? Wait inside x=0, P=(1,0), q-P=(-1,0) from boundary to ball, gradient of signed distance inside: moving left increases distance to boundary, so n=(-1,0) (inward). q-P = (-1,0). Good. Ball moving right into wall v=(1,0), dot(n)=-1 <0, impulse along n=(-1,0) inward. Good. So n = gradient of signed distance (toward interior, increasing signed distance) works universally. For a vertex inside, q-P points inward from vertex to ball; gradient inside? yes. For outside vertex, P-q points inward. Great.
+
+Thus implement SDF for convex polygon:
+- vertices in local coords (fixed) in order.
+- For ball local center q, compute inside = point_in_polygon (using halfspaces maybe). For regular heptagon, can check all sides dot(q,n_out_i) < apothem. Or ray casting.
+- Find closest point P on polygon boundary (edges segments). dist = |q-P|. If dist == 0, choose normal from polygon center? (rare). Signed distance s = dist if inside else -dist.
+- Normal n = (q-P)/dist if inside else (P-q)/dist. This is unit direction of increasing signed distance (into interior). For inside, points away from boundary into interior; for outside, points into polygon (away from outside). Good.
+- Penetration = r - s. If s < r (i.e. distance to boundary less than r, including outside), collision. Position correction: ball.pos += n * max(pen - slop, 0) maybe. But if outside s negative, pen = r + |s|, push inward by full. Use Baumgarte position correction: ball.pos += n * pen * percent? For stability, can fully correct position (or a percentage). But if we fully correct every frame, may cause energy? Position correction after velocity response okay. Use linear projection: move ball along n by pen * 0.8 maybe; also if pen large, full. But full correction could teleport; okay.
+- Velocity response: Wall velocity at contact point. Contact point? The actual point on ball surface nearest boundary is ball center - r*n? Wait n is direction into interior (away from boundary). For inside, n points from boundary to ball interior? At side, n inward (left). The ball surface point toward boundary is center - r*n (since n points away from boundary). For outside, n points into polygon (left), ball surface point toward boundary (right) is center + r*n? Let's define contact point on ball = center - r*n? If n points into interior, boundary is opposite direction, so surface toward boundary = center - r*n for inside. For outside, n points into interior, boundary is opposite direction as well? Outside x=2, n left; boundary at x=1 left of ball, so surface toward boundary = center -? center - r*n = 2 - (-1)*r? If n=(-1,0), center - r*n = 2 + r (right), not boundary. So need contact point on ball toward boundary = center - r * gradient? Wait gradient n points increasing signed distance (into interior). The boundary is in direction of decreasing signed distance, i.e. -n. For inside, -n is outward to boundary. For outside, -n is outward away from polygon (to the outside direction), but boundary lies between ball and interior, i.e. along n? Let's see signed distance s negative outside; gradient points toward increasing s (inside, left). Boundary is along +n from ball? From x=2 to x=1 left = +n. So boundary direction is sign? For inside s positive, boundary direction is -n. For outside, boundary direction is +n. So contact point on ball = center - r * boundary_dir = center - r*sign(s)*n? If inside sign=+1, boundary_dir=-n => contact = center - r*(-n)=center + r*n? Wait inside side x=0, boundary right x=1, n left. center + r*n = 0 - r (left), wrong. Let's recalc: inside x=0, boundary right. n = q-P = left. boundary_dir = P - q = right = -n. Contact point on ball toward boundary = center + r*boundary_dir = center - r*n. For n left, center - (-r? Actually n=(-1,0), center - r*n = (0,0) - r*(-1,0) = (r,0) right. Good. So inside contact = center - r*n. Outside x=2, n left, boundary_dir = P-q = left = n. Contact = center + r*n = (2-r,0). Good. Thus boundary_dir = -n if inside else n. contact_ball = center + r * boundary_dir = center - r*n*inside + r*n*outside = center - r*n * sign(s)? Since sign(s)=+ inside, - sign = -1 -> center - r*n; sign=- -> + r*n. So rc = -r*n*sign(s). But for spin, radius vector from ball center to contact point = r * boundary_dir.
+- Wall contact point P (boundary closest). Wall velocity = omega x (P - polygon_center) (world). In local frame, wall velocity in local rotating frame? We can compute in world or local. If we transform ball to local frame, its local velocity must account for rotating frame: v_local = R(-θ) v_world - ω × q? Because local coordinates rotating with heptagon. Easier do physics in world coordinates: compute world vertices and closest point? Or compute local q and local P, normal local, then transform normal and velocity to world. For wall velocity at P world, use world P. For ball velocity world. We can compute in local frame with relative velocity including Coriolis? Better to do collision response in inertial world coordinates. Steps:
+   1. Get world vertices (center + R*rotate(local_vertices, θ)).
+   2. For ball world pos, find closest point P_world on polygon boundary (using world edges) and inside boolean. Compute dist, signed s, normal n_world (gradient into interior).
+   3. Boundary direction b_dir = -n if inside else n. rc = r * b_dir (world vector from ball center to contact point on ball). Contact point on ball = pos + rc. Contact point on wall = P_world (should be approximately pos + r*b_dir? For inside, P = pos -? pos + r*b_dir). Use P_world for wall velocity.
+   4. Wall velocity v_wall = omega x (P_world - center). (2D cross scalar: (-omega*dy, omega*dx)).
+   5. Relative velocity at contact includes ball surface velocity: v_contact_ball = v + ω_ball × rc. But for normal restitution, should use center velocity or surface? Normal component unaffected by spin because rc perpendicular? rc is along boundary_dir which is parallel to n (or -n). ω×rc is perpendicular to n, so normal component same as center velocity. Use v_rel = v - v_wall for normal. For friction, use surface relative velocity: v_surf_rel = v + ω_ball×rc - v_wall. Then tangential component.
+   6. vn = dot(v_rel, n) (n into interior). If vn < 0 (moving decreasing signed distance, into wall), apply normal impulse: v += -(1+e_wall)*vn * n. If vn >=0, no normal impulse (but position correction still). For restitution, maybe use coefficient e.
+   7. Friction: t_vec = v_surf_rel - dot(v_surf_rel, n)*n (after normal? Use pre-impulse surface relative? Standard: after normal impulse, tangential relative velocity unchanged initially. Compute t = v_surf_rel - vn*n (before normal). Desired remove tangential with friction. Friction impulse magnitude on ball Jt = -t * min(1, μ*|Jn|/|t|)? For wall infinite mass, normal impulse magnitude |jn| = (1+e)*max(0, -vn)? Wait vn negative, normal impulse on ball = -(1+e)vn n, magnitude = -(1+e)vn (since n unit). For friction, Jt_vec magnitude <= μ * |jn|. Apply impulse to linear velocity: v += Jt_vec. Angular velocity update: torque = cross(rc, Jt_vec); ω += torque / I. But if we change v, it changes vn slightly? Jt tangential so no normal change. Good.
+   8. Rolling/sliding friction may also affect spin. If relative tangential velocity at contact zero but spin persists, apply small angular damping. We can always apply spin damping: ball.spin *= (1 - spin_damping*dt). Maybe tangential rolling resistance. Also if in contact and no sliding, static friction could set surface velocity to zero; our friction impulse does that if enough μ.
+   9. Position correction: move ball center along n by penetration * percent. If outside, this moves into polygon. If we move center, rc changes slightly; okay.
+
+But if using closest point on world edges for each ball each frame, 20*7 segments okay.
+
+Point inside polygon: For convex, use all edges orientation. Need know vertices order. We can generate vertices in increasing angle: angle_k = θ + k*2π/7. In screen y down, this order is clockwise (because y down). The signed area? Let's compute local vertices [R cos(0), R sin(0)], [cos(2π/7), sin(2π/7)] etc. With y down, sin positive downward, points go clockwise? In standard math y up, increasing angle CCW; in canvas y down, increasing angle visually CW but coordinate algebra same (right-handed? Actually coordinates are just x right y down; standard cross product with z out is left-handed? But orientation sign in coordinate system is consistent: area = sum x_i y_{i+1}-... For regular polygon increasing angle, area positive? Let's check 0 to 2π/7: cos0=1, sin0=0; next cos~0.623, sin~0.782. Cross x1*y2 - y1*x2 = 1*0.782 -0=0.782 positive. Sum positive. So polygon vertices in coordinate system are CCW in the algebraic sense? But visually CW. Orientation doesn't matter if we compute normals via edge cross.
+
+For closest point on segment, need edges in order. Outward normals: For an edge from A to B, if polygon is CCW in coordinate algebra, inward normal is (dy, -dx)? Let's derive. For CCW polygon, interior is left of edge. Edge tangent t = B-A. Left normal = (-t_y, t_x). That's inward for CCW. Outward = (t_y, -t_x). But we may not need normals if using closest point and inside test. For inside test, can use ray casting or halfspaces. Since polygon regular, we can compute center distance to edges: for each edge, inward normal n_in (left normal). A point inside if dot(q - A, n_in) >= 0 for all edges (if CCW). Or use halfspace with outward. Let's generate local vertices; compute edge tangent; n_in = normalize((-ty, tx)) (left). For each edge, dot(q - A, n_in) should be >=0 if inside (assuming CCW). Need verify for vertex order increasing angle: edge from angle 0 to 2π/7. A=(R,0), B=(0.623R,0.782R). Tangent=(-0.377R,0.782R). Left normal = (-0.782, -0.377) (points inward? At edge midpoint angle ~π/7, inward direction toward center is angle π/7 + π =? Actually side outward normal angle = π/7? Wait vertex angles 0 and 2π/7; side midpoint angle π/7, outward normal points away from center at angle π/7 (cos .901, sin .434? Hmm). Let's compute edge A(1,0), B(.623,.782). Tangent=(-.377,.782). Left normal=(-.782,-.377). Midpoint (.811,.391). From midpoint to center = (-.811,-.391) proportional (-.782,-.377) yes left normal inward. Good. So inside if dot(q - A, n_in) >=0.
+
+But for SDF normal, using closest point and inside boolean enough.
+
+Closest point on segment algorithm:
+def closest_point_on_segment(p, a, b):
+    ab = b-a; t = dot(p-a, ab)/dot(ab,ab); clamp 0..1; return a + t*ab, t.
+Need classify endpoint if t <= eps or >=1-eps. But for SDF normal, we don't actually need classify; normal = (q-P)/dist (inside) or (P-q)/dist (outside). This works for vertex and side. Dist may be zero if center on boundary; choose fallback normal = normalize(q - center) maybe? If dist < 1e-9, set normal = normalize(q - center) if inside? If center exactly at center, dist to boundary=apothem >0 no collision if r small. If dist=0 only if on boundary; fallback to polygon center direction: n = normalize(center - q)? Wait if on boundary, signed distance 0; need normal into interior. Use closest point P, q=P; q-P=0. We can use normal from boundary to center: n = normalize(center - P) (toward polygon interior). Good.
+
+However using closest point on boundary and signed distance for a ball center inside but near a side: P is projection on segment (or vertex). n = (q-P)/dist points from boundary to ball center. This is not necessarily exactly perpendicular to side if P is vertex; that's correct for corner. For side, n inward perpendicular.
+
+Penetration = ball_radius - signed_distance. But if signed_distance computed as dist to closest boundary point. For a ball inside, signed distance to boundary = dist. Collision if dist < r. Correct. For outside, signed_distance = -dist; collision if -dist < r always, pen = r + dist. Position correction pushes to boundary? If we move by pen along n (into interior), new signed distance = s + pen = r? For outside s=-d, pen=r+d, move along n (into interior) by r+d, center ends at distance r outside? Wait if outside, n into interior. Moving by r+d along n from q: if boundary at distance d along n (P = q + d*n? outside, n=P-q/d yes). Move by d puts at boundary, plus r puts inside distance r. Good. So center signed distance becomes r. Good.
+
+Position correction percentage: If we fully move to s=r, might add energy? Position correction doesn't change velocity, can add potential? okay. Use percent 0.8 to avoid jitter, plus maybe small extra. For containment, full correction may be better. We can do ball.pos += n * pen * 0.8 each substep. If still outside after, maybe clamp. But with substeps and velocity, fine. Could use 0.9.
+
+Need compute wall velocity at P. But if using closest point on boundary, P may be vertex. Good.
+
+Ball-ball collisions with spin:
+Need robust for many balls. Use O(n^2) 20 okay. For each pair, if dist < 2r. If dist=0, use deterministic normal. Use n from i to j. This normal points from i to j; for response, impulse direction on i = -n, on j = +n. Normal component vn = dot(v_j - v_i, n). If vn < 0 approaching. Normal impulse scalar Jn = -(1+e_ball)*vn / (1/m_i + 1/m_j) = -(1+e)*vn / (2/m). If m=1, delta_v = Jn/m? Let's define Jn scalar such that impulse on i = -Jn*n, on j = +Jn*n. To get relative normal after: (v_j+Jn/m n - (v_i - Jn/m n))·n = vn + 2 Jn/m. Set = -e vn => Jn/m = -(1+e)vn/2. So if m=1, Jn = -(1+e)vn/2. Apply v_i -= Jn*n, v_j += Jn*n. Since vn<0, Jn>0.
+Friction: contact point for i rc_i = r*n (toward j), for j rc_j = -r*n.
+Relative surface velocity = (v_j + ω_j×rc_j) - (v_i + ω_i×rc_i). Tangential t = rel_surf - dot(rel_surf,n)n. Friction impulse scalar/vector on j? Let Jt_vec be impulse applied to j (i gets -Jt_vec). To reduce tangential relative, Jt_vec = -t * min(1, μ*Jn/|t|) if Jn>0. Apply v_i -= Jt_vec, v_j += Jt_vec. Angular: torque_i = cross(rc_i, -Jt_vec); torque_j = cross(rc_j, Jt_vec); ω_i += torque_i/I; ω_j += torque_j/I.
+Need use Jn magnitude for Coulomb. If no normal impulse (separating), maybe Jn=0 no friction. If vn <0, Jn positive. If we also position correct, okay.
+Restitution ball-ball maybe same e or lower. Could use e_ball = e_wall or 0.5. Material bounce height likely wall. Use e = 0.65? Let's choose values.
+
+Spin drawing:
+Each ball has angle (radians) representing number orientation. Each frame angle += spin * dt (or substep). Positive spin? We need drawing. Tkinter canvas create_text angle option rotates text. According to Tk docs, angle: specifies angle in degrees through which to rotate the text. Rotation is clockwise? I think positive angle rotates text clockwise. In our coordinate system, angular velocity positive? We need define cross product. Let's define angular velocity scalar positive means counterclockwise in the mathematical coordinate system used for physics (x right, y up? But screen y down). We need settle.
+
+In 2D vector math, we can use scalar ω and cross(ω, rc) = (-ω*rc_y, ω*rc_x) if using right-hand z out of screen with x right y up. But screen y down, if we still use formula, positive ω will rotate rc how? For rc=(1,0) (right), cross = (0,1) (down on screen). So positive ω moves point at right downward, which is clockwise visually. In canvas, positive angle maybe clockwise. So positive spin will rotate number clockwise visually if we draw angle=degrees(ω integrated). If we use angle += spin*dt and canvas angle=math.degrees(angle), positive spin clockwise, matches formula? Let's check: If number initially at top? The formula for surface velocity positive spin at right point downward (clockwise). The number on ball should rotate clockwise. So angle_deg = degrees(ball.angle) with positive angle clockwise. Good. We can just set ball.angle += ball.spin*dt and draw text with angle=math.degrees(ball.angle) (maybe positive clockwise). Need verify Tk canvas positive angle clockwise? I believe yes: "Angle of rotation in degrees, clockwise". Let's assume. If not, not critical? User wants numbers indicate spin; direction might be opposite but visible. Could add comment.
+
+Need render heptagon spinning. Use polygon points. Balls: create ovals with color, text number. Need update each frame. Use canvas.itemconfig on precreated items. For number rotation, canvas.create_text has angle; itemconfig('angle', ...). But rotating text around its center? create_text anchor center, angle rotates around anchor? It rotates around the anchor? If anchor center, okay. The text may not have bounding? Should be okay.
+
+Use tkinter after loop. Need maybe request_stop. Single file.
+
+Simulation details:
+- Use fixed dt = 1/240 sec? Use substeps. In after loop, accumulate real time, step multiple fixed steps. To keep simple, each after call dt = min(1/60, elapsed) and substeps e.g. 4 of dt/substeps. But for stability, fixed h = 1/120 or 1/240. Use time accumulator.
+- Units: pixels per second. Gravity choose e.g. 1200 px/s². Heptagon R maybe 350, ball r=16. Spin, friction. Need tune for visible bouncing.
+- Restitution: To satisfy bounce height constraint: Choose max_rebound_height maybe R*0.7? Let's compute if e_wall=0.75, drop height h ~ R? rebound = 0.5625 h. If h≈R-r? less than R, >r if R large. Maybe e=0.7. If ball dropped from center to lowest point: h ≈ R - r? For R=380, r=16, h≈364. e=0.7 => rebound 178 px >16, <380. Good. e=0.8 => 232 <380. e=0.9 =>287 <380. All <R. "not exceed radius, but higher than ball radius" Could pick e=0.85? rebound 0.7225*(R-r) <R if R-r <1.38R yes. For small h, rebound can be <r. But material property maximum? We can comment choose e=0.78 so max rebound from full radius drop is 0.6*R? Actually if drop from top to bottom inside radius? Max fall height maybe 2(R-r) if ball at top to bottom. Rebound = e²*2(R-r). To not exceed R, e²*2(R-r) <= R => e <= sqrt(R/(2(R-r))). If R=380,r=16, e<=sqrt(380/(728))=sqrt(.522)=.722. If drop from center only, max fall h≈R-r, e<=1. But "impact bounce height" maybe from impact with wall after falling from center? Hmm. To be safe, choose e such that even max possible drop 2(R-r) rebound < R and > r. e=0.7 gives max rebound 0.49*728=356.7 <380 and >16. Good. If R much larger relative r, e=0.7 max rebound 0.49*2R=0.98R if r negligible, close but below. Use e=0.68: 0.462*2R=0.924R. Good. Higher than ball radius: if max h small? For max possible, yes. Choose e_wall=0.68. For ball-ball maybe 0.6.
+- But user: "The material of all the balls determines that their impact bounce height will not exceed the radius of the heptagon, but higher than ball radius." Maybe they want set coefficient based on dimensions: e = sqrt(2*target_rebound_height / max_drop_height)? We can define target_rebound_height = (R + r)/2? Hmm. Or set e = sqrt((R - r)/(2*(R - r)))? No.
+Could implement property: MAX_BOUNCE_HEIGHT = (HEPTAGON_RADIUS + BALL_RADIUS) / 2? But must not exceed heptagon radius and higher than ball radius. Choose e_wall = math.sqrt(MAX_BOUNCE_HEIGHT / MAX_DROP_HEIGHT) where MAX_DROP_HEIGHT = 2*(HEPTAGON_RADIUS - BALL_RADIUS) (max inside). If set MAX_BOUNCE_HEIGHT = 0.45*HEPTAGON_RADIUS (higher than ball radius if R large). Then e≈sqrt(0.45R/(2R))=0.474. That seems low. If set 0.8R, e≈sqrt(0.8R/(2R))=0.632. Rebound max 0.8R (<R, >r). Good. Let's set MAX_BOUNCE_HEIGHT = 0.8 * HEPTAGON_RADIUS (and ensure > BALL_RADIUS). e_wall = sqrt(MAX_BOUNCE_HEIGHT / (2*(R-r))) = sqrt(0.8R/(2R)) ≈0.632. If R/r not huge, still <1. If R=380,r=16, max drop 728, rebound=0.8*380=304, e=sqrt(304/728)=0.645. This ensures maximum possible bounce height 0.8R < R and >r. Good. But if ball drops from center h≈R-r=364, rebound=e²h=0.416*364=151 >16. Good.
+Need ensure e <=1. If R not much larger than r, e may >1? R=2r? max drop=2r, max bounce=1.6r, e=sqrt(0.8)>1? 0.8/2=0.4 e=.632 still <1 because max drop 2(R-r)=2r, max bounce 0.8R=1.6r => e²=0.8? Wait 1.6r/(2r)=0.8 e=.894. <1. If R=1.2r, max drop=0.4r, max bounce=0.96r => e²=2.4 >1. But our R large. We can clamp e to 0.95.
+- Ball-ball restitution can use same e or maybe 0.5. Use e_ball = min(e_wall, 0.7) or 0.55.
+
+Friction coefficients:
+- Wall friction μ_wall = 0.2? For spin. Maybe 0.35.
+- Ball-ball friction μ_ball = 0.2.
+- Spin damping: 0.2/s? To slow spin.
+- Linear damping: 0.02/s? small.
+
+Gravity: 900 px/s². With R 380, balls settle.
+
+Heptagon angular speed: 2π / 5 = 1.256637 rad/s. 360 deg/5 sec.
+
+Canvas size: maybe 900x900, center 450,450, R=400? Window maybe 850? Need heptagon fit: circumradius 400 needs canvas 800+ margin. Use width=840, height=840, center=420, R=380. Ball radius 14? 20 balls area 12315, hept area with R=380: 1.75*144400*0.481=122,? 144400*0.841? Wait area factor 1.75*0.481=0.841; *144400=121,? 144400*0.841=121,? 121,? 20 balls area 12315, ~10%. Good. Ball r=14 maybe. Use R=380, r=14. Max possible bounce height 0.8R=304 >14.
+Could use window 860x860, R=390, r=15. Need fit: canvas width=880, height=880, center=440, R=390, margin 50. Use 900x900, center=450, R=400, r=16. Window 900x900, polygon touches near edges if R=400, margin 50. Good.
+
+Initial positions:
+Option: all at center with deterministic offsets on small circle. To satisfy "drop from heptagon center", we can set base center and if we offset, maybe they are not exactly center. But exact overlaps impossible. We can implement initial positions exactly center, and in first few substeps if distance < 1e-6 use deterministic separation. But with all exact, pair collision normal undefined. We can at initialization perturb by 0.1 pixel in a spiral. Maybe acceptable. Let's create positions: for i in 0..19, angle = i*2π/20, radius = 0.0? If radius 0, same. Use small radius = 0.25*BALL_RADIUS? That's 4 px for r=16. They are at center cluster. Maybe comment: "The nominal drop point is the heptagon center; a sub-pixel/cell deterministic spread is used only to avoid exactly coincident starts." Use radius = 0.2*BALL_RADIUS? That's still near center. Or use a small hexagonal grid with spacing = ball_radius*1.05 around center. That is not center for outer balls (up to maybe 3r). Requirement strict? Could be okay if "drop from center" means release at center area. To be safer, use all exact center and handle zero distance by assigning temporary random tiny offsets each time? But visual start: all overlapping at center, then explode. That is physically impossible but simulation can handle if we add separation. We can initialize exact center, and before simulation, run a few separation iterations to place them in a small cluster? That violates exact? But after start they drop. We can say they are dropped from center; the simulator resolves the impossible exact overlap by a tiny deterministic displacement. In code, initial positions = center for all. Then in setup, call separate_initial() that if dist < 2r, moves along golden angle by small amount. This keeps them near center. Good.
+
+Maybe better: start all at center but with a tiny radial offset based on index: offset_radius = 0.05 * BALL_RADIUS (0.8 px) plus angle. That is effectively center. Use no big cluster. Then collision solver will separate them over first frames. With small offset, normal directions defined. It will create an initial outward push due to overlaps. That's okay.
+But if all offsets radius 0.8, distances between adjacent ~0.5? Still overlapping heavily. The solver will push them apart. Could be explosive due to 20 overlaps. Use position correction and velocity impulses maybe large. To avoid explosion, we can do a pre-solve to relax overlaps without velocity: run 100 iterations of position only separation for initial cluster. But then they start not at center? They will spread maybe to pack radius ~? 20 balls packed around center extends ~3r=48 px. Still near center relative R=400. Could call that starting from center? Hmm.
+Maybe simplest: initialize in a small circle with radius = (count//2)*ball_radius? That's not center. But user likely won't inspect exact; just see balls start in middle. I'd choose a neat deterministic cluster (e.g., 5x4 grid) centered at heptagon center with spacing = ball_radius*1.01. It will look like dropped from center (a group at center). But requirement says all balls drop from center, not cluster. However exact center impossible; cluster is reasonable.
+Need final answer can explain that exact coincident centers are non-physical, so a minimal deterministic spread is used while the release point is the center. The code can set start positions with small offsets. Good.
+
+Let's decide: BALL_RADIUS = 16. Initial cluster: arrange 20 in a circle of radius = 3.5*BALL_RADIUS? That is 56 px. Still center. Or use two rings: 6 inner, 14 outer? Maybe overkill. A simple small circle radius = 4*BALL_RADIUS (64) with 20 points. They are separated? Circumference 2π*64=402, spacing 20 px < 2r=32, still overlaps. Need spacing >32: radius = 20*32/(2π)=102. That's not tiny but still central (R=400). A single circle radius 100, balls spacing 31.4 just touching. But not center. Maybe use a packed grid 5x4 spacing 33, extent 132x99. Still central. But all not at center.
+Could use exact center and let solver handle; initial explosion might be dramatic but okay. Need avoid instability. We can initialize exact center and assign zero velocities. In physics, pair collision with dist=0: use deterministic normal based on index difference; apply impulses. But 190 pairs with zero dist will produce many equal impulses? Could blow. We can pre-relax positions using only positional correction to a stable packing near center, without velocities. This is a common trick. Then "drop from center" means their centers start at the center and are then separated by the collision solver before first visible frame? We can do initial relaxation for a few frames with gravity? Hmm.
+Maybe set initial positions exactly center, run 60 substeps of position-only separation (no gravity/velocity) to resolve overlaps into a stable cluster. Then set velocities zero and start. The positions after relaxation will be near center but packed. The user sees them start clustered at center, acceptable. In code comments: exact center initial condition is degenerate; we perform an initial overlap relaxation while keeping the release point at the center.
+But requirement "All balls drop from the heptagon center when starting." If we pre-relax, they don't all drop from exact center. But no alternative. I'll mention in final explanation.
+
+Physics integrator:
+Use semi-implicit Euler: v += g*dt; v *= damping; pos += v*dt; spin *= damping; angle += spin*dt.
+Substeps: h = dt / substeps. For each substep:
+- integrate velocities (gravity, damping)
+- integrate positions
+- ball-ball collisions (maybe multiple iterations for stacks)
+- wall collisions
+- maybe resolve ball-ball again after walls?
+For 20 balls, can do 2 iterations of pair collisions per substep for stability.
+Use fixed h = 1/240. substeps from accumulator.
+Need handle many collisions: Use iterative solver:
+for iteration in range(2):
+  resolve_ball_pairs()
+  resolve_walls()
+  maybe resolve_ball_pairs()
+Position correction in pair and wall.
+
+Collision response details with spin:
+Define Ball dataclass:
+ x,y, vx,vy, spin, angle, radius, color, label, id
+ methods? Use functions.
+
+Vector operations with tuples (x,y) or lists. Use numpy? Allowed but not necessary. Could use lists for simplicity. Maybe use dataclasses.
+
+cross2(rc, f) = rc[0]*f[1] - rc[1]*f[0]. This gives positive torque? Need consistent with spin and surface velocity formula. If surface velocity v_surface = v + spin x rc, with cross(spin, rc) = (-spin*rc_y, spin*rc_x). Then torque = cross(rc, F) (standard). Angular momentum update I*α = torque. Sign: If force on right side downward (rc=(r,0), F=(0,-F)), torque = r*(-F) - 0 = -rF (negative), so spin negative (counterclockwise? with our formula positive spin at right point down? Wait positive spin at rc=(r,0) gives surface velocity (0, r*spin) downward if spin positive. To produce that, torque negative? If spin positive, angular acceleration positive. Torque = I*alpha. But if force downward on right side, it should rotate clockwise (positive in our screen?), torque in standard right-hand with y up would be negative (CW). But our positive spin formula gave surface at right downward, which is CW. So positive spin corresponds to clockwise visually, but torque formula cross with y down? Let's be consistent. In 2D algebra with y down, the cross product z = x*y? Actually standard cross with coordinates (x,y) and z out gives torque positive for CCW in mathematical plane (y up). But in screen y down, positive torque (cross rc,F) yields? Example rc=(1,0) right, F=(0,1) down (positive y). cross = 1*1 - 0 = +1. This force down on right side rotates clockwise visually. So positive cross corresponds to clockwise visually. Good. Our positive spin formula cross(spin, rc) = (-spin*rc_y, spin*rc_x). For rc=(1,0), spin positive => (0, +spin) down, clockwise. Good. So torque positive increases spin (clockwise). Drawing angle positive clockwise. Great.
+
+Angular velocity × rc: define spin_cross_rc(spin, rc) = (-spin*rc[1], spin*rc[0]).
+
+When applying friction impulse Jt to ball (force impulse on ball), torque = cross(rc, Jt), spin += torque/I. For wall contact, rc = contact radius vector from ball center to wall (toward boundary). If friction impulse on ball is Jt (vector), use torque_i = cross(rc, Jt). For ball-ball, impulse on i = -Jt_vec, rc_i, torque = cross(rc_i, -Jt_vec).
+
+Need ensure tangential relative velocity sign and friction impulse:
+For wall:
+rc = r * boundary_dir (from center to contact point on ball).
+v_contact_ball = v + spin_cross(spin, rc)
+v_rel_surf = v_contact_ball - v_wall
+vn = dot(v_center_rel? Use v - v_wall dot n) where n = gradient into interior. But rc = -r*n if inside, +r*n if outside. Normal component of v_contact_ball same as v dot n? Since rc parallel n, spin_cross perpendicular, yes.
+If vn < 0: normal impulse on ball = - (1+e)*vn * n. (This is a vector impulse). Linear v += normal_impulse.
+For friction, after normal impulse, surface relative tangential? Since normal impulse does not affect surface tangential? It affects v normal, not tangential. v_rel_t = v_rel_surf - dot(v_rel_surf, n)*n. But dot(v_rel_surf,n)=vn (before normal). We could compute t before normal. Then desired friction impulse Jt = -t * min(1, μ*|jn|/|t|), where |jn| = -(1+e)*vn (scalar magnitude). Apply v += Jt; spin += cross(rc,Jt)/I. But adding Jt changes relative tangential to zero (if full) or partially. However if we use pre-normal t, after normal impulse, the center v changes normal only, so tangential relative remains t. Good.
+But if Jt applied, the surface velocity relative tangential becomes t + Jt? Wait v_rel_surf = (v + spin×rc - v_wall). If we apply linear impulse Jt to v and angular impulse τ/I to spin, the new surface velocity changes by Jt + cross(spin_new - spin, rc) = Jt + cross(τ/I, rc). For rolling/slipping friction, the change in surface velocity due to combined linear+angular impulses is not simply Jt; because spin change also affects surface velocity. In rigid body friction impulse, the tangential impulse Jt and angular impulse τ = rc × Jt lead to change in relative surface velocity: Δv_contact = Jt/m + (rc × Jt)/I × rc. In 2D, the effective mass in tangential direction is 1/m + r²/I (if rc perpendicular to tangent? Actually rc normal, tangent perpendicular, cross yields). For Coulomb friction with a moving infinite wall, the impulse needed to stop sliding is Jt_required = -t / (1/m + r²/I?) times tangent direction. The torque from the same impulse automatically contributes. If we just apply Jt vector and update spin with τ=rc×Jt, the surface tangential velocity change is Jt + (spin_change)×rc. For a solid disk I=0.5 m r², spin_change = τ/I = cross(rc,Jt)/(0.5 r²). For rc = r n, Jt = t_hat * a. cross(rc,Jt)= r n × (a t_hat). Since t_hat perpendicular n, magnitude = r a. spin_change = (r a)/(0.5r²)=2a/r. spin_change × rc = (2a/r) × (r n) = 2a (t_hat?) sign. Linear change a t_hat, angular change adds maybe a t_hat? Let's compute: if n=(0,1)? Need sign. The total contact velocity change can be 2a or 3a. Therefore to compute correct friction impulse, need inverse effective inertia.
+
+For point contact with a ball on plane, tangential impulse J (on ball) changes contact point velocity by J/m + (rc×J)/I × rc. In 2D with rc = r n, J = J_t t (t perpendicular n). rc×J scalar = cross(rn, J t) = r J (n×t). spin_change = τ/I = rJ/I. New surface velocity = v + spin_change×rc = v + (rJ/I) k×(r n) = v + (r² J / I) (k×(k×?))? k×(r n) = r (k×n) = ± t. So angular contribution = (r² J/I) t. Thus total tangential velocity change = J (1/m + r²/I) t. For I=0.5 m r², factor=1+2=3/m. So impulse to kill tangential relative velocity t is J = -t / (1/m + r²/I). But the friction impulse vector is J t, and torque uses same J. The Coulomb cap uses normal impulse magnitude. So implement proper effective mass.
+
+For wall (infinite mass), normal impulse magnitude jn = (1+e)*(-vn) (if vn<0). Tangential relative velocity t_vec. Effective tangential mass: inv_eff = 1/m + (|rc|²)/I? Since rc perpendicular to t. But sign? We can compute scalar required_j = -dot(t_vec, t_dir) / (1/m + r²/I). Or vector: t_dir = t/|t|; required_J_scalar = -dot(t, t_dir) / (inv_mass + (rc·rc)/I) = -|t| / (1 + r²/I) for m=1. Apply impulse = t_dir * clamp(required_J_scalar, -μ*|jn|, μ*|jn|). But since t_dir = t/|t|, required scalar negative (to oppose t). We can just compute t_vec, mag, if mag>eps:
+    max_J = μ * jn_mag
+    eff_inv = 1.0 + (r*r)/I (since m=1) # for wall, rc length r
+    J = -mag / eff_inv
+    if abs(J) > max_J: J = -sign(J) * max_J? J negative; clamp magnitude.
+    impulse = t_vec * (J / mag)  # J negative
+    v += impulse
+    spin += cross(rc, impulse)/I
+This correctly changes surface velocity by impulse + angular contribution = (1 + r²/I)*impulse? Let's verify: impulse scalar a = J (negative). Total change tangential = a*(1 + r²/I). We set a = -mag/(1+r²/I), so total = -mag. Good.
+But if friction clamped, total change = a*(1+r²/I) with |a|<=max, so partial.
+
+For ball-ball, tangential impulse Jt_vec on j and -Jt on i. The relative contact velocity change due to friction impulse Jt (on j, -Jt on i) is: Δv_rel = Jt/m_j + (τ_j/I_j)×rc_j - (-Jt/m_i?) Wait relative velocity v_j - v_i. If impulse on j = +Jt, on i = -Jt.
+Change in v_j contact = Jt/m_j + (rc_j × Jt)/I_j × rc_j.
+Change in v_i contact = (-Jt)/m_i + (rc_i × (-Jt))/I_i × rc_i.
+Δv_rel = change_j - change_i = Jt*(1/m_j+1/m_i) + [ (rc_j×Jt)/I_j × rc_j + (rc_i×(-Jt))/I_i × rc_i ]. Since rc_i = r n, rc_j = -r n. The angular terms: rc_j × Jt = (-r n)×Jt = -r J (n×t) = r J (t×n)? rc_i×(-Jt) = (r n)×(-Jt) = -r J (n×t) = same? Let's compute both may add same sign. The effective coefficient = 1/m_i+1/m_j + (r²/I_i + r²/I_j). For equal I=0.5mr², r²/I=2/m, total = 2/m + 4/m =6/m? But maybe sign. We can use general formula for friction impulse between two rigid bodies with contact points. Simpler: Since m small, we can use a simplified model: apply impulse with effective mass for relative tangential velocity: inv_eff = 1/m_i + 1/m_j + (r_i² + r_j²)/I? Need derive correctly.
+For 2D rotational scalar, contact point velocity = v + ω × rc. For impulse F on body a at rc_a, linear impulse F, angular impulse τ_a = rc_a × F. Change in contact velocity = F/m + (rc×F)/I × rc. For a vector F in tangent direction, with rc = r n, F = a t, t perpendicular n. Let n×t = ±1. Define t = k×n? Let's set t_hat = k×n (90° CCW in algebra). Then for body with rc = c n (c can +r or -r), F = a t. τ = c n × a t = c a (n×t). If t=k×n, n×t = n×(k×n)=? In 2D, cross scalar. If n=(0,1), t=( -1? Let's not). The angular change × rc: (τ/I) × (c n) = c a (n×t)/I × (c n) = c² a (n×t)/I * (k×n). But k×n = t. And (n×t) is scalar ±1. If t = k×n, then n×t = n×(k×n) = ? Using 2D cross scalar: k×n = t. n×(k×n) as vector? Wait τ scalar = n_x* t_y - n_y*t_x. If t = (-n_y, n_x) (k×n), then n×t = n_x*n_x - n_y*(-n_y)=1. So positive. Thus τ = c a. angular × rc = (c a/I) × (c n) = c² a (k×n) = c² a t. So total contact velocity change for that body = a(1/m + c²/I) t. If rc = -r n (c=-r), c² same. Thus both bodies contribute positive a*(1/m+c²/I). But relative change for j - i: if F on j = a t, F on i = -a t. For body i, its impulse F_i = -a t, so contact change = -a(1/m_i + c_i²/I_i) t. Relative change = a[1/m_j+c_j²/I_j] - (-a[...]) = a[sum]. Good. So inv_eff = 1/m_i+1/m_j + c_i²/I_i + c_j²/I_j. For equal m, I=0.5mr² => 2/m + 2/m +2/m+2/m? Wait c²/I = r²/(0.5mr²)=2/m. Sum = 1/m+1/m+2/m+2/m=6/m. Then a = -t_mag / inv_eff. For m=1, a=-mag/6. But if we instead naively apply impulse and spin with torque, total relative tangential change = a*6. Good. So use this formula.
+For wall, body i ball, wall infinite mass: inv_eff = 1/m + r²/I (c²/I). I=0.5mr² => 3/m.
+
+But note for wall, if rc direction c = ±r, c² same.
+
+Normal impulse for ball-ball with spin? Normal contact points rc along n, spin cross perpendicular, so normal relative velocity unaffected by spin. Effective normal mass = 1/m_i+1/m_j (equal 2). Good.
+
+Position correction:
+For pair: correction = max(overlap - slop, 0) * percent; move i -= n*correction/2, j += n*correction/2. But if one ball? all equal.
+For wall: move along n (gradient into interior) by correction*percent. Use slop small 0.01.
+
+Resting contact and energy: With restitution, small bounces may persist. Use if abs(vn) < threshold, e=0 to prevent jitter. For walls: if -vn < 5 px/s, set e=0? Similarly ball-ball. Use threshold maybe 20? Need tune. Gravity 1200, substep 1/240, velocity change per substep 5. Threshold 10. Use e=0 if impact speed < 10.
+
+Ball spin damping: after collisions, spin *= max(0, 1 - 0.1*dt)? Maybe 0.1/s. Also rolling on wall: when in contact and sliding, friction does. If not sliding but spin nonzero, static friction? Our friction impulse only if tangential relative velocity >0; if zero, no change. Add small rolling resistance: if in contact, spin *= (1 - rolling_damping*dt) maybe 0.5/s. Could cause spin decay.
+
+Heptagon rotation and friction: Wall velocity at P can be significant: ω=1.257, P radius up to R=400, wall speed up to 503 px/s. Friction can spin balls strongly.
+
+Need ensure wall collision detection with rotating polygon: We recompute world vertices each substep based on hept_angle. The ball positions world. The wall velocity at P uses current hept_angle and omega. Good.
+
+Potential issue: Using closest point on boundary for SDF and then position correction along normal can move ball inside, but if ball is in a corner, closest point is vertex, normal from vertex to ball. If penetration >? Works. But if ball center inside and dist to boundary < r, the closest point may be on a non-adjacent edge? For convex polygon, closest boundary point is on nearest edge/vertex; okay.
+
+Point inside polygon: Use all edges inward normals. For world vertices, compute inside each substep. Since polygon rotates, but regular; can compute in local frame to avoid recomputing normals? We can compute local q and use fixed inward normals for inside and closest point on local edges, then transform normal to world. This is more efficient and avoids world segment rotation errors. Let's do local frame.
+
+Local approach:
+- Precompute local vertices: [ (R cos(a), R sin(a)) for a in 0..6*2π/7 ] maybe with initial orientation. Precompute edges (a,b), inward normals n_in for each edge (left normal). Apothem maybe not needed.
+- hept_angle θ. World transform: world = center + rotate(local, θ). Inverse: local = rotate(world - center, -θ).
+- For each ball:
+   q_local = rotate((x-cx, y-cy), -θ)
+   inside = point_inside_local(q_local) using fixed edges/inward normals.
+   find closest point P_local on boundary among edges (segments). dist = |q_local - P_local|.
+   if dist < 1e-9: normal_local = normalize(center? - P_local?) Since center at (0,0), n_local = normalize(-P_local) (toward center) if on boundary. Else if inside: n_local = (q_local - P_local)/dist; else: n_local = (P_local - q_local)/dist.
+   s = dist if inside else -dist.
+   if s < r:
+      penetration = r - s.
+      # velocity response in world
+      n_world = rotate(n_local, θ)  # gradient into interior? Rotating local vector to world with +θ.
+      P_world = center + rotate(P_local, θ)
+      v_wall = omega_cross(P_world - center)
+      # boundary_dir in world: if inside: -n_world, else: n_world. Because boundary is opposite gradient inside; for outside, boundary along gradient? Wait gradient n into interior. For inside, boundary direction = -n; for outside, boundary direction = n. So b_dir_world = -n_world if inside else n_world.
+      rc = BALL_RADIUS * b_dir_world  # vector from ball center to contact point on ball
+      # linear relative velocity for normal: v_rel_center = ball.v - v_wall. vn = dot(v_rel_center, n_world). But n_world into interior. If vn < 0, collision.
+      # surface relative for friction: v_contact_ball = ball.v + spin_cross(ball.spin, rc); v_rel_surf = v_contact_ball - v_wall.
+      # normal impulse if vn < 0.
+      # position correction: ball.pos += n_world * penetration * percent? Since n into interior. For outside, n into interior, good. For inside, n into interior, good. But penetration = r - s. If inside s=dist, moving by pen along n puts signed distance r. For outside s=-d, moving by r+d along n puts signed distance r. Good.
+      # However if we apply position correction after velocity, okay.
+
+Need be careful: For inside, n_local = (q-P)/dist. q-P points from boundary to center? For side, q inside, P side, q-P inward. This is gradient into interior. Good. b_dir = -n (toward boundary). rc = -r*n. Contact point on ball = pos + rc = pos - r*n. This is toward boundary. Wall P should be approximately pos + rc? For inside side, P is beyond boundary; pos - r*n? Suppose side at x=1, q x=0.9, r=0.1, dist=0.1, n=(-1,0) (left), b_dir=right, rc=(0.1,0), contact ball x=1.0. P x=1. Good.
+For outside x=1.1, dist=0.1, inside false, n=(P-q)=(-1,0) left, b_dir = n left, rc=(-0.1,0), contact ball x=1.0. Good.
+
+Wall velocity at P_world: use P_local transformed. But if contact point on ball differs from P by tiny due to dist-r? P is closest boundary to center; if dist<r, ball surface contact should be at center + r*b_dir. This may not exactly equal P if dist != r (penetration). For wall velocity, use P (boundary closest) or contact point? The actual contact point on wall is P if side, but if ball penetrating, closest boundary point remains P. Use P. For corner, P vertex. Good.
+
+But for spin rc should be vector to actual contact point on ball surface, which is center + r*b_dir (assuming contact normal exactly n). If P is not exactly along n (for vertex, P along n by construction closest point; yes P, center, n collinear). For side, P along n. So rc = ±r n. Good.
+
+Point_inside_local: For each edge inward normal n_in, if dot(q - A, n_in) < -eps => outside. Since polygon regular, use eps=1e-7. However when q is outside near vertex but inside halfspaces? For convex, outside if any halfspace violated. Good.
+
+Closest point on local boundary: loop 7 edges, compute closest point, min dist. Need also maybe if q is at center, dist=apothem (~R cos π/7 = 0.9009R) > r, no collision.
+
+Performance: 20 balls * 7 edges = 140 per substep; okay.
+
+Ball-ball collision in world coordinates. Should we transform to local? No, balls interact in world; heptagon rotation doesn't affect ball-ball.
+
+Need ensure ball-ball collisions do not push balls outside polygon before wall resolution. Order: integrate, then resolve ball-ball, then walls, maybe repeat. Since walls are constraints, do walls last to ensure containment. But ball-ball after walls may push outside again; do multiple iterations: for iter in range(2): ball_pairs(); walls(); Then maybe one final wall correction position only. Good.
+
+Stability with rotating walls: Since wall moves, position correction may need account for wall motion? The polygon rotates between substeps; wall velocity high. If ball is in contact, position correction based on current polygon. Fine.
+
+Tunneling: Heptagon wall speed up to 500 px/s, substep h=1/240 => 2 px per substep, ball radius 16, no tunnel. Ball velocities maybe high; gravity 1200, after 1 sec 1200, h 5 px. okay. Use h=1/240 or 1/360. For after loop max dt 1/30, substeps accumulator with fixed h=1/240 => up to 8 substeps. Good.
+
+Rendering loop:
+class HeptagonBallsApp:
+  def __init__: setup root, canvas, items.
+  def create_items: polygon item, ball ovals and texts.
+  def start: reset hept_angle=0, balls initial, last_time, root.after(16, update)
+  def update: compute elapsed, accumulate, while acc >= h: step(h); acc-=h; draw; after.
+
+Need maybe pause/stop? Not required. Could add 'q' to quit? Optional.
+
+Drawing:
+- Clear polygon points? Use canvas.coords(polygon_item, flat_points)
+- For each ball item: canvas.coords(oval, x-r, y-r, x+r, y+r); canvas.itemconfig(text, text=str(i), angle=math.degrees(ball.angle))
+But canvas.text angle rotates around anchor? We need set anchor center. The text may have default anchor center? create_text with anchor='center'. The angle option rotates the text around the anchor? Yes.
+Maybe ball number should be centered. Good.
+Could draw spin arrow? Not needed.
+
+Potential Tkinter issue: create_text angle rotates but text may not update bounding? Should be fine.
+
+Colors: list exactly 20. Need ensure index. Colors:
+#f8b862, #f6ad49, #f39800, #f08300, #ec6d51, #ee7948, #ed6d3d, #ec6800, #ec6800, #ee7800, #eb6238, #ea5506, #ea5506, #eb6101, #e49e61, #e45e32, #e17b34, #dd7a56, #db8449, #d66a35
+Duplicate colors okay. Numbers 1 to 20.
+
+Material bounce height: Could include constants:
+HEPTAGON_RADIUS = 400
+BALL_RADIUS = 16
+MAX_BOUNCE_HEIGHT = 0.8 * HEPTAGON_RADIUS  # > BALL_RADIUS
+MAX_DROP_HEIGHT = 2 * (HEPTAGON_RADIUS - BALL_RADIUS)
+RESTITUTION = math.sqrt(MAX_BOUNCE_HEIGHT / MAX_DROP_HEIGHT) if MAX_DROP_HEIGHT>0 else 0
+RESTITUTION = max(0.0, min(0.95, RESTITUTION))
+This gives ~0.632. For ball-ball maybe BALL_RESTITUTION = min(0.85, RESTITUTION*0.9) or 0.55.
+But if using max drop 2(R-r), the max bounce height after a full top-to-bottom drop is MAX_BOUNCE_HEIGHT = 0.8R, which is <R and >r. This directly satisfies. Add comment.
+
+Friction constants:
+WALL_FRICTION = 0.35
+BALL_FRICTION = 0.25
+SPIN_DAMPING = 0.35  # per second
+LINEAR_DAMPING = 0.02
+ROLLING_DAMPING = 0.6
+
+Gravity: GRAVITY = 1300.0
+
+Heptagon angular speed: 2*pi/5.
+
+Need maybe choose units so bounce height visually not exceed heptagon radius. With restitution computed from max drop, energy constraints. But collisions can transfer energy; rotating walls can add energy (work) because moving walls can increase bounce height beyond material limit? The requirement material bounce height? If rotating wall imparts energy, could exceed. But realistic. We can clamp normal impulse? No, moving wall can give extra. But the ball material restitution limits relative rebound, but wall motion can add translational energy. Bounce height might exceed R if wall moving fast? Wall speed 500 px/s, max height from wall speed = v²/(2g) ~ 500²/2600=96 px, not huge. Combined maybe still <R. Fine.
+
+Need ensure balls contained: position correction may not fully prevent outside if multiple collisions. Add a final clamp: for each ball, compute signed distance to polygon (local) and if s < BALL_RADIUS, move to s=BALL_RADIUS maybe full. But if we already do percent 0.9, okay. Could enforce hard containment after all: compute s, if s < BALL_RADIUS: pos += n*(BALL_RADIUS - s) (full). But this may teleport at high speed; okay for containment. Use percent 0.8 in solver, then hard clamp with full if s < BALL_RADIUS*0.5? Or just full correction in wall collision resolution (penetration) every substep. Full position correction can cause jitter but ensures containment. Use percent = 0.85. If still s < 0? Hard clamp.
+
+Let's design wall collision function in detail:
+def resolve_wall(ball):
+    dx = ball.x - cx; dy = ball.y - cy
+    q = rotate_vec((dx,dy), -hept_angle)
+    inside = point_inside(q)
+    # find closest P
+    min_dist_sq = inf; P=None
+    for edge: P,t = closest(q, A,B); d2 = dist2(q-P); if d2 < min: ...
+    dist = sqrt(min_dist_sq)
+    if dist < 1e-9:
+       n_local = normalize((-P[0], -P[1]))  # toward center
+       s = 0.0
+    else:
+       if inside: n_local = ((q[0]-P[0])/dist, (q[1]-P[1])/dist)
+       else: n_local = ((P[0]-q[0])/dist, (P[1]-q[1])/dist)
+       s = dist if inside else -dist
+    if s < BALL_RADIUS + CONTACT_EPS: # maybe no epsilon
+       pen = BALL_RADIUS - s
+       # position correction
+       corr = max(pen - SLOP, 0.0) * POSITION_PERCENT
+       # If pen large, maybe full? corr = pen if pen > BALL_RADIUS*0.5?
+       n_world = rotate_vec(n_local, hept_angle)
+       # velocity response only if approaching
+       P_world = (cx + P[0]*cosθ - P[1]*sinθ, cy + P[0]*sinθ + P[1]*cosθ) # rotate local to world
+       wall_v = omega_cross((P_world[0]-cx, P_world[1]-cy))
+       v_rel = (ball.vx - wall_v[0], ball.vy - wall_v[1])
+       vn = dot(v_rel, n_world)
+       if vn < 0:
+           # normal impulse
+           e = WALL_RESTITUTION if -vn > REST_THRESH else 0.0
+           jn = -(1.0 + e) * vn  # scalar impulse along n_world (mass 1)
+           ball.vx += jn * n_world[0]
+           ball.vy += jn * n_world[1]
+           # friction
+           b_dir = (-n_world[0], -n_world[1]) if inside else (n_world[0], n_world[1])
+           rc = (BALL_RADIUS*b_dir[0], BALL_RADIUS*b_dir[1])
+           # surface relative after normal? The normal impulse doesn't affect surface tangential? It changes v normal, but surface velocity normal changes, tangential unchanged. Use v_rel_surf = (ball.v + spin_cross - wall_v) - dot(...)*n? But ball.v already includes normal impulse. The tangential component is same as before, but spin unchanged yet. Compute t_vec from current ball.v (after normal) + spin_cross - wall_v, then tangential part.
+           surf = (ball.vx + spin_cross(ball.spin, rc)[0] - wall_v[0], ...)
+           vn_surf = dot(surf, n_world)
+           t_vec = (surf[0] - vn_surf*n_world[0], surf[1] - vn_surf*n_world[1])
+           t_mag = hypot(t_vec)
+           if t_mag > 1e-6:
+               max_j = WALL_FRICTION * abs(jn)
+               # effective inverse mass for wall contact
+               inv_eff = 1.0 + (BALL_RADIUS*BALL_RADIUS) / BALL_MOMENT  # m=1
+               j = -t_mag / inv_eff
+               if abs(j) > max_j: j = -math.copysign(max_j, j) # but j negative; simpler if j < -max_j: j=-max_j; elif j > max_j: j=max_j
+               impulse = (t_vec[0]*(j/t_mag), t_vec[1]*(j/t_mag))
+               ball.vx += impulse[0]; ball.vy += impulse[1]
+               torque = cross2(rc, impulse)
+               ball.spin += torque / BALL_MOMENT
+               # rolling damping maybe if contact
+       # position correction after velocity
+       ball.x += n_world[0] * corr
+       ball.y += n_world[1] * corr
+       # optional spin damping if contact and low slide
+       ball.spin *= max(0.0, 1.0 - CONTACT_SPIN_DAMPING*h) ??? Need dt available. Could apply outside.
+
+But note: If vn < 0, jn positive. If vn = -5 and e=0, jn=5. max friction = 0.35*5=1.75. Fine. If contact with wall moving and vn small due to rotating wall, friction can spin.
+
+However friction should also apply if vn >=0 but there is tangential sliding and normal force? In resting contact, normal impulse may be zero if not approaching, but static friction can act. Our Coulomb cap uses jn=0, so no friction. But if ball resting on rotating wall, vn may be small negative/positive due to wall motion; friction occurs. If wall moving tangentially under ball, vn might be 0, no friction. Real static friction could accelerate ball. To make balls rotate with friction more, we can allow friction when in contact even if vn >=0 but with a small normal force due to gravity? We can estimate normal impulse needed to maintain contact? Simpler: if in contact (pen>0) and vn is small (within threshold), set jn_est = max(0, abs(vn) + small) maybe use gravity component? Or apply friction with a baseline normal force (e.g., weight component normal) to generate spin. Requirement says balls rotate with friction; wall collisions will spin them during impacts. That may be enough. But if wall spinning and balls resting on side, they should be dragged. We can implement a friction impulse with max_j = WALL_FRICTION * max(abs(jn), NORMAL_FORCE_ESTIMATE). Estimate normal impulse from gravity over dt? For a wall contact, normal force supports weight component. Could approximate normal_impulse_per_dt = max(0, -dot(g, n_world)) * dt? But in impulse solver, jn from restitution may be zero if resting. We can add a small baseline: max_j = WALL_FRICTION * max(abs(jn), 10.0) when pen>0. This allows spin from wall friction even at rest. But may add energy. Use small baseline 5. Or estimate: normal_force = max(0, -dot(GRAVITY, n_world)) * MASS / h? Then max_j = μ*normal_force*h. Since h small, baseline small. But wall moving tangentially, friction impulse over substep = μ*normal_force*h; can change spin gradually. Let's implement better:
+- In wall collision, after normal impulse jn (impulse), normal_force_impulse = max(abs(jn), normal_support_impulse)
+where normal_support_impulse = max(0.0, -dot(GRAVITY, n_world)) * h? Wait gravity vector in world (0,G) downward. n into interior. If ball resting on bottom side, n points upward (into interior), gravity dot n = -G, -dot = G. The normal impulse per second ~ m*g_n. Over substep h, impulse ~ m*g_n*h. So normal_support_impulse = max(0, -dot(g, n_world)) * h. This is small (1300*1/240=5.4). μ*5.4=1.9. Good. If wall has multiple normals (corner), sum? For one wall okay. Use this as min jn for friction cap. But if wall is vertical, gravity dot n=0, no support; but if ball in corner with two walls, each support maybe partial. Fine.
+But if ball not in contact? pen>0. Use jn_for_friction = max(abs(jn) if vn<0 else 0, support_impulse). If support_impulse positive. This allows rolling friction.
+However friction impulse should not exceed μ*normal_force. If vn=0 but wall tangential relative velocity high, friction impulse = min(required, μ*support). Good.
+Need pass h to wall resolution.
+
+Ball-ball friction: normal impulse jn from collision; if resting stacks, vn may be 0, no friction. Could add support estimate? For ball-ball, normal forces support weight; hard to estimate. Not necessary; collisions spin balls.
+
+Spin damping: Apply each substep: ball.spin *= max(0, 1 - SPIN_DAMPING*h). If SPIN_DAMPING=0.2.
+
+Angle update: ball.angle += ball.spin*h. To avoid huge angle, can modulo 2π: ball.angle = math.fmod(ball.angle, 2π). But canvas angle can handle. Use modulo.
+
+Need linear damping: v *= max(0, 1 - LINEAR_DAMPING*h). Apply after gravity? Use before position.
+
+Gravity vector: (0, GRAVITY) in screen y down.
+
+Ball-ball collision function details with proper effective friction:
+def resolve_pairs():
+ for i in range(N-1):
+  for j in range(i+1,N):
+   dx = balls[j].x - balls[i].x; dy=...
+   d = hypot
+   if d < 2r:
+      if d < 1e-9: n = (cos deterministic, sin) else n=(dx/d, dy/d)
+      pen = 2r - d
+      # position correction
+      corr = max(pen - SLOP,0)*PERCENT
+      balls[i].x -= n[0]*corr/2; ...
+      balls[j].x += n[0]*corr/2; ...
+      v_rel = vj - vi
+      vn = dot(v_rel, n)
+      if vn < 0:
+         e = BALL_RESTITUTION if -vn > REST_THRESH else 0
+         # normal impulse scalar Jn (impulse on j along +n, i -Jn)
+         inv_mass = 1/m_i + 1/m_j = 2
+         Jn = -(1+e)*vn / inv_mass  # since both m=1
+         # if Jn >0
+         balls[i].vx -= Jn*n[0]; ...
+         balls[j].vx += Jn*n[0]; ...
+         # friction
+         rc_i = (r*n[0], r*n[1])  # from i to contact
+         rc_j = (-r*n[0], -r*n[1])
+         # use current velocities after normal impulse; surface relative = (vj + spin_j×rc_j) - (vi + spin_i×rc_i)
+         si=spin_cross(balls[i].spin, rc_i); sj=spin_cross(balls[j].spin, rc_j)
+         surf = (vj + sj - vi - si)
+         vn_surf = dot(surf, n)
+         t_vec = surf - vn_surf*n
+         t_mag = hypot(t_vec)
+         if t_mag > 1e-6:
+            max_j = BALL_FRICTION * abs(Jn)
+            inv_eff = 1/m_i + 1/m_j + (r_i²/I_i) + (r_j²/I_j)
+            # for equal: 2 + 2/r? Wait units: r²/I = 2/m if I=0.5 m r². If m=1, inv_eff=6.
+            Jt = -t_mag / inv_eff
+            clamp to max_j (negative)
+            impulse_j = t_vec * (Jt / t_mag)
+            impulse_i = -impulse_j
+            vi += impulse_i; vj += impulse_j
+            torque_i = cross2(rc_i, impulse_i)
+            torque_j = cross2(rc_j, impulse_j)
+            spin_i += torque_i/I; spin_j += torque_j/I
+      # even if vn>=0, maybe position correction only.
+
+But normal impulse Jn computed with inv_mass=2 (if m=1). For friction inv_eff = 1/m_i+1/m_j + r²/I_i + r²/I_j. With I=0.5, r²/I=2, sum=6. If masses maybe 1. Good.
+
+Need be careful units: Jn scalar is impulse (mass*velocity). For m=1, velocity change each = Jn. inv_mass=2, Jn = -(1+e)vn / 2. If e=0.6, vn=-100, Jn=80, each velocity change 80, relative change 160 = (1+e)*100. Good.
+Friction Jt scalar is impulse magnitude on each body? We defined a = impulse scalar on j along t (and -a on i). inv_eff = sum effective; relative contact velocity change = a*inv_eff. To kill t_mag, a = -t_mag/inv_eff. This a has units impulse. Good. Clamp |a| <= μ|Jn|. If Jn is normal impulse scalar (impulse on each), yes Coulomb.
+
+Moment of inertia: For solid disk I = 0.5 * m * r². m=1, r=16 => I=128. r²/I = 2. Good.
+
+Wall friction inv_eff = 1/m + r²/I = 3. If I maybe 0.5. Good.
+
+Should we use different mass? Set BALL_MASS=1.
+
+Potential sign issues in ball-ball friction: Let's test simple: two balls, i left, j right, n=(1,0) from i to j. i spin 0, j spin 0, vi=(0,0), vj=(0,10) (up? y down maybe). t_vec? surf = vj-vi = (0,10). n=(1,0), t=(0,10). t_mag=10. inv_eff=6, a=-10/6=-1.667. impulse_j = (0,-1.667), impulse_i=(0,+1.667). So j is pushed up? If j moving down? Let's use y down: vj=(0,10) downward. t=(0,10), a negative => impulse_j=(0,-1.667) upward, opposes downward. Good. torque_i = cross(rc_i=(16,0), impulse_i=(0,1.667)) = 16*1.667=+26.7 => spin_i positive clockwise? Force on i downward at right side (contact point to j) => clockwise, yes. torque_j = cross(rc_j=(-16,0), impulse_j=(0,-1.667)) = (-16)*(-1.667)=+26.7? cross x*fy = 26.7 positive. Force on j upward at left side: left side upward force rotates clockwise? Left point up moves top? A force upward on left side (negative x) produces torque positive? It rotates clockwise? Visual: ball j, contact at left, force up; left side up makes ball rotate clockwise? Top moves right? Yes positive. Both spin positive? For two balls sliding, i right side down -> clockwise; j left side up -> clockwise? Maybe both same spin, plausible? If two balls approach vertically, maybe yes. Sign okay.
+
+Wall friction sign test: Ball inside above bottom wall? Let's use side bottom: polygon side at y=+1, interior y<1, n into interior = (0,-1) (up). b_dir = -n = (0,1) down, rc=(0,r) down. Wall moving right (wall_v=(1,0)). Ball v=0, spin=0. vn = dot(0-wall_v, n) = dot((-1,0),(0,-1))=0. t_vec = surf - 0 = (-1,0). t_mag=1. inv_eff=3, a=-1/3, impulse = (-1/3,0). Ball v left. torque = cross(rc=(0,r), impulse=(-a? impulse=(-1/3,0))) = 0*0 - r*(-1/3)= +r/3 positive. Surface at bottom (rc down) with force left: bottom left force rotates clockwise? bottom point left -> clockwise? Visual: bottom left force makes top right, clockwise positive. Wall moving right drags bottom ball left, spins clockwise (number rotates). Good.
+
+If wall moving right, ball should eventually move right? Wait bottom wall moving right, friction on ball at contact should be to right (wall drags ball), not left. Our relative surface velocity = ball contact (0) - wall (right) = left; friction impulse on ball = -t/eff = right? Let's recalc: wall_v=(+1,0). surf = 0 - (1,0)=(-1,0). t_vec=(-1,0). a = -t_mag/eff = -1/3. impulse = t_vec*(a/mag) = (-1,0)*(-1/3) = (+1/3,0). I mistakenly sign. Good. torque = cross((0,r),(+1/3,0)) = -r/3 negative (counterclockwise). Wall moving right at bottom gives friction right, bottom right force rotates counterclockwise (negative). Our positive spin clockwise, so negative spin CCW. Drawing angle negative CCW. Good.
+
+Normal impulse sign wall: bottom side y=1, interior y<1, n=(0,-1). Ball below? center y=0.9, moving down v=(0,10). v_rel down, vn=dot((0,10),(0,-1))=-10. jn=-(1+e)*(-10)=positive. impulse along n (up) => v_y decreases. Good.
+
+Ball-ball normal sign: i left x=0, j right x=2r, n=(1,0). Approaching: vi=(10,0) right, vj=(-10,0) left, v_rel=vj-vi=(-20,0), vn=-20. Jn=-(1+e)(-20)/2=positive. vi -= Jn n => left; vj += Jn n => right. Good.
+
+Position correction with wall: If inside near bottom side y=0.9, dist=0.1, n=(0,-1), pen=r-dist. Move ball.x += n*corr => y decreases (up), good. If outside below y=1.1, inside false, n=(P-q)=(0,-1)? P y=1, q y=1.1 => P-q=(0,-0.1) left? n=(0,-1) up, move y decreases into interior, good.
+
+Now rendering rotating heptagon:
+local vertices precomputed. world points = [center + rotate(v, θ)]. Use canvas.coords(polygon_item, *flat). Could add outline width. Maybe fill? Heptagon walls maybe no fill or dark. Use fill maybe #111? The balls inside; if fill covers balls? Draw polygon first, then balls; if fill semi-transparent not possible in Tk. Use outline only. Maybe fill #1e1e1e and balls on top? If fill, polygon inside area dark, balls visible. But if fill, outline okay. Use fill="#0f0f0f", outline="#555". Balls drawn after. Window background maybe #222.
+
+Tkinter text angle: Need pass angle option. According to Tk, create_text(angle=...) but itemconfig key is 'angle'. It rotates text. Default anchor center. We can also use tag. Good.
+
+Potential issue: canvas.text with angle and coordinates: When angle changes, the text rotation anchor may be the text center? I think anchor is center if set. The angle rotates around the anchor point? Yes.
+
+Need maybe update number rotation by ball.angle; if angle large, use modulo 360. Use math.degrees(math.fmod(ball.angle, 2*math.pi)).
+
+Initial ball items: oval with fill=color, outline maybe darker? Number text black? Colors are orange; black text visible. Use font=("Helvetica", 10, "bold"). For r=16, font 9.
+
+Dataclass Ball:
+@dataclass
+class Ball:
+ x: float; y: float; vx: float=0; vy: float=0; spin: float=0; angle: float=0; radius: float=BALL_RADIUS; color: str; label: int
+But dataclass fields with default values referencing constants okay if defined after constants.
+
+Maybe use lists for performance? Dataclass fine.
+
+Allowed libraries: math, tkinter, dataclasses, typing, sys. We can import numpy? Not needed. Use only allowed.
+
+Need ensure single file, no pygame.
+
+Let's think about collision detection algorithm self-implemented. We can include helper functions.
+
+Detailed code structure:
+import math, sys, tkinter as tk
+from dataclasses import dataclass
+from typing import List, Tuple
+
+constants...
+Vector = Tuple[float, float]
+
+def rotate_vec(v, angle): c=cos, s=sin; return (v[0]*c - v[1]*s, v[0]*s + v[1]*c)  # rotates by angle in coordinate system.
+def dot(a,b): return a[0]*b[0]+a[1]*b[1]
+def sub, add, scale, length, normalize
+def cross_vec(a,b): return a[0]*b[1]-a[1]*b[0]
+def spin_cross(spin, rc): return (-spin*rc[1], spin*rc[0])
+
+Precompute HEPTA_VERTS_LOCAL, HEPTA_EDGES, HEPTA_INWARD_NORMALS.
+How to generate: for k in range(7): angle = k*2π/7 + initial_offset maybe -π/2 to point up? Initial orientation can have vertex at top? In screen y down, top is negative y. Use initial_offset = -math.pi/2 so one vertex at top. Then vertices. Edges i to i+1. Inward normals: edge tangent = B-A; len; n_in = (-ty/len, tx/len) assuming CCW in coordinate algebra. Need verify with initial offset -π/2. The order increasing angle still CCW algebra, inward left normal. Good.
+Could also compute apothem? Not needed.
+
+point_inside(q): for each A,n_in: if dot(q-A,n_in) < -1e-7: return False; return True.
+
+closest_point_on_segment(p,a,b): as above.
+
+find_closest_boundary(q): loop edges, min dist2, return P, dist, maybe t.
+
+Wall resolution function needs current hept_angle. Could be method in app.
+
+App class:
+class Simulation:
+ def __init__(self, root, canvas): ...
+ def reset(): create balls, initial positions.
+ def step(self, h):
+   self.hept_angle = (self.hept_angle + HEPTA_OMEGA*h) % (2π)
+   for ball in balls:
+      ball.vy += GRAVITY*h
+      damp = max(0,1-LINEAR_DAMPING*h); vx*=damp; vy*=damp
+      spin_damp = max(0,1-SPIN_DAMPING*h); spin*=spin_damp
+      x += vx*h; y += vy*h
+      angle = fmod(angle + spin*h, 2π)
+   for _ in range(SOLVER_ITERATIONS):
+      self.resolve_ball_pairs()
+      self.resolve_walls()
+   # final hard containment maybe
+   self.enforce_containment()
+
+But if we update hept_angle before physics, wall velocity at current angle. Good.
+
+resolve_walls uses h for support friction.
+
+Need consider order of hept_angle and wall velocity: If hept_angle advanced at start of substep, positions from previous step. Wall moved; okay.
+
+Time accumulator: Use last = time.time? Allowed sys but not time? User didn't list time. Allowed libs: tkinter, math, numpy, dataclasses, typing, sys. time not allowed. Need avoid import time. Tkinter after provides milliseconds? We can use root.update? For timing without time module, we can use fixed number of substeps per after based on 60 FPS, ignoring real time. Since after 16ms approximates. Use each after call advances one fixed frame dt=1/60 with substeps. That avoids time import. Or use sys? sys doesn't provide time. We can use canvas.after(16, update) and step dt = 1/60 * substeps. That's okay. If display refresh differs, simulation speed approximate. Could use tkinter's after with 16ms; no time lib. For fixed simulation speed, use FRAME_DT = 1/60, SUBSTEPS=4, h=FRAME_DT/SUBSTEPS. Each after 16ms. Good. No time needed. Or use root.wait? Not.
+
+Need maybe allow pause? Not.
+
+Use sys.exit in cleanup? optional.
+
+Ball initial reset:
+balls = []
+for i in range(20):
+  # nominal center; deterministic tiny spread
+  a = i * 2π/20
+  off = INITIAL_SPREAD_RADIUS * (0.3 + 0.7 * (i/19))? Maybe.
+  x = cx + off*cos(a), y = cy + off*sin(a)
+  balls.append(Ball(x,y,0,0,0,0,BALL_RADIUS,COLORS[i],i+1))
+INITIAL_SPREAD_RADIUS = 0.25*BALL_RADIUS? Let's choose 0.3. They overlap heavily but solver separates. Maybe add pre-relaxation:
+def initial_relax():
+  for _ in range(80):
+    for i<j:
+      d; if d<2r:
+        if d<1e-6: n=deterministic
+        corr = (2r-d)*0.5
+        i -= n*corr*0.5? Actually full separation: i.x -= n[0]*corr; j.x += n[0]*corr where corr=(2r-d)/2.
+  # After relaxation, maybe move cluster so center of mass = heptagon center
+  com_x = sum(x)/N; com_y...; shift all by -com.
+This will produce a packed cluster centered at center. It may spread up to ~3r. Acceptable. We can then set velocities zero. The cluster extends maybe 50 px, still central. This is a good compromise. We can call it initial release from center with solver-resolved overlap. In final explanation mention.
+But if we pre-relax only positions, the cluster might not be stable under gravity? It will fall as a group, then spread. Good.
+Maybe we don't want them start in a neat pack; exact center degenerate. Use pre-relax.
+Could set INITIAL_SPREAD_RADIUS = BALL_RADIUS*0.5 to help. Pre-relax 100 iterations. Then center of mass exactly center. Good.
+
+However pre-relax with O(N²) 80*190=15200 trivial.
+
+Need ensure pre-relax doesn't push outside heptagon? Cluster small, no.
+
+Alternative start all at center and pre-relax; after relaxation, not all at center but cluster. I think okay.
+
+Now, bounce height material: If initial cluster falls, balls may bounce. Restitution computed. Need maybe set ball-ball restitution lower to avoid energy amplification. Use WALL_RESTITUTION from max bounce; BALL_RESTITUTION = 0.55 or min(0.6, WALL_RESTITUTION). If wall restitution 0.63, ball-ball 0.5.
+
+Friction and spin: The number rotation may be too fast; spin damping. Wall wall speed 500, friction impulse can change spin by torque/I: friction impulse max μ*jn. If jn ~100, max 35, torque r*35=560, I=128, Δspin=4.4 rad/s. Over many contacts spin could grow. Damping 0.5/s. Good.
+
+Need ensure spin angle not huge; modulo.
+
+Potential issue with Tkinter text angle: The angle option may be in degrees but rotates text around the anchor point; if anchor center, okay. But if text has multiple chars, anchor center. Good.
+
+Let's consider if canvas.create_text with angle and anchor center will center after rotation? The anchor point remains at specified coordinates; text centered at anchor before rotation? It rotates around anchor, so center remains. Good.
+
+Need maybe update item tags to bring to front? If balls overlap, draw order fixed. Could tag 'ball' and lift? Not necessary. If want numbers visible, text drawn after oval? In canvas, create order: if create oval then text, text on top. But when itemconfig coords, text remains? If new oval? We update existing. Draw order remains: all ovals and texts created per ball; text for ball 1 before oval ball 2? If create per ball oval then text, ball2 oval may be above ball1 text if overlap. Could lift text tags. Use canvas.tag_raise('numbers') after each update? Or create all ovals first, then all texts, so texts on top of all ovals. But if text for ball1 and oval ball2, texts on top if created after all ovals. Do that: create ovals for all balls, then texts. Then update. Tag lift maybe. Use tags ['ball', f'oval{i}'] and ['number', f'num{i}']; after creating, canvas.tag_raise('number').
+
+Need maybe outline on balls? Use outline='black' or darker color. Not required.
+
+Heptagon size: R=400, canvas 900. Ball radius 16. 20 balls can fit. Good.
+
+Let's test mentally simulation stability:
+- h=1/240, gravity 1300 -> dv=5.4 per substep. Position move ~ small.
+- Wall speed 503 -> 2.1 per substep.
+- Collisions: position correction percent 0.8, slop 0.01.
+- Solver iterations 3? Use 3 for stability. 20 balls, 7 edges, substeps 4, after 16ms => 12 substeps? Wait FRAME_DT=1/60, SUBSTEPS=4 -> 4 substeps per frame. Each substep 3 iterations => 12 resolutions per frame. 20*19/2=190 pairs => 2280 pair checks per frame + 280 walls, trivial.
+Maybe use SUBSTEPS=6 for smoother. h=1/360. Wall movement 1.4, gravity 3.6. More stable. 6*3=18 resolutions per frame, still fine. Use SUBSTEPS=6, FRAME_DT=1/60.
+Fixed simulation frame 60fps; if after 16ms, okay.
+
+Could use h=1/240 and SUBSTEPS=4; 60fps. 1/360 better. Let's set FRAME_DT = 1.0/60.0, SUBSTEPS=6, STEP_DT=FRAME_DT/SUBSTEPS.
+
+Need ensure rotation angle updated per substep: hept_angle += omega*h. Over frame 1/60, total 0.02094 rad = 1.2 deg, 5 sec for 360. Good.
+
+Now, implement enforce_containment:
+for ball:
+  q_local = rotate((x-cx,y-cy), -theta)
+  inside = point_inside(q_local)
+  P,dist = closest
+  s = dist if inside else -dist
+  if s < BALL_RADIUS:
+     if dist < eps: n_local = normalize(-P)
+     elif inside: n_local=(q-P)/dist else n_local=(P-q)/dist
+     n_world=rotate(n_local, theta)
+     pen = BALL_RADIUS - s
+     ball.x += n_world[0]*pen  # full correction
+     ball.y += n_world[1]*pen
+     # If still maybe, but enough.
+     # Optionally if ball was moving out of interior, reflect? Position only.
+This hard clamp after solver ensures inside. But full correction may remove energy? It can cause sticking. But containment important. Maybe only full if s < BALL_RADIUS*0.5 or s < 0 (outside). For normal, solver percent handles. Use:
+ if s < 0: full; elif s < BALL_RADIUS*0.8: partial? Hmm.
+Simpler: in resolve_walls use percent=0.9, no separate hard clamp except if s < -0.01 (outside boundary) full. But due to position correction, s after should >= r - slop. If outside due to numerical, full.
+Implement final clamp: if s < BALL_RADIUS: ball.x += n*(BALL_RADIUS - s) maybe full. This may be okay; because it only moves ball inward to just touching. It can reduce penetration. Since it's after velocity, may add upward position without velocity change, causing slight energy but prevents escape. For high gravity, resting contact may jitter. Use percent 0.8 in solver, final full only if s < BALL_RADIUS*0.5 or s < -1e-6. Let's do:
+if s < 0.0: ball.pos += n*(BALL_RADIUS - s)  # outside full
+elif s < BALL_RADIUS*0.5: ball.pos += n*(BALL_RADIUS - s)*0.5
+But if s=0.1r, half correction. Good.
+
+Maybe no final clamp needed if resolve_walls percent=0.8 and multiple iterations. But to guarantee, add final full if s < 0.001.
+
+Now, support friction in wall: Need pass h. Compute gravity vector global GRAVITY_VEC = (0, GRAVITY).
+In wall collision:
+support_impulse = max(0.0, -dot(GRAVITY_VEC, n_world)) * h
+jn = 0
+if vn < 0:
+   e=...
+   jn = -(1+e)*vn
+   apply normal
+# friction cap = WALL_FRICTION * max(abs(jn), support_impulse)
+But if vn > 0 (separating), jn=0. If support_impulse positive, friction can act. However if ball is in contact but not under gravity normal (e.g. side wall), support 0, no friction. If corner, two wall collisions each support maybe partial; okay.
+But if ball resting on bottom, n up, gravity dot n = -G, support=G*h. Good. If wall rotating and ball resting, vn may be? Wall velocity tangential, vn maybe 0. friction cap = μ G h, small. Required impulse to match wall tangential velocity could be larger, clamped. Good.
+But note support_impulse is impulse over substep, not force. If contact persists, friction applied each substep, can gradually accelerate. Good.
+
+If vn < 0 and e=0 for small impact, jn = -vn. support maybe bigger? max.
+
+Rolling damping when in contact: after friction, apply ball.spin *= max(0, 1 - CONTACT_SPIN_DAMPING*h) maybe only if pen>0. Use CONTACT_SPIN_DAMPING=0.8? Could be too high. Use 0.5.
+Also linear damping global.
+
+Need think about angular units: spin rad/s, angle rad. Drawing angle degrees. If spin positive clockwise, angle positive clockwise. Good.
+
+Let's test wall friction with support: bottom wall n up, wall moving right. vn=0, support=G*h=5.4, max_j=0.35*5.4=1.89. t_mag = wall speed 503. inv_eff=3, required a=-167, clamped to -1.89 (impulse on ball right 1.89). Ball velocity increases right by 1.89 per substep, spin changes: torque = cross(rc down, impulse right) = -r*1.89/I = -0.236 rad/s per substep. Over 6 substeps ~ -1.4 rad/s, ball accelerates. It will reach rolling condition when contact surface velocity matches wall: v + spin×rc = wall_v. For bottom rc=(0,r), spin×rc = (-spin*r,0). To match wall right V, need v - spin*r = V. If friction gives v right and spin negative (CCW), spin×rc = (-(-)*r?) spin negative, -spin*r positive, so surface velocity = v + positive. Good. It can roll. Damping will slow. Nice.
+
+Ball-ball friction may be unstable if inv_eff too high? We use proper.
+
+Need ensure spin_cross uses scalar spin and vector rc. For rc down (0,r), spin negative: (-spin*r? formula (-spin*rc_y, spin*rc_x) = (-spin*r,0). If spin=-1, (-(-1)r,0)=(r,0) right. Good.
+
+Now, possible issue: The number on ball rotating: If ball rolls without slipping on rotating wall, the number spin should reflect physical rotation. Good.
+
+Let's consider coordinate rotation for local to world. We define rotate_vec(v, angle) = (x cos - y sin, x sin + y cos). This rotates a vector by angle in the coordinate system (visually clockwise for positive due y down?). For a local point, world = center + rotate(local, θ). As θ increases, point moves according to derivative (-y,x) with positive? derivative of rotate: d/dθ (x cos - y sin, x sin + y cos) = (-x sin - y cos, x cos - y sin). For a point at local angle α, world angle α+θ. At θ=0, point (R,0); derivative (0,R) down. So positive θ moves right point down, clockwise visually. Good.
+Wall velocity formula omega_cross(r) = (-ω*r_y, ω*r_x). For right point, (0, ωR) down, matches derivative. Good.
+Inverse rotate world to local: rotate(world, -θ). Good.
+
+Point inside local with vertices generated angle offset -π/2 and increasing. Inward normals computed as left of edge. Need verify for offset -π/2: vertices: top (0,-R), next angle 2π/7-π/2 = ~ -1.212 rad? cos .355? sin -0.935? Actually screen top to lower right? The polygon order still increasing angle algebra. Edge from top to lower right? Tangent maybe down-right; left normal inward? Likely. Could test one edge: A=(0,-1), B=(cos(2π/7-π/2), sin(...)) = (cos(150? wait 2π/7=51.43°, -90+51=-38.57°) => (0.782, -0.623). Tangent=(0.782, 0.377). Left normal=(-0.377,0.782). Edge midpoint=(0.391,-0.811). From midpoint to center=(-0.391,0.811) proportional (-0.377,0.782), yes inward. Good.
+
+Closest boundary point: For q local, loop edges. If q inside and close to vertex, closest P vertex. Good.
+
+Potential issue with SDF using closest point: For a ball inside a polygon, the distance to boundary is minimum over edges. If ball is near a side, P on side. If ball is near a vertex but center inside, P vertex. The normal (q-P)/dist points inward from vertex. Penetration = r - dist. But the ball may also overlap adjacent sides even if dist to vertex > r? The closest distance criterion is sufficient for collision with the boundary (circle vs convex polygon). If dist < r, collision. The normal from closest point is correct for circle vs convex shape. Good.
+
+But for a moving convex polygon, the ball can collide with an edge even if the closest point to center is a vertex? The SDF closest point handles.
+
+Now, wall velocity at P if P is vertex: use current world vertex. Good.
+
+Need maybe account for wall angular acceleration? None, constant.
+
+Now, code details:
+Constants:
+CANVAS_SIZE = 900
+CENTER = (450,450)
+HEPTAGON_RADIUS = 400
+BALL_RADIUS = 16
+BALL_COUNT = 20
+BALL_MASS = 1.0
+BALL_I = 0.5 * BALL_MASS * BALL_RADIUS**2
+GRAVITY = 1200.0
+HEPTA_OMEGA = 2*math.pi/5.0
+MAX_BOUNCE_HEIGHT = 0.8 * HEPTAGON_RADIUS
+if BALL_RADIUS >= MAX_BOUNCE_HEIGHT: MAX_BOUNCE_HEIGHT = BALL_RADIUS + 0.1? But R large.
+MAX_DROP_HEIGHT = 2 * max(HEPTAGON_RADIUS - BALL_RADIUS, 1e-6)
+WALL_RESTITUTION = math.sqrt(max(0.0, MAX_BOUNCE_HEIGHT / MAX_DROP_HEIGHT))
+WALL_RESTITUTION = max(0.0, min(0.95, WALL_RESTITUTION))
+BALL_RESTITUTION = min(0.85, 0.9*WALL_RESTITUTION) maybe 0.5.
+WALL_FRICTION = 0.32
+BALL_FRICTION = 0.22
+LINEAR_DAMPING = 0.05
+SPIN_DAMPING = 0.45
+CONTACT_SPIN_DAMPING = 0.8
+REST_THRESHOLD = 8.0
+POSITION_PERCENT = 0.85
+POSITION_SLOP = 0.01
+SUBSTEPS = 6
+SOLVER_ITERATIONS = 3
+FRAME_DT = 1.0/60.0
+
+Color list.
+
+Dataclass:
+@dataclass
+class Ball:
+    x: float
+    y: float
+    vx: float
+    vy: float
+    spin: float
+    angle: float
+    radius: float
+    color: str
+    label: int
+Maybe init defaults 0.
+
+App:
+class HeptagonBallsApp:
+    def __init__(self, root):
+       self.root=root; root.title; canvas = tk.Canvas(root, width=CANVAS_SIZE, height=CANVAS_SIZE, bg='#1b1b1b')
+       canvas.pack()
+       self.canvas=canvas
+       self.hept_angle=0.0
+       self.polygon_item = canvas.create_polygon([], fill='#101010', outline='#666', width=3)
+       self.ball_items=[]; self.text_items=[]
+       for color in COLORS:
+          item=canvas.create_oval(-1,-1,-1,-1, fill=color, outline='black', tags='ball')
+          text=canvas.create_text(0,0, text='', fill='black', font=('Helvetica', 9, 'bold'), angle=0, tags='number')
+          self.ball_items.append(item); self.text_items.append(text)
+       canvas.tag_raise('number')
+       self.reset()
+       self.last? no time. self.frame_count=0
+       self.after_id = root.after(16, self.tick)
+
+    def reset(self):
+       self.balls=[]
+       for i in range(BALL_COUNT):
+           a = i*2π/BALL_COUNT
+           r_off = BALL_RADIUS*0.35
+           x = CENTER[0] + r_off*math.cos(a)
+           y = CENTER[1] + r_off*math.sin(a)
+           self.balls.append(Ball(x,y,0,0,0,0,BALL_RADIUS,COLORS[i],i+1))
+       self.relax_initial()
+       # center of mass to center
+       com...
+       for b in balls: b.x += CENTER[0]-com_x; b.y += CENTER[1]-com_y
+       self.hept_angle=0.0
+       # set items? draw initial
+       self.draw()
+
+    def relax_initial(self):
+       for _ in range(80):
+          moved=False
+          for i in range(N):
+             for j in range(i+1,N):
+                dx...; d=hypot; if d < 2r:
+                   if d < 1e-9:
+                      ang = math.atan2(j,i)? deterministic: angle = i*2.399963 + j
+                      n=(cos angle, sin angle)
+                   else n=(dx/d,dy/d)
+                   corr = (2r-d)*0.5
+                   balls[i].x -= n[0]*corr; ... balls[j].x += ...
+                   moved=True
+          if not moved: break
+Need note this uses 2r; if exact center, d=0, deterministic. Good.
+After relax, some balls may be outside heptagon? cluster small. Could clamp inside.
+
+    def tick(self):
+       for _ in range(SUBSTEPS): self.step(FRAME_DT/SUBSTEPS)
+       self.draw()
+       self.root.after(16, self.tick)
+Could add if root destroyed? Use self.root.after; if window closed, after callback may raise. Use try/except? Simpler.
+Maybe use self.running flag and bind close. Not necessary but nice.
+    def stop(self): if self.after_id: root.after_cancel; root.destroy? Bind WM_DELETE_WINDOW.
+
+Step:
+    def step(self,h):
+       self.hept_angle = (self.hept_angle + HEPTA_OMEGA*h) % (2π)
+       for b in self.balls:
+          b.vy += GRAVITY*h
+          ld = max(0.0, 1.0 - LINEAR_DAMPING*h)
+          b.vx *= ld; b.vy *= ld
+          b.x += b.vx*h; b.y += b.vy*h
+          b.spin *= max(0.0, 1.0 - SPIN_DAMPING*h)
+          b.angle = math.fmod(b.angle + b.spin*h, 2π)
+       for _ in range(SOLVER_ITERATIONS):
+          self.resolve_ball_pairs()
+          self.resolve_walls(h)
+       self.enforce_containment()
+
+But if we update angle before solver, collision spin updates will further change spin but angle not updated for that substep until next. Fine.
+
+resolve_walls(h): for b in balls: self.resolve_wall(b,h)
+
+resolve_wall(b,h): as above. Need access CENTER. Use local variables for cos/sin? rotate_vec uses math each call; okay. Could optimize but not needed.
+
+In resolve_wall, after position correction, if b.spin maybe large. Apply contact spin damping:
+if pen > 0:
+   b.spin *= max(0, 1 - CONTACT_SPIN_DAMPING*h)
+But if contact every substep, spin decays. Maybe too strong. Use 0.3.
+
+Need be careful: In wall friction, if support_impulse >0 and vn>=0, we apply friction without normal impulse. But our friction required impulse computed using current surf. However if no normal impulse, the ball may not be in contact? pen>0. Good. But applying friction when vn>0 (separating) could be unphysical; only if contact support. If ball is moving away from wall but still overlapping due to position correction, support? Could add condition: if vn > 0 and vn > REST_THRESHOLD, no friction (separating). If vn small (abs(vn) < REST_THRESHOLD or vn <=0), allow support friction. Implement:
+allow_friction = (vn < REST_THRESHOLD) and pen > 0
+If allow:
+   cap = WALL_FRICTION * max(abs(jn) if vn < 0 else 0.0, support_impulse)
+   ...
+This prevents friction when flying away.
+
+But if wall moving, vn may be small positive due to wall moving outward; allow.
+
+Support impulse estimate: support = max(0, -dot(GRAVITY_VEC, n_world))*h. But if ball in contact with wall not supporting weight (e.g. side), 0. If corner, two calls each support maybe based on their n; sum can exceed weight? Each side normal component of gravity may be negative if downward component; total support could be > weight? In a corner, two normals can share load, sum of max(0,-g·n) can exceed g? Example two 45° sides, each support 0.707g, sum 1.414g, but actual load shared maybe g; using max could overestimate. But it's a cap, overestimate may allow more friction. Could divide by number of contacts? We don't track. Fine.
+
+Ball-ball support friction not implemented; resting ball-ball may not have friction. Could add if pen>0 and abs(vn) < REST_THRESHOLD, estimate support impulse from gravity shared? Hard. Not needed.
+
+Enforce containment: Need compute closest boundary and inside. Could reuse function. Implement helper signed_distance_local(q) returning s, n_local, P, inside. Use in resolve_wall and enforce.
+
+def polygon_sdf(q_local):
+   inside = point_inside(q_local)
+   min... P, dist2
+   dist = sqrt
+   if dist < 1e-9:
+      n_local = normalize((-P[0], -P[1]))
+      s = 0.0
+   elif inside:
+      n_local = ((q[0]-P[0])/dist,...)
+      s=dist
+   else:
+      n_local = ((P[0]-q[0])/dist,...)
+      s=-dist
+   return s, n_local, P, inside
+
+But for dist=0 and P maybe center? If q on boundary, -P points to center (if regular centered at origin). Good.
+
+point_inside uses local vertices. If q far outside, inside false.
+
+resolve_wall:
+ q = rotate((b.x-CX,b.y-CY), -theta)
+ s,n_local,P,inside = polygon_sdf(q)
+ if s < BALL_RADIUS:
+    pen = BALL_RADIUS - s
+    n_world = rotate(n_local, theta)
+    P_world = (CX + rotate(P, theta)[0], CY + rotate(P, theta)[1])
+    wall_v = omega_cross((P_world[0]-CX, P_world[1]-CY))
+    v_rel = (b.vx - wall_v[0], b.vy - wall_v[1])
+    vn = dot(v_rel, n_world)
+    jn = 0.0
+    if vn < 0.0:
+       e = WALL_RESTITUTION if -vn > REST_THRESHOLD else 0.0
+       jn = -(1.0+e)*vn
+       b.vx += jn*n_world[0]; b.vy += jn*n_world[1]
+    # friction if contact and not separating strongly
+    if pen > 0 and vn < REST_THRESHOLD:
+       b_dir = (-n_world[0], -n_world[1]) if inside else (n_world[0], n_world[1])
+       rc = (BALL_RADIUS*b_dir[0], BALL_RADIUS*b_dir[1])
+       surf = (b.vx + spin_cross(b.spin, rc)[0] - wall_v[0], ...)
+       vn_surf = dot(surf, n_world)
+       t_vec = (surf[0] - vn_surf*n_world[0], surf[1] - vn_surf*n_world[1])
+       t_mag = hypot
+       if t_mag > 1e-6:
+          support = max(0.0, -dot(GRAVITY_VEC, n_world))*h
+          cap = WALL_FRICTION * max(abs(jn), support)
+          inv_eff = 1.0/BALL_MASS + (BALL_RADIUS*BALL_RADIUS)/BALL_I
+          j = -t_mag / inv_eff
+          if abs(j) > cap: j = -math.copysign(cap, j) # j negative usually
+          # clamp between -cap and cap: if j < -cap: j=-cap; elif j > cap: j=cap
+          impulse = scale(t_vec, j/t_mag)
+          b.vx += impulse[0]; b.vy += impulse[1]
+          torque = cross2(rc, impulse)
+          b.spin += torque / BALL_I
+          b.spin *= max(0.0, 1.0 - CONTACT_SPIN_DAMPING*h)
+    # position correction
+    corr = max(pen - POSITION_SLOP, 0.0) * POSITION_PERCENT
+    b.x += n_world[0]*corr; b.y += n_world[1]*corr
+
+But if vn >= REST_THRESHOLD (separating), no normal impulse, no friction, but position correction still moves inward. Good.
+
+One subtlety: We compute friction after normal impulse, using ball.vx updated. The support impulse cap uses jn (normal impulse applied) and support. If vn<0 but small, e=0, jn=-vn. If vn is negative large, jn large. Good.
+If vn>=0, jn=0. But support can allow friction. However if ball is just touching and moving away slowly, vn small positive, support friction might pull it back, maybe okay. If vn > REST_THRESHOLD, skip.
+
+Position correction: Should it be applied before velocity? We do after. If pen large, moving position after velocity okay. But friction computed using pre-correction rc and wall P. Fine.
+
+Potential double counting: If a ball touches two walls (corner), resolve_walls loops edges? Our SDF uses single closest point, so only one contact normal (vertex). It won't apply two side constraints. Is that okay? Circle vs convex polygon closest point gives a single normal (vertex or edge). It should be sufficient. For a ball squeezed into a corner, closest point vertex; normal from vertex to ball. It resolves distance to vertex. It may not account for both side planes separately, but circle vs vertex is correct. If ball is inside and very close to a side, closest point side. Good.
+
+But for a ball in a corner, if dist to vertex < r, normal from vertex. If the ball is also close to one side but vertex closer, correct. If side closer, it treats as side. Good.
+
+Wall velocity at vertex: P vertex. Good.
+
+Does SDF closest point handle ball center inside but near a side whose projection falls outside segment? It will choose vertex if that is closer. Good.
+
+Now, ball-ball collision with rotating walls: Since balls are in world coords, okay.
+
+Need maybe ensure balls do not overlap after wall correction: Order pairs then walls; wall correction can push balls into others. Next iteration pairs fix. Final containment may push into others, but small. Could do final pairs position-only after containment? Maybe add after enforce_containment: one more resolve_ball_pairs() position only? Could be overkill. Use SOLVER_ITERATIONS=4.
+
+Let's set SOLVER_ITERATIONS=4, SUBSTEPS=4? Performance okay. 4*4=16 resolutions/frame. 190 pairs*16=3040, fine. Use SUBSTEPS=4 for 60fps h=1/240. Or SUBSTEPS=6, iterations=3. Let's choose SUBSTEPS=5? Simpler: SUBSTEPS=4, ITER=4. h=1/240. Good.
+
+Potential energy: Full containment clamp may add energy. Use only final if outside. Let's implement enforce:
+ for b:
+   q... s,n,P,inside = polygon_sdf(q)
+   if s < 0.0: # outside boundary
+       pen = BALL_RADIUS - s
+       b.x += n[0]*pen; b.y += n[1]*pen
+   elif s < BALL_RADIUS*0.75:
+       pen = BALL_RADIUS - s
+       b.x += n[0]*pen*0.35
+This is mild. But if solver percent 0.85, s after ~r - slop? Actually correction percent 0.85 of pen, after one iteration s increases by 0.85(r-s), so residual pen =0.15 initial. Multiple iterations reduce. Final mild okay.
+
+Maybe use POSITION_PERCENT=0.9, final if s < 0 only. Let's keep simple: final if s < 0: full; elif s < BALL_RADIUS*0.5: b.x += n*(BALL_RADIUS-s)*0.5.
+
+Need ensure after final correction, ball not outside; if s was negative large, full moves to s=r. Good.
+
+Now, draw:
+def draw(self):
+  c=cos(theta); s=sin(theta)
+  pts=[]
+  for v in HEPTA_VERTS: pts.extend([CX + v[0]*c - v[1]*s, CY + v[0]*s + v[1]*c])
+  self.canvas.coords(self.polygon_item, *pts)
+  for i,b in enumerate(self.balls):
+     self.canvas.coords(self.ball_items[i], b.x-b.radius, b.y-b.radius, b.x+b.radius, b.y+b.radius)
+     deg = math.degrees(math.fmod(b.angle, 2π))
+     self.canvas.itemconfig(self.text_items[i], text=str(b.label), x=b.x, y=b.y, angle=deg)
+Maybe itemconfig with x,y,angle. create_text initially at 0; itemconfig x,y.
+
+Could also draw heptagon center? not.
+
+Bind window size? Fixed.
+
+Potential Tkinter font: use ('Helvetica', 10, 'bold'). For radius 16, fits.
+
+Now, final answer should include code in single file and maybe brief explanation. User asked "Write a Python program". We can provide code block. Need ensure no disallowed libraries. We use tkinter, math, sys, dataclasses, typing. No time. Good.
+
+Let's consider if `sys` needed? We can import sys for exit maybe. If not used, okay? Allowed but not required. Could avoid sys to reduce. But user allows sys. We can import sys and use sys.exit in cleanup? Not necessary. Maybe include `import sys` to allow graceful exit? We can use `self.root.protocol("WM_DELETE_WINDOW", self.cleanup)`. In cleanup, if after_id: root.after_cancel; root.destroy. No sys needed. But allowed. Could omit sys. Single file.
+
+Need ensure code is syntactically correct.
+
+Let's write code carefully.
+
+Helper functions:
+def rotate_vec(v, angle):
+    c = math.cos(angle); s = math.sin(angle)
+    return (v[0]*c - v[1]*s, v[0]*s + v[1]*c)
+
+def omega_cross(r, omega=HEPTA_OMEGA): # but omega constant
+    return (-HEPTA_OMEGA * r[1], HEPTA_OMEGA * r[0])
+
+Maybe if omega constant, no parameter.
+
+`hypot = math.hypot`.
+
+Precompute:
+HEPTA_VERTS = []
+for k in range(7):
+    a = -math.pi/2 + k*2*math.pi/7
+    HEPTA_VERTS.append((HEPTAGON_RADIUS*math.cos(a), HEPTAGON_RADIUS*math.sin(a)))
+HEPTA_EDGES = [(HEPTA_VERTS[i], HEPTA_VERTS[(i+1)%7]) for i in range(7)]
+HEPTA_INWARD_NORMALS = []
+for a,b in HEPTA_EDGES:
+    tx=b[0]-a[0]; ty=b[1]-a[1]; L=math.hypot(tx,ty)
+    # assuming CCW algebra, left normal is inward
+    HEPTA_INWARD_NORMALS.append((-ty/L, tx/L))
+
+point_inside(q):
+ for (a,n) in zip(HEPTA_EDGES, HEPTA_INWARD_NORMALS):
+    if (q[0]-a[0])*n[0] + (q[1]-a[1])*n[1] < -1e-7:
+       return False
+ return True
+
+closest:
+def closest_point_on_segment(p,a,b):
+ ax,ay=a; bx,by=b; px,py=p
+ abx=bx-ax; aby=by-ay
+ denom=abx*abx+aby*aby
+ if denom < 1e-12: return a,0.0
+ t=((px-ax)*abx + (py-ay)*aby)/denom
+ if t<0: t=0
+ elif t>1: t=1
+ return (ax+t*abx, ay+t*aby), t
+
+polygon_sdf(q):
+ inside=point_inside(q)
+ best_p=None; best_d2=inf
+ for a,b in HEPTA_EDGES:
+    p,t=closest...
+    d2=(q[0]-p[0])**2 + ...
+    if d2 < best_d2: ...
+ dist=math.sqrt(best_d2)
+ if dist < 1e-9:
+    # use direction from boundary to center
+    L=math.hypot(best_p[0], best_p[1])
+    if L < 1e-9: n=(1.0,0.0) # should not happen
+    else: n=(-best_p[0]/L, -best_p[1]/L)
+    s=0.0
+ elif inside:
+    n=((q[0]-best_p[0])/dist, (q[1]-best_p[1])/dist)
+    s=dist
+ else:
+    n=((best_p[0]-q[0])/dist, (best_p[1]-q[1])/dist)
+    s=-dist
+ return s,n,best_p,inside
+
+But if q is at origin center, point_inside true, dist to boundary=apothem ~360, n = (q-P)/dist = -P/dist (toward center? P on boundary, q-P = -P, yes). If r small no collision.
+
+Ball dataclass:
+@dataclass
+class Ball:
+ x: float
+ y: float
+ vx: float
+ vy: float
+ spin: float
+ angle: float
+ radius: float
+ color: str
+ label: int
+
+App methods.
+
+In reset, create balls with exact center? Let's do:
+for i in range(BALL_COUNT):
+    a = i*2π/BALL_COUNT
+    off = BALL_RADIUS*0.25
+    x = CENTER[0] + off*math.cos(a)
+    y = CENTER[1] + off*math.sin(a)
+    balls.append(...)
+self.relax_initial()
+com shift.
+
+relax_initial:
+for _ in range(120):
+  any=False
+  for i in range(N):
+    bi=balls[i]
+    for j in range(i+1,N):
+      bj=balls[j]
+      dx=bj.x-bi.x; dy=bj.y-bi.y; d=hypot
+      if d < 2*BALL_RADIUS:
+        if d < 1e-9:
+           ang = math.fmod(i*2.399963 + j*1.7, 2π)
+           nx=cos(ang); ny=sin(ang)
+        else: nx=dx/d; ny=dy/d
+        corr = (2*BALL_RADIUS - d)*0.5
+        bi.x -= nx*corr; bi.y -= ny*corr
+        bj.x += nx*corr; bj.y += ny*corr
+        any=True
+  if not any: break
+# maybe after relax, ensure inside: for b: clamp? Not necessary.
+com...
+for b: b.x += cx - comx; b.y += cy - comy
+# velocities zero already.
+
+One issue: If initial relax makes cluster extended, center of mass shift could move some balls outside if near? cluster small. okay.
+
+In step, update angle: `b.angle = math.fmod(b.angle + b.spin * h, 2.0 * math.pi)`.
+
+resolve_ball_pairs:
+for i in range(N):
+ bi=balls[i]
+ for j in range(i+1,N):
+  bj=balls[j]
+  dx=bj.x-bi.x; dy=...
+  d=math.hypot(dx,dy)
+  if d < 2*b.radius + 1e-9: # same radius
+    if d < 1e-9:
+       ang = math.fmod(i*2.399963 + j*1.31, 2π)
+       nx=cos; ny=sin
+    else:
+       nx=dx/d; ny=dy/d
+    pen = 2*BALL_RADIUS - d
+    corr = max(pen - POSITION_SLOP, 0.0)*POSITION_PERCENT*0.5
+    bi.x -= nx*corr; ... bj.x += nx*corr
+    rvx = bj.vx - bi.vx; rvy = bj.vy - bi.vy
+    vn = rvx*nx + rvy*ny
+    Jn = 0.0
+    if vn < 0.0:
+       e = BALL_RESTITUTION if -vn > REST_THRESHOLD else 0.0
+       Jn = -(1.0 + e) * vn / (2.0/BALL_MASS?) Wait inv_mass = 1/m_i+1/m_j = 2/BALL_MASS. Since BALL_MASS=1, inv=2. Use `inv_mass = 1.0/BALL_MASS + 1.0/BALL_MASS`
+       Jn = -(1.0+e)*vn / inv_mass
+       bi.vx -= Jn*nx; bi.vy -= Jn*ny
+       bj.vx += Jn*nx; bj.vy += Jn*ny
+    # friction if pen>0 and not separating strongly? Use if vn < REST_THRESHOLD (includes negative)
+    if pen > 0.0 and vn < REST_THRESHOLD:
+       r = BALL_RADIUS
+       rci = (r*nx, r*ny)
+       rcj = (-r*nx, -r*ny)
+       # surface velocities after normal impulse
+       si = spin_cross(bi.spin, rci)
+       sj = spin_cross(bj.spin, rcj)
+       rvx = (bj.vx + sj[0]) - (bi.vx + si[0])
+       rvy = (bj.vy + sj[1]) - (bi.vy + si[1])
+       vn_s = rvx*nx + rvy*ny
+       tx = rvx - vn_s*nx
+       ty = rvy - vn_s*ny
+       tmag = math.hypot(tx,ty)
+       if tmag > 1e-7:
+          # normal impulse magnitude for Coulomb; if vn<0 use Jn else maybe 0
+          cap = BALL_FRICTION * (abs(Jn) if vn < 0.0 else 0.0)
+          if cap > 0.0:
+             inv_eff = (1.0/BALL_MASS + 1.0/BALL_MASS) + (r*r)/BALL_I + (r*r)/BALL_I
+             Jt = -tmag / inv_eff
+             if abs(Jt) > cap:
+                Jt = -math.copysign(cap, Jt)  # preserve sign (usually negative)
+                # but if Jt positive? It should be negative. Use clamp:
+             # Better clamp:
+             if Jt > cap: Jt = cap
+             elif Jt < -cap: Jt = -cap
+             impulse_jx = tx * (Jt / tmag)
+             impulse_jy = ty * (Jt / tmag)
+             bi.vx -= impulse_jx; bi.vy -= impulse_jy
+             bj.vx += impulse_jx; bj.vy += impulse_jy
+             torque_i = cross2(rci, (-impulse_jx, -impulse_jy))
+             torque_j = cross2(rcj, (impulse_jx, impulse_jy))
+             bi.spin += torque_i / BALL_I
+             bj.spin += torque_j / BALL_I
+
+But cap if Jn=0 no friction. For ball-ball resting, no friction. Could add support estimate? Maybe not.
+Clamp code: After Jt = -tmag/inv_eff (negative). if abs(Jt) > cap: Jt = -cap if Jt<0 else cap. Simpler:
+if Jt > cap: Jt = cap
+elif Jt < -cap: Jt = -cap
+If cap=0, Jt becomes 0. Good.
+
+Need if vn<0 but Jn maybe zero if vn=0? no. If vn<REST_THRESHOLD but >0, Jn=0, cap=0. If vn slightly negative, Jn small, cap small.
+
+Position correction before velocity may alter d but we don't recompute; okay.
+
+resolve_walls(h):
+for b in self.balls:
+ q=(b.x-CENTER[0], b.y-CENTER[1])
+ q_local=rotate_vec(q, -self.hept_angle)
+ s,n_local,p_local,inside = polygon_sdf(q_local)
+ if s < BALL_RADIUS:
+   pen = BALL_RADIUS - s
+   n_world=rotate_vec(n_local, self.hept_angle)
+   p_world_vec=rotate_vec(p_local, self.hept_angle)
+   px=CENTER[0]+p_world_vec[0]; py=CENTER[1]+p_world_vec[1]
+   wall_v=omega_cross((px-CENTER[0], py-CENTER[1]))
+   vx = b.vx - wall_v[0]; vy = b.vy - wall_v[1]
+   vn = vx*n_world[0] + vy*n_world[1]
+   jn=0.0
+   if vn < 0.0:
+      e = WALL_RESTITUTION if -vn > REST_THRESHOLD else 0.0
+      jn = -(1.0+e)*vn / (1.0/BALL_MASS) # = ...
+      b.vx += jn*n_world[0]; b.vy += jn*n_world[1]
+   if pen > 0.0 and vn < REST_THRESHOLD:
+      if inside:
+         bdir = (-n_world[0], -n_world[1])
+      else:
+         bdir = (n_world[0], n_world[1])
+      rc = (BALL_RADIUS*bdir[0], BALL_RADIUS*bdir[1])
+      sc = spin_cross(b.spin, rc)
+      surf_x = b.vx + sc[0] - wall_v[0]
+      surf_y = b.vy + sc[1] - wall_v[1]
+      vn_s = surf_x*n_world[0] + surf_y*n_world[1]
+      tx = surf_x - vn_s*n_world[0]
+      ty = surf_y - vn_s*n_world[1]
+      tmag = math.hypot(tx,ty)
+      if tmag > 1e-7:
+         support = max(0.0, -(GRAVITY_VEC[0]*n_world[0] + GRAVITY_VEC[1]*n_world[1])) * h
+         cap = WALL_FRICTION * max(abs(jn), support)
+         if cap > 0:
+            inv_eff = 1.0/BALL_MASS + (BALL_RADIUS*BALL_RADIUS)/BALL_I
+            Jt = -tmag / inv_eff
+            if Jt > cap: Jt = cap
+            elif Jt < -cap: Jt = -cap
+            imp_x = tx*(Jt/tmag)
+            imp_y = ty*(Jt/tmag)
+            b.vx += imp_x; b.vy += imp_y
+            torque = cross2(rc, (imp_x, imp_y))
+            b.spin += torque / BALL_I
+            b.spin *= max(0.0, 1.0 - CONTACT_SPIN_DAMPING*h)
+   corr = max(pen - POSITION_SLOP, 0.0)*POSITION_PERCENT
+   b.x += n_world[0]*corr
+   b.y += n_world[1]*corr
+
+Need note: For wall normal impulse, inv_mass = 1/m. Since wall infinite, `jn = -(1+e)*vn` (mass 1). Good.
+
+But if ball mass not 1? We set 1. If we wanted general, jn = -(1+e)*vn / (1/m). Use `1.0 / BALL_MASS`.
+
+Support impulse: `support = max(0.0, -dot(GRAVITY_VEC, n_world)) * h / BALL_MASS?` Normal force impulse = m * g_n * h. Since m=1, okay. If mass not 1, multiply by BALL_MASS? The impulse units mass*velocity. Gravity acceleration times mass. Use `* BALL_MASS * h`. Since m=1. Good.
+
+But if wall is moving, vn may be negative due to wall moving into ball even if ball not approaching. Restitution will reflect relative velocity, can add energy. That's realistic.
+
+Potential issue: In wall friction, we compute `surf` using `b.vx` after normal impulse. But if normal impulse changed velocity, `vn_s` may no longer equal pre-normal vn? Normal impulse changes normal component of center velocity, and rc is parallel to n, spin_cross perpendicular, so vn_s after normal = 0? Wait if we set relative normal velocity after normal to -e*vn, not zero unless e=1? Actually normal impulse sets v_rel_n = -e vn. So vn_s should equal -e*vn, not 0. The tangential component unaffected. We subtract vn_s*n to get tangential. Good.
+If e=0, vn_s=0. If e>0, vn_s negative (still approaching? Actually after bounce relative normal away? vn was negative; -e*vn positive? Let's check: vn=-10, e=0.5, impulse jn=15, new v_rel_n = -10 +15 = 5 positive (away). Wait desired after = -e*vn = 5 positive. Yes. So vn_s positive. Subtracting normal component okay.
+
+But if friction impulse applied, it will change vn_s? Tangential impulse perpendicular, no.
+
+Now, `support` should maybe use original vn? If vn positive separating, support still. okay.
+
+`CONTACT_SPIN_DAMPING` applied only if friction impulse cap>0? In code inside if cap>0. If no tangential velocity, no damping. Could always if pen>0: b.spin *= ... But not necessary.
+
+Global spin damping already applied.
+
+Enforce containment:
+for b:
+ q... s,n,p,inside=polygon_sdf
+ if s < 0.0:
+    pen=BALL_RADIUS - s
+    b.x += n[0]*pen; b.y += n[1]*pen
+ elif s < BALL_RADIUS*0.7:
+    pen=BALL_RADIUS - s
+    b.x += n[0]*pen*0.4; ...
+This final correction may break ball-ball overlaps; but small. Could call resolve_ball_pairs position-only after? Maybe not.
+
+Maybe better: final full correction only if s < 0; no partial. Solver should handle. Use:
+if s < -1e-6:
+   pen = BALL_RADIUS - s
+   b.x += n[0]*pen; b.y += n[1]*pen
+elif s < BALL_RADIUS*0.5:
+   pen = BALL_RADIUS - s
+   b.x += n[0]*pen*0.3
+Ok.
+
+Now, draw text angle. Tkinter `angle` expects float degrees. If angle negative, okay. `itemconfig(self.text_items[i], text=str(b.label), x=b.x, y=b.y, angle=deg)`.
+
+Potential issue: The text anchor may not update if angle changed? It should.
+
+Need maybe create text with `anchor='center'`. Default anchor is center? For create_text, default anchor is CENTER? I think yes, but set.
+
+Now, test code mentally for syntax.
+
+One concern: The user allowed numpy but we don't use. Fine.
+
+Another concern: "All balls drop from the heptagon center when starting." Our reset relaxes initial overlaps, so after relax they are not all at center. Could final answer explain: exact center is degenerate, so a deterministic minimal cluster is used at the center and recentered. The code comments can say "nominal release point is center". Should be acceptable. If strict, maybe we can set all positions to center and then in `relax_initial` separate. The final positions are a cluster centered at center. I can phrase in explanation: "Because 20 non-overlapping balls cannot share one exact point, the code starts them at the center and resolves the initial overlap with a deterministic position-only relaxation, keeping the cluster centered on the heptagon center." Good.
+
+Need maybe ensure colors list length 20. Count:
+1 f8b862
+2 f6ad49
+3 f39800
+4 f08300
+5 ec6d51
+6 ee7948
+7 ed6d3d
+8 ec6800
+9 ec6800
+10 ee7800
+11 eb6238
+12 ea5506
+13 ea5506
+14 eb6101
+15 e49e61
+16 e45e32
+17 e17b34
+18 dd7a56
+19 db8449
+20 d66a35
+Yes.
+
+Potential issue with `math.fmod` negative angles: In Python, math.fmod(-0.1, 2π) = -0.1, fine. Canvas angle can negative. If we want 0..360, can `deg = math.degrees(math.fmod(angle, 2π))`. Negative okay. Could normalize: `deg = math.degrees(b.angle % (2*math.pi))` but Python % gives positive. Use `deg = math.degrees(b.angle % (2.0*math.pi))`. For angle stored maybe negative? fmod can negative. Use `b.angle = (b.angle + b.spin*h) % (2π)` to keep positive. In step, use modulo `%` not fmod. Python `%` positive. Good.
+
+In relax deterministic normal, use angle = (i*2.399963 + j*1.7) % 2π.
+
+Now, possible performance of polygon_sdf: point_inside loops 7, closest loops 7. For each ball each wall resolution (4 iterations*4 substeps=16 per frame) 20*16=320 SDF, each 14 loops = 4480, fine.
+
+Let's think about physical realism of wall collision using SDF closest point and single normal. For a ball inside a rotating polygon, if it touches a side, wall velocity at closest point. But the side is moving tangentially; the contact point on the side is the closest point to center. As the ball slides, P changes. Good.
+But for a side, if ball center is inside but projection onto side segment is outside (near vertex), SDF picks vertex. Good.
+For a rotating side, the closest point in local frame to ball center is on the static side; in world, P rotates. Wall velocity at P. Good.
+
+One subtlety: The ball's closest point to the rotating polygon boundary in world is not necessarily the same as rotating the closest point in local frame if polygon is rotating? Since polygon is rigid rotation about center, distance from ball center to boundary is rotationally invariant? The ball center world q_w; local q_l = R(-θ) q_w. Boundary local fixed. Closest local P_l; rotate to world P_w. Distance same. Yes.
+
+Now, sign of inward normals for point_inside: If point outside but due to numerical near edge, inside false. Good.
+
+Let's test bottom side with local orientation. If initial heptagon has vertex at top, there is no flat bottom? Heptagon with vertex top has one vertex top, bottom side? 7 sides, maybe bottom side flat? With vertex top, angles: top, then 51°,103°,154°,206°,258°,310°. There is a side near bottom between 206 and 258? It's a flat side at bottom? The side midpoint at 232°? In screen y down, 232° has cos -0.616, sin -0.788? Actually y down, 232° (180+51) cos -0.623, sin -0.782 (up? negative y up? Wait y down, negative y is up. 232° sin negative => up. Hmm orientation with vertex top (0,-R), increasing angle goes to lower right? Let's map: angle 0 (1,0) right; -90 top; -38 lower? It might produce a heptagon with one vertex top and one side bottom? Fine. Doesn't matter.
+
+Gravity down positive y. Heptagon rotates clockwise visually. Good.
+
+Now, "The material of all the balls determines that their impact bounce height will not exceed the radius of the heptagon, but higher than ball radius." Our restitution computed from max drop 2(R-r) to max bounce 0.8R. But if wall moving, could exceed. Could add a post-collision velocity clamp based on maximum possible bounce height? Maybe to enforce material limit, after wall collision, if vertical velocity upward (negative vy) too high such that h = v_y^2/(2g) > MAX_BOUNCE_HEIGHT, reduce it? But bounce height relative to wall not just vertical. The requirement likely about coefficient. But to be safe, we can clamp any ball's vertical rebound after wall normal collision? Could interfere with realistic. Maybe add a global clamp: after step, for each ball, if -vy (upward) > sqrt(2*g*MAX_BOUNCE_HEIGHT), set to that? But horizontal velocity could also contribute to bounce height along normal. The phrase "impact bounce height" likely vertical height after impact. We can implement a material property as restitution; no need clamp. But maybe to guarantee, choose low restitution. With e=0.632, max vertical rebound from max vertical drop 2(R-r) is sqrt(2g*0.8R) relative? The velocity after bounce = e*impact_velocity. If impact vertical velocity from drop 2(R-r): v_imp=sqrt(2g*2(R-r)); v_reb=e*v_imp=sqrt(2g*0.8R); height=0.8R. So vertical bounce height max 0.8R. Good. Wall rotation can add, but small. We can also clamp vertical upward velocity to sqrt(2g*MAX_BOUNCE_HEIGHT) to enforce. Let's add after step: `max_up_speed = math.sqrt(2.0*GRAVITY*MAX_BOUNCE_HEIGHT)`; if b.vy < -max_up_speed: b.vy = -max_up_speed` (since up negative). This ensures vertical bounce height <= MAX_BOUNCE_HEIGHT. But could reduce legitimate wall-induced velocity. Requirement says material bounce height not exceed radius, higher than ball radius. MAX_BOUNCE_HEIGHT=0.8R. Good. Add comment. It also ensures not too high. But if ball launched by rotating wall horizontally, vertical not affected. Fine.
+Could also ensure minimum? "but higher than ball radius" means maximum possible rebound height > ball radius. MAX_BOUNCE_HEIGHT=0.8R > r. No need clamp min; small drops can bounce lower.
+
+Set MAX_BOUNCE_HEIGHT = min(0.8*HEPTAGON_RADIUS, maybe 0.95*HEPTAGON_RADIUS). Ensure > BALL_RADIUS: if not, set BALL_RADIUS*1.5? But R large. Code:
+MAX_BOUNCE_HEIGHT = 0.8 * HEPTAGON_RADIUS
+if MAX_BOUNCE_HEIGHT <= BALL_RADIUS:
+    MAX_BOUNCE_HEIGHT = BALL_RADIUS * 1.2
+WALL_RESTITUTION = sqrt(MAX_BOUNCE_HEIGHT / (2*(R-r))) clamp 0..0.95.
+MAX_UP_SPEED = sqrt(2*GRAVITY*MAX_BOUNCE_HEIGHT)
+In step after solver: for b: if b.vy < -MAX_UP_SPEED: b.vy = -MAX_UP_SPEED.
+This enforces vertical. If ball moving upward due to wall, okay.
+
+Could also clamp total speed? Not necessary.
+
+Now, possible issue with position correction and vertical clamp: okay.
+
+Let's consider if balls can escape due to rotating corner: final containment.
+
+Now, code final. Need ensure all constants defined before dataclass if using defaults? Dataclass doesn't use constants as defaults except radius? We'll pass.
+
+Let's draft code in final. But before final, let's scrutinize physics formulas for friction effective mass signs.
+
+Wall friction effective mass derivation with sign:
+We have t_vec = current surface relative tangential velocity (ball - wall) projected. We want after friction impulse `impulse` on ball, the change in surface relative tangential velocity = impulse + spin_change×rc (wall infinite). spin_change = cross(rc, impulse)/I. Since rc = r bdir, impulse = a t_hat, t_hat perpendicular n. bdir is ±n. cross(rc, impulse) scalar = r bdir × a t_hat. The sign of spin_change×rc? We earlier found total change = a(1 + r²/I) t_hat if t_hat = k×? Need ensure sign positive. Let's test specific to avoid wrong sign causing friction to amplify.
+Example bottom wall: n into interior = (0,-1) (up). bdir = -n = (0,1) down. rc=(0,r). Suppose t_hat = (1,0) (right). wall moving right? surf t = ball - wall maybe left (-1,0) => t_hat left. But formula with t_vec arbitrary.
+Take t_vec = (1,0) (ball surface moving right relative wall). We want friction impulse left (negative) to oppose. Our algorithm: tmag=1, Jt = -1/inv_eff negative. impulse = t_vec*(Jt/tmag) = (Jt,0) left. Good.
+Now compute total surface velocity change:
+impulse linear = (a,0), a negative.
+spin_change = cross(rc, impulse)/I = (0*r? cross (0,r) x (a,0) = 0*0 - r*a = -r*a)/I. Since a negative, -r*a positive. spin_change positive.
+spin_change × rc = ( -spin_change*rc_y, spin_change*rc_x ) = (-spin_change*r, 0). If spin_change positive, = (-positive*r,0) left. So angular contribution also left. Total = a + (-spin_change*r) = a - (r*a/I)*r = a(1 - r²/I)? Wait sign negative! That suggests angular contribution opposes linear? Let's recalc sign carefully.
+rc=(0,r). impulse=(a,0). cross(rc, impulse) = rc_x*imp_y - rc_y*imp_x = 0 - r*a = -r a. If a negative, spin_change = -r a / I positive.
+spin_change cross rc = (-spin_change*rc_y, spin_change*rc_x) = (-spin_change*r, 0). Since spin_change positive, left (negative). Linear a is left (negative). Both left. Magnitudes: spin_change*r = (r a / I)*r? spin_change = -r a/I. Then -spin_change*r = r² a / I? Because a negative, r² a/I negative. Total = a + r² a/I = a(1 + r²/I). Yes sign same. I mistakenly wrote -positive*r but positive = -r a/I, so -positive*r = r² a/I (negative). Good. So effective inv =1+r²/I. Good.
+For wall with bdir = n (outside bottom? n up? bdir n? rc=(0,-r) maybe). Let's test outside below: boundary above, n up (0,-1)? Wait outside below y=1.1, P y=1, n=P-q=(0,-1) up, inside false, bdir=n=(0,-1), rc=(0,-r). Suppose t_vec=(1,0). a negative. cross(rc,imp)= (0, -r) x (a,0)=0 - (-r)a = r a (negative if a negative). spin_change negative. spin_cross = (-spin_change*rc_y, spin_change*rc_x) = (-neg*-r? spin_change=-c, rc_y=-r: -(-c)*(-r)= -c r? Let's compute total = a + r² a/I positive? likely same. Good.
+
+Ball-ball effective mass sign: We should ensure relative contact velocity change = a*inv_eff with inv_eff positive. Our formula uses c²/I positive. Good. The impulse direction from algorithm opposes t_vec. Should work.
+
+But in ball-ball friction, we compute `surf` after normal impulse. `vn_s` may not be zero; subtract normal. t_vec is relative tangential velocity. We apply impulse_j = t_vec * (Jt/tmag). If Jt negative, impulse_j opposes t. On i, -impulse_j. The relative tangential velocity change = impulse_j/m_j + spin_j change×rc_j - (impulse_i/m_i + spin_i change×rc_i). We derived positive coefficient. Need ensure sign of angular terms for rc_j=-r n, impulse_j=a t, impulse_i=-a t.
+Let n=(1,0), t=(0,1) (up? algebra). rc_i=(r,0), rc_j=(-r,0).
+impulse_j=(0,a). torque_j = cross((-r,0),(0,a)) = -r a. spin_j change = -r a/I.
+spin_j × rc_j = (-spin*rc_y, spin*rc_x) = (0, spin*(-r)) = (0, (-r a/I)*(-r)) = (0, r² a/I) (same direction as a positive). linear_j=(0,a). total contact change j = a(1+r²/I) (0,1).
+impulse_i=(0,-a). torque_i = cross((r,0),(0,-a)) = -r a. spin_i change = -r a/I. spin_i×rc_i = (0, spin*r) = (0, (-r a/I)*r) = (0, -r² a/I). linear_i=(0,-a). Contact change i = -a(1+r²/I). Relative change j - i = a[1+r²/I] - (-a[1+r²/I]) = a*2(1+r²/I) = a*(2 + 2r²/I). With I=0.5 => 6a. Good. So formula correct.
+
+Now, for wall, if cap based on normal impulse, we use `inv_eff = 1/m + r²/I`. Good.
+
+One nuance: For wall friction, the normal impulse `jn` scalar may be positive, but if support is used, cap = μ*support. However the effective normal force for friction should be the normal impulse per substep. If ball is in contact and vn<0, jn includes restitution and normal impulse. If vn=0 but support, cap support. Good.
+
+Now, ball-ball friction with no normal impulse but contact (resting) no cap. Could maybe add support estimate for ball-ball: For each ball, normal support from gravity? We can approximate if pen>0 and vn small, cap = BALL_FRICTION * max(0, -dot(GRAVITY_VEC, n)) * h * 0.5? But n direction from i to j; gravity support on i if -g·n? The normal force along n on i is opposite n? Hard. Skip.
+
+Now, possible issue: In ball-ball, if vn < 0 but very small below threshold, e=0, Jn=-vn/2 small. cap small. If balls resting stacked, vn may be 0, no friction. But spin damping decays. Fine.
+
+Now, final code should be self-contained. Let's write with comments.
+
+Need maybe include `if __name__ == '__main__': main()`.
+
+main:
+def main():
+    root = tk.Tk()
+    app = HeptagonBallsApp(root)
+    root.mainloop()
+
+In app cleanup, bind close.
+
+Potential issue: `tk.Canvas` can be large; root resizes. Use `root.resizable(False, False)`.
+
+Let's consider if `canvas.create_text` with `angle` option is available in all Tk versions? Yes.
+
+If not, alternative draw number with line/spin indicator? But requirement number on ball; angle okay.
+
+Now, let's test a few values:
+R=400, apothem = R cos(π/7)=400*0.900968=360.4. Ball r=16. Canvas 900 center 450, polygon vertices at radius 400; top y=50, bottom? Vertex top y=50; other vertices maybe y up to 450+400*sin(310°)=450-305=145? Wait with vertex top, all y between 50 and? Max y maybe 450+400*sin(206°)=450-124=326? Actually heptagon with vertex top may not have bottom at y=850; circumradius 400 but bottom flat side maybe y=450+? The lowest y might be apothem? If a side bottom, y=450+apothem=810. So fits. Good.
+
+Initial cluster center 450,450. Heptagon center same.
+
+Now, check `point_inside` for local q. Since polygon centered origin. For q at center (0,0), dot(q-A,n_in) for each edge should be positive apothem. Good.
+
+Now, possible issue with local vertices order and inward normals: We assume left normal. If due to y down, the algebraic orientation is CCW and left normal inward. We verified. Good.
+
+Now, potential bug: In `polygon_sdf`, if inside false, n = (P-q)/dist. This is direction from ball to closest boundary? For outside, P-q points from q to P (toward boundary), but earlier we wanted n into interior (gradient increasing signed distance). For outside side x=2, P-q = (-1,0) (toward boundary and interior? Boundary is left, interior is left of boundary, so P-q points into interior as well). Good. For outside near vertex, P-q points to vertex and beyond? It points toward boundary, which is into polygon? If outside a convex polygon, the segment from outside point to closest boundary point points into polygon (toward interior). Yes. So n into interior. Good.
+For inside, n=(q-P)/dist points away from boundary into interior. Good. Thus n always into interior. b_dir: boundary direction from ball = -n if inside else n. Good.
+
+Now, wall velocity at P: If P is closest boundary, but if ball penetrating, P may be not exactly contact point? It is boundary point closest to center. For a circle colliding with a convex shape, contact point is along normal at distance r from center, not necessarily P if dist != r. The actual contact point on wall for side is the projection of center onto side plane, which is P if P on side. For vertex, P vertex. Even if dist<r, P remains same closest point. Good.
+
+Now, if ball center is inside and closest point P is a vertex, the normal n from vertex to center. The boundary direction is -n (from ball to vertex). rc=-r*n. The contact point on ball is center - r*n. The wall contact point P is at distance dist from center; since dist<r, ball penetrates vertex. The actual geometric contact might be at the vertex, and ball surface point at center - r*n. The distance between these is r-dist (penetration). Good. Wall velocity at vertex P. Fine.
+
+Now, if ball center outside and closest point P vertex, n from ball to vertex (into interior). Boundary direction = n. rc=r*n. Contact ball point = center + r*n, which is toward vertex/interior. Good.
+
+Now, if ball center exactly on boundary (dist=0), inside? point_inside might return false/true depending eps. n fallback (-P)/L toward center. If inside true? s=0. b_dir? if inside true, boundary direction=-n (away from center?) But on boundary, ambiguous. Rare.
+
+Now, let's consider `point_inside` when q on boundary: dot =0, not < -eps, inside true. n=(q-P)/dist=0 fallback. okay.
+
+Now, possible issue: In `resolve_wall`, if s < BALL_RADIUS but pen small and vn positive, position correction moves ball inward. If ball is outside but moving away (vn? For outside, n into interior, moving away further out v·n <0? If outside and moving away, vn<0, normal impulse will bounce inward. If outside and moving into interior, vn>0, no impulse, position correction pushes inward. Good.
+
+Now, check `support = max(0.0, -dot(GRAVITY_VEC, n_world)) * h`. If n_world into interior. For bottom side, n up (0,-1), gravity down (0,G), dot=-G, -dot=G positive. For top side, n down (0,1), dot=G, -dot negative =>0. For side wall, n horizontal, dot=0. Good.
+
+Now, vertical bounce clamp: `MAX_UP_SPEED = math.sqrt(2.0 * GRAVITY * MAX_BOUNCE_HEIGHT)`. Since vy negative upward. If b.vy < -MAX_UP_SPEED, set -MAX_UP_SPEED. This clamps vertical upward speed. If gravity 1200, R=400, max height 320, speed sqrt(768000)=876 px/s. Wall speed 500, plausible. Good.
+
+Could also clamp downward? no.
+
+Now, ensure no use of `time`. Good.
+
+Let's maybe include type hints? Allowed typing. Use `Tuple[float, float]`, `List[Ball]`. Need from typing import List, Tuple.
+
+Code:
+from dataclasses import dataclass
+from typing import List, Tuple
+import math
+import tkinter as tk
+
+Vector = Tuple[float, float]
+
+...
+
+In dataclass, `label: int`.
+
+App `self.balls: List[Ball] = []`.
+
+Potential issue: Default arguments in dataclass referencing constants not necessary.
+
+Now, let's write final code in answer. But before final, let's simulate a few edge cases mentally.
+
+Case: ball at center, no collision. polygon_sdf s=apothem ~360, no wall. gravity makes it fall. Good.
+
+Case: ball hits bottom side. s decreases. When s<r, n up. vn = v_y - wall_v_y? wall_v_y maybe due rotation. If ball moving down v_y positive, n_y negative, vn negative. jn positive, v_y reduced. Position correction y += n_y*corr (negative) moves up. Good.
+
+Case: ball hits top side. n down (0,1). Ball moving up v_y negative, vn negative? dot(v, n) = v_y*1 negative, impulse down. Position y += positive moves down. Good.
+
+Case: rotating wall moving into ball: wall_v has normal component. vn = v - wall_v dot n. If wall moving into interior (e.g., side rotating downward toward ball), wall_v dot n positive? Then v_rel dot n maybe negative even if v=0, bounce. Good.
+
+Spin drawing: If spin negative (CCW), angle decreases? In step: angle = (angle + spin*h) % 2π. If spin negative, angle may become large positive due modulo? Example angle=0, spin=-1, h=0.01 => -0.01 % 6.283 = 6.273 (359.4 deg). Canvas angle 359.4 (CW nearly full) equivalent to -0.6 deg CCW. Good. So direction visible.
+
+Now, one possible issue: Tkinter `angle` positive rotates clockwise, but our modulo positive for negative spin yields near 360, which is clockwise almost full, equivalent to small CCW. Good.
+
+Now, need maybe set ball text fill black; colors orange, black visible. Outline black.
+
+Now, final answer should be code only? User asked write program. We can include brief note and code. Desired oververbosity 9, so include explanation and code. But final answer likely long code. Ensure code single file. We can say "Save as heptagon_balls.py and run". Include comments.
+
+Let's consider if the code will run without errors.
+
+Detailed code writing:
+
+```
+import math
+import tkinter as tk
+from dataclasses import dataclass
+from typing import List, Tuple
+
+Vector = Tuple[float, float]
+
+CANVAS_SIZE = 900
+CENTER_X = CANVAS_SIZE // 2
+CENTER_Y = CANVAS_SIZE // 2
+HEPTAGON_RADIUS = 400.0
+BALL_RADIUS = 16.0
+BALL_COUNT = 20
+...
+COLORS = [...]
+```
+
+Constants:
+```
+HEPTA_OMEGA = 2.0 * math.pi / 5.0
+GRAVITY = 1200.0
+GRAVITY_VEC = (0.0, GRAVITY)
+BALL_MASS = 1.0
+BALL_I = 0.5 * BALL_MASS * BALL_RADIUS * BALL_RADIUS
+MAX_BOUNCE_HEIGHT = 0.8 * HEPTAGON_RADIUS
+if MAX_BOUNCE_HEIGHT <= BALL_RADIUS:
+    MAX_BOUNCE_HEIGHT = BALL_RADIUS * 1.25
+MAX_DROP_HEIGHT = 2.0 * max(HEPTAGON_RADIUS - BALL_RADIUS, 1e-6)
+WALL_RESTITUTION = math.sqrt(max(0.0, MAX_BOUNCE_HEIGHT / MAX_DROP_HEIGHT))
+WALL_RESTITUTION = min(0.95, max(0.0, WALL_RESTITUTION))
+BALL_RESTITUTION = min(0.75, 0.85 * WALL_RESTITUTION)
+...
+```
+Maybe BALL_RESTITUTION = max(0.3, 0.75*WALL_RESTITUTION). If wall 0.63, ball 0.47. Good.
+
+Precompute vertices:
+```
+HEPTA_VERTS: List[Vector] = []
+for k in range(7):
+    a = -math.pi/2 + k*2*math.pi/7
+    HEPTA_VERTS.append((HEPTAGON_RADIUS*math.cos(a), HEPTAGON_RADIUS*math.sin(a)))
+HEPTA_EDGES = [(HEPTA_VERTS[i], HEPTA_VERTS[(i+1)%7]) for i in range(7)]
+HEPTA_INWARD_NORMALS: List[Vector] = []
+for a,b in HEPTA_EDGES:
+    tx = b[0]-a[0]; ty = b[1]-a[1]
+    L = math.hypot(tx,ty)
+    HEPTA_INWARD_NORMALS.append((-ty/L, tx/L))
+```
+
+Helper functions. Need `normalize`? Use inline.
+
+```
+def rotate_vec(v: Vector, angle: float) -> Vector:
+    c = math.cos(angle); s = math.sin(angle)
+    return (v[0]*c - v[1]*s, v[0]*s + v[1]*c)
+```
+
+`spin_cross`:
+```
+def spin_cross(spin: float, rc: Vector) -> Vector:
+    return (-spin*rc[1], spin*rc[0])
+```
+
+`omega_cross`:
+```
+def wall_velocity_at(p_local: Vector) -> Vector:
+    # p_local is local vector from polygon center
+    return (-HEPTA_OMEGA * p_local[1], HEPTA_OMEGA * p_local[0])
+```
+But in resolve we have p_world vector relative center; can use same formula with world relative. Since rotation formula independent. Use `omega_cross(r)`.
+
+`point_inside`:
+```
+def point_inside(q: Vector) -> bool:
+    for a,n in zip(HEPTA_EDGES, HEPTA_INWARD_NORMALS):
+       if (q[0]-a[0])*n[0] + (q[1]-a[1])*n[1] < -1e-7:
+          return False
+    return True
+```
+
+`closest_point_on_segment` returns Vector.
+
+`polygon_sdf`:
+```
+def polygon_sdf(q: Vector) -> Tuple[float, Vector, Vector, bool]:
+    inside = point_inside(q)
+    best_p = (0.0,0.0)
+    best_d2 = float('inf')
+    for a,b in HEPTA_EDGES:
+       p = closest_point_on_segment(q,a,b)
+       dx=q[0]-p[0]; dy=q[1]-p[1]
+       d2=dx*dx+dy*dy
+       if d2 < best_d2:
+          best_d2=d2; best_p=p
+    dist=math.sqrt(best_d2)
+    if dist < 1e-9:
+       L=math.hypot(best_p[0], best_p[1])
+       if L < 1e-9:
+          n=(1.0,0.0)
+       else:
+          n=(-best_p[0]/L, -best_p[1]/L)
+       s=0.0
+    elif inside:
+       n=((q[0]-best_p[0])/dist, (q[1]-best_p[1])/dist)
+       s=dist
+    else:
+       n=((best_p[0]-q[0])/dist, (best_p[1]-q[1])/dist)
+       s=-dist
+    return s,n,best_p,inside
+```
+
+Dataclass.
+
+App:
+```
+class HeptagonBallsApp:
+    def __init__(self, root: tk.Tk):
+       self.root=root
+       root.title("Balls in a spinning heptagon")
+       root.resizable(False, False)
+       self.canvas = tk.Canvas(root, width=CANVAS_SIZE, height=CANVAS_SIZE, bg='#181818')
+       self.canvas.pack()
+       self.hept_angle = 0.0
+       self.polygon_item = self.canvas.create_polygon([], fill='#101010', outline='#777', width=3)
+       self.ball_items=[]; self.text_items=[]
+       for color in COLORS:
+           self.ball_items.append(self.canvas.create_oval(-9999,-9999,0,0, fill=color, outline='black', width=1, tags='ball'))
+           self.text_items.append(self.canvas.create_text(0,0, text='', fill='black', font=('Helvetica', 9, 'bold'), anchor='center', angle=0, tags='number'))
+       self.canvas.tag_raise('number')
+       self.reset()
+       self.after_id = root.after(16, self.tick)
+       root.protocol("WM_DELETE_WINDOW", self.cleanup)
+```
+
+cleanup:
+```
+    def cleanup(self):
+       if self.after_id is not None:
+          self.root.after_cancel(self.after_id)
+       self.root.destroy()
+```
+Need initialize self.after_id = None before protocol? In __init__, set self.after_id=None then after. Protocol can access.
+
+reset:
+```
+    def reset(self):
+       self.balls = []
+       for i in range(BALL_COUNT):
+          a = i * 2.0*math.pi / BALL_COUNT
+          off = BALL_RADIUS * 0.3
+          x = CENTER_X + off*math.cos(a)
+          y = CENTER_Y + off*math.sin(a)
+          self.balls.append(Ball(x,y,0.0,0.0,0.0,0.0,BALL_RADIUS,COLORS[i],i+1))
+       self.hept_angle = 0.0
+       self.relax_initial()
+       comx = sum(b.x for b in self.balls)/BALL_COUNT
+       comy = ...
+       for b in self.balls:
+          b.x += CENTER_X - comx
+          b.y += CENTER_Y - comy
+          b.vx=b.vy=b.spin=0.0
+          b.angle=0.0
+       self.draw()
+```
+
+relax_initial as method uses self.balls.
+```
+    def relax_initial(self):
+       for _ in range(120):
+          any_overlap = False
+          for i in range(BALL_COUNT):
+             bi = self.balls[i]
+             for j in range(i+1, BALL_COUNT):
+                bj = self.balls[j]
+                dx = bj.x - bi.x; dy = bj.y - bi.y
+                d = math.hypot(dx,dy)
+                if d < 2.0*BALL_RADIUS:
+                   if d < 1e-9:
+                      ang = (i*2.399963 + j*1.7) % (2*math.pi)
+                      nx = math.cos(ang); ny = math.sin(ang)
+                   else:
+                      nx=dx/d; ny=dy/d
+                   corr = (2*BALL_RADIUS - d)*0.5
+                   bi.x -= nx*corr; bi.y -= ny*corr
+                   bj.x += nx*corr; bj.y += ny*corr
+                   any_overlap=True
+          if not any_overlap: break
+```
+Maybe after relax, some balls might have velocity? zero.
+
+tick:
+```
+    def tick(self):
+       if self.root.winfo_exists():
+          dt = FRAME_DT
+          h = dt / SUBSTEPS
+          for _ in range(SUBSTEPS):
+             self.step(h)
+          self.draw()
+          self.after_id = self.root.after(16, self.tick)
+       else:
+          self.after_id = None
+```
+No time; always fixed.
+
+step:
+```
+    def step(self,h):
+       self.hept_angle = (self.hept_angle + HEPTA_OMEGA*h) % (2*math.pi)
+       max_up_speed = MAX_UP_SPEED
+       for b in self.balls:
+          b.vy += GRAVITY*h
+          ld = max(0.0, 1.0 - LINEAR_DAMPING*h)
+          b.vx *= ld; b.vy *= ld
+          b.x += b.vx*h; b.y += b.vy*h
+          b.spin *= max(0.0, 1.0 - SPIN_DAMPING*h)
+          b.angle = (b.angle + b.spin*h) % (2*math.pi)
+          if b.vy < -max_up_speed:
+              b.vy = -max_up_speed
+       for _ in range(SOLVER_ITERATIONS):
+          self.resolve_ball_pairs()
+          self.resolve_walls(h)
+       self.enforce_containment()
+       for b in self.balls:
+          if b.vy < -MAX_UP_SPEED: b.vy = -MAX_UP_SPEED
+```
+Maybe vertical clamp before integrate? After solver.
+
+resolve_ball_pairs method. Use local balls = self.balls.
+Need be careful with dataclass mutable updates.
+
+```
+    def resolve_ball_pairs(self):
+       balls=self.balls
+       for i in range(BALL_COUNT):
+          bi=balls[i]
+          for j in range(i+1,BALL_COUNT):
+             bj=balls[j]
+             dx=bj.x-bi.x; dy=bj.y-bi.y
+             d=math.hypot(dx,dy)
+             if d < 2.0*BALL_RADIUS + 1e-9:
+                if d < 1e-9:
+                   ang = (i*2.399963 + j*1.31) % (2*math.pi)
+                   nx=math.cos(ang); ny=math.sin(ang)
+                else:
+                   nx=dx/d; ny=dy/d
+                pen = 2.0*BALL_RADIUS - d
+                corr = max(pen - POSITION_SLOP, 0.0) * POSITION_PERCENT * 0.5
+                bi.x -= nx*corr; bi.y -= ny*corr
+                bj.x += nx*corr; bj.y += ny*corr
+                rvx = bj.vx - bi.vx; rvy = bj.vy - bi.vy
+                vn = rvx*nx + rvy*ny
+                jn = 0.0
+                if vn < 0.0:
+                   e = BALL_RESTITUTION if -vn > REST_THRESHOLD else 0.0
+                   inv_mass = 2.0 / BALL_MASS
+                   jn = -(1.0 + e) * vn / inv_mass
+                   bi.vx -= jn*nx; bi.vy -= jn*ny
+                   bj.vx += jn*nx; bj.vy += jn*ny
+                if pen > 0.0 and vn < REST_THRESHOLD:
+                   r = BALL_RADIUS
+                   rci = (r*nx, r*ny)
+                   rcj = (-r*nx, -r*ny)
+                   si = spin_cross(bi.spin, rci)
+                   sj = spin_cross(bj.spin, rcj)
+                   rvx = (bj.vx + sj[0]) - (bi.vx + si[0])
+                   rvy = (bj.vy + sj[1]) - (bi.vy + si[1])
+                   vn_s = rvx*nx + rvy*ny
+                   tx = rvx - vn_s*nx
+                   ty = rvy - vn_s*ny
+                   tmag = math.hypot(tx,ty)
+                   if tmag > 1e-7:
+                      cap = BALL_FRICTION * (abs(jn) if vn < 0.0 else 0.0)
+                      if cap > 0.0:
+                         inv_eff = (2.0 / BALL_MASS) + 2.0 * (r*r) / BALL_I
+                         jt = -tmag / inv_eff
+                         if jt > cap: jt = cap
+                         elif jt < -cap: jt = -cap
+                         imp_jx = tx * (jt / tmag)
+                         imp_jy = ty * (jt / tmag)
+                         bi.vx -= imp_jx; bi.vy -= imp_jy
+                         bj.vx += imp_jx; bj.vy += imp_jy
+                         torque_i = cross2(rci, (-imp_jx, -imp_jy))
+                         torque_j = cross2(rcj, (imp_jx, imp_jy))
+                         bi.spin += torque_i / BALL_I
+                         bj.spin += torque_j / BALL_I
+```
+Note `inv_eff = 2.0/BALL_MASS + 2.0*(r*r)/BALL_I`. If BALL_MASS=1, =2+4=6. Good.
+
+resolve_walls method:
+```
+    def resolve_walls(self, h: float):
+       for b in self.balls:
+          q = (b.x - CENTER_X, b.y - CENTER_Y)
+          q_local = rotate_vec(q, -self.hept_angle)
+          s, n_local, p_local, inside = polygon_sdf(q_local)
+          if s < BALL_RADIUS:
+             pen = BALL_RADIUS - s
+             n = rotate_vec(n_local, self.hept_angle)
+             p_rel = rotate_vec(p_local, self.hept_angle)
+             wall_v = omega_cross(p_rel)
+             vx = b.vx - wall_v[0]
+             vy = b.vy - wall_v[1]
+             vn = vx*n[0] + vy*n[1]
+             jn = 0.0
+             if vn < 0.0:
+                e = WALL_RESTITUTION if -vn > REST_THRESHOLD else 0.0
+                jn = -(1.0 + e) * vn / (1.0 / BALL_MASS)
+                b.vx += jn*n[0]
+                b.vy += jn*n[1]
+             if pen > 0.0 and vn < REST_THRESHOLD:
+                if inside:
+                   bdir = (-n[0], -n[1])
+                else:
+                   bdir = (n[0], n[1])
+                rc = (BALL_RADIUS*bdir[0], BALL_RADIUS*bdir[1])
+                sc = spin_cross(b.spin, rc)
+                surf_x = b.vx + sc[0] - wall_v[0]
+                surf_y = b.vy + sc[1] - wall_v[1]
+                vn_s = surf_x*n[0] + surf_y*n[1]
+                tx = surf_x - vn_s*n[0]
+                ty = surf_y - vn_s*n[1]
+                tmag = math.hypot(tx, ty)
+                if tmag > 1e-7:
+                   support = max(0.0, -(GRAVITY_VEC[0]*n[0] + GRAVITY_VEC[1]*n[1])) * BALL_MASS * h
+                   cap = WALL_FRICTION * max(abs(jn), support)
+                   if cap > 0.0:
+                      inv_eff = 1.0 / BALL_MASS + (BALL_RADIUS*BALL_RADIUS) / BALL_I
+                      jt = -tmag / inv_eff
+                      if jt > cap: jt = cap
+                      elif jt < -cap: jt = -cap
+                      imp_x = tx * (jt / tmag)
+                      imp_y = ty * (jt / tmag)
+                      b.vx += imp_x
+                      b.vy += imp_y
+                      torque = cross2(rc, (imp_x, imp_y))
+                      b.spin += torque / BALL_I
+                      b.spin *= max(0.0, 1.0 - CONTACT_SPIN_DAMPING*h)
+             corr = max(pen - POSITION_SLOP, 0.0) * POSITION_PERCENT
+             b.x += n[0] * corr
+             b.y += n[1] * corr
+```
+
+`omega_cross` uses HEPTA_OMEGA constant. p_rel is world relative vector. Since wall is rotating with same angular velocity, velocity formula independent of angle. Good.
+
+enforce_containment:
+```
+    def enforce_containment(self):
+       for b in self.balls:
+          q = (b.x-CENTER_X, b.y-CENTER_Y)
+          ql = rotate_vec(q, -self.hept_angle)
+          s,n_local,p_local,inside = polygon_sdf(ql)
+          if s < 0.0:
+             pen = BALL_RADIUS - s
+             n = rotate_vec(n_local, self.hept_angle)
+             b.x += n[0]*pen
+             b.y += n[1]*pen
+          elif s < BALL_RADIUS * 0.5:
+             pen = BALL_RADIUS - s
+             n = rotate_vec(n_local, self.hept_angle)
+             b.x += n[0]*pen*0.35
+             b.y += n[1]*pen*0.35
+```
+Maybe if s < BALL_RADIUS*0.5 partial. Good.
+
+draw:
+```
+    def draw(self):
+       c=math.cos(self.hept_angle); s=math.sin(self.hept_angle)
+       pts=[]
+       for vx,vy in HEPTA_VERTS:
+          pts.append(CENTER_X + vx*c - vy*s)
+          pts.append(CENTER_Y + vx*s + vy*c)
+       self.canvas.coords(self.polygon_item, *pts)
+       for i,b in enumerate(self.balls):
+          self.canvas.coords(self.ball_items[i], b.x-b.radius, b.y-b.radius, b.x+b.radius, b.y+b.radius)
+          deg = math.degrees(b.angle % (2.0*math.pi))
+          self.canvas.itemconfig(self.text_items[i], text=str(b.label), x=b.x, y=b.y, angle=deg)
+```
+
+Potential issue: `b.angle` already modulo positive, so % okay.
+
+Now, constants for solver:
+```
+FRAME_DT = 1.0 / 60.0
+SUBSTEPS = 4
+SOLVER_ITERATIONS = 4
+```
+Maybe 4 substeps, 4 iterations. Good.
+
+Damping constants:
+```
+LINEAR_DAMPING = 0.06
+SPIN_DAMPING = 0.35
+CONTACT_SPIN_DAMPING = 0.8
+REST_THRESHOLD = 10.0
+POSITION_PERCENT = 0.9
+POSITION_SLOP = 0.01
+```
+Contact spin damping 0.8 per sec maybe strong but only when friction applied. If wall dragging, spin may not reach? Let's reduce to 0.4. Global spin damping 0.25. Use:
+LINEAR_DAMPING=0.05
+SPIN_DAMPING=0.25
+CONTACT_SPIN_DAMPING=0.5
+
+Rest threshold 8.
+
+Gravity 1200.
+
+Now, think about wall friction support: If support impulse small (G*h ~5), cap ~1.6. Required to match wall speed huge, clamped. Over 60fps, ball accelerates. Good. But contact spin damping 0.5 per substep? Actually `b.spin *= (1 - 0.5*h)`, h=1/240 => factor .9979 per substep, .985 per frame, 5% per second. Not strong. Wait 0.5*h=0.00208, per frame 4 => .9917, per second 59.5 frames => .61. Good. Global spin damping 0.25 => per second .78. Combined maybe .47. Okay.
+
+Could spin blow up? Friction impulse max from impact: jn maybe 100, cap 32, torque r*32/I=0.4? Wait r=16, I=128, torque=512, spin change=4 rad/s. Damping slows. Okay.
+
+Now, possible issue with `support` cap in wall friction: If ball resting on bottom, support=G*h=5, cap=1.6. If wall speed 500, required jt=-167, clamped -1.6. Each substep linear impulse 1.6, per frame 6.4 velocity, per second 384 px/s. Enough to drag. Spin change per substep: torque r*1.6/I=0.2, per frame .8, per second 48 rad/s, but damping 50%? Rolling condition spin ~ -V/r = -31 rad/s. It may reach. Good.
+
+Now, if wall speed high, friction can make spin high; number rotates fast. Visible.
+
+Potential issue: The ball may be in contact with wall and vn small positive, support friction applied every substep, but if wall moves away, it may accelerate ball even when not supported? support based on gravity normal, so if side wall gravity normal zero, no. If bottom wall moving down? support positive; if wall moving down into ball? okay.
+
+Now, final answer explanation: mention all implemented, no pygame, allowed libs. Provide code.
+
+Let's check for disallowed libraries: We import math, tkinter, dataclasses, typing. `sys` not used. Good.
+
+Potential issue: `tkinter` import as `tk` allowed? The library is tkinter. Yes.
+
+Now, let's consider if user expects numpy? Not required.
+
+Let's maybe include `# single file` comment.
+
+Double-check code for name conflicts: `rotate_vec` used before defined? Define constants and helpers before class. Good.
+
+Potential bug: In `resolve_walls`, `jn = -(1.0 + e) * vn / (1.0 / BALL_MASS)`. Since `vn` negative, jn positive. If BALL_MASS=1, okay. But division by (1/m) = m. Actually impulse for wall infinite: j = -(1+e) vn / (1/m) = -(1+e) vn * m. Since m=1. Good.
+
+In ball-ball, `inv_mass = 2.0 / BALL_MASS`, jn = -(1+e)*vn / inv_mass = -(1+e)*vn * BALL_MASS /2. Since m=1, /2. Good.
+
+In friction inv_eff wall: `1.0 / BALL_MASS + (r*r)/BALL_I`. If m=1, 1+2=3. Good.
+Ball-ball: `(2.0 / BALL_MASS) + 2.0 * (r*r) / BALL_I`. With I=0.5*m*r², r²/I=2/m. 2*(2/m)=4/m; plus 2/m =6/m. Good.
+
+Now, possible bug: In ball-ball friction, `cap = BALL_FRICTION * (abs(jn) if vn < 0.0 else 0.0)`. If vn is negative but very small below threshold, jn small. If vn positive but contact, no friction. okay.
+
+But if balls are resting and vn=0, no friction. They may not rotate from ball-ball. Wall friction and global damping enough. Requirement "All balls rotate with friction" maybe means affected by friction, not necessarily all spinning constantly. Collisions will spin.
+
+Now, one more thought: The number on ball indicates spin. If spin is angular velocity, angle updates. But if ball translates, number doesn't rotate unless spin. Good.
+
+Now, maybe user expects "All balls rotate with friction" meaning the balls themselves spin due to friction, not necessarily angular dynamics in collisions. We implement.
+
+Now, let's consider if the heptagon spinning speed 360 deg / 5 sec: HEPTA_OMEGA = 2π/5 rad/s. In screen positive clockwise. Good.
+
+Now, ensure heptagon size large enough: R=400, ball r=16, 20 balls. Good.
+
+Now, final answer should not mention internal analysis. Provide code.
+
+Let's maybe add a top comment describing how bounce height is set.
+
+Potential code issue: `self.canvas.itemconfig(self.text_items[i], angle=deg)` may require `angle` option in `itemconfig`? Yes. In Tk, canvas item configuration options include angle. Should work.
+
+If Tk version doesn't support angle? Most do. Could alternatively draw a small line to indicate spin, but number requirement. Angle is best.
+
+Now, possible issue with `create_text` and `angle`: The angle is in degrees, but it rotates the text around the anchor. If anchor center, okay. But the text's bounding box may not be recomputed? It should.
+
+Now, let's produce final code. Ensure no syntax errors:
+- `@dataclass` class Ball fields no defaults? All required. In reset, provide all.
+- Type hints `List[Vector]` okay.
+- In class, `self.balls: List[Ball] = []` in reset? Could declare in __init__? Use `self.balls = []` no type needed.
+- `self.after_id = None` before protocol.
+- `root.protocol("WM_DELETE_WINDOW", self.cleanup)` after self.after_id initialized.
+
+Let's write code fully:
+
+```
+import math
+import tkinter as tk
+from dataclasses import dataclass
+from typing import List, Tuple
+
+Vector = Tuple[float, float]
+...
+```
+
+No `sys`.
+
+One more check: In `reset`, after relax, com shift may cause balls outside heptagon if cluster large? cluster radius maybe <60, R=400, safe.
+
+In `relax_initial`, using `2.0*BALL_RADIUS` but balls have radius attribute same. okay.
+
+In `resolve_ball_pairs`, use `if d < 2.0 * BALL_RADIUS + 1e-9`. If d=0, normal deterministic. Good.
+
+Now, possible issue with position correction in pairs: We move both balls by corr each; corr = (pen-slop)*percent*0.5. Total separation = pen-slop*percent. Good.
+
+In wall position correction: corr = (pen-slop)*percent. If pen large, can move beyond? It moves to s = s + (r-s)*percent. If percent<1, residual. Multiple iterations. Good.
+
+Now, `enforce_containment` partial if s < 0.5r. If after solver residual s=0.9r, no partial. Good.
+
+Now, vertical bounce clamp: `MAX_UP_SPEED` constant. Use after each substep? In step after integrate and after solver. Good.
+
+Could the vertical clamp interfere with ball moving upward due to ball-ball collision? It clamps to max material bounce height. Good.
+
+Now, let's think about "impact bounce height will not exceed the radius of the heptagon, but higher than ball radius." Our MAX_BOUNCE_HEIGHT=0.8R. If R=400, 320. Ball radius 16. Good. If user resizes? Constants fixed.
+
+Now, final explanation: Keep concise but enough. Provide code. Ensure final answer oververbosity 9: include notes about degenerate center, physics, how to run. But not too much.
+
+Let's produce final.

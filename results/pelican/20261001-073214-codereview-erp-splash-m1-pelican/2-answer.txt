@@ -1,0 +1,103 @@
+
+
+## The bug: `cancel_pending()` leaks the backlog ledger, permanently bricking the write path
+
+`_pending_bytes` is the tier's memory-safety ledger: `_admit_write()` **charges** it (under `_stats_lock`) at enqueue, and the only place it is **debited** is the writer thread's `finally` — which only runs for items the writer actually `get()`s off the queue.
+
+`cancel_pending()` drains the queue *itself* (`get_nowait` + `task_done`) but never calls `_release_pending()`:
+
+```python
+dropped += 1
+self._queue.task_done()      # <- no _release_pending(pending.*) here
+```
+
+Dropped items are consumed, so the writer's `finally` never executes for them. Their reservation is charged **forever** — nothing else in the class ever debits it.
+
+### When it triggers
+
+Exactly its documented use: the admin cache‑clear quiesce, called while the writer still has backlog (which is the only situation where canceling matters — a non‑empty queue of multi‑GB `PendingWrite`s). After that one call, `_pending_bytes` sits at the sum of the dropped items (typically several GiB, i.e. ≈ the 4 GiB `MTPLX_SSD_WRITER_BACKLOG_BYTES` budget) for the rest of the process lifetime.
+
+### What it costs
+
+- Every subsequent `put_entry` fails admission: `self._pending_bytes + needed > budget` is true, and the #384 oversized‑alone rescue requires `_pending_bytes <= 0`, so even a lone oversized entry is rejected. The counter `skipped_backlog_bytes` ticks silently.
+- The cold tier is **permanently dead for writes** until the daemon is restarted: no session is ever persisted again, so every restart after the clear pays a full re‑prefill (the #305‑class minutes‑of‑TTFT pain the tier exists to remove) for every session.
+- The dashboard makes it look like a phantom: `writer_backlog_bytes` pegged at the budget while `writer_queue_depth` is 0 — a queue that is empty but a backlog that "never drains." That mismatch is the only trace.
+
+### The asymmetry behind it (fixed by the same patch)
+
+The ledger is also inconsistent on the normal path: admission reserves `entry.nbytes` (`estimated`), but the item carries and releases `pinned_nbytes = max(estimated, encoded.nbytes)`. Every completed write whose encode outgrows the bank's estimate releases *more than it reserved*; the `max(0, …)` clamp in `_release_pending` then converts that into **phantom room**, so the budget silently erodes toward zero under churn — re‑opening the exact 35→66 GB pinning blowup of issue #145 that the budget was added to stop. The root cause of both defects is the same: the item doesn't remember what it was actually *charged*.
+
+### Minimal patch
+
+Record the reserved amount on the item and release exactly it on every fate (drain, drop‑on‑full, cancel):
+
+```python
+@dataclass(frozen=True)
+class PendingWrite:
+    entry_id: str
+    token_ids: tuple[int, ...]
+    metadata: dict[str, Any]
+    payload_spec: dict[str, Any] | None
+    tensors: dict[str, bytes]
+    deferred: DeferredPayload | None = None
+    created_at_s: float = field(default_factory=time.time)
+    # What _admit_write charged to _pending_bytes (the bank's estimate).
+    # Every release path must debit exactly this, or the ledger drifts.
+    reserved_nbytes: int = 0
+    # Estimated bytes this write pins in memory until the writer drains it
+    # (deferred payloads hold live KV arrays; encoded ones hold the buffers).
+    pinned_nbytes: int = 0
+```
+
+In `put_entry`, where the item is built:
+
+```python
+        pending = PendingWrite(
+            entry_id=str(metadata["entry_id"]),
+            token_ids=token_ids,
+            metadata=metadata,
+            payload_spec=encoded.spec,
+            tensors=encoded.tensors,
+            reserved_nbytes=max(0, estimated_nbytes),
+            pinned_nbytes=max(estimated_nbytes, int(encoded.nbytes)),
+        )
+```
+
+Writer loop (`_writer_loop` finally):
+
+```python
+            finally:
+                self._release_pending(pending.reserved_nbytes)
+                self._queue.task_done()
+```
+
+Queue‑full path in `put_entry`:
+
+```python
+        except queue.Full:
+            self._release_pending(pending.reserved_nbytes)
+```
+
+And the actual bug, in `cancel_pending()`:
+
+```python
+            dropped += 1
+            self._release_pending(pending.reserved_nbytes)   # was: missing
+            self._queue.task_done()
+```
+
+(The encode‑interrupt and serialize‑error paths already release `estimated_nbytes`, which equals `reserved_nbytes` — unchanged. `pinned_nbytes` is retained for its current uses: the hourly‑budget charge and the completion log line.)
+
+This makes the ledger exactly the sum of live reservations: cancel un‑charges what admit charged (fixing the permanent brick), and drain no longer over/under‑releases (fixing the budget erosion). The ledger is now a *lower bound* on true pinned bytes rather than an eroding one — the conservative direction for a memory cap.
+
+### Secondary findings (not the headline, worth filing)
+
+1. **`stats()` sums an unpruned `_written_window`.** `_admit_write`/`_admit_hourly` prune the deque, but `stats()` does not:
+
+   ```python
+   written_last_hour = sum(nbytes for _, nbytes in self._written_window)
+   ```
+
+   On a write‑idle daemon (the /health‑polling case), the deque is never pruned, so `written_bytes_last_hour` reports the all‑time total and grows unboundedly. Add the same 3600 s prune before the sum.
+
+2. **`entry_id` aliases `mtp_snapshot_epoch=None` and `0`.** In `_metadata_for_entry` the digest uses `int(getattr(entry, "mtp_snapshot_epoch", 0) or 0)` — both values stringify to `"0"` — while the row stores them distinctly (`NULL` vs `0`). A re‑snapshot of the same `(tokens, identity, snapshot_epoch)` with the MTP epoch going `None → 0` collides, so the writer's phase‑0 "exists + in manifest → touch, skip" path silently drops the newer payload (stale/missing MTP history served on restore, and divergent `capabilities` in the row feeding the shadow logic). The digest should distinguish `None` from `0` (e.g. `""` vs `"0"`).

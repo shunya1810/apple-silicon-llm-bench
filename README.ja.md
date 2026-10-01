@@ -219,6 +219,27 @@ npanj の splash-plus の5つのプロンプトを5分間ループし（250 ト�
 - 1トークンあたりのエネルギーは、ループ全体（短い prefill も含む）のパッケージ電力を生成トークン数で割った値である。
 - Splash は重みをディスクから直接マップするので、`footprint` には約 4.9 GB しか現れない。上の長い文脈の計測での wired メモリは 22〜26 GB だった。
 
+## thinking オン（reasoning xhigh、長い生成）
+
+thinking オン、reasoning xhigh、モデルのサンプリングの設定（temperature 1.0、top-p 0.95、top-k 20）、生成の上限は実質なしで、MTPLX M1 fork（v2.12.0-m1.3）と Splash 1.1.0-m1 に3つの課題をさせた（2026-09-30〜10-01。[`scripts/pelican.py`](scripts/pelican.py)、[`run_thinking2.sh`](run_thinking2.sh)、生データとすべての出力は [`results/pelican/`](results/pelican/)）。
+
+| 課題 | エンジン | 回数 | 生成トークン数 | 全体の時間 | decode tok/s |
+|---|---|---|---|---|---|
+| 「ペリカンが自転車に乗っている SVG」 | Splash 1.1.0-m1 | 3 | 3.0万〜4.6万 | 17.6〜26.1 分 | 27.9〜29.5 |
+| | MTPLX M1 fork | 3 | 2.9万〜3.2万 | 16.7〜18.3 分 | 28.9〜29.6 |
+| | MTPLX M1 fork ＋ `MTPLX_MLX_COMMAND_BUFFER_MB=1000` | 3 | 2.7万〜3.6万 | 14.0〜19.0 分 | 30.3〜31.9 |
+| 回転する七角形の中の 20 個のボール（Python） | Splash 1.1.0-m1 | 2 | 6.3万前後 | 42.6〜46.2 分 | 22.9〜24.5 |
+| | MTPLX M1 fork | 2 | 4.7万〜5.7万 | 31.9〜39.1 分 | 24.3〜24.7 |
+| 2.97 万トークンのソースファイルのレビュー | Splash 1.1.0-m1 | 2 | 4.0万〜5.1万 | 34.1〜47.1 分 | 19.7〜20.0 |
+| | MTPLX M1 fork | 2 | 3.2万〜3.4万 | 26.8〜27.0 分 | 21.5〜22.9 |
+
+<img alt="ペリカンの SVG 9 枚：Splash 1.1.0-m1、MTPLX M1 fork、command buffer を広げた fork から各3枚" src="charts/pelican-grid.png" width="720">
+
+- 推論が数万トークンまで伸びると、fork の decode は Splash と同じか少し速い。短い生成での Splash の優位は、ここでは続かない。
+- temperature 1.0 では推論の長さが回ごとに大きく変わるので、全体の時間ではなく decode で比べるのがよい。コードレビューの2回目は、どちらも1回目のプロンプトキャッシュを使った（最初の読み込みは Splash が 264.6 秒、fork が 228.8 秒）。
+- 七角形のプログラムは4本とも文法上は正しい（617〜721 行）。tkinter の画面が開くので、ここでは実行していない。コードレビューは4回とも、v2.12.0-m1.2 で直した再開位置の不具合を見つけず、うち3回は `cancel_pending()` の予約の戻し忘れを指摘した（まだ確かめていない）。
+- v2.12.0-m1.3 より前の fork は、どの回も約 16,530 トークンの生成で止まった（non-finite logits。upstream 1de2b1c も同じ）。compiled verify の KV キャッシュが、最初に確保した 16,384 新規トークンを超えて増えられなかったためである。止まった回は `results/pelican-xhigh-aborted/` と `results/pelican/*fork-m1.2*` にあり、再現手順は [`scripts/nan_repro.py`](scripts/nan_repro.py)、結果は `results/nan-repro/` にある。
+
 ## サンプリング（temperature 1.0）
 
 temperature 0 で 256 トークンという条件は、比べるために揃えた課題で、普段の使い方ではない。

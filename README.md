@@ -276,6 +276,41 @@ prompt token counts), a 3-minute rest, then one cold 44K prompt. ABBA, two runs 
 - Splash maps its weights from disk, so `footprint` sees only ~4.9 GB of it; its wired
   memory in the long-context runs above was 22–26 GB.
 
+## Thinking on (reasoning xhigh, long generations)
+
+Three tasks with thinking on, reasoning xhigh, the model's sampling settings (temperature
+1.0, top-p 0.95, top-k 20) and no practical output cap, on the MTPLX M1 fork at
+v2.12.0-m1.3 and Splash 1.1.0-m1 (2026-09-30/10-01, [`scripts/pelican.py`](scripts/pelican.py),
+[`run_thinking2.sh`](run_thinking2.sh), raw data and every output in
+[`results/pelican/`](results/pelican/)):
+
+| task | engine | runs | generated tokens | total time | decode tok/s |
+|---|---|---|---|---|---|
+| "Generate an SVG of a pelican riding a bicycle" | Splash 1.1.0-m1 | 3 | 30.2K–46.2K | 17.6–26.1 min | 27.9–29.5 |
+| | MTPLX M1 fork | 3 | 29.5K–31.7K | 16.7–18.3 min | 28.9–29.6 |
+| | MTPLX M1 fork + `MTPLX_MLX_COMMAND_BUFFER_MB=1000` | 3 | 26.9K–35.6K | 14.0–19.0 min | 30.3–31.9 |
+| 20 balls in a spinning heptagon (Python) | Splash 1.1.0-m1 | 2 | 62.6K–63.5K | 42.6–46.2 min | 22.9–24.5 |
+| | MTPLX M1 fork | 2 | 47.2K–56.8K | 31.9–39.1 min | 24.3–24.7 |
+| Review a 29.7K-token source file | Splash 1.1.0-m1 | 2 | 40.4K–51.2K | 34.1–47.1 min | 19.7–20.0 |
+| | MTPLX M1 fork | 2 | 31.8K–34.5K | 26.8–27.0 min | 21.5–22.9 |
+
+<img alt="Nine pelican SVGs: three each from Splash 1.1.0-m1, the MTPLX M1 fork and the fork with larger command buffers" src="charts/pelican-grid.png" width="720">
+
+- Once the reasoning runs to tens of thousands of tokens, the fork decodes as fast as
+  Splash or slightly faster; Splash's lead on short generations does not carry over.
+- Reasoning length varies a lot from run to run at temperature 1.0, so compare decode
+  speed rather than total time. The second code-review run of each engine reused the
+  first run's prompt cache (cold prompt read: Splash 264.6 s, the fork 228.8 s).
+- All four heptagon programs compile (617–721 lines); none was run here (they open a
+  tkinter window). None of the four code reviews found the restore-point bug fixed in
+  v2.12.0-m1.2; three flagged a reservation leak in `cancel_pending()` instead (not yet
+  verified).
+- Every fork run before v2.12.0-m1.3 failed at about 16,530 generated tokens (non-finite
+  logits; upstream 1de2b1c as well): the compiled-verify cache could not grow past the
+  16,384 new tokens reserved up front. The failed runs are in
+  `results/pelican-xhigh-aborted/` and `results/pelican/*fork-m1.2*`; the reproduction is
+  [`scripts/nan_repro.py`](scripts/nan_repro.py) with its results in `results/nan-repro/`.
+
 ## Sampled decoding (temperature 1.0)
 
 Greedy decoding at 256 tokens is a matched workload, not how the model is normally run.

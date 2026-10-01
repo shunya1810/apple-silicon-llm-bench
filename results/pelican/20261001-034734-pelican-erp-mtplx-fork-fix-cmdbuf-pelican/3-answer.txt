@@ -1,0 +1,126 @@
+Here's a complete, self-contained SVG of a pelican riding a bicycle — complete with pedaling legs, a flowing scarf, and motion lines:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <title>Pelican riding a bicycle</title>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#cdeaff"/>
+      <stop offset="1" stop-color="#f3fbff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <circle cx="712" cy="86" r="36" fill="#ffe08a" opacity=".9"/>
+  <circle cx="712" cy="86" r="47" fill="none" stroke="#ffe08a" stroke-width="4" opacity=".45"/>
+  <g fill="#ffffff" opacity=".9">
+    <ellipse cx="130" cy="96" rx="40" ry="20"/><ellipse cx="98" cy="104" rx="26" ry="14"/><ellipse cx="163" cy="104" rx="28" ry="15"/>
+    <ellipse cx="608" cy="66" rx="34" ry="17"/><ellipse cx="582" cy="73" rx="22" ry="12"/><ellipse cx="636" cy="73" rx="24" ry="13"/>
+    <ellipse cx="392" cy="50" rx="26" ry="13"/><ellipse cx="372" cy="56" rx="17" ry="10"/><ellipse cx="412" cy="56" rx="18" ry="10"/>
+  </g>
+
+  <!-- Ground -->
+  <rect x="0" y="498" width="800" height="102" fill="#e9f4e9"/>
+  <line x1="0" y1="498" x2="800" y2="498" stroke="#c3ddc6" stroke-width="5"/>
+  <ellipse cx="400" cy="504" rx="218" ry="13" fill="#cfe0cf" opacity=".7"/>
+  <g stroke="#8fbf94" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M110 498 C107 490 104 486 99 481 M110 498 C111 489 114 484 119 480 M110 498 C110 488 110 483 110 479"/>
+    <path d="M672 498 C669 490 666 486 661 481 M672 498 C673 489 676 484 681 480 M672 498 C672 488 672 483 672 479"/>
+    <path d="M740 498 C737 492 735 488 731 484 M740 498 C741 490 744 486 748 483"/>
+    <path d="M60 498 C57 492 55 488 51 484 M60 498 C61 490 64 486 68 483"/>
+  </g>
+
+  <!-- Motion lines & dust -->
+  <g stroke="#9fc2d8" stroke-width="6" stroke-linecap="round" stroke-dasharray="28 20" opacity=".85">
+    <path d="M48 356 H168"/><path d="M30 414 H148"/><path d="M56 470 H182"/>
+  </g>
+  <circle cx="182" cy="486" r="8" fill="#cfd8dc" opacity=".7"/>
+  <circle cx="156" cy="494" r="6" fill="#cfd8dc" opacity=".7"/>
+  <circle cx="134" cy="483" r="5" fill="#cfd8dc" opacity=".7"/>
+
+  <!-- Far leg (behind the bike) -->
+  <path d="M340 322 L326 438" stroke="#2f3640" stroke-width="15" stroke-linecap="round"/>
+  <path d="M340 322 L326 438" stroke="#ffb703" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Bicycle -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M358 421 L326 440" stroke="#2b2d33" stroke-width="8"/>
+    <path d="M313 443 L337 439" stroke="#2b2d33" stroke-width="7"/>
+
+    <!-- Rear wheel -->
+    <circle cx="220" cy="420" r="78" fill="none" stroke="#2b2d33" stroke-width="10"/>
+    <circle cx="220" cy="420" r="64" fill="none" stroke="#8d99ae" stroke-width="4"/>
+    <path d="M220 356 V484 M156 420 H284 M175 375 265 465 M265 375 175 465" stroke="#aeb8c6" stroke-width="3"/>
+    <circle cx="220" cy="420" r="9" fill="none" stroke="#2b2d33" stroke-width="4.5"/>
+    <circle cx="220" cy="420" r="3.5" fill="#2b2d33"/>
+
+    <!-- Front wheel -->
+    <circle cx="560" cy="420" r="78" fill="none" stroke="#2b2d33" stroke-width="10"/>
+    <circle cx="560" cy="420" r="64" fill="none" stroke="#8d99ae" stroke-width="4"/>
+    <path d="M560 356 V484 M496 420 H624 M515 375 605 465 M605 375 515 465" stroke="#aeb8c6" stroke-width="3"/>
+    <circle cx="560" cy="420" r="9" fill="none" stroke="#2b2d33" stroke-width="4.5"/>
+    <circle cx="560" cy="420" r="3.5" fill="#2b2d33"/>
+
+    <!-- Chain -->
+    <path d="M358 404 L220 412 M358 438 L220 428" fill="none" stroke="#4a5160" stroke-width="5" stroke-dasharray="8 5"/>
+
+    <!-- Frame -->
+    <path d="M220 420 L358 421 M220 420 L331 296 M331 296 L334 344 L358 421 M358 421 L528 296 M331 296 L528 296 M528 296 L520 266 M528 296 C538 330 553 375 560 420" fill="none" stroke="#e63946" stroke-width="9"/>
+
+    <!-- Stem & handlebar -->
+    <path d="M520 266 L509 246 M488 253 L524 238" fill="none" stroke="#2b2d33" stroke-width="8"/>
+
+    <!-- Saddle -->
+    <path d="M302 342 C310 332 346 331 358 337 C363 341 358 347 349 349 C330 353 308 352 303 347 C299 345 299 343 302 342 Z" fill="#2b2d33"/>
+
+    <!-- Chainring, crank, pedal -->
+    <circle cx="358" cy="421" r="17" fill="none" stroke="#2b2d33" stroke-width="6"/>
+    <circle cx="358" cy="421" r="5" fill="#2b2d33"/>
+    <path d="M358 421 L394 401" stroke="#2b2d33" stroke-width="8"/>
+    <path d="M384 403 L408 399" stroke="#2b2d33" stroke-width="7"/>
+  </g>
+
+  <!-- Far foot (on the far pedal) -->
+  <path d="M311 431 L344 428 C350 436 345 445 332 447 L313 443 C308 439 308 433 311 431 Z" fill="#ffb703" stroke="#2f3640" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M327 446 L325 437" stroke="#2f3640" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Pelican -->
+  <g stroke-linejoin="round">
+    <!-- Scarf tail -->
+    <path d="M412 188 C372 198 330 206 292 228 C282 236 278 246 280 254 C300 246 322 236 344 226 C374 214 398 202 414 196 Z" fill="#d62839" stroke="#2f3640" stroke-width="4"/>
+    <!-- Tail feathers -->
+    <path d="M300 278 L196 246 L246 281 L182 288 L252 302 L206 331 L300 318 Z" fill="#e7ecf1" stroke="#2f3640" stroke-width="4"/>
+    <!-- Body, neck & head -->
+    <path d="M455 105 C442 104 429 112 425 127 C421 147 413 164 401 179 C366 196 312 234 268 290 C258 300 254 312 258 322 C270 336 300 342 336 340 C378 337 420 316 448 286 C468 262 483 230 489 196 C495 172 498 156 499 147 C502 128 486 106 455 105 Z" fill="#ffffff" stroke="#2f3640" stroke-width="5"/>
+    <ellipse cx="352" cy="302" rx="62" ry="32" fill="#e9eff5" opacity=".8"/>
+    <!-- Scarf band -->
+    <path d="M402 180 C420 194 444 200 466 196 L462 212 C440 215 416 207 398 193 Z" fill="#e63946" stroke="#2f3640" stroke-width="4"/>
+    <!-- Wing reaching the handlebar -->
+    <path d="M408 205 C448 208 486 224 512 243 C519 250 513 259 503 258 C468 262 428 264 395 259 C368 253 350 238 346 222 C352 210 374 202 408 205 Z" fill="#f4f7fa" stroke="#2f3640" stroke-width="4"/>
+    <path d="M382 224 C420 228 462 240 498 252 M372 238 C408 243 448 250 484 258" fill="none" stroke="#c9d4de" stroke-width="3" stroke-linecap="round"/>
+    <!-- Pouch -->
+    <path d="M468 146 C525 158 585 172 640 177 C646 194 630 216 598 230 C558 246 516 238 488 212 C472 194 464 168 468 146 Z" fill="#fb8500" stroke="#2f3640" stroke-width="4"/>
+    <path d="M496 162 C516 194 540 212 568 220" fill="none" stroke="#e2710d" stroke-width="3" stroke-linecap="round"/>
+    <!-- Beak -->
+    <path d="M464 116 C530 128 595 148 648 168 C651 173 649 178 644 179 C588 172 524 158 470 149 C464 138 462 124 464 116 Z" fill="#ffb703" stroke="#2f3640" stroke-width="4"/>
+    <path d="M484 128 L506 134" stroke="#d98e04" stroke-width="3" stroke-linecap="round"/>
+    <!-- Eye -->
+    <circle cx="452" cy="127" r="7" fill="#2b2d33"/>
+    <circle cx="454.5" cy="124.5" r="2.2" fill="#ffffff"/>
+    <!-- Near leg -->
+    <path d="M351 320 L394 398" stroke="#2f3640" stroke-width="15" stroke-linecap="round"/>
+    <path d="M351 320 L394 398" stroke="#ffb703" stroke-width="9" stroke-linecap="round"/>
+    <!-- Near webbed foot -->
+    <path d="M381 391 L414 388 C420 396 415 405 402 407 L384 403 C379 399 379 393 381 391 Z" fill="#ffb703" stroke="#2f3640" stroke-width="4"/>
+    <path d="M396 406 L394 397 M405 404 L403 395" stroke="#2f3640" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
+```
+
+**Details baked in:**
+- **Pelican** — white body, big orange beak with a drooping throat pouch, folded wing gripping the handlebar, fanned tail feathers, a red scarf blowing in the wind, and yellow legs pedaling (one foot up, one down, on opposite pedals)
+- **Bicycle** — red frame, spoked wheels, chain, chainring, cranks, saddle, and handlebar, all correctly layered (far leg behind the frame, body hides the top tube)
+- **Scene** — sky gradient, sun, clouds, ground, shadow, motion dashes, and dust puffs
+
+Save it as `pelican.svg` and open it in any browser. Want me to add a SMIL/CSS animation so the wheels and pedals actually spin?
