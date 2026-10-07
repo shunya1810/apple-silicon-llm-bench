@@ -9,9 +9,10 @@
    - config.json gets per-module quantization entries for the MTP head (4-bit, group 64,
      as recorded in mtplx_runtime.json); the body default in the file is group 32.
    No weight is converted or copied.
-2. engines/omlx-base-{q8,fp16}/: settings.json + model_settings.json for `omlx serve
+2. engines/omlx-base-{q8,fp16,q8-aggressive}/: settings.json + model_settings.json for `omlx serve
    --base-path` from templates/omlx/, so the benchmark never touches ~/.omlx. q8 =
-   TurboQuant 8-bit KV, fp16 = KV unquantized; both with Lightning MTP, 3 draft tokens,
+   TurboQuant 8-bit KV, fp16 = KV unquantized, q8-aggressive = q8 with memory_guard_tier
+   aggressive (the 256K run only); all with Lightning MTP, 3 draft tokens,
    thinking off. oMLX writes its own auth secret into settings.json on first start.
 
   python scripts/prepare_omlx.py
@@ -71,7 +72,7 @@ def model_view() -> None:
 
 def base_paths() -> None:
     """Fill templates/omlx/*.json (the exact files used for the published run, secrets removed)."""
-    for kv in ("q8", "fp16"):
+    for kv in ("q8", "fp16", "q8-aggressive"):
         base = ROOT / "engines" / f"omlx-base-{kv}"
         base.mkdir(parents=True, exist_ok=True)
         for name in ("settings", "model_settings"):
@@ -82,4 +83,4 @@ def base_paths() -> None:
 if __name__ == "__main__":
     model_view()
     base_paths()
-    print("prepared", DST, "and engines/omlx-base-{q8,fp16}")
+    print("prepared", DST, "and engines/omlx-base-{q8,fp16,q8-aggressive}")

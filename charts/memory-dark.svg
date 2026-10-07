@@ -50,12 +50,12 @@
 <path d="M380.0 207.7L386.0 213.7L380.0 219.7L374.0 213.7Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 32K: 38.1 GB</title></path>
 <path d="M504.0 177.3L510.0 183.3L504.0 189.3L498.0 183.3Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 64K: 44.5 GB</title></path>
 <path d="M628.0 138.7L634.0 144.7L628.0 150.7L622.0 144.7Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 128K: 52.7 GB</title></path>
-<polyline points="132.0,266.6 256.0,237.1 380.0,218.9 504.0,206.4 628.0,164.4" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
-<rect x="127.0" y="261.6" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 26.9 GB</title></rect>
-<rect x="251.0" y="232.1" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 33.2 GB</title></rect>
-<rect x="375.0" y="213.9" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 37.0 GB</title></rect>
-<rect x="499.0" y="201.4" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 39.6 GB</title></rect>
-<rect x="623.0" y="159.4" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 48.5 GB</title></rect>
+<polyline points="132.0,252.9 256.0,235.0 380.0,222.2 504.0,198.3 628.0,166.7" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
+<rect x="127.0" y="247.9" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 29.8 GB</title></rect>
+<rect x="251.0" y="230.0" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 33.6 GB</title></rect>
+<rect x="375.0" y="217.2" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 36.3 GB</title></rect>
+<rect x="499.0" y="193.3" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 41.3 GB</title></rect>
+<rect x="623.0" y="161.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 48.0 GB</title></rect>
 <polyline points="132.0,290.4 256.0,289.2 380.0,285.6 504.0,280.1 628.0,270.1" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 284.4L138.0 295.4L126.0 295.4Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 2K: 21.9 GB</title></path>
 <path d="M256.0 283.2L262.0 294.2L250.0 294.2Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 8K: 22.1 GB</title></path>
@@ -70,7 +70,7 @@
 <path d="M628.0 223.7L634.0 212.7L622.0 212.7Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 128K: 37.2 GB</title></path>
 <text x="640.0" y="143.7" fill="#ffffff" font-size="12" font-weight="600">52.7 GB</text><text x="640.0" y="157.7" fill="#c3c2b7" font-size="11">MTPLX upstream + env</text>
 <text x="640.0" y="173.7" fill="#ffffff" font-size="12" font-weight="600">52.4 GB</text><text x="640.0" y="187.7" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
-<text x="640.0" y="203.7" fill="#ffffff" font-size="12" font-weight="600">48.5 GB</text><text x="640.0" y="217.7" fill="#c3c2b7" font-size="11">oMLX</text>
+<text x="640.0" y="203.7" fill="#ffffff" font-size="12" font-weight="600">48.0 GB</text><text x="640.0" y="217.7" fill="#c3c2b7" font-size="11">oMLX</text>
 <text x="640.0" y="233.7" fill="#ffffff" font-size="12" font-weight="600">43.5 GB</text><text x="640.0" y="247.7" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
 <text x="640.0" y="263.7" fill="#ffffff" font-size="12" font-weight="600">37.2 GB</text><text x="640.0" y="277.7" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>
 <text x="640.0" y="293.7" fill="#ffffff" font-size="12" font-weight="600">26.2 GB</text><text x="640.0" y="307.7" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>

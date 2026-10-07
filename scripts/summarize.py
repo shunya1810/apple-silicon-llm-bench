@@ -20,19 +20,19 @@ ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx",
 CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
 NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "mtplx-upstream-tuned-nobuf": "MTPLX upstream + env", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
          "tensorfold": "TensorFold (bf16 KV)",
-         "mtplx-fork-m1.1": "MTPLX M1 build m1.1"}
+         "mtplx-fork-m1.1": "MTPLX M1 build m1.1", "omlx-064": "oMLX 0.6.4", "omlx-aggressive": "oMLX (guard aggressive)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 CTX_LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K", "mt-256k": "256K"}
 GB = 1e9
 
 THEMES = {
     "light": {"bg": "#fcfcfb", "t1": "#0b0b0b", "t2": "#52514e", "grid": "#e4e3de", "axis": "#8a8983",
-              "mtplx-fork": "#2a78d6", "mtplx-fork-m1.1": "#2a78d6", "mtplx-upstream": "#eb6834", "mtplx-upstream-tuned-nobuf": "#e87ba4", "omlx": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
+              "mtplx-fork": "#2a78d6", "mtplx-fork-m1.1": "#2a78d6", "mtplx-upstream": "#eb6834", "mtplx-upstream-tuned-nobuf": "#e87ba4", "omlx": "#1baf7a", "omlx-aggressive": "#1baf7a", "splash-m1": "#eda100", "splash-src": "#e87ba4", "tensorfold": "#8a5cd6"},
     "dark": {"bg": "#1a1a19", "t1": "#ffffff", "t2": "#c3c2b7", "grid": "#34332f", "axis": "#6d6c66",
-             "mtplx-fork": "#3987e5", "mtplx-fork-m1.1": "#3987e5", "mtplx-upstream": "#d95926", "mtplx-upstream-tuned-nobuf": "#d55181", "omlx": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
+             "mtplx-fork": "#3987e5", "mtplx-fork-m1.1": "#3987e5", "mtplx-upstream": "#d95926", "mtplx-upstream-tuned-nobuf": "#d55181", "omlx": "#199e70", "omlx-aggressive": "#199e70", "splash-m1": "#c98500", "splash-src": "#d55181", "tensorfold": "#a483e8"},
 }
 FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif"
-MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "mtplx-upstream-tuned-nobuf": "diamond", "omlx": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
+MARKER = {"mtplx-fork": "dot", "mtplx-upstream": "diamond", "mtplx-upstream-tuned-nobuf": "diamond", "omlx": "square", "omlx-aggressive": "square", "splash-m1": "triangle", "splash-src": "triangle-down", "tensorfold": "triangle-down"}
 
 
 # ---------------------------------------------------------------- data
@@ -362,7 +362,7 @@ def conversation_chart(th, cells, ctxs, spot=None):
         o.append(f'<text x="20" y="{y + 6}" fill="{th["t1"]}" font-size="13" font-weight="600">'
                  f'{CTX_LABEL[s]} prompt'
                  + (f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">one run each · the M1 build '
-                    f'here is v2.12.0-m1.1 (m1.2 but for an SSD cache fix)</tspan>' if spot and s == spot[0] else '') + '</text>')
+                    f'here is v2.12.0-m1.1 (m1.2 but for an SSD cache fix) · oMLX with its memory guard at aggressive</tspan>' if spot and s == spot[0] else '') + '</text>')
         y += 18
         ybot = y + len(engines) * (rowh + 6)
         t = 0.0
@@ -395,7 +395,7 @@ def conversation_chart(th, cells, ctxs, spot=None):
     return "\n".join(o)
 
 
-SPOT_ENGINES = ["mtplx-fork-m1.1", "splash-m1"]  # 256K spot check, one run each
+SPOT_ENGINES = ["mtplx-fork-m1.1", "omlx-aggressive", "splash-m1"]  # 256K spot check, one run each
 
 
 def spot256_chart(th, cells):
@@ -419,7 +419,7 @@ def spot256_chart(th, cells):
     ph = 40 + len(engines) * (rowh + gap) + 18
     H = 100 + len(panels) * ph + 6
     o = svg_open(W, H, th, "256K spot check: a 3-turn conversation over a 258K-token prompt",
-                 "Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · 2026-09-29")
+                 "Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · 2026-09-29 (oMLX 2026-10-07)")
     legend(o, th, engines, 20, 76, swatch=True)
     y = 104
     for title, note, get, fmt in panels:
@@ -442,8 +442,8 @@ def spot256_chart(th, cells):
     return "\n".join(o)
 
 
-LONG_ENGINES = ["mtplx-fork", "mtplx-upstream", "splash-m1"]
-SPOT_OF = {"mtplx-fork": "mtplx-fork-m1.1", "splash-m1": "splash-m1"}  # whose 256K cell continues each line
+LONG_ENGINES = ["mtplx-fork", "mtplx-upstream", "omlx", "splash-m1"]
+SPOT_OF = {"mtplx-fork": "mtplx-fork-m1.1", "omlx": "omlx-aggressive", "splash-m1": "splash-m1"}  # whose 256K cell continues each line
 
 
 def long_charts(th, cells, ctxs):
@@ -460,8 +460,8 @@ def long_charts(th, cells, ctxs):
             out[e] = row
         return out
 
-    note = ("256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1, "
-            "the same as m1.2 but for an SSD cache fix")
+    note = ("256K: one run each; the M1 build's point is v2.12.0-m1.1 (m1.2 but for an SSD cache fix), "
+            "oMLX's runs with its memory guard at aggressive")
     return {
         "decode-256k": line_chart(
             th, "Decode speed, 2K to 256K (8-bit KV)",

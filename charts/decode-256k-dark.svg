@@ -8,9 +8,12 @@
 <line x1="158" x2="180" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
 <path d="M169 66L175 72L169 78L163 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
 <text x="186" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
-<line x1="296" x2="318" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
-<path d="M307 66L313 77L301 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
-<text x="324" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
+<line x1="296" x2="318" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
+<rect x="302" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
+<text x="324" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
+<line x1="364" x2="386" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
+<path d="M375 66L381 77L369 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
+<text x="392" y="76" fill="#c3c2b7" font-size="12">Splash 1.1.0-m1</text>
 <line x1="70" x2="690" y1="394.0" y2="394.0" stroke="#34332f"/><text x="62" y="398.0" fill="#c3c2b7" font-size="11" text-anchor="end">0</text>
 <line x1="70" x2="690" y1="323.0" y2="323.0" stroke="#34332f"/><text x="62" y="327.0" fill="#c3c2b7" font-size="11" text-anchor="end">10</text>
 <line x1="70" x2="690" y1="252.0" y2="252.0" stroke="#34332f"/><text x="62" y="256.0" fill="#c3c2b7" font-size="11" text-anchor="end">20</text>
@@ -39,6 +42,13 @@
 <path d="M431.7 326.4L437.7 332.4L431.7 338.4L425.7 332.4Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 64K: 8.7</title></path>
 <path d="M535.0 352.8L541.0 358.8L535.0 364.8L529.0 358.8Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 128K: 5.0</title></path>
 <text x="535.0" y="378.8" fill="#ffffff" font-size="12" font-weight="600" text-anchor="middle">5.0</text><text x="535.0" y="391.8" fill="#c3c2b7" font-size="11" text-anchor="middle">MTPLX upstream</text>
+<polyline points="121.7,240.5 225.0,250.9 328.3,292.7 431.7,318.9 535.0,343.5 638.3,364.7" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
+<rect x="116.7" y="235.5" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 21.6</title></rect>
+<rect x="220.0" y="245.9" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 20.2</title></rect>
+<rect x="323.3" y="287.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 14.3</title></rect>
+<rect x="426.7" y="313.9" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 10.6</title></rect>
+<rect x="530.0" y="338.5" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 7.1</title></rect>
+<rect x="633.3" y="359.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 256K: 4.1</title></rect>
 <polyline points="121.7,159.2 225.0,163.1 328.3,201.9 431.7,223.1 535.0,261.0 638.3,302.1" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
 <path d="M121.7 153.2L127.7 164.2L115.7 164.2Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 2K: 33.1</title></path>
 <path d="M225.0 157.1L231.0 168.1L219.0 168.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 8K: 32.5</title></path>
@@ -48,5 +58,6 @@
 <path d="M638.3 296.1L644.3 307.1L632.3 307.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 256K: 12.9</title></path>
 <text x="650.3" y="290.0" fill="#ffffff" font-size="12" font-weight="600">14.5</text><text x="650.3" y="304.0" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
 <text x="650.3" y="320.0" fill="#ffffff" font-size="12" font-weight="600">12.9</text><text x="650.3" y="334.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
-<text x="20" y="452" fill="#c3c2b7" font-size="11">256K: one run each, Splash and the M1 build only; the M1 build's 256K point is v2.12.0-m1.1, the same as m1.2 but for an SSD cache fix</text>
+<text x="650.3" y="363.7" fill="#ffffff" font-size="12" font-weight="600">4.1</text><text x="650.3" y="377.7" fill="#c3c2b7" font-size="11">oMLX</text>
+<text x="20" y="452" fill="#c3c2b7" font-size="11">256K: one run each; the M1 build's point is v2.12.0-m1.1 (m1.2 but for an SSD cache fix), oMLX's runs with its memory guard at aggressive</text>
 </svg>

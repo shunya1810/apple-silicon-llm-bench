@@ -52,12 +52,12 @@
 <path d="M380.0 324.3L386.0 330.3L380.0 336.3L374.0 330.3Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 32K: 1.32 s</title></path>
 <path d="M504.0 312.9L510.0 318.9L504.0 324.9L498.0 318.9Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 64K: 2.10 s</title></path>
 <path d="M628.0 296.0L634.0 302.0L628.0 308.0L622.0 302.0Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream + env · 128K: 4.17 s</title></path>
-<polyline points="132.0,271.3 256.0,268.3 380.0,258.8 504.0,250.8 628.0,239.4" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
-<rect x="127.0" y="266.3" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 14.5 s</title></rect>
-<rect x="251.0" y="263.3" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 16.3 s</title></rect>
-<rect x="375.0" y="253.8" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 24.0 s</title></rect>
-<rect x="499.0" y="245.8" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 33.3 s</title></rect>
-<rect x="623.0" y="234.4" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 52.8 s</title></rect>
+<polyline points="132.0,282.6 256.0,312.1 380.0,302.2 504.0,293.5 628.0,282.0" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round"/>
+<rect x="127.0" y="277.6" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 2K: 9.14 s</title></rect>
+<rect x="251.0" y="307.1" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 8K: 2.76 s</title></rect>
+<rect x="375.0" y="297.2" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 4.13 s</title></rect>
+<rect x="499.0" y="288.5" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 5.88 s</title></rect>
+<rect x="623.0" y="277.0" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 9.38 s</title></rect>
 <polyline points="132.0,313.1 256.0,311.4 380.0,305.8 504.0,299.6 628.0,292.1" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 307.1L138.0 318.1L126.0 318.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 2K: 2.66 s</title></path>
 <path d="M256.0 305.4L262.0 316.4L250.0 316.4Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.1.0-m1 · 8K: 2.85 s</title></path>
@@ -71,7 +71,7 @@
 <path d="M504.0 302.4L510.0 291.4L498.0 291.4Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 64K: 5.22 s</title></path>
 <path d="M628.0 158.8L634.0 147.8L622.0 147.8Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 128K: 29.4 min</title></path>
 <text x="640.0" y="151.8" fill="#ffffff" font-size="12" font-weight="600">29.4 min</text><text x="640.0" y="165.8" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>
-<text x="640.0" y="238.4" fill="#ffffff" font-size="12" font-weight="600">52.8 s</text><text x="640.0" y="252.4" fill="#c3c2b7" font-size="11">oMLX</text>
+<text x="640.0" y="253.0" fill="#ffffff" font-size="12" font-weight="600">9.38 s</text><text x="640.0" y="267.0" fill="#c3c2b7" font-size="11">oMLX</text>
 <text x="640.0" y="283.0" fill="#ffffff" font-size="12" font-weight="600">6.23 s</text><text x="640.0" y="297.0" fill="#c3c2b7" font-size="11">Splash 1.1.0-m1</text>
 <text x="640.0" y="313.0" fill="#ffffff" font-size="12" font-weight="600">4.17 s</text><text x="640.0" y="327.0" fill="#c3c2b7" font-size="11">MTPLX upstream + env</text>
 <text x="640.0" y="343.0" fill="#ffffff" font-size="12" font-weight="600">3.52 s</text><text x="640.0" y="357.0" fill="#c3c2b7" font-size="11">MTPLX upstream</text>

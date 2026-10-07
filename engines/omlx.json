@@ -1,6 +1,6 @@
 {
  "id": "omlx",
- "label": "oMLX 0.6.4",
+ "label": "oMLX 0.7.0",
  "port": 18101,
  "model_id": "qwen38-27b-mtplx-speed",
  "tokenizer_dir": "${ROOT}/models/qwen38-27b-mtplx-speed",
@@ -39,6 +39,6 @@
   }
  },
  "version_cmds": {
-  "version": "grep -o '[0-9.]*' /Applications/oMLX.app/Contents/Resources/omlx/_version.py"
+  "version": "grep -o '[0-9.]*' \"$(dirname \"${OMLX_CLI}\")/../Resources/omlx/_version.py\""
  }
 }

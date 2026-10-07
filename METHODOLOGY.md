@@ -54,9 +54,11 @@ the only per-phase measurement.
   layers are linear attention (GDN) with a fixed-size state.
 - **Engine defaults otherwise**, including the prefix cache: MTPLX keeps session
   state in RAM (SSD session cache off, the app default); oMLX stores its paged prefix
-  cache on SSD in 4,096-token blocks. For this model family oMLX can only store a
-  prefix at a block boundary (the GDN state has to be snapshotted there), so a
-  follow-up turn re-reads everything after the last full block.
+  cache on SSD in 4,096-token blocks. For this model family oMLX stores a prefix only
+  where it snapshots the GDN state: in 0.6.4 at block boundaries, so a follow-up turn
+  re-read everything after the last full block; 0.7.0 also snapshots the end of the
+  first prompt, so turn 2 resumes there, while turn 3 still resumes at the last block
+  boundary.
 - **The two MTPLX engines get the same command line** (`engines/mtplx-*.json`): same
   model, profile, depth, KV mode, context window and session-cache setting. Only
   `PYTHONPATH` differs, which picks the code (the M1 build or upstream `1de2b1c`), and
@@ -197,12 +199,34 @@ the only per-phase measurement.
 - Per-request rounds and accepted/drafted counts come from its server log line.
 - It ran last, in two rounds of its own (2K–64K) and one 128K run.
 
+## oMLX 0.7.0 (2026-10-07)
+
+- oMLX was re-measured at 0.7.0 (the 2026-09-30 release, installed beside 0.6.4) alone
+  on 2026-10-07, with the same plans, model view and settings templates
+  (`run_omlx070.sh`). The 0.6.4 rows are kept under `omlx-064`. A 2K probe of the M1
+  build first read 31.1 tok/s on its canary (gate 29.9), so the machine was in its usual
+  state after 5.8 days of uptime.
+- 8-bit canaries stayed at 20.98–21.05 tok/s in every cell, including 128K and 256K;
+  no cell was re-run. The 2K fp16-KV canary (separate reference) read 22.9.
+- 0.7.0's rebuilt prefill memory guard is on by default (tier `balanced`). At 128K it
+  paused the first turn once and read the rest in 1,024-token chunks (`Prefill
+  throttled ... chunk 4096 -> 1024` in the server log); the 4,096 tokens read before the
+  pause are reported as `cached_tokens` on that turn. TTFT is still the client's wall
+  time from the request. 32K and 64K were not throttled.
+- At 256K the guard rejected the first turn before reading it (HTTP 400: ~46.1 GB
+  predicted peak against a 39.4 GB dynamic ceiling); that row is in `rows.jsonl` under
+  `omlx` with the error. The 256K numbers come from one extra run with
+  `memory_guard_tier: aggressive` (`omlx-aggressive`, `run_omlx070_256k_aggressive.sh`,
+  templates `templates/omlx/*-q8-aggressive.json`), the only non-default oMLX setting in
+  this benchmark.
+
 ## Known limitations
 
 - One machine (M1 Max, 64 GB), one model, one synthetic workload (greedy, plus the
   sampled scenario above).
 - Greedy decoding produces different text on different engines, so turn 2 and 3
   prompts differ between engines (by at most 6 tokens in this run).
-- The oMLX run uses its default memory guard and scheduler settings; oMLX has other
+- The oMLX runs use the default memory guard and scheduler settings (except the 256K
+  run, tier `aggressive`); oMLX has other
   speed features (DFlash speculative decoding, ANE prefill, hot RAM cache) that are
   off here because they are off by default or need a different draft model.
