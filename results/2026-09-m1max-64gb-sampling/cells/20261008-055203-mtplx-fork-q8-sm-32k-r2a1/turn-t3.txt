@@ -1,0 +1,3 @@
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This line differs significantly from the standard telemetry entries in three key ways. First, the identifier "NEEDLE" is non-numeric, whereas all valid records use sequential integers starting from 000000. Second, the payload lacks the structured key-value pairs for sensor, status, and zone required by the data schema. Instead, it contains free-form text describing a maintenance override and a specific code. Finally, the content explicitly states it is "not telemetry," highlighting that it is an administrative or log injection rather than a measured environmental data point. This breaks the consistent numerical pattern and formatting expected for parsing and analysis.

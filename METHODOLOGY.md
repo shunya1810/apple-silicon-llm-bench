@@ -199,6 +199,22 @@ the only per-phase measurement.
 - Per-request rounds and accepted/drafted counts come from its server log line.
 - It ran last, in two rounds of its own (2K–64K) and one 128K run.
 
+## Splash 1.2.1-m1 and the M1 build v2.12.2-m1 (2026-10-08)
+
+- Both re-measured together at their latest releases (`run_refresh_1008.sh`), interleaved,
+  with the same plans (2K–64K two rounds, 128K once, the sampled scenario, Splash 256K
+  once). Splash 1.2.1-m1 was installed beside 1.1.0-m1 (launcher `splash-m1-121`); the
+  M1 build ran from a worktree at tag `v2.12.2-m1` with the MTPLX app's runtime (MLX 0.32.2).
+  Earlier rows are kept as `splash-m1-110` and `mtplx-fork-m1.2`.
+- 2K smoke runs first: fork canary 30.7, Splash 28.9 tok/s. In the run the fork's 8-bit
+  canaries read 30.3–30.9 and Splash's 28.7–29.6; Splash's round-1 64K cell was 3.1% below
+  its best and was re-run once (the re-run is used).
+- At 128K v2.12.2-m1 refused turn 2 with `insufficient_memory` (its memory guard, from
+  upstream 2.12.1/2.12.2, projected 0.5 GiB more than the 12.1 GiB the other apps left);
+  turn 3 did not run. The row is kept. `scripts/summarize.py` fills the M1 build's 128K
+  cell from the m1.2 run (`FILL`) and marks it in the tables and charts; the fork's 256K
+  plan was not run.
+
 ## oMLX 0.7.0 (2026-10-07)
 
 - oMLX was re-measured at 0.7.0 (the 2026-09-30 release, installed beside 0.6.4) alone

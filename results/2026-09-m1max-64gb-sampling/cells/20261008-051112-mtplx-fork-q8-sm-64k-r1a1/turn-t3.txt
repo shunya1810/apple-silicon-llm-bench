@@ -1,0 +1,4 @@
+Record 001316: sensor=76.0 status=degraded zone=A62.
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+The line beginning with "Record NEEDLE" deviates fundamentally from the established data schema. All other entries follow a strict format: "Record [ID]: sensor=[float] status=[enum] zone=[string]." The anomalous line replaces the numeric sensor value and categorical status with a free-text description regarding a "maintenance override" and a specific code ("7391-ALPHA"). Unlike the other records, which represent quantitative telemetry data, this entry serves as a textual note or alert. Furthermore, it lacks a sequential numeric ID (using "NEEDLE" instead) and explicitly states it is "not telemetry," distinguishing it as a metadata or exception record embedded within the synthetic dataset.

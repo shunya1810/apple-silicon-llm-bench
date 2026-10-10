@@ -1,6 +1,6 @@
 {
  "id": "splash-m1",
- "label": "Splash 1.1.0-m1 (paperniuk M1/M2 build)",
+ "label": "Splash 1.2.1-m1 (paperniuk M1/M2 build)",
  "port": 18104,
  "model_id": "splash",
  "tokenizer_dir": "${MTPLX_MODEL}",
@@ -13,7 +13,7 @@
   "reasoning_effort": "none"
  },
  "cmd": [
-  "${SPLASH_M1}",
+  "${SPLASH_M1_121}",
   "serve",
   "--model",
   "incoai/Qwen3.8-27B-Splash",
@@ -47,6 +47,6 @@
   }
  },
  "version_cmds": {
-  "version": "${SPLASH_M1} --version"
+  "version": "${SPLASH_M1_121} --version"
  }
 }

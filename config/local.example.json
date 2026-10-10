@@ -4,5 +4,6 @@
  "OMLX_CLI": "/Applications/oMLX.app/Contents/MacOS/omlx-cli",
  "OMLX064_CLI": "/Applications/oMLX-0.6.4.app/Contents/MacOS/omlx-cli",
  "SPLASH_M1": "/Users/you/.local/bin/splash-m1",
+ "SPLASH_M1_121": "/Users/you/.local/bin/splash-m1-121",
  "TENSORFOLD": "/Users/you/tensorfold/.venv/bin/tensorfold"
 }

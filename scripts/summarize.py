@@ -18,7 +18,7 @@ from pathlib import Path
 
 ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # table order
 CHART_ENGINES = ["mtplx-fork", "mtplx-upstream", "mtplx-upstream-tuned-nobuf", "omlx", "splash-m1", "tensorfold"]  # fixed order = fixed color slot
-NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-upstream": "MTPLX upstream", "mtplx-upstream-tuned-nobuf": "MTPLX upstream + env", "omlx": "oMLX", "splash-m1": "Splash 1.1.0-m1", "splash-src": "Splash source (HEAD)",
+NAMES = {"mtplx-fork": "MTPLX M1 build", "mtplx-fork-m1.2": "MTPLX M1 build m1.2", "splash-m1-110": "Splash 1.1.0-m1", "mtplx-upstream": "MTPLX upstream", "mtplx-upstream-tuned-nobuf": "MTPLX upstream + env", "omlx": "oMLX", "splash-m1": "Splash 1.2.1-m1", "splash-src": "Splash source (HEAD)",
          "tensorfold": "TensorFold (bf16 KV)",
          "mtplx-fork-m1.1": "MTPLX M1 build m1.1", "omlx-064": "oMLX 0.6.4", "omlx-aggressive": "oMLX (guard aggressive)"}
 CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
@@ -55,6 +55,13 @@ def load(run: Path) -> list[dict]:
 def med(values):
     v = [x for x in values if x is not None]
     return statistics.median(v) if v else None
+
+
+# v2.12.2-m1's memory guard refused the 128K turn 2 (0.5 GiB short with other apps open), so the
+# M1 build's 128K cell is the v2.12.0-m1.2 run (marked in the tables).
+FILL = {("mtplx-fork", "mt-128k"): "mtplx-fork-m1.2"}
+FILL_MARK = {"mtplx-fork-m1.2": " (m1.2)"}
+M128 = "M1 build at 128K: v2.12.0-m1.2 (v2.12.2-m1 refused turn 2 for memory with other apps open)"
 
 
 def build(rows: list[dict]) -> dict:
@@ -95,6 +102,9 @@ def build(rows: list[dict]) -> dict:
         out[key] = {"engine": key[0], "kv": key[1], "scenario": key[2], "rounds": sorted(c["rounds"]),
                     "turns": turns, "kv_impl": m.get("kv_impl"), "mtp_impl": m.get("mtp_impl"),
                     "engine_version": m.get("engine_version"), "context_tokens_raw": m.get("context_tokens_raw")}
+    for (e, s), src in FILL.items():  # a column's cell taken from an earlier build of the same engine
+        if (src, "q8", s) in out:
+            out[(e, "q8", s)] = dict(out[(src, "q8", s)], engine=e, filled_from=src)
     return out
 
 
@@ -153,7 +163,7 @@ def tables_md(cells: dict, lang: str) -> str:
             nd = "—" if not needles else f"{sum(needles)}/{len(needles)}"
             wired = max((g(t, "peak_wired") or 0) for t in (1, 2, 3)) or None
             out.append(
-                f"| {CTX_LABEL[s]} | {NAMES[e]} | {fs(g(1, 'ttft_s'))} | {fs(g(2, 'ttft_s'))} | {fs(g(3, 'ttft_s'))} | "
+                f"| {CTX_LABEL[s]} | {NAMES[e]}{FILL_MARK.get(cells[(e, 'q8', s)].get('filled_from'), '')} | {fs(g(1, 'ttft_s'))} | {fs(g(2, 'ttft_s'))} | {fs(g(3, 'ttft_s'))} | "
                 f"{f(g(1, 'decode_tok_s'))} / {f(g(2, 'decode_tok_s'))} / {f(g(3, 'decode_tok_s'))} | "
                 f"{fs(conv_total(cells, e, s))} | {f(g(2, 'cached_tokens'), 0)} / {f(g(3, 'cached_tokens'), 0)} | "
                 f"{fgb(wired)} | {nd} |")
@@ -179,7 +189,7 @@ def passes_md(rows: list[dict], lang: str) -> str:
            "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         s = r.get("engine_stats") or {}
-        if (r["phase"] != "turn" or r["engine"] != "splash-m1" or r["kv"] != "q8" or str(r.get("round")) != "1"
+        if (r["phase"] != "turn" or r["engine"] != "splash-m1-110" or r["kv"] != "q8" or str(r.get("round")) != "1"
                 or not s.get("verify_passes")):
             continue
         out.append(f"| {CTX_LABEL[r['scenario']]} | {r['turn']} | {f(r.get('decode_tok_s'))} | {s['verify_passes']} | "
@@ -362,7 +372,9 @@ def conversation_chart(th, cells, ctxs, spot=None):
         o.append(f'<text x="20" y="{y + 6}" fill="{th["t1"]}" font-size="13" font-weight="600">'
                  f'{CTX_LABEL[s]} prompt'
                  + (f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">one run each · the M1 build '
-                    f'here is v2.12.0-m1.1 (m1.2 but for an SSD cache fix) · oMLX with its memory guard at aggressive</tspan>' if spot and s == spot[0] else '') + '</text>')
+                    f'here is v2.12.0-m1.1 (m1.2 but for an SSD cache fix) · oMLX with its memory guard at aggressive</tspan>' if spot and s == spot[0] else '')
+                 + (f'<tspan fill="{th["t2"]}" font-size="11" font-weight="400" dx="8">the M1 build here is v2.12.0-m1.2 '
+                    f'(v2.12.2-m1 refused turn 2)</tspan>' if any(e == "mtplx-fork" and s == fs_ for (e, fs_) in FILL) else '') + '</text>')
         y += 18
         ybot = y + len(engines) * (rowh + 6)
         t = 0.0
@@ -419,7 +431,7 @@ def spot256_chart(th, cells):
     ph = 40 + len(engines) * (rowh + gap) + 18
     H = 100 + len(panels) * ph + 6
     o = svg_open(W, H, th, "256K spot check: a 3-turn conversation over a 258K-token prompt",
-                 "Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · 2026-09-29 (oMLX 2026-10-07)")
+                 "Qwen3.8-27B, 8-bit KV, temperature 0 · one run per engine · M1 build 2026-09-29, oMLX 2026-10-07, Splash 2026-10-08")
     legend(o, th, engines, 20, 76, swatch=True)
     y = 104
     for title, note, get, fmt in panels:
@@ -481,17 +493,17 @@ def charts(cells: dict, out: Path) -> list[str]:
                 th, "Decode speed vs prompt length (8-bit KV)",
                 "Qwen3.8-27B, MTP depth 3, temperature 0 · mean of turns 1–3, median of rounds · higher is better",
                 "decode tok/s", ctxs,
-                {e: [mean_turns(cells, e, s, "decode_tok_s") for s in ctxs] for e in CHART_ENGINES}),
+                {e: [mean_turns(cells, e, s, "decode_tok_s") for s in ctxs] for e in CHART_ENGINES}, note=M128),
             "ttft-followup": line_chart(
                 th, "Time to first token, turns 2–3 (follow-up)",
                 "Previous turns should come from the engine's prefix cache · mean of turns 2 and 3 · log scale · lower is better",
                 "seconds (log)", ctxs,
-                {e: [mean_turns(cells, e, s, "ttft_s", ts=(2, 3)) for s in ctxs] for e in CHART_ENGINES}, logy=True, vfmt=fs),
+                {e: [mean_turns(cells, e, s, "ttft_s", ts=(2, 3)) for s in ctxs] for e in CHART_ENGINES}, logy=True, vfmt=fs, note=M128),
             "memory": line_chart(
                 th, "Peak wired memory during the conversation",
                 "System-wide wired memory (vm_stat), max over turns 1–3 · 64 GB machine · lower is better", "GB", ctxs,
                 {e: [(lambda v: v / GB if v else None)(max((turn(cells, e, s, t, "peak_wired") or 0) for t in (1, 2, 3)) or None)
-                     for s in ctxs] for e in CHART_ENGINES}, vfmt=lambda v: f"{v:.1f} GB"),
+                     for s in ctxs] for e in CHART_ENGINES}, vfmt=lambda v: f"{v:.1f} GB", note=M128),
             "conversation": conversation_chart(th, cells, ctxs, spot=("mt-256k", SPOT_ENGINES)),
             "spot256k": spot256_chart(th, cells),
             **long_charts(th, cells, ctxs),

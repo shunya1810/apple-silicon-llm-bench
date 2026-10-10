@@ -1,0 +1,6 @@
+The provided dataset consists of 2,635 synthetic telemetry records, each containing a sensor value, a status field, and a zone identifier. The sensor values exhibit a consistent linear decay pattern, starting at 0.0 or near-high values and decreasing by 5.7 units per record index, eventually wrapping around or resetting as the sequence progresses. This creates a predictable, sawtooth-like distribution across the entire dataset. The status field cycles through five distinct states—nominal, degraded, recovering, offline, and calibrating—in a strict, repeating five-record sequence. Similarly, the zone identifiers alternate between 'A' and 'N' prefixes with incrementing suffixes.
+
+Three concrete observations include:
+1.  **Perfect Correlation**: The status of each record is strictly determined by its index modulo 5, with no random variation observed in the status field.
+2.  **Linear Degradation**: The sensor value decreases exactly by 5.7 for every consecutive record number, indicating a deterministic mathematical function rather than organic sensor drift.
+3.  **Non-Telemetry Intrusion**: Record 001316 is an anomalous entry containing a maintenance override message for zone Q42, which breaks the standard telemetry format and does not follow the established sensor value or status patterns.

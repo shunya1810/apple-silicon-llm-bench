@@ -1,0 +1,6 @@
+The provided synthetic telemetry dataset exhibits a structured, cyclical pattern in both sensor values and operational statuses. Sensor readings generally oscillate in a repeating sequence, starting near 0.0 and ascending to approximately 99.0 before resetting, with each increment reducing the value by 5.7 units. Simultaneously, the status field follows a rigid five-step cycle: nominal, degraded, recovering, offline, and calibrating, repeating in that exact order for every record. This indicates that the data is generated algorithmically rather than reflecting random physical fluctuations. The zone identifiers also cycle through a predefined list of alphanumeric codes.
+
+Three concrete observations include:
+1. **Strict Status Cycling:** Every record’s status strictly adheres to the sequence nominal → degraded → recovering → offline → calibrating, with no deviations or skipped states observed.
+2. **Linear Sensor Decay:** Sensor values decrease by a consistent 5.7 units per record index until they drop below 0, at which point they reset to a high value (approx. 99-100), creating a sawtooth wave pattern.
+3. **Anomalous Non-Telemetry Entry:** Record 001316 is an outlier; it lacks standard numeric sensor and status fields, instead containing a text string about a "maintenance override for zone Q42," which breaks the established telemetry format.

@@ -194,8 +194,8 @@
   },
   "context_tokens_raw": 1634
  },
- "splash-m1|q8|sm-2k": {
-  "engine": "splash-m1",
+ "splash-m1-110|q8|sm-2k": {
+  "engine": "splash-m1-110",
   "kv": "q8",
   "scenario": "sm-2k",
   "rounds": [
@@ -454,8 +454,8 @@
   },
   "context_tokens_raw": 32363
  },
- "splash-m1|q8|sm-32k": {
-  "engine": "splash-m1",
+ "splash-m1-110|q8|sm-32k": {
+  "engine": "splash-m1-110",
   "kv": "q8",
   "scenario": "sm-32k",
   "rounds": [
@@ -714,8 +714,8 @@
   },
   "context_tokens_raw": 65117
  },
- "splash-m1|q8|sm-64k": {
-  "engine": "splash-m1",
+ "splash-m1-110|q8|sm-64k": {
+  "engine": "splash-m1-110",
   "kv": "q8",
   "scenario": "sm-64k",
   "rounds": [
@@ -974,8 +974,8 @@
   },
   "context_tokens_raw": 65117
  },
- "mtplx-fork|q8|sm-2k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1.2|q8|sm-2k": {
+  "engine": "mtplx-fork-m1.2",
   "kv": "q8",
   "scenario": "sm-2k",
   "rounds": [
@@ -1039,8 +1039,8 @@
   },
   "context_tokens_raw": 1634
  },
- "mtplx-fork|q8|sm-32k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1.2|q8|sm-32k": {
+  "engine": "mtplx-fork-m1.2",
   "kv": "q8",
   "scenario": "sm-32k",
   "rounds": [
@@ -1104,8 +1104,8 @@
   },
   "context_tokens_raw": 32363
  },
- "mtplx-fork|q8|sm-64k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1.2|q8|sm-64k": {
+  "engine": "mtplx-fork-m1.2",
   "kv": "q8",
   "scenario": "sm-64k",
   "rounds": [
@@ -1166,6 +1166,396 @@
   "mtp_impl": "MTPLX native MTP, depth 3",
   "engine_version": {
    "commit": "9984c63232752da631bbb591df97f5bcfb32c997"
+  },
+  "context_tokens_raw": 65117
+ },
+ "mtplx-fork|q8|sm-2k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "sm-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 11.15511037549004,
+    "gen_s": 12.962853395496495,
+    "e2e_s": 24.117963770986535,
+    "decode_tok_s": 27.78306672554939,
+    "completion_tokens": 358.0,
+    "peak_wired": 29693493248,
+    "peak_rss": 17037213696,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5695059952038369
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 2088.0,
+    "cached_tokens": 2038.0,
+    "ttft_s": 0.5468298329942627,
+    "gen_s": 10.559198833492701,
+    "e2e_s": 11.106028666486964,
+    "decode_tok_s": 30.48036274954103,
+    "completion_tokens": 322.0,
+    "peak_wired": 30178885632,
+    "peak_rss": 17038655488,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6662187933425797
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2457.0,
+    "cached_tokens": 2410.0,
+    "ttft_s": 0.528310458001215,
+    "gen_s": 6.346489688003203,
+    "e2e_s": 6.874800146004418,
+    "decode_tok_s": 29.390424697380794,
+    "completion_tokens": 187.0,
+    "peak_wired": 30141153280,
+    "peak_rss": 17038852096,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6332371332371333
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c1294c2d789c83cf454d01a64d3e26b442d60a78"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-m1|q8|sm-2k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "sm-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 12.161163124997984,
+    "gen_s": 10.08459491650865,
+    "e2e_s": 22.245758041506633,
+    "decode_tok_s": 28.217479726213817,
+    "completion_tokens": 285.5,
+    "peak_wired": 23026155520,
+    "peak_rss": 18847514624,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.2850335612968592
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 2015.5,
+    "cached_tokens": 1664.0,
+    "ttft_s": 2.86097537499154,
+    "gen_s": 10.010698061989387,
+    "e2e_s": 12.871673436980927,
+    "decode_tok_s": 34.760031712110234,
+    "completion_tokens": 348.0,
+    "peak_wired": 23242555392,
+    "peak_rss": 19043794944,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.38334299236936153
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2410.5,
+    "cached_tokens": 1984.0,
+    "ttft_s": 3.3411914794851327,
+    "gen_s": 5.119146957993507,
+    "e2e_s": 8.46033843747864,
+    "decode_tok_s": 34.129166241999194,
+    "completion_tokens": 174.0,
+    "peak_wired": 23408066560,
+    "peak_rss": 19239976960,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3761165663604688
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.2.1-m1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "mtplx-fork|q8|sm-32k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "sm-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 246.6249103750015,
+    "gen_s": 11.088330270998995,
+    "e2e_s": 257.7132406460005,
+    "decode_tok_s": 24.22535803926937,
+    "completion_tokens": 265.5,
+    "peak_wired": 34013069312,
+    "peak_rss": 17052958720,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5821637426900585
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32724.5,
+    "cached_tokens": 32674.5,
+    "ttft_s": 0.8762973544944543,
+    "gen_s": 13.331501186999958,
+    "e2e_s": 14.207798541494412,
+    "decode_tok_s": 26.506713881910223,
+    "completion_tokens": 355.0,
+    "peak_wired": 33793015808,
+    "peak_rss": 17068769280,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6697803275473178
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33126.5,
+    "cached_tokens": 33079.5,
+    "ttft_s": 0.8630897710099816,
+    "gen_s": 6.994574978991295,
+    "e2e_s": 7.857664750001277,
+    "decode_tok_s": 25.812179989131785,
+    "completion_tokens": 179.0,
+    "peak_wired": 34690433024,
+    "peak_rss": 17078829056,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6458846048673776
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c1294c2d789c83cf454d01a64d3e26b442d60a78"
+  },
+  "context_tokens_raw": 32363
+ },
+ "splash-m1|q8|sm-32k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "sm-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 290.442205542,
+    "gen_s": 13.234097207983723,
+    "e2e_s": 303.67630274998373,
+    "decode_tok_s": 22.609405259828087,
+    "completion_tokens": 299.5,
+    "peak_wired": 24106745856,
+    "peak_rss": 18865963008,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.2931893687707641
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32758.5,
+    "cached_tokens": 32384.0,
+    "ttft_s": 4.348257354518864,
+    "gen_s": 14.850771791490843,
+    "e2e_s": 19.199029146009707,
+    "decode_tok_s": 25.096415213349864,
+    "completion_tokens": 380.5,
+    "peak_wired": 24319901696,
+    "peak_rss": 19062030336,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.34735288692123223
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33186.5,
+    "cached_tokens": 32736.0,
+    "ttft_s": 5.253805624990491,
+    "gen_s": 7.13735808301135,
+    "e2e_s": 12.39116370800184,
+    "decode_tok_s": 23.667410699839586,
+    "completion_tokens": 170.0,
+    "peak_wired": 24516362240,
+    "peak_rss": 19258277888,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.32126984126984126
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.2.1-m1"
+  },
+  "context_tokens_raw": 32363
+ },
+ "mtplx-fork|q8|sm-64k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "sm-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 564.3625136040064,
+    "gen_s": 12.989783333003288,
+    "e2e_s": 577.3522969370097,
+    "decode_tok_s": 22.255863184947746,
+    "completion_tokens": 278.0,
+    "peak_wired": 36178657280,
+    "peak_rss": 17074290688,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5917492409835519
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65491.0,
+    "cached_tokens": 65441.0,
+    "ttft_s": 1.2245741664955858,
+    "gen_s": 14.472504437493626,
+    "e2e_s": 15.697078603989212,
+    "decode_tok_s": 24.43733044092988,
+    "completion_tokens": 353.0,
+    "peak_wired": 38922289152,
+    "peak_rss": 17095163904,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6859788359788359
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65891.0,
+    "cached_tokens": 65844.0,
+    "ttft_s": 1.2445023754989961,
+    "gen_s": 8.961658645508578,
+    "e2e_s": 10.206161021007574,
+    "decode_tok_s": 21.797159704354307,
+    "completion_tokens": 195.0,
+    "peak_wired": 37535399936,
+    "peak_rss": 17107615744,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5886653252850436
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c1294c2d789c83cf454d01a64d3e26b442d60a78"
+  },
+  "context_tokens_raw": 65117
+ },
+ "splash-m1|q8|sm-64k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "sm-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 714.7605291670043,
+    "gen_s": 17.46500124949671,
+    "e2e_s": 732.225530416501,
+    "decode_tok_s": 17.944556187799627,
+    "completion_tokens": 314.5,
+    "peak_wired": 25229377536,
+    "peak_rss": 18908626944,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.29387579774177713
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65527.5,
+    "cached_tokens": 65152.0,
+    "ttft_s": 5.911655208503362,
+    "gen_s": 17.247219333497924,
+    "e2e_s": 23.158874542001286,
+    "decode_tok_s": 23.11952187259261,
+    "completion_tokens": 391.0,
+    "peak_wired": 25409536000,
+    "peak_rss": 19104989184,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4141966141966142
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65965.5,
+    "cached_tokens": 65504.0,
+    "ttft_s": 7.185769334013457,
+    "gen_s": 8.813471457993728,
+    "e2e_s": 15.999240792007186,
+    "decode_tok_s": 19.206510255736042,
+    "completion_tokens": 170.5,
+    "peak_wired": 25602801664,
+    "peak_rss": 19301220352,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.31777155306567073
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.2.1-m1"
   },
   "context_tokens_raw": 65117
  }

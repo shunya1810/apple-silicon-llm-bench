@@ -1,0 +1,6 @@
+The provided synthetic telemetry exhibits a distinct, predictable pattern where sensor values decrease linearly as the record index increases. Starting near zero, the values drop by approximately 5.7 units per record until reaching a low point, after which the sequence resets to a high value (near 96-99) and continues its downward trend. This cyclic behavior is consistent across the dataset, excluding one anomalous entry labeled "NEEDLE." The status fields follow a rigid, repeating five-state sequence: nominal, degraded, recovering, offline, and calibrating. This status cycle advances sequentially with each record, independent of the specific sensor value. Meanwhile, the zone identifiers alternate strictly between alphanumeric prefixes 'A' and 'N', with the numeric component increasing by 17 for every subsequent record of the same prefix type.
+
+Three concrete observations from the data are:
+1. The sensor value decreases by a constant decrement of 5.7 between consecutive numerical records (e.g., 0.0 to -5.7, though displayed as positive in a new cycle or linear drop).
+2. The status field cycles through exactly five states in a fixed order, with "nominal" appearing every fifth record starting at index 0.
+3. The zone field strictly alternates between zones starting with 'A' and 'N', while the numerical suffix increases by 17 for each respective letter group.
