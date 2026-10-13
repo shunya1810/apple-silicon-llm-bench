@@ -1,0 +1,6 @@
+The provided telemetry data exhibits a highly structured, cyclical pattern in both sensor values and status fields. The sensor readings generally decrease in a linear fashion, starting near 94.0 and dropping by approximately 5.7 units per record, wrapping around to high values (near 99.6) before descending again. This creates a sawtooth wave effect across the dataset. Simultaneously, the status field follows a rigid, repeating four-state cycle: nominal, degraded, recovering, and offline. This sequence repeats consistently regardless of the sensor value, suggesting that status is determined by the record index rather than the magnitude of the sensor reading. The zone identifiers also alternate between 'A' and 'N' prefixes, correlating with the status cycle.
+
+Three concrete observations are:
+1. The status field cycles through "nominal," "degraded," "recovering," and "offline" in a fixed order, independent of the specific sensor value.
+2. Sensor values decrease by a constant increment of 5.7 per record, resetting to high values (approx. 96-99) after reaching low values (approx. 2-8).
+3. A single non-telemetry entry, Record NEEDLE, interrupts the sequence

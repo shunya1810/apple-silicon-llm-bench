@@ -1,0 +1,8 @@
+Comparing "offline" and "nominal" records reveals distinct patterns in sensor values and zone assignments, despite their shared cyclical nature. "Nominal" records consistently display higher sensor values, typically ranging from 85 to 100, whereas "offline" records show significantly lower values, generally between 2 and 54. This inverse relationship suggests that lower sensor readings correlate with the "offline" status in this specific dataset. Furthermore, the zone prefixes alternate strictly: "nominal" records always belong to 'A' zones, while "offline" records belong to 'N' zones. This structural separation implies that zone assignment is tied to the status cycle rather than random distribution.
+
+Three specific records illustrate these differences:
+1. Record 000003 is "offline" with a low sensor value of 82.6 and zone N61.
+2. Record 000005 is "nominal" with a high sensor value of 71.2 and zone N95.
+3. Record 000008 is "offline" with a very low sensor value of 54.1 and zone A56.
+
+Note: While Record 000

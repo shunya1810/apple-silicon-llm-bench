@@ -1,0 +1,6 @@
+The provided telemetry data exhibits a highly structured, cyclical pattern rather than random variation. Sensor values generally decrease in increments of 5.7, starting from high values (near 94-100) and dropping to low values (near 0-5), before resetting to high values. This creates a sawtooth wave effect across the record sequence. The status field follows a rigid, repeating five-state cycle: nominal, degraded, recovering, offline, and calibrating. This sequence repeats consistently regardless of the sensor value's magnitude. Zone identifiers alternate between 'A' and 'N' prefixes, with specific numeric suffixes that also follow a predictable, albeit complex, shifting pattern corresponding to the record index.
+
+Three concrete observations are:
+1. The status field cycles through exactly five states (nominal, degraded, recovering, offline, calibrating) in a fixed order, repeating every five records.
+2. Sensor values decrease by exactly 5.7 units for each subsequent record, resetting to a high value (typically between 94.0 and 99.6) whenever the value drops below a certain threshold (around 2.8).
+3. Zone IDs alternate between 'A' and 'N' prefixes,

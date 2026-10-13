@@ -1,0 +1,5 @@
+The provided telemetry data exhibits a highly structured, cyclical pattern rather than random noise. Sensor values generally decrease in increments of 5.7, starting from high values (near 100) and dropping to near zero, before resetting to high values. This cycle repeats consistently across thousands of records. The `status` field is strictly deterministic, cycling through five specific states—`nominal`, `degraded`, `recovering`, `offline`, and `calibrating`—in a fixed sequence corresponding to the sensor value ranges. Specifically, high sensor values (approx. 95-100) correspond to `nominal` or `degraded` states, mid-range values (approx. 50-90) align with `recovering` or `offline`, and low values (approx. 0-50) map to `calibrating` or `nominal` depending on the specific cycle phase. The `zone` field alternates between 'A' and 'N' prefixes with incrementing numbers, showing no correlation to sensor health.
+
+Three concrete observations are:
+1. Sensor values decrease by exactly 5.7 units per record until they reset to approximately 96-99.
+2.

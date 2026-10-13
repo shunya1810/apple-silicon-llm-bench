@@ -1,0 +1,7 @@
+The provided telemetry logs exhibit a highly structured, cyclical pattern in both sensor values and status fields. The sensor readings generally decrease in a linear fashion, dropping by exactly 5.7 units per record, creating a descending sequence that resets periodically. For instance, the sequence begins at 94.0 and descends to 2.8, then jumps to 96.8, continuing the downward trend. This numerical oscillation suggests a simulated sensor cycle or a repeating diagnostic routine rather than random environmental data.
+
+Simultaneously, the status field follows a rigid, four-state rotation: nominal, degraded, recovering, and offline. This sequence repeats consistently across the records, independent of the specific sensor value. The status assignment appears deterministic, cycling through these four states regardless of whether the sensor is high or low. Notably, the "NEEDLE" record interrupts this pattern, introducing a maintenance override that explicitly states it is not telemetry, serving as a clear anomaly in the otherwise uniform data stream.
+
+Three concrete observations are:
+1. Sensor values decrease by 5.7 units per record until resetting to a high value (approx. 96-99).
+2. Status fields cycle strictly through four states: nominal, degraded, recovering,

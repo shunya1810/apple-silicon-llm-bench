@@ -1,0 +1,6 @@
+The provided telemetry logs exhibit a highly structured, cyclical pattern governing both sensor values and status fields. Sensor readings generally decrease in increments of 5.7, starting from high values near 100 and dropping to near zero, before resetting to high values. This oscillation creates a predictable sawtooth wave across the dataset. Simultaneously, the status field follows a rigid, repeating four-state cycle: nominal, degraded, recovering, and offline. These statuses are strictly tied to specific sensor value ranges, with "nominal" corresponding to the highest values in each cycle and "offline" appearing at lower mid-range values. The zone identifiers also follow a deterministic alternating pattern between "A" and "N" prefixes, incrementing numerically.
+
+Three concrete observations are:
+1. Sensor values consistently decrement by 5.7 units per record until they reset to approximately 96-99, indicating a periodic reset mechanism.
+2. The status field cycles through exactly four states (nominal, degraded, recovering, offline) in a fixed order, regardless of the specific sensor value, suggesting a state machine independent of the numeric reading.
+3. Zone identifiers alternate strictly between "A" and "N" prefixes, with the numeric suffix increasing by

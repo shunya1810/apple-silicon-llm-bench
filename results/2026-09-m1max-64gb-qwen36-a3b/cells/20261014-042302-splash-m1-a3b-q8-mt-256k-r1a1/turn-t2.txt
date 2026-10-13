@@ -1,0 +1,7 @@
+Records with `status=offline` consistently exhibit lower sensor values compared to those with `status=nominal`. Specifically, `offline` records typically have sensor values ranging between 2.0 and 54.0, whereas `nominal` records generally show higher values, often exceeding 54.0 and frequently approaching 100.0. This suggests that `nominal` status correlates with high sensor readings, while `offline` status correlates with mid-to-low readings.
+
+Regarding zones, both statuses utilize the same pool of zones (A10, N27, etc.), but the specific zone assignment follows a deterministic sequence based on the record index rather than the status itself. However, the pairing of status and zone reveals a pattern: `nominal` records often appear at the start of a cycle (high sensor value), while `offline` records appear in the middle of the cycle (mid-range sensor value).
+
+Three concrete examples illustrate this:
+1. **Record 000003** (`offline`) has a sensor value of 82.6, which is an outlier as it is high, but its zone is N61.
+2. **Record 000000** (`nom

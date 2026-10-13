@@ -1,0 +1,6 @@
+The provided telemetry logs exhibit a highly structured, cyclical pattern in both sensor values and status fields. Sensor readings generally decrease by 5.7 units per record, wrapping around from near 0 to near 100, creating a sawtooth wave. Simultaneously, the status field cycles through five distinct states—nominal, degraded, recovering, offline, and calibrating—in a strict, repeating sequence. This creates a deterministic relationship where specific sensor value ranges correlate with specific operational statuses. Zones alternate between 'A' and 'N' prefixes, incrementing numerically in a predictable fashion that aligns with the status cycle.
+
+Three concrete observations are:
+1. Sensor values consistently decrement by 5.7, resetting to approximately 99.6 when crossing below zero, indicating a modular arithmetic system.
+2. The status field follows a rigid five-state loop (nominal -> degraded -> recovering -> offline -> calibrating) that repeats every five records, regardless of the sensor value magnitude.
+3. Zone identifiers alternate strictly between 'A' and 'N' prefixes, with the numeric portion increasing by 17 every ten records, suggesting a fixed mapping between record index, zone, and operational state.

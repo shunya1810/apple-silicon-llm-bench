@@ -1,0 +1,3 @@
+"NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This line differs fundamentally from the surrounding data by lacking the standard "Record [ID]: sensor=[value] status=[state] zone=[ID]" structure. Instead of numerical telemetry, it contains a textual maintenance instruction with a specific override code. It explicitly declares itself as non-telemetry, breaking the established pattern of sequential record IDs and predictable sensor/status cycles. Unlike other records, it has no sensor value, status, or standard zone format, serving as an intentional anomaly or marker within the synthetic dataset rather than a data point.
