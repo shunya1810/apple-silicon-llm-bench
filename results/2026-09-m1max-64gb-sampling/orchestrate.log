@@ -98,3 +98,32 @@
 06:13:52 round 2 sm-64k q8 mtplx-fork attempt 1
 06:24:22   canary 30.78985649688747 ref 30.851044585398867 slow=False
 06:25:52 plan done
+10:04:11 round 1 sm-2k q8 mtplx-fork attempt 1
+10:05:14   canary 31.889713154819194 ref None slow=False
+10:06:44 round 1 sm-2k q8 splash-m1 attempt 1
+10:08:07   canary 22.833964053212252 ref None slow=False
+10:09:37 round 1 sm-32k q8 mtplx-fork attempt 1
+10:13:23   canary 32.14926575023543 ref 31.889713154819194 slow=False
+10:14:53 round 1 sm-32k q8 splash-m1 attempt 1
+10:19:27   canary 23.78888682197169 ref 22.833964053212252 slow=False
+10:20:57 round 1 sm-64k q8 mtplx-fork attempt 1
+10:28:50   canary 31.683232206581547 ref 32.14926575023543 slow=False
+10:30:20 round 1 sm-64k q8 splash-m1 attempt 1
+10:39:44   canary 22.80694239496304 ref 23.78888682197169 slow=True
+10:41:14   canary slow: resting 300 s and re-running once
+10:46:14 round 1 sm-64k q8 splash-m1 attempt 2
+10:55:48   canary 22.84544587914908 ref 23.78888682197169 slow=True
+10:57:18   canary slow: resting 300 s and re-running once
+11:02:18 round 2 sm-2k q8 splash-m1 attempt 1
+11:03:39   canary 23.217584944880954 ref 23.78888682197169 slow=False
+11:05:09 round 2 sm-2k q8 mtplx-fork attempt 1
+11:06:10   canary 32.14788771200782 ref 32.14926575023543 slow=False
+11:07:40 round 2 sm-32k q8 splash-m1 attempt 1
+11:12:15   canary 23.774779713721735 ref 23.78888682197169 slow=False
+11:13:45 round 2 sm-32k q8 mtplx-fork attempt 1
+11:17:26   canary 31.839341854070863 ref 32.14926575023543 slow=False
+11:18:56 round 2 sm-64k q8 splash-m1 attempt 1
+11:28:25   canary 23.266448566519024 ref 23.78888682197169 slow=False
+11:29:55 round 2 sm-64k q8 mtplx-fork attempt 1
+11:37:45   canary 32.10029615129602 ref 32.14926575023543 slow=False
+11:39:15 plan done

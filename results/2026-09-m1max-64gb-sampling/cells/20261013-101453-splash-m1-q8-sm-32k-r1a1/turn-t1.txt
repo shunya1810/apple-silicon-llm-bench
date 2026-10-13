@@ -1,0 +1,6 @@
+The synthetic telemetry data exhibits a highly structured, periodic pattern across the 1,300+ records. Sensor values generally follow a descending linear trend, starting near 100.0 and decreasing by approximately 0.7 units per record, resetting to high values every 55 records. This creates a sawtooth wave where values drop from roughly 99.0 to 0.0 before spiking back up. The status field cycles through a fixed five-state sequence: nominal, degraded, recovering, offline, and calibrating. Unlike the continuous sensor data, the status is discrete and strictly indexed by the record number modulo 5. Zones also follow a distinct pattern, alternating between 'A' and 'N' prefixes with specific numeric suffixes that appear to reset or shift periodically, ensuring a diverse but ordered distribution of locations.
+
+Three concrete observations include:
+1. Record 000000 begins the sequence with a sensor value of 0.0 and a "nominal" status in zone A10.
+2. The data contains an anomalous entry labeled "Record NEEDLE," which contains non-telemetry text regarding a maintenance override for zone Q42, disrupting the standard numeric format.
+3. The status field cycles perfectly every five records, meaning Record 000001 is always "degraded," Record 000002 is "recovering," and so on, independent of the actual sensor magnitude.

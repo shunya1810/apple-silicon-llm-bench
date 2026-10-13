@@ -1,0 +1,5 @@
+Records with an "offline" status and those with a "nominal" status exhibit distinct patterns in their sensor values and zone assignments, primarily driven by the dataset’s cyclical structure. In the initial sequence, "nominal" records (e.g., Record 000000) start at the highest sensor values (0.0 to 99.0) and are associated with zones starting with 'A' (e.g., A10, A90). Conversely, "offline" records (e.g., Record 000003) appear later in the five-status cycle, corresponding to lower sensor values (e.g., 82.6) and zones starting with 'N' (e.g., N61). As the cycles repeat, this relationship holds: "nominal" records consistently align with the beginning of the value decay and 'A' zones, while "offline" records align with the middle of the decay and 'N' zones.
+
+Three specific records illustrate this:
+1.  **Record 000000**: Status is nominal, sensor is 0.0, zone is A10.
+2.  **Record 000003**: Status

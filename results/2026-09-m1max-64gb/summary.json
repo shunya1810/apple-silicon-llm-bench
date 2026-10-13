@@ -6628,8 +6628,8 @@
   },
   "context_tokens_raw": 257626
  },
- "splash-m1|fp16|mt-2k": {
-  "engine": "splash-m1",
+ "splash-m1-121|fp16|mt-2k": {
+  "engine": "splash-m1-121",
   "kv": "fp16",
   "scenario": "mt-2k",
   "rounds": [
@@ -6693,8 +6693,8 @@
   },
   "context_tokens_raw": 1634
  },
- "mtplx-fork|fp16|mt-2k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|fp16|mt-2k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "fp16",
   "scenario": "mt-2k",
   "rounds": [
@@ -6758,8 +6758,8 @@
   },
   "context_tokens_raw": 1634
  },
- "splash-m1|q8|mt-2k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-2k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-2k",
   "rounds": [
@@ -6823,8 +6823,8 @@
   },
   "context_tokens_raw": 1634
  },
- "mtplx-fork|q8|mt-2k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|q8|mt-2k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "q8",
   "scenario": "mt-2k",
   "rounds": [
@@ -6888,8 +6888,8 @@
   },
   "context_tokens_raw": 1634
  },
- "splash-m1|q8|mt-8k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-8k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-8k",
   "rounds": [
@@ -6953,8 +6953,8 @@
   },
   "context_tokens_raw": 7787
  },
- "mtplx-fork|q8|mt-8k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|q8|mt-8k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "q8",
   "scenario": "mt-8k",
   "rounds": [
@@ -7018,8 +7018,8 @@
   },
   "context_tokens_raw": 7787
  },
- "splash-m1|q8|mt-32k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-32k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-32k",
   "rounds": [
@@ -7083,8 +7083,8 @@
   },
   "context_tokens_raw": 32363
  },
- "mtplx-fork|q8|mt-32k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|q8|mt-32k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "q8",
   "scenario": "mt-32k",
   "rounds": [
@@ -7148,8 +7148,8 @@
   },
   "context_tokens_raw": 32363
  },
- "splash-m1|q8|mt-64k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-64k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-64k",
   "rounds": [
@@ -7213,8 +7213,8 @@
   },
   "context_tokens_raw": 65117
  },
- "mtplx-fork|q8|mt-64k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|q8|mt-64k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "q8",
   "scenario": "mt-64k",
   "rounds": [
@@ -7278,8 +7278,8 @@
   },
   "context_tokens_raw": 65117
  },
- "splash-m1|q8|mt-128k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-128k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-128k",
   "rounds": [
@@ -7341,8 +7341,8 @@
   },
   "context_tokens_raw": 130667
  },
- "mtplx-fork|q8|mt-128k": {
-  "engine": "mtplx-fork",
+ "mtplx-fork-m1-2122|q8|mt-128k": {
+  "engine": "mtplx-fork-m1-2122",
   "kv": "q8",
   "scenario": "mt-128k",
   "rounds": [
@@ -7353,60 +7353,105 @@
     "n": 1,
     "prompt_tokens": 130713,
     "cached_tokens": 0,
-    "ttft_s": 1451.7209243329999,
-    "gen_s": 15.358531457999561,
-    "e2e_s": 1467.0794557909994,
-    "decode_tok_s": 18.400067914289778,
+    "ttft_s": 1406.7456672919798,
+    "gen_s": 15.53190495801391,
+    "e2e_s": 1422.2775722499937,
+    "decode_tok_s": 18.152969036870505,
     "completion_tokens": 256,
-    "peak_wired": 39655079936,
-    "peak_rss": 17061511168,
+    "peak_wired": 40971960320,
+    "peak_rss": 17081417728,
     "needle_ok": [],
     "errors": [],
     "accept_rate": 0.5669014084507042
    },
    "2": {
     "n": 1,
-    "prompt_tokens": 131020,
-    "cached_tokens": 130969,
-    "ttft_s": 2.1073418329997367,
-    "gen_s": 12.879646125000363,
-    "e2e_s": 14.9869879580001,
-    "decode_tok_s": 20.257412999738236,
-    "completion_tokens": 256,
-    "peak_wired": 43481055232,
-    "peak_rss": 17135517696,
+    "prompt_tokens": null,
+    "cached_tokens": null,
+    "ttft_s": null,
+    "gen_s": null,
+    "e2e_s": 0.20088329198188148,
+    "decode_tok_s": null,
+    "completion_tokens": 0,
+    "peak_wired": null,
+    "peak_rss": null,
     "needle_ok": [],
-    "errors": [],
-    "accept_rate": 0.6325757575757576
-   },
-   "3": {
-    "n": 1,
-    "prompt_tokens": 131324,
-    "cached_tokens": 131276,
-    "ttft_s": 2.100885000000744,
-    "gen_s": 9.724502707999818,
-    "e2e_s": 11.825387708000562,
-    "decode_tok_s": 18.456427772790857,
-    "completion_tokens": 177,
-    "peak_wired": 43406147584,
-    "peak_rss": 17167138816,
-    "needle_ok": [
-     true
+    "errors": [
+     {
+      "message": "insufficient memory: the other apps on this Mac leave 12.1 GiB free, and this prompt needs about 0.5 GiB more than that (131020 prompt tokens, 51 not cached). The engine gave back its own caches first. Held after reclamation: model weights 19.3 GiB; cached conversations 5.8 GiB: anon-19bfb417d0412478 5.8 GiB (this_request); allocator pool 0.0 GiB; 4.5 GiB outside MLX (0.5 GiB past the 4.0 GiB allowance). A retry can succeed once other apps give memory back: close some apps and try again, or shorten the prompt. The request was refused before prefill instead of pushing the Mac into swap, which can freeze the whole desktop; --allow-swap admits it anyway.",
+      "type": "server_error",
+      "code": "insufficient_memory",
+      "param": null,
+      "detail": {
+       "message": "insufficient memory: the other apps on this Mac leave 12.1 GiB free, and this prompt needs about 0.5 GiB more than that (131020 prompt tokens, 51 not cached). The engine gave back its own caches first. Held after reclamation: model weights 19.3 GiB; cached conversations 5.8 GiB: anon-19bfb417d0412478 5.8 GiB (this_request); allocator pool 0.0 GiB; 4.5 GiB outside MLX (0.5 GiB past the 4.0 GiB allowance). A retry can succeed once other apps give memory back: close some apps and try again, or shorten the prompt. The request was refused before prefill instead of pushing the Mac into swap, which can freeze the whole desktop; --allow-swap admits it anyway.",
+       "code": "insufficient_memory",
+       "memory": {
+        "refusal_reason": "system_memory_short_after_reclamation",
+        "retry_can_succeed": true,
+        "retry_when": "after_other_apps_free_memory",
+        "limit_bytes": 51539607552,
+        "projected_bytes_after": 38096423824,
+        "growth_bytes_after": 10539078120,
+        "prompt_tokens": 131020,
+        "miss_tokens": 51,
+        "reusable_prefix_tokens": 130969,
+        "reusable_prefix_mode": "exact",
+        "system_available_bytes_after": 12993265664,
+        "system_shortfall_bytes_after": 542643974,
+        "system_abort_floor_bytes": 3037058334,
+        "system_shed_floor_bytes": 6074116668,
+        "holders": {
+         "weights_bytes": 20683239637,
+         "allocator_active_bytes": 27065953804,
+         "allocator_pool_bytes": 0,
+         "host_overhang_bytes": 4786359196,
+         "host_allowance_bytes": 4294967296,
+         "host_overhang_charged_bytes": 491391900,
+         "bank_bytes": 6281178624,
+         "sessions": [
+          {
+           "session_id": "anon-19bfb417d0412478",
+           "entries": 1,
+           "held_bytes": 6281178624,
+           "leases": 0,
+           "live_cache_refs": 0,
+           "longest_prefix_tokens": 130969,
+           "held_because": "this_request"
+          }
+         ],
+         "in_flight_bytes": 0,
+         "queued_persistence_bytes": 0
+        },
+        "reclamation_steps": [
+         "lru_idle_entries",
+         "chain_walk",
+         "idle_sessions",
+         "own_session_siblings"
+        ],
+        "idle_release": {
+         "entries": 0,
+         "held_bytes": 0,
+         "dropped_entries": 0,
+         "persistence_cancelled": 0,
+         "queued_persistence_entries": 0,
+         "queued_persistence_bytes": 0
+        }
+       }
+      }
+     }
     ],
-    "errors": [],
-    "accept_rate": 0.5606060606060606
+    "accept_rate": null
    }
   },
   "kv_impl": "MTPLX paged KV, affine q8",
   "mtp_impl": "MTPLX native MTP, depth 3",
   "engine_version": {
-   "commit": "9984c63232752da631bbb591df97f5bcfb32c997"
+   "commit": "c1294c2d789c83cf454d01a64d3e26b442d60a78"
   },
-  "context_tokens_raw": 130667,
-  "filled_from": "mtplx-fork-m1.2"
+  "context_tokens_raw": 130667
  },
- "splash-m1|q8|mt-256k": {
-  "engine": "splash-m1",
+ "splash-m1-121|q8|mt-256k": {
+  "engine": "splash-m1-121",
   "kv": "q8",
   "scenario": "mt-256k",
   "rounds": [
@@ -7465,6 +7510,1249 @@
   "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
   "engine_version": {
    "version": "Splash 1.2.1-m1"
+  },
+  "context_tokens_raw": 257626
+ },
+ "splash-m1|fp16|mt-2k": {
+  "engine": "splash-m1",
+  "kv": "fp16",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 8.383792084059678,
+    "gen_s": 9.80196143744979,
+    "e2e_s": 18.18575352150947,
+    "decode_tok_s": 26.01846243252509,
+    "completion_tokens": 256.0,
+    "peak_wired": 23835836416,
+    "peak_rss": 19419742208,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.2634920634920635
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1664.0,
+    "ttft_s": 2.7454058960429393,
+    "gen_s": 5.985099166457076,
+    "e2e_s": 8.730505062500015,
+    "decode_tok_s": 42.60762392545992,
+    "completion_tokens": 256.0,
+    "peak_wired": 23808638976,
+    "peak_rss": 19545948160,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5102040816326531
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 1952.0,
+    "ttft_s": 2.655605687003117,
+    "gen_s": 5.477826249960344,
+    "e2e_s": 8.133431936963461,
+    "decode_tok_s": 31.76510997527767,
+    "completion_tokens": 175.0,
+    "peak_wired": 24231002112,
+    "peak_rss": 19742392320,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3445378151260504
+   }
+  },
+  "kv_impl": "Splash BF16 target KV",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "mtplx-fork|fp16|mt-2k": {
+  "engine": "mtplx-fork",
+  "kv": "fp16",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 8.796199854521547,
+    "gen_s": 8.676698332943488,
+    "e2e_s": 17.472898187465034,
+    "decode_tok_s": 29.73526480094194,
+    "completion_tokens": 256.0,
+    "peak_wired": 29857480704,
+    "peak_rss": 17023188992,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5927272727272728
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1936.0,
+    "ttft_s": 0.5066108124447055,
+    "gen_s": 8.187102229509037,
+    "e2e_s": 8.693713041953743,
+    "decode_tok_s": 31.17611053331151,
+    "completion_tokens": 256.0,
+    "peak_wired": 28631302144,
+    "peak_rss": 17038639104,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6387832699619772
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 2243.0,
+    "ttft_s": 0.506012124940753,
+    "gen_s": 6.525007124990225,
+    "e2e_s": 7.031019249930978,
+    "decode_tok_s": 26.30125180719028,
+    "completion_tokens": 172.0,
+    "peak_wired": 28150579200,
+    "peak_rss": 17049354240,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.4975845410628019
+   }
+  },
+  "kv_impl": "MTPLX paged KV, unquantized",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-m1|q8|mt-2k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 8.337950062472373,
+    "gen_s": 8.833020854508504,
+    "e2e_s": 17.170970916980878,
+    "decode_tok_s": 28.86932959246448,
+    "completion_tokens": 256.0,
+    "peak_wired": 23681187840,
+    "peak_rss": 19428851712,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.2925170068027211
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1664.0,
+    "ttft_s": 2.716206792043522,
+    "gen_s": 6.265880812483374,
+    "e2e_s": 8.982087604526896,
+    "decode_tok_s": 40.698091265278165,
+    "completion_tokens": 256.0,
+    "peak_wired": 23642406912,
+    "peak_rss": 19548127232,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.4666666666666667
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 1952.0,
+    "ttft_s": 2.642738333030138,
+    "gen_s": 6.0016085834940895,
+    "e2e_s": 8.644346916524228,
+    "decode_tok_s": 31.32572899940306,
+    "completion_tokens": 189.0,
+    "peak_wired": 24072470528,
+    "peak_rss": 19744489472,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3283208020050125
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 1634
+ },
+ "mtplx-fork|q8|mt-2k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-2k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 1680.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 9.019919062557165,
+    "gen_s": 8.887084103946108,
+    "e2e_s": 17.907003166503273,
+    "decode_tok_s": 29.041743409652454,
+    "completion_tokens": 256.0,
+    "peak_wired": 31626461184,
+    "peak_rss": 17077190656,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5927272727272728
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 1987.0,
+    "cached_tokens": 1936.0,
+    "ttft_s": 0.5456181460176595,
+    "gen_s": 7.993098958453629,
+    "e2e_s": 8.538717104471289,
+    "decode_tok_s": 31.932583580236056,
+    "completion_tokens": 256.0,
+    "peak_wired": 30668029952,
+    "peak_rss": 17081630720,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6387832699619772
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 2291.0,
+    "cached_tokens": 2243.0,
+    "ttft_s": 0.5253213124815375,
+    "gen_s": 6.286802687565796,
+    "e2e_s": 6.8121240000473335,
+    "decode_tok_s": 27.30070747531591,
+    "completion_tokens": 172.0,
+    "peak_wired": 30361600000,
+    "peak_rss": 17081712640,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.4975845410628019
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 1634
+ },
+ "splash-m1|q8|mt-8k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 7833.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 38.929283812467474,
+    "gen_s": 9.078506062447559,
+    "e2e_s": 48.007789874915034,
+    "decode_tok_s": 28.090155892140384,
+    "completion_tokens": 256.0,
+    "peak_wired": 24148705280,
+    "peak_rss": 19545686016,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.32007233273056057
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 8139.0,
+    "cached_tokens": 7808.0,
+    "ttft_s": 2.8257863959879614,
+    "gen_s": 8.05033572902903,
+    "e2e_s": 10.876122125016991,
+    "decode_tok_s": 31.677156279646205,
+    "completion_tokens": 256.0,
+    "peak_wired": 24347394048,
+    "peak_rss": 19742015488,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3722334004024145
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 8443.0,
+    "cached_tokens": 8128.0,
+    "ttft_s": 2.7388593335053883,
+    "gen_s": 6.217581062519457,
+    "e2e_s": 8.956440396024846,
+    "decode_tok_s": 28.95140934275245,
+    "completion_tokens": 181.0,
+    "peak_wired": 24324046848,
+    "peak_rss": 19939180544,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3246753246753247
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 7787
+ },
+ "mtplx-fork|q8|mt-8k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-8k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 7833.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 36.47291795851197,
+    "gen_s": 8.93774610402761,
+    "e2e_s": 45.41066406253958,
+    "decode_tok_s": 28.6003268968895,
+    "completion_tokens": 256.0,
+    "peak_wired": 33195196416,
+    "peak_rss": 17059807232,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5842293906810035
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 8140.0,
+    "cached_tokens": 8089.0,
+    "ttft_s": 0.59103024948854,
+    "gen_s": 8.295663499971852,
+    "e2e_s": 8.886693749460392,
+    "decode_tok_s": 30.798644942975464,
+    "completion_tokens": 256.0,
+    "peak_wired": 30956568576,
+    "peak_rss": 17061625856,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6640625
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 8444.0,
+    "cached_tokens": 8396.0,
+    "ttft_s": 0.5756193955312483,
+    "gen_s": 6.550595812499523,
+    "e2e_s": 7.1262152080307715,
+    "decode_tok_s": 28.34937949616534,
+    "completion_tokens": 186.0,
+    "peak_wired": 30887362560,
+    "peak_rss": 17066344448,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5652173913043478
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 7787
+ },
+ "splash-m1|q8|mt-32k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 192.20546727097826,
+    "gen_s": 10.498697396018542,
+    "e2e_s": 202.7041646669968,
+    "decode_tok_s": 24.290047843207546,
+    "completion_tokens": 256.0,
+    "peak_wired": 24991432704,
+    "peak_rss": 19586433024,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3302411873840445
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32716.0,
+    "cached_tokens": 32384.0,
+    "ttft_s": 3.5580164165003225,
+    "gen_s": 8.935451770958025,
+    "e2e_s": 12.493468187458348,
+    "decode_tok_s": 28.538485729101968,
+    "completion_tokens": 256.0,
+    "peak_wired": 25173278720,
+    "peak_rss": 19782647808,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.41125541125541126
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33020.0,
+    "cached_tokens": 32704.0,
+    "ttft_s": 3.4841679579694755,
+    "gen_s": 7.661533208563924,
+    "e2e_s": 11.1457011665334,
+    "decode_tok_s": 23.233583816312258,
+    "completion_tokens": 179.0,
+    "peak_wired": 25135857664,
+    "peak_rss": 19978715136,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3112244897959184
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 32363
+ },
+ "mtplx-fork|q8|mt-32k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-32k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 32409.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 169.12835345847998,
+    "gen_s": 9.419130437483545,
+    "e2e_s": 178.54748389596352,
+    "decode_tok_s": 27.478096840017788,
+    "completion_tokens": 256.0,
+    "peak_wired": 36186996736,
+    "peak_rss": 17087152128,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.630188679245283
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 32716.0,
+    "cached_tokens": 32665.0,
+    "ttft_s": 0.8140300830127671,
+    "gen_s": 8.850499062449671,
+    "e2e_s": 9.664529145462438,
+    "decode_tok_s": 28.908548767723705,
+    "completion_tokens": 256.0,
+    "peak_wired": 33652211712,
+    "peak_rss": 17103224832,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.688
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 33020.0,
+    "cached_tokens": 32972.0,
+    "ttft_s": 0.8010063749388792,
+    "gen_s": 6.862115125055425,
+    "e2e_s": 7.663121499994304,
+    "decode_tok_s": 27.862889403154576,
+    "completion_tokens": 191.0,
+    "peak_wired": 33777942528,
+    "peak_rss": 17117429760,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.6461538461538462
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 32363
+ },
+ "splash-m1|q8|mt-64k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 478.67733541701455,
+    "gen_s": 13.314064541540574,
+    "e2e_s": 491.9913999585551,
+    "decode_tok_s": 19.152969662397197,
+    "completion_tokens": 256.0,
+    "peak_wired": 26074005504,
+    "peak_rss": 19573981184,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.3320964749536178
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65470.0,
+    "cached_tokens": 65152.0,
+    "ttft_s": 4.272372874955181,
+    "gen_s": 9.670980729046278,
+    "e2e_s": 13.943353604001459,
+    "decode_tok_s": 26.368138065598522,
+    "completion_tokens": 256.0,
+    "peak_wired": 26026967040,
+    "peak_rss": 19770228736,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.49874686716791977
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65774.0,
+    "cached_tokens": 65440.0,
+    "ttft_s": 4.497508187952917,
+    "gen_s": 9.691249083494768,
+    "e2e_s": 14.188757271447685,
+    "decode_tok_s": 18.78036709917979,
+    "completion_tokens": 183.0,
+    "peak_wired": 26454327296,
+    "peak_rss": 19966722048,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.3132832080200501
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 65117
+ },
+ "mtplx-fork|q8|mt-64k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-64k",
+  "rounds": [
+   1,
+   2
+  ],
+  "turns": {
+   "1": {
+    "n": 2,
+    "prompt_tokens": 65163.0,
+    "cached_tokens": 0.0,
+    "ttft_s": 411.64906620798865,
+    "gen_s": 10.96956733299885,
+    "e2e_s": 422.6186335409875,
+    "decode_tok_s": 24.375807691103695,
+    "completion_tokens": 256.0,
+    "peak_wired": 40086929408,
+    "peak_rss": 17090805760,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6007326007326007
+   },
+   "2": {
+    "n": 2,
+    "prompt_tokens": 65470.0,
+    "cached_tokens": 65419.0,
+    "ttft_s": 1.1242530209710822,
+    "gen_s": 9.020430228498299,
+    "e2e_s": 10.14468324946938,
+    "decode_tok_s": 28.700006014422783,
+    "completion_tokens": 256.0,
+    "peak_wired": 37954715648,
+    "peak_rss": 17116200960,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.7705627705627706
+   },
+   "3": {
+    "n": 2,
+    "prompt_tokens": 65774.0,
+    "cached_tokens": 65726.0,
+    "ttft_s": 1.1266173335025087,
+    "gen_s": 6.9309134790091775,
+    "e2e_s": 8.057530812511686,
+    "decode_tok_s": 23.392303204682225,
+    "completion_tokens": 160.0,
+    "peak_wired": 39041744896,
+    "peak_rss": 17126539264,
+    "needle_ok": [
+     true,
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5804597701149425
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 65117
+ },
+ "splash-m1|q8|mt-128k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1323.9305393330287,
+    "gen_s": 19.730577458976768,
+    "e2e_s": 1343.6611167920055,
+    "decode_tok_s": 12.924212214521589,
+    "completion_tokens": 256,
+    "peak_wired": 28215132160,
+    "peak_rss": 19576766464,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.2925170068027211
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130688,
+    "ttft_s": 6.42216020799242,
+    "gen_s": 14.9660280829994,
+    "e2e_s": 21.38818829099182,
+    "decode_tok_s": 17.038684108114865,
+    "completion_tokens": 256,
+    "peak_wired": 28396158976,
+    "peak_rss": 19773095936,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.42857142857142855
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131008,
+    "ttft_s": 6.185055874986574,
+    "gen_s": 13.493519000010565,
+    "e2e_s": 19.67857487499714,
+    "decode_tok_s": 13.043636069452782,
+    "completion_tokens": 177,
+    "peak_wired": 28390653952,
+    "peak_rss": 19969409024,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.29064039408866993
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 130667
+ },
+ "mtplx-fork|q8|mt-128k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-128k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 130713,
+    "cached_tokens": 0,
+    "ttft_s": 1066.4180510829901,
+    "gen_s": 15.453280166955665,
+    "e2e_s": 1081.8713312499458,
+    "decode_tok_s": 18.29638059388537,
+    "completion_tokens": 256,
+    "peak_wired": 44917227520,
+    "peak_rss": 17102225408,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5304054054054054
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 131020,
+    "cached_tokens": 130969,
+    "ttft_s": 1.8307041249936447,
+    "gen_s": 11.722485625068657,
+    "e2e_s": 13.553189750062302,
+    "decode_tok_s": 22.098079479139358,
+    "completion_tokens": 256,
+    "peak_wired": 43678253056,
+    "peak_rss": 17111252992,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6907630522088354
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 131324,
+    "cached_tokens": 131276,
+    "ttft_s": 1.8332887499127537,
+    "gen_s": 9.202026625047438,
+    "e2e_s": 11.035315374960192,
+    "decode_tok_s": 18.914103665022726,
+    "completion_tokens": 171,
+    "peak_wired": 42724753408,
+    "peak_rss": 17122557952,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5435897435897435
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 130667
+ },
+ "mtplx-fork|q8|mt-256k": {
+  "engine": "mtplx-fork",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": null,
+    "cached_tokens": null,
+    "ttft_s": null,
+    "gen_s": null,
+    "e2e_s": 0.494845874956809,
+    "decode_tok_s": null,
+    "completion_tokens": 0,
+    "peak_wired": 27601436672,
+    "peak_rss": 17059643392,
+    "needle_ok": [],
+    "errors": [
+     {
+      "message": "insufficient memory: this prompt projects 54.7 GiB against the engine's 48.0 GiB limit (6.7 GiB over) after the allocator cache and the idle session state were reclaimed (257672 prompt tokens, 257672 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 0.0 GiB; allocator pool 0.0 GiB; 1.5 GiB outside MLX. A retry cannot succeed at this memory limit: the model's weights plus this prompt alone exceed it. Shorten the prompt or start a new conversation. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+      "type": "server_error",
+      "code": "insufficient_memory",
+      "param": null,
+      "detail": {
+       "message": "insufficient memory: this prompt projects 54.7 GiB against the engine's 48.0 GiB limit (6.7 GiB over) after the allocator cache and the idle session state were reclaimed (257672 prompt tokens, 257672 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 0.0 GiB; allocator pool 0.0 GiB; 1.5 GiB outside MLX. A retry cannot succeed at this memory limit: the model's weights plus this prompt alone exceed it. Shorten the prompt or start a new conversation. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+       "code": "insufficient_memory",
+       "memory": {
+        "refusal_reason": "projected_over_limit_after_reclamation",
+        "retry_can_succeed": false,
+        "retry_when": "never_at_this_limit",
+        "limit_bytes": 51539607552,
+        "projected_bytes_after": 58691137269,
+        "growth_bytes_after": 37914614169,
+        "prompt_tokens": 257672,
+        "miss_tokens": 257672,
+        "reusable_prefix_tokens": 0,
+        "reusable_prefix_mode": "none",
+        "system_available_bytes_after": 31833997312,
+        "system_shortfall_bytes_after": 10010684210,
+        "system_abort_floor_bytes": 4081120665,
+        "system_shed_floor_bytes": 8162241330,
+        "holders": {
+         "weights_bytes": 20683239637,
+         "allocator_active_bytes": 20776523100,
+         "allocator_pool_bytes": 0,
+         "host_overhang_bytes": 1632969876,
+         "host_allowance_bytes": 4294967296,
+         "host_overhang_charged_bytes": 0,
+         "bank_bytes": 0,
+         "sessions": [],
+         "in_flight_bytes": 0,
+         "queued_persistence_bytes": 0
+        },
+        "reclamation_steps": [
+         "lru_idle_entries",
+         "chain_walk",
+         "idle_sessions",
+         "own_session_siblings"
+        ],
+        "idle_release": {
+         "entries": 0,
+         "held_bytes": 0,
+         "dropped_entries": 0,
+         "persistence_cancelled": 0,
+         "queued_persistence_entries": 0,
+         "queued_persistence_bytes": 0
+        }
+       }
+      }
+     }
+    ],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 257626
+ },
+ "splash-m1|q8|mt-256k": {
+  "engine": "splash-m1",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 257672,
+    "cached_tokens": 0,
+    "ttft_s": 4023.9372967499075,
+    "gen_s": 27.898327375063673,
+    "e2e_s": 4051.835624124971,
+    "decode_tok_s": 9.140357597171668,
+    "completion_tokens": 256,
+    "peak_wired": 32335872000,
+    "peak_rss": 19617841152,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.326007326007326
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 257979,
+    "cached_tokens": 257664,
+    "ttft_s": 9.755723334033974,
+    "gen_s": 19.238195749931037,
+    "e2e_s": 28.99391908396501,
+    "decode_tok_s": 13.25501068810502,
+    "completion_tokens": 256,
+    "peak_wired": 32313655296,
+    "peak_rss": 19822542848,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5317460317460317
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 258283,
+    "cached_tokens": 257952,
+    "ttft_s": 10.2652753329603,
+    "gen_s": 21.726232124958187,
+    "e2e_s": 31.991507457918487,
+    "decode_tok_s": 8.28499638830997,
+    "completion_tokens": 181,
+    "peak_wired": 32724369408,
+    "peak_rss": 20018839552,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.2786885245901639
+   }
+  },
+  "kv_impl": "Splash INT8 target KV (default)",
+  "mtp_impl": "DFlash2 block-diffusion draft (separate 5-layer model), Splash's own verify kernels",
+  "engine_version": {
+   "version": "Splash 1.3.0-m1.1"
+  },
+  "context_tokens_raw": 257626
+ },
+ "mtplx-fork-allowswap|q8|mt-256k": {
+  "engine": "mtplx-fork-allowswap",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 257672,
+    "cached_tokens": 0,
+    "ttft_s": 3534.423973707948,
+    "gen_s": 21.80889012501575,
+    "e2e_s": 3556.2328638329636,
+    "decode_tok_s": 14.591300706996307,
+    "completion_tokens": 235,
+    "peak_wired": 46600978432,
+    "peak_rss": 17207787520,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5882352941176471
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 257957,
+    "cached_tokens": 257907,
+    "ttft_s": 2.9617572081042454,
+    "gen_s": 17.618370624957606,
+    "e2e_s": 20.58012783306185,
+    "decode_tok_s": 14.718514860442653,
+    "completion_tokens": 256,
+    "peak_wired": 53211889664,
+    "peak_rss": 17220239360,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6349809885931559
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 258261,
+    "cached_tokens": 258213,
+    "ttft_s": 2.963950000004843,
+    "gen_s": 12.779205708997324,
+    "e2e_s": 15.743155709002167,
+    "decode_tok_s": 13.907948946950633,
+    "completion_tokens": 175,
+    "peak_wired": 47336685568,
+    "peak_rss": 17237819392,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.558974358974359
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "c121efba5a2fa0b8b713aa808be612fb07887465"
+  },
+  "context_tokens_raw": 257626
+ },
+ "mtplx-fork-61af5233|q8|mt-256k": {
+  "engine": "mtplx-fork-61af5233",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 257672,
+    "cached_tokens": 0,
+    "ttft_s": 3531.3673150829272,
+    "gen_s": 21.828842042014003,
+    "e2e_s": 3553.1961571249412,
+    "decode_tok_s": 14.570983353921518,
+    "completion_tokens": 235,
+    "peak_wired": 48580345856,
+    "peak_rss": 17206722560,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5882352941176471
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": null,
+    "cached_tokens": null,
+    "ttft_s": null,
+    "gen_s": null,
+    "e2e_s": 0.2523040419910103,
+    "decode_tok_s": null,
+    "completion_tokens": 0,
+    "peak_wired": 31242190848,
+    "peak_rss": 17206820864,
+    "needle_ok": [],
+    "errors": [
+     {
+      "message": "insufficient memory: this prompt projects 48.9 GiB against the engine's 48.0 GiB limit (0.9 GiB over) after the allocator cache and the idle session state were reclaimed (257957 prompt tokens, 50 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 10.3 GiB: anon-abd6517cced9c243 10.3 GiB (this_request); allocator pool 0.0 GiB; 1.4 GiB outside MLX. A retry cannot succeed as is: what the engine still holds is the model, the cached state this prompt restores from, and requests in flight, and none of it can go without making this prompt larger or stopping another request. Shorten the prompt, start a new conversation, or use q8 KV quantization. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+      "type": "server_error",
+      "code": "insufficient_memory",
+      "param": null,
+      "detail": {
+       "message": "insufficient memory: this prompt projects 48.9 GiB against the engine's 48.0 GiB limit (0.9 GiB over) after the allocator cache and the idle session state were reclaimed (257957 prompt tokens, 50 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 10.3 GiB: anon-abd6517cced9c243 10.3 GiB (this_request); allocator pool 0.0 GiB; 1.4 GiB outside MLX. A retry cannot succeed as is: what the engine still holds is the model, the cached state this prompt restores from, and requests in flight, and none of it can go without making this prompt larger or stopping another request. Shorten the prompt, start a new conversation, or use q8 KV quantization. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+       "code": "insufficient_memory",
+       "memory": {
+        "refusal_reason": "projected_over_limit_after_reclamation",
+        "retry_can_succeed": false,
+        "retry_when": "not_without_a_shorter_prompt",
+        "limit_bytes": 51539607552,
+        "projected_bytes_after": 52558756938,
+        "growth_bytes_after": 20729580480,
+        "prompt_tokens": 257957,
+        "miss_tokens": 50,
+        "reusable_prefix_tokens": 257907,
+        "reusable_prefix_mode": "exact",
+        "system_available_bytes_after": 23661887488,
+        "system_shortfall_bytes_after": 303334524,
+        "system_abort_floor_bytes": 3398171836,
+        "system_shed_floor_bytes": 6796343672,
+        "holders": {
+         "weights_bytes": 20683239637,
+         "allocator_active_bytes": 31829176458,
+         "allocator_pool_bytes": 0,
+         "host_overhang_bytes": 1545046518,
+         "host_allowance_bytes": 4294967296,
+         "host_overhang_charged_bytes": 0,
+         "bank_bytes": 11025613312,
+         "sessions": [
+          {
+           "session_id": "anon-abd6517cced9c243",
+           "entries": 1,
+           "held_bytes": 11025613312,
+           "leases": 0,
+           "live_cache_refs": 0,
+           "longest_prefix_tokens": 257907,
+           "held_because": "this_request"
+          }
+         ],
+         "in_flight_bytes": 0,
+         "queued_persistence_bytes": 0
+        },
+        "reclamation_steps": [
+         "allocator_pool",
+         "lru_idle_entries",
+         "chain_walk",
+         "idle_sessions",
+         "own_session_siblings"
+        ],
+        "idle_release": {
+         "entries": 0,
+         "held_bytes": 0,
+         "dropped_entries": 0,
+         "persistence_cancelled": 0,
+         "queued_persistence_entries": 0,
+         "queued_persistence_bytes": 0
+        }
+       }
+      }
+     }
+    ],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "61af523386a04798ef8aafd38b091a910fced6ef"
+  },
+  "context_tokens_raw": 257626
+ },
+ "mtplx-fork-b56e472d|q8|mt-256k": {
+  "engine": "mtplx-fork-b56e472d",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": null,
+    "cached_tokens": null,
+    "ttft_s": null,
+    "gen_s": null,
+    "e2e_s": 0.5086146250832826,
+    "decode_tok_s": null,
+    "completion_tokens": 0,
+    "peak_wired": 27315486720,
+    "peak_rss": 17178066944,
+    "needle_ok": [],
+    "errors": [
+     {
+      "message": "insufficient memory: this prompt projects 58.4 GiB against the engine's 52.0 GiB limit (6.4 GiB over) after the allocator cache and the idle session state were reclaimed (257672 prompt tokens, 257672 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 0.0 GiB; allocator pool 0.0 GiB; 1.5 GiB outside MLX. A retry cannot succeed at this memory limit: the model's weights plus this prompt alone exceed it. Shorten the prompt or start a new conversation. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+      "type": "server_error",
+      "code": "insufficient_memory",
+      "param": null,
+      "detail": {
+       "message": "insufficient memory: this prompt projects 58.4 GiB against the engine's 52.0 GiB limit (6.4 GiB over) after the allocator cache and the idle session state were reclaimed (257672 prompt tokens, 257672 not cached). Held after reclamation: model weights 19.3 GiB; cached conversations 0.0 GiB; allocator pool 0.0 GiB; 1.5 GiB outside MLX. A retry cannot succeed at this memory limit: the model's weights plus this prompt alone exceed it. Shorten the prompt or start a new conversation. The engine stays up and keeps its in-flight sessions; this request was refused before prefill instead of pushing the Mac into swap; --allow-swap admits it anyway.",
+       "code": "insufficient_memory",
+       "memory": {
+        "refusal_reason": "projected_over_limit_after_reclamation",
+        "retry_can_succeed": false,
+        "retry_when": "never_at_this_limit",
+        "limit_bytes": 55834574848,
+        "projected_bytes_after": 62726551572,
+        "growth_bytes_after": 41950025412,
+        "prompt_tokens": 257672,
+        "miss_tokens": 257672,
+        "reusable_prefix_tokens": 0,
+        "reusable_prefix_mode": "none",
+        "system_available_bytes_after": 32775143424,
+        "system_shortfall_bytes_after": 13350836272,
+        "system_abort_floor_bytes": 4327595372,
+        "system_shed_floor_bytes": 8655190744,
+        "holders": {
+         "weights_bytes": 20683239637,
+         "allocator_active_bytes": 20776526160,
+         "allocator_pool_bytes": 0,
+         "host_overhang_bytes": 1653414048,
+         "host_allowance_bytes": 4294967296,
+         "host_overhang_charged_bytes": 0,
+         "bank_bytes": 0,
+         "sessions": [],
+         "in_flight_bytes": 0,
+         "queued_persistence_bytes": 0
+        },
+        "reclamation_steps": [
+         "lru_idle_entries",
+         "chain_walk",
+         "idle_sessions",
+         "own_session_siblings"
+        ],
+        "idle_release": {
+         "entries": 0,
+         "held_bytes": 0,
+         "dropped_entries": 0,
+         "persistence_cancelled": 0,
+         "queued_persistence_entries": 0,
+         "queued_persistence_bytes": 0
+        }
+       }
+      }
+     }
+    ],
+    "accept_rate": null
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "b56e472dce68b6cc66f7ad7252499b675e34666e"
+  },
+  "context_tokens_raw": 257626
+ },
+ "mtplx-fork-m12|q8|mt-256k": {
+  "engine": "mtplx-fork-m12",
+  "kv": "q8",
+  "scenario": "mt-256k",
+  "rounds": [
+   1
+  ],
+  "turns": {
+   "1": {
+    "n": 1,
+    "prompt_tokens": 257672,
+    "cached_tokens": 0,
+    "ttft_s": 3512.100969708059,
+    "gen_s": 22.09980858291965,
+    "e2e_s": 3534.2007782909786,
+    "decode_tok_s": 14.358472095723688,
+    "completion_tokens": 235,
+    "peak_wired": 48723509248,
+    "peak_rss": 17200742400,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.5882352941176471
+   },
+   "2": {
+    "n": 1,
+    "prompt_tokens": 257957,
+    "cached_tokens": 257907,
+    "ttft_s": 2.9024301250465214,
+    "gen_s": 18.0219296249561,
+    "e2e_s": 20.924359750002623,
+    "decode_tok_s": 14.40155743496687,
+    "completion_tokens": 256,
+    "peak_wired": 49503092736,
+    "peak_rss": 17202823168,
+    "needle_ok": [],
+    "errors": [],
+    "accept_rate": 0.6349809885931559
+   },
+   "3": {
+    "n": 1,
+    "prompt_tokens": 258261,
+    "cached_tokens": 258213,
+    "ttft_s": 2.917553250095807,
+    "gen_s": 12.854779540910386,
+    "e2e_s": 15.772332791006193,
+    "decode_tok_s": 13.838546041241935,
+    "completion_tokens": 175,
+    "peak_wired": 50106073088,
+    "peak_rss": 16813981696,
+    "needle_ok": [
+     true
+    ],
+    "errors": [],
+    "accept_rate": 0.5729166666666666
+   }
+  },
+  "kv_impl": "MTPLX paged KV, affine q8",
+  "mtp_impl": "MTPLX native MTP, depth 3",
+  "engine_version": {
+   "commit": "ca059bfbcb058a5c73d742c55f5dfcd84b51aff0"
   },
   "context_tokens_raw": 257626
  }

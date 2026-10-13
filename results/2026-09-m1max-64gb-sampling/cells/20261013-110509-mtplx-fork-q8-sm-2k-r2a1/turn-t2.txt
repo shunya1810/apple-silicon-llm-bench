@@ -1,0 +1,6 @@
+Records with an "offline" status and those with a "nominal" status follow identical structural patterns in their sensor values and zone assignments, differing only by their position within the five-record cycle. Both groups exhibit the same linear decrease in sensor values across the dataset and share the same zone prefix alternation. The primary distinction is that "nominal" records occur at indices divisible by 5 (e.g., 0, 5, 10), while "offline" records occur at indices where the remainder is 3 (e.g., 3, 8, 13). Consequently, any "offline" record will have a higher sensor value than the immediately preceding "nominal" record but a lower value than the subsequent "nominal" record in the next cycle.
+
+Three specific examples illustrating this relationship are:
+1. **Record 000003**: Status is offline with a sensor value of 82.6 in zone N61.
+2. **Record 000005**: Status is nominal with a sensor value of 71.2 in zone N95. Note that Record 3 has a higher sensor value than Record 5 because it precedes the reset point in the cycle.
+3. **Record 000013**: Status is offline with a sensor value of 25.6 in zone N51, which is lower than the preceding nominal Record 000010 (42.7) but higher than the following nominal Record 000015 (14.2).

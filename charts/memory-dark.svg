@@ -4,19 +4,19 @@
 <text x="20" y="50" fill="#c3c2b7" font-size="12">System-wide wired memory (vm_stat), max over turns 1–3 · 64 GB machine · lower is better</text>
 <line x1="20" x2="42" y1="72" y2="72" stroke="#3987e5" stroke-width="2"/>
 <circle cx="31" cy="72" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"></circle>
-<text x="48" y="76" fill="#c3c2b7" font-size="12">MTPLX M1 build</text>
-<line x1="158" x2="180" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
-<path d="M169 66L175 72L169 78L163 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
-<text x="186" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
-<line x1="296" x2="318" y1="72" y2="72" stroke="#d55181" stroke-width="2"/>
-<path d="M307 66L313 72L307 78L301 72Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"></path>
-<text x="324" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream + env</text>
-<line x1="476" x2="498" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
-<rect x="482" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
-<text x="504" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
-<line x1="544" x2="566" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
-<path d="M555 66L561 77L549 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
-<text x="572" y="76" fill="#c3c2b7" font-size="12">Splash 1.2.1-m1</text>
+<text x="48" y="76" fill="#c3c2b7" font-size="12">MTPLX M1 fork (m1.1)</text>
+<line x1="200" x2="222" y1="72" y2="72" stroke="#d95926" stroke-width="2"/>
+<path d="M211 66L217 72L211 78L205 72Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"></path>
+<text x="228" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream</text>
+<line x1="338" x2="360" y1="72" y2="72" stroke="#d55181" stroke-width="2"/>
+<path d="M349 66L355 72L349 78L343 72Z" fill="#d55181" stroke="#1a1a19" stroke-width="2"></path>
+<text x="366" y="76" fill="#c3c2b7" font-size="12">MTPLX upstream + env</text>
+<line x1="518" x2="540" y1="72" y2="72" stroke="#199e70" stroke-width="2"/>
+<rect x="524" y="67" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"></rect>
+<text x="546" y="76" fill="#c3c2b7" font-size="12">oMLX</text>
+<line x1="586" x2="608" y1="72" y2="72" stroke="#c98500" stroke-width="2"/>
+<path d="M597 66L603 77L591 77Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"></path>
+<text x="614" y="76" fill="#c3c2b7" font-size="12">Splash 1.3.0-m1.1</text>
 <line x1="20" x2="42" y1="90" y2="90" stroke="#a483e8" stroke-width="2"/>
 <path d="M31 96L37 85L25 85Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"></path>
 <text x="48" y="94" fill="#c3c2b7" font-size="12">TensorFold (bf16 KV)</text>
@@ -32,12 +32,12 @@
 <text x="628.0" y="412" fill="#c3c2b7" font-size="12" text-anchor="middle">128K</text>
 <text x="380.0" y="436" fill="#c3c2b7" font-size="11" text-anchor="middle">prompt length (tokens)</text>
 <text x="16" y="252.0" fill="#c3c2b7" font-size="11" text-anchor="middle" transform="rotate(-90 16 252.0)">GB</text>
-<polyline points="132.0,247.3 256.0,246.0 380.0,233.0 504.0,216.4 628.0,188.2" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
-<circle cx="132.0" cy="247.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 2K: 31.0 GB</title></circle>
-<circle cx="256.0" cy="246.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 8K: 31.3 GB</title></circle>
-<circle cx="380.0" cy="233.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 32K: 34.0 GB</title></circle>
-<circle cx="504.0" cy="216.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 64K: 37.5 GB</title></circle>
-<circle cx="628.0" cy="188.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 build · 128K: 43.5 GB</title></circle>
+<polyline points="132.0,244.3 256.0,236.9 380.0,222.7 504.0,204.3 628.0,181.4" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="132.0" cy="244.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 fork (m1.1) · 2K: 31.6 GB</title></circle>
+<circle cx="256.0" cy="236.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 fork (m1.1) · 8K: 33.2 GB</title></circle>
+<circle cx="380.0" cy="222.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 fork (m1.1) · 32K: 36.2 GB</title></circle>
+<circle cx="504.0" cy="204.3" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 fork (m1.1) · 64K: 40.1 GB</title></circle>
+<circle cx="628.0" cy="181.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"><title>MTPLX M1 fork (m1.1) · 128K: 44.9 GB</title></circle>
 <polyline points="132.0,233.1 256.0,226.2 380.0,193.0 504.0,164.1 628.0,145.9" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 227.1L138.0 233.1L132.0 239.1L126.0 233.1Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 2K: 34.0 GB</title></path>
 <path d="M256.0 220.2L262.0 226.2L256.0 232.2L250.0 226.2Z" fill="#d95926" stroke="#1a1a19" stroke-width="2"><title>MTPLX upstream · 8K: 35.5 GB</title></path>
@@ -56,12 +56,12 @@
 <rect x="375.0" y="217.2" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 32K: 36.3 GB</title></rect>
 <rect x="499.0" y="193.3" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 64K: 41.3 GB</title></rect>
 <rect x="623.0" y="161.7" width="10" height="10" rx="1.5" fill="#199e70" stroke="#1a1a19" stroke-width="2"><title>oMLX · 128K: 48.0 GB</title></rect>
-<polyline points="132.0,284.4 256.0,282.9 380.0,278.9 504.0,273.9 628.0,263.6" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
-<path d="M132.0 278.4L138.0 289.4L126.0 289.4Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.2.1-m1 · 2K: 23.2 GB</title></path>
-<path d="M256.0 276.9L262.0 287.9L250.0 287.9Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.2.1-m1 · 8K: 23.5 GB</title></path>
-<path d="M380.0 272.9L386.0 283.9L374.0 283.9Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.2.1-m1 · 32K: 24.3 GB</title></path>
-<path d="M504.0 267.9L510.0 278.9L498.0 278.9Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.2.1-m1 · 64K: 25.4 GB</title></path>
-<path d="M628.0 257.6L634.0 268.6L622.0 268.6Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.2.1-m1 · 128K: 27.6 GB</title></path>
+<polyline points="132.0,280.1 256.0,278.8 380.0,274.8 504.0,268.8 628.0,259.6" fill="none" stroke="#c98500" stroke-width="2" stroke-linejoin="round"/>
+<path d="M132.0 274.1L138.0 285.1L126.0 285.1Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.3.0-m1.1 · 2K: 24.1 GB</title></path>
+<path d="M256.0 272.8L262.0 283.8L250.0 283.8Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.3.0-m1.1 · 8K: 24.3 GB</title></path>
+<path d="M380.0 268.8L386.0 279.8L374.0 279.8Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.3.0-m1.1 · 32K: 25.2 GB</title></path>
+<path d="M504.0 262.8L510.0 273.8L498.0 273.8Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.3.0-m1.1 · 64K: 26.5 GB</title></path>
+<path d="M628.0 253.60000000000002L634.0 264.6L622.0 264.6Z" fill="#c98500" stroke="#1a1a19" stroke-width="2"><title>Splash 1.3.0-m1.1 · 128K: 28.4 GB</title></path>
 <polyline points="132.0,285.7 256.0,287.2 380.0,265.7 504.0,236.8 628.0,217.7" fill="none" stroke="#a483e8" stroke-width="2" stroke-linejoin="round"/>
 <path d="M132.0 291.7L138.0 280.7L126.0 280.7Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 2K: 22.9 GB</title></path>
 <path d="M256.0 293.2L262.0 282.2L250.0 282.2Z" fill="#a483e8" stroke="#1a1a19" stroke-width="2"><title>TensorFold (bf16 KV) · 8K: 22.6 GB</title></path>
@@ -71,8 +71,7 @@
 <text x="640.0" y="143.7" fill="#ffffff" font-size="12" font-weight="600">52.7 GB</text><text x="640.0" y="157.7" fill="#c3c2b7" font-size="11">MTPLX upstream + env</text>
 <text x="640.0" y="173.7" fill="#ffffff" font-size="12" font-weight="600">52.4 GB</text><text x="640.0" y="187.7" fill="#c3c2b7" font-size="11">MTPLX upstream</text>
 <text x="640.0" y="203.7" fill="#ffffff" font-size="12" font-weight="600">48.0 GB</text><text x="640.0" y="217.7" fill="#c3c2b7" font-size="11">oMLX</text>
-<text x="640.0" y="233.7" fill="#ffffff" font-size="12" font-weight="600">43.5 GB</text><text x="640.0" y="247.7" fill="#c3c2b7" font-size="11">MTPLX M1 build</text>
+<text x="640.0" y="233.7" fill="#ffffff" font-size="12" font-weight="600">44.9 GB</text><text x="640.0" y="247.7" fill="#c3c2b7" font-size="11">MTPLX M1 fork (m1.1)</text>
 <text x="640.0" y="263.7" fill="#ffffff" font-size="12" font-weight="600">37.2 GB</text><text x="640.0" y="277.7" fill="#c3c2b7" font-size="11">TensorFold (bf16 KV)</text>
-<text x="640.0" y="293.7" fill="#ffffff" font-size="12" font-weight="600">27.6 GB</text><text x="640.0" y="307.7" fill="#c3c2b7" font-size="11">Splash 1.2.1-m1</text>
-<text x="20" y="452" fill="#c3c2b7" font-size="11">M1 build at 128K: v2.12.0-m1.2 (v2.12.2-m1 refused turn 2 for memory with other apps open)</text>
+<text x="640.0" y="293.7" fill="#ffffff" font-size="12" font-weight="600">28.4 GB</text><text x="640.0" y="307.7" fill="#c3c2b7" font-size="11">Splash 1.3.0-m1.1</text>
 </svg>

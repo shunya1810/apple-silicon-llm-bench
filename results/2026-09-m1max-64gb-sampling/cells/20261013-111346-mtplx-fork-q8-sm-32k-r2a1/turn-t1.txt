@@ -1,0 +1,7 @@
+The provided telemetry records exhibit highly structured, periodic patterns rather than random variation. Sensor values generally trend downward in increments of 5.7 per record, but this sequence resets abruptly every 35 records, creating a repeating cycle where values fluctuate between approximately 0.0 and 99.6. The status field follows a strict, deterministic five-state cycle: nominal, degraded, recovering, offline, and calibrating. This status pattern repeats identically every five consecutive records, independent of the sensor value magnitude. Furthermore, the zone identifiers alternate systematically between A and N prefixes, with the numeric suffix increasing by 17 per record within a 100-unit modular cycle.
+
+Three concrete observations from this dataset are:
+
+1.  **Cyclic Status Progression:** The status field strictly follows the sequence [nominal, degraded, recovering, offline, calibrating] for every block of five records, regardless of the sensor reading.
+2.  **Non-Monotonic Sensor Values:** Sensor values decrease by a constant step of 5.7 until reaching a low threshold (below 5.0), at which point they reset to a high value (approx. 95.0–99.0), creating a sawtooth wave pattern rather than a continuous decline.
+3.  **Deterministic Zone Rotation:** Zones follow a predictable rotation where the prefix alternates between A and N, and the number increments by 17 modulo 100, ensuring a consistent distribution across the zone grid.

@@ -61,16 +61,16 @@ the only per-phase measurement.
   boundary.
 - **The two MTPLX engines get the same command line** (`engines/mtplx-*.json`): same
   model, profile, depth, KV mode, context window and session-cache setting. Only
-  `PYTHONPATH` differs, which picks the code (the M1 build or upstream `1de2b1c`), and
+  `PYTHONPATH` differs, which picks the code (the M1 fork or upstream `1de2b1c`), and
   both run in the MTPLX app's Python runtime (MLX 0.32.2).
-- **The M1 build changes defaults on M1, and upstream exposes some of them.** Part of
-  the M1 build's lead is code upstream does not have (the M1 attention kernels, the
+- **The M1 fork changes defaults on M1, and upstream exposes some of them.** Part of
+  the M1 fork's lead is code upstream does not have (the M1 attention kernels, the
   session-bank fixes, prefill evaluated every four layers, the Japanese-aware FR-Spec
   list); part is defaults that upstream can reach with environment variables
   (context-copy off, fused projections, the FR-Spec draft head with upstream's
   64K code list, a 1 GiB MLX cache, two saved states per conversation, larger Metal
   command buffers). The `MTPLX upstream + env` column runs upstream with all of the
-  latter (`engines/mtplx-upstream-tuned.json`), so the gap between it and the M1 build
+  latter (`engines/mtplx-upstream-tuned.json`), so the gap between it and the M1 fork
   is the code alone.
 - **Every cell starts the engine fresh**, with its on-disk cache wiped, then sends a
   short warmup request (excluded) and a thermal canary.
@@ -79,13 +79,13 @@ the only per-phase measurement.
   fixed ~2K "canary" request measures decode speed; if it was more than 3% below
   that engine's best canary in the run, the machine rested 5 minutes and the cell
   was re-run once (the last attempt is used). 128K ran as one round in the order
-  upstream → oMLX → M1 build, which puts the M1 build last, on the warmest machine; it was a
+  upstream → oMLX → M1 fork, which puts the M1 fork last, on the warmest machine; it was a
   separate run, so its canaries had no reference and no cell was re-run (they were
   1.7–4.8% below the engines' best canaries of the 2K–64K run).
 
-## Re-run of the M1 build
+## Re-run of the M1 fork
 
-- The M1 build column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
+- The M1 fork column was re-measured on 2026-09-26 at `40b6113` (context-copy off by default
   on M1), with the same plans: 2K–64K in two rounds, then 128K once, running alone. The
   first measurement (`16751dc`) is kept in `rows.jsonl` under `mtplx-fork-16751dc`.
 - It was re-measured again the same evening at `4fe8067` (M1 memory defaults: MLX buffer
@@ -112,17 +112,17 @@ the only per-phase measurement.
 
 ## Same-session re-run (2026-09-29)
 
-- The M1 build (at its release tag `v2.12.0-m1`, `6be2b28`), upstream `1de2b1c` and
+- The M1 fork (at its release tag `v2.12.0-m1`, `6be2b28`), upstream `1de2b1c` and
   upstream + env ran in one session with the same plans (`plans/fair-day.json`: 2K–64K,
   two rounds, order reversed in the second; `plans/fair-night.json`: 128K once, in the
-  order upstream → upstream + env → M1 build, which puts the M1 build on the warmest
-  machine). Before, upstream had been measured on 2026-09-25/26 and the M1 build
+  order upstream → upstream + env → M1 fork, which puts the M1 fork on the warmest
+  machine). Before, upstream had been measured on 2026-09-25/26 and the M1 fork
   re-measured alone on later days.
 - Earlier rows stay in `rows.jsonl`: `mtplx-upstream-0925` (upstream, first run) and
-  `mtplx-fork-0cd2a73` (the M1 build's 2026-09-28 run), next to the older M1 build rounds.
+  `mtplx-fork-0cd2a73` (the M1 fork's 2026-09-28 run), next to the older M1 fork rounds.
 - **Command buffers left out of upstream + env.** The first upstream + env arm
   (`mtplx-upstream-tuned`) also set `MLX_MAX_MB_PER_BUFFER=1000` and
-  `MLX_MAX_OPS_PER_BUFFER=150`, the M1 build's command-buffer defaults. In the M1 build
+  `MLX_MAX_OPS_PER_BUFFER=150`, the M1 fork's command-buffer defaults. In the M1 fork
   those come with a prefill that evaluates every four layers (`MTPLX_PREFILL_LAYER_EVAL_EVERY`,
   code upstream does not have) to hold its peak; without it, upstream's peak wired memory
   rose 12–15 GB, its 32K–64K cold prefill slowed 12–16%, and its 128K turn 1 failed with a
@@ -132,12 +132,12 @@ the only per-phase measurement.
 - In the published sampled table, upstream + env is the same `-nobuf` arm
   (`plans/sampling-nobuf.json`, run after the others); the first arm's sampled rows stay
   in the raw data.
-- The 128K canaries of this run were 0.2% (M1 build), 2.4% (upstream) below and 1.1%
+- The 128K canaries of this run were 0.2% (M1 fork), 2.4% (upstream) below and 1.1%
   (upstream + env) above each engine's best 2K–64K canary; no cell needed a re-run.
 
-## Re-run of the M1 build at v2.12.0-m1.2 (2026-09-30)
+## Re-run of the M1 fork at v2.12.0-m1.2 (2026-09-30)
 
-- The M1 build's column is v2.12.0-m1.2 (larger Metal command buffers off by default on
+- The M1 fork's column is v2.12.0-m1.2 (larger Metal command buffers off by default on
   M1, plus an SSD prompt-cache fix this benchmark does not use), run alone with the same
   plans (`plans/fork-m12-*.json`, `run_fork_m12.sh`). Before the plans, a 2K probe cell had
   to show a canary of at least 29.9 tok/s (m1.2 on a cool, idle machine: 30.3–30.6); it
@@ -160,7 +160,7 @@ the only per-phase measurement.
   rounds and the engine-reported draft acceptance. Results are in
   `results/2026-09-m1max-64gb-sampling/` (`scripts/summarize_sampling.py`).
 
-## Splash M1 build
+## Splash M1 fork
 
 - Splash reads only its own packages (MLX affine 4-bit, group 64, or GGUF, prepared
   for its kernels, paired with a DFlash2 draft), so it runs `incoai/Qwen3.8-27B-Splash`
@@ -199,19 +199,39 @@ the only per-phase measurement.
 - Per-request rounds and accepted/drafted counts come from its server log line.
 - It ran last, in two rounds of its own (2K–64K) and one 128K run.
 
-## Splash 1.2.1-m1 and the M1 build v2.12.2-m1 (2026-10-08)
+## Splash 1.3.0-m1.1 and the M1 fork v2.12.2-m1.1 / m1.2 (2026-10-13)
+
+- Both re-measured together at their latest releases (`run_refresh_1013.sh`), interleaved,
+  with the same plans as 2026-10-08 (2K–64K two rounds, 128K once, the sampled scenario,
+  then 256K once each). Splash 1.3.0-m1.1 was installed beside 1.2.1-m1 (launcher
+  `splash-m1-130`); the M1 fork ran from a worktree at tag `v2.12.2-m1.1` with its native
+  extensions built by `scripts/build-m1-native-extensions.sh` (MLX 0.32.2). Earlier rows
+  were renamed `splash-m1-121` and `mtplx-fork-m1-2122` (backup of the rows file:
+  `rows.jsonl.bak-20261013`).
+- Canaries: the fork 31.0–32.2 tok/s, Splash 22.7–23.8 (its 1.2.1-m1 read 28.7–29.6; the
+  2K cells' decode stayed within 3%). Splash's round-1 64K cell and both sampled 64K
+  cells read more than 3% below the reference and were re-run once (the re-runs are used).
+- 256K: v2.12.2-m1.1 refused turn 1 with `insufficient_memory` (54.7 GiB projected against
+  its 48 GiB limit); the row is kept. A diagnostic run with `--allow-swap`
+  (`run_256k_allowswap.sh`, rows `mtplx-fork-allowswap`) finished without swap (swap use
+  stayed at 0.9 GB, logged each minute) at a 53.2 GB peak. Two intermediate commits that
+  were still refused at turn 1 or 2 are kept as `mtplx-fork-61af5233` and
+  `mtplx-fork-b56e472d`. The published 256K row is commit `ca059bfb` = `v2.12.2-m1.2`'s code
+  (`run_256k_m12b.sh`, renamed `mtplx-fork-m12`), run at its defaults.
+
+## Splash 1.2.1-m1 and the M1 fork v2.12.2-m1 (2026-10-08)
 
 - Both re-measured together at their latest releases (`run_refresh_1008.sh`), interleaved,
   with the same plans (2K–64K two rounds, 128K once, the sampled scenario, Splash 256K
   once). Splash 1.2.1-m1 was installed beside 1.1.0-m1 (launcher `splash-m1-121`); the
-  M1 build ran from a worktree at tag `v2.12.2-m1` with the MTPLX app's runtime (MLX 0.32.2).
+  M1 fork ran from a worktree at tag `v2.12.2-m1` with the MTPLX app's runtime (MLX 0.32.2).
   Earlier rows are kept as `splash-m1-110` and `mtplx-fork-m1.2`.
 - 2K smoke runs first: fork canary 30.7, Splash 28.9 tok/s. In the run the fork's 8-bit
   canaries read 30.3–30.9 and Splash's 28.7–29.6; Splash's round-1 64K cell was 3.1% below
   its best and was re-run once (the re-run is used).
 - At 128K v2.12.2-m1 refused turn 2 with `insufficient_memory` (its memory guard, from
   upstream 2.12.1/2.12.2, projected 0.5 GiB more than the 12.1 GiB the other apps left);
-  turn 3 did not run. The row is kept. `scripts/summarize.py` fills the M1 build's 128K
+  turn 3 did not run. The row is kept. `scripts/summarize.py` fills the M1 fork's 128K
   cell from the m1.2 run (`FILL`) and marks it in the tables and charts; the fork's 256K
   plan was not run.
 

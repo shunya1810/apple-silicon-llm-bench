@@ -1,0 +1,6 @@
+The dataset exhibits a highly structured, deterministic pattern where sensor values decrease linearly by 0.7 units per record, creating a continuous downward drift from a peak of 99.6 down to a floor of 0.0. This cyclic range resets every 14 records, causing the values to oscillate between high and low magnitudes across the 2,634 entries. The status field cycles sequentially through five states—nominal, degraded, recovering, offline, and calibrating—in a fixed order of five. Meanwhile, the zone identifier alternates strictly between 'A' and 'N' prefixes, with the numerical suffix cycling through a specific set of 19 zones in a repeating sequence. These patterns ensure that every combination of status and zone prefix repeats at precise intervals, creating a predictable grid of telemetry states.
+
+Three concrete observations are:
+1. Record 001316 is an anomaly containing a maintenance override message for zone Q42, which deviates from the standard telemetry format found in all other records.
+2. The sensor value for any given record index $i$ follows the formula $sensor = 99.6 - 0.7 \times (i \mod 14)$, confirming a strict arithmetic progression within each 14-record cycle.
+3. The status field is entirely determined by the record index modulo 5, ensuring a perfect rotation of system states independent of the sensor magnitude.

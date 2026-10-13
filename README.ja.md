@@ -5,28 +5,26 @@
 Mac で長いプロンプトを読ませて3ターン会話するとき、推論エンジンによって速さはどれだけ変わるのか。
 このリポジトリは、MacBook Pro（M1 Max、64 GB）の上で Qwen3.8-27B を複数の推論エンジンで動かし、同じ会話の速さを比べたベンチマークである。
 どのエンジンも投機的デコードと 8-bit の KV キャッシュを使い（TensorFold は 8-bit の KV が無いので bf16）、各エンジンの OpenAI 互換のストリーミング API を同じ方法で計測した。
-6つ目の列として、MTPLX upstream に M1 build の既定値を環境変数で与えたもの（upstream + env）を測り、M1 build の差のうちコードによる分と設定による分を分けた。
+6つ目の列として、MTPLX upstream に M1 fork の既定値を環境変数で与えたもの（upstream + env）を測り、M1 fork の差のうちコードによる分と設定による分を分けた。
 
 MTPLX の3つと oMLX は、**同じモデルファイル**を MTP（深さ 3）で動かす。
 Splash と TensorFold は専用のパッケージ（4bit、group size 64 の重みと DFlash2 の draft モデル）を読む。
 そのため Splash と TensorFold の列は、エンジンの違いに加えて、量子化と投機的デコードの方式の違いも含む。
 
-> **開示**：MTPLX M1 build は、このベンチの作者が管理している。
-> M1 build の列は公開したリリースのタグを upstream と同じコマンドラインで動かしたもので、以下の数値はすべて `rows.jsonl` から `scripts/summarize.py` で集計した。
+> **開示**：MTPLX M1 fork は、このベンチの作者が管理している。
+> M1 fork の列は公開したリリースのタグを upstream と同じコマンドラインで動かしたもので、以下の数値はすべて `rows.jsonl` から `scripts/summarize.py` で集計した。
 
 | エンジン | 版 | 備考 |
 |---|---|---|
-| **MTPLX M1 build** | [`v2.12.2-m1`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1)（`c1294c2`、[`shunya1810/MTPLX`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx)） | MTPLX を M1 系の長い文脈向けに調整した非公式版。このリリースから upstream 2.12.2 が土台。2026-10-08 に Splash 1.2.1-m1 と一緒に測った。**128K では、upstream 2.12.2 から入ったメモリガードが2ターン目を拒否した**（いつものアプリを開いたままで 0.5 GiB 不足）。そのため 128K のセルは 2026-09-30 の `v2.12.0-m1.2` の値を使い、† を付けた。256K の確認は `v2.12.0-m1.1`（SSD キャッシュの修正を除けば m1.2 と同じ）で測った。前の回：`mtplx-fork-m1.2`（2026-09-30）、`mtplx-fork-m1`（最初のリリース。decode は 3〜9% 速く、2K〜32K の prompt の読み込みは 2〜9% 遅かった。[理由](#m1-build-が-decode-より-prompt-の読み込みを優先する理由)）、`mtplx-fork-16751dc`、`-40b6113`、`-4fe8067`、`-bba1b7b`、`-0cd2a73` |
-| **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | 計測時点の `main`（2026-09-29 時点でも最新）。M1 build の土台。最初の計測（2026-09-25〜26）は生データに `mtplx-upstream-0925` として残した |
-| **MTPLX upstream + env** | upstream `1de2b1c` | 同じコードに、M1 build の既定値のうち upstream が環境変数で持つものをすべて与えた：`MTPLX_CONTEXT_COPY=0`、`MTPLX_FUSE_PROJ=gdn,attn`、`MTPLX_FRSPEC_DRAFT=1 MTPLX_FRSPEC_LEGACY=1 MTPLX_FRSPEC_VOCAB=builtin:qwen38-code-64k`、`MTPLX_MLX_CACHE_LIMIT=1G`、`MTPLX_SESSION_BANK_PER_SESSION_MAX_ENTRIES=2`（[エンジンの定義](engines/mtplx-upstream-tuned-nobuf.json)）。M1 build の Metal command buffer の拡大は入れていない（後述） |
+| **MTPLX M1 fork** | [`v2.12.2-m1.1`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.1)（`c121efb`、[`shunya1810/MTPLX`](https://github.com/shunya1810/MTPLX/tree/m1max-longctx)）。256K は [`v2.12.2-m1.2`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.2) | MTPLX を M1 系の長い文脈向けに調整した非公式版で、土台は upstream 2.12.2。m1.1 で Neural Engine を使う prefill と、decode のホストとの往復の削減が入った。2026-10-13 に Splash 1.3.0-m1.1 と一緒に測った。m1.1 のメモリガードが 256K の prompt を拒否したので、256K の確認は m1.2（同じコードに、M1 のメモリの見積もりと prefill の修正を足したもの）で測った（[詳細](#splash-130-m11-と-m1-fork-v2122-m11)）。前の回：`mtplx-fork-m1-2122`（v2.12.2-m1、2026-10-08）、`mtplx-fork-m1.2`（2026-09-30）、`mtplx-fork-m1`（最初のリリース。[decode が速かった理由](#m1-fork-が-decode-より-prompt-の読み込みを優先する理由)）、`mtplx-fork-16751dc`、`-40b6113`、`-4fe8067`、`-bba1b7b`、`-0cd2a73` |
+| **MTPLX upstream** | [`youssofal/MTPLX@1de2b1c`](https://github.com/youssofal/MTPLX/commit/1de2b1c049136ed117af0c6712baaadd81820b51) | 計測時点の `main`（2026-09-29 時点でも最新）。M1 fork の土台。最初の計測（2026-09-25〜26）は生データに `mtplx-upstream-0925` として残した |
+| **MTPLX upstream + env** | upstream `1de2b1c` | 同じコードに、M1 fork の既定値のうち upstream が環境変数で持つものをすべて与えた：`MTPLX_CONTEXT_COPY=0`、`MTPLX_FUSE_PROJ=gdn,attn`、`MTPLX_FRSPEC_DRAFT=1 MTPLX_FRSPEC_LEGACY=1 MTPLX_FRSPEC_VOCAB=builtin:qwen38-code-64k`、`MTPLX_MLX_CACHE_LIMIT=1G`、`MTPLX_SESSION_BANK_PER_SESSION_MAX_ENTRIES=2`（[エンジンの定義](engines/mtplx-upstream-tuned-nobuf.json)）。M1 fork の Metal command buffer の拡大は入れていない（後述） |
 | **oMLX** | [0.7.0](https://github.com/jundot/omlx/releases/tag/v0.7.0) | 計測時点の最新の正式版。2026-10-07 に単独で測った（後述）。2026-09-25〜26 の 0.6.4 の計測は、生データに `omlx-064` として残した（[変わった点](#omlx-070-と-064-の比較)） |
-| **Splash 1.2.1-m1** | [paperniuk/splash 1.2.1-m1](https://github.com/paperniuk/splash/releases/tag/1.2.1-m1) | [incoai/splash](https://github.com/incoai/splash) 1.2.1 を M1/M2 向けの kernel で動かすコミュニティ版。モデルは `incoai/Qwen3.8-27B-Splash`（4bit g64 と DFlash2 の draft）、KV は INT8。2026-10-08 に測った。2026-09-28〜29 の 1.1.0-m1 の計測は生データに `splash-m1-110` として残した（[変わった点](#splash-121-m1-と-m1-build-v2122-m1)）。さらに前：`splash-m1-102`、`splash-src` |
+| **Splash 1.3.0-m1.1** | [paperniuk/splash 1.3.0-m1.1](https://github.com/paperniuk/splash/releases/tag/1.3.0-m1.1) | [incoai/splash](https://github.com/incoai/splash) 1.3.0 を M1/M2 向けの kernel で動かすコミュニティ版で、Neural Engine を使う prefill が入った。モデルは `incoai/Qwen3.8-27B-Splash`（4bit g64 と DFlash2 の draft）、KV は INT8。2026-10-13 に測った（本家の Splash 1.3.1 には、まだ M1 版が無かった）。前の回：`splash-m1-121`（1.2.1-m1、2026-10-08、[変わった点](#splash-130-m11-と-m1-fork-v2122-m11)）、`splash-m1-110`、`splash-m1-102`、`splash-src` |
 | **TensorFold** | [0.3.5.1](https://github.com/ashhart/TensorFold/releases/tag/v0.3.5.1) | draft の受理を「本体のサンプルと一致したときだけ」にする Python/MLX のエンジン。モデルは `Vontra/Qwen3.8-27B-MLX-4bit`（4bit g64）と `z-lab/Qwen3.8-27B-DFlash2` の draft（読み込み時に 4bit）、KV は bf16（8-bit の設定は無い）。M1 Max で起動できる最初の版（2026-09-28） |
 
 2K〜64K は各2回測り、中央値を載せた。128K は1回である。
-MTPLX upstream と upstream + env は 2026-09-29 に同じセッションで交互に測った。M1 build v2.12.2-m1 と Splash 1.2.1-m1 は 2026-10-08 に同じセッションで交互に測った。oMLX 0.7.0 は 2026-10-07 に単独で、TensorFold は別のセッションで、同じ方法で測った。後のセッションでは、始める前に M1 build の 2K でマシンが同じ状態であること（canary 30.3〜31.1 tok/s）を確かめた。
-
-† M1 build の 128K は v2.12.0-m1.2（2026-09-30）の値である。v2.12.2-m1 はメモリ不足として2ターン目を拒否した（上記）。
+MTPLX upstream と upstream + env は 2026-09-29 に同じセッションで交互に測った。M1 fork v2.12.2-m1.1 と Splash 1.3.0-m1.1 は 2026-10-13 に同じセッションで交互に測った。oMLX 0.7.0 は 2026-10-07 に単独で、TensorFold は別のセッションで、同じ方法で測った。後のセッションでは、始める前に M1 fork の 2K でマシンが同じ状態であること（canary 30.3〜31.9 tok/s）を確かめた。
 
 ## 主な結果（8-bit KV）
 
@@ -34,51 +32,51 @@ MTPLX upstream と upstream + env は 2026-09-29 に同じセッションで交�
 
 | エンジン | 2K | 8K | 32K | 64K | 128K |
 |---|---|---|---|---|---|
-| MTPLX M1 build | **35 秒** | **79 秒** | **4.6 分** | **9.9 分** | **24.9 分** † |
+| MTPLX M1 fork (m1.1) | **33 秒** | **61 秒** | **3.3 分** | **7.3 分** | **18.4 分** |
 | MTPLX upstream | 42 秒 | 86 秒 | 5.0 分 | 11.3 分 | 30.6 分 |
 | MTPLX upstream + env | 38 秒 | 84 秒 | 4.9 分 | 11.3 分 | 32.2 分 |
 | oMLX | 61 秒 | 95 秒 | 5.1 分 | 10.9 分 | 27.0 分 |
-| Splash 1.2.1-m1 | 38 秒 | 85 秒 | 5.4 分 | 12.6 分 | 34.3 分 |
+| Splash 1.3.0-m1.1 | 35 秒 | 68 秒 | 3.8 分 | 8.7 分 | 23.1 分 |
 | TensorFold（bf16 KV） | 47 秒 | 106 秒 | 6.1 分 | 13.1 分 | 89.6 分 |
 
 **decode**（3ターンの平均、tok/s）：
 
 | エンジン | 2K | 8K | 32K | 64K | 128K |
 |---|---|---|---|---|---|
-| MTPLX M1 build | 29.6 | 29.2 | **25.6** | **23.1** | **19.0** † |
+| MTPLX M1 fork (m1.1) | 29.4 | 29.2 | **28.1** | **25.5** | **19.8** |
 | MTPLX upstream | 23.6 | 22.5 | 14.0 | 8.7 | 5.0 |
 | MTPLX upstream + env | 27.2 | 25.8 | 15.3 | 7.8 | 4.6 |
 | oMLX | 21.6 | 20.2 | 14.3 | 10.6 | 7.1 |
-| Splash 1.2.1-m1 | **34.5** | **32.1** | 25.5 | 21.3 | 15.0 |
+| Splash 1.3.0-m1.1 | **33.6** | **29.6** | 25.4 | 21.4 | 14.3 |
 | TensorFold（bf16 KV） | 27.7 | 25.5 | 17.0 | 11.3 | 6.4 |
 
-- **会話全体の時間は、どの長さでも M1 build が最も短い**：Splash より 2K〜8K で 7%、32K で 16%、64K で 22%、128K で 27% 短い。
-  prompt の読み込みと続きのターンの開始が速く、64K 以上では decode も速いからである。
-  decode は 2K〜8K で Splash が最も速く（M1 build より 16% と 10% 速い）、32K でほぼ同じ、64K では M1 build が 8%、128K では 27% 速い。
-  読む量より生成する量がずっと多いターン（チャットや、ファイル全体のコード生成）では、短い文脈での Splash の decode の速さが効く。
-- **Splash 1.2.1-m1 は 32K 以上で 1.1.0-m1 より遅い**：会話全体の時間は 32K で 7%、64K で 9%、128K で 17%（34.3 分と 29.4 分）長くなった。最初の prompt の読み込みは 7〜17%、decode は 6〜20% 遅い。2K〜8K では差は 2% 以内だった（2K の decode は 4% 速い）。
-  原因は調べていない。1.2.1-m1 は既定で prefill を約 2 秒ずつの GPU コマンドに分ける（[詳細](#splash-121-m1-と-m1-build-v2122-m1)）。
-- **サンプリング**（temperature 1.0、top-p 0.95、top-k 20、最大 512 トークン）：2K / 32K / 64K で M1 build が 29.2 / 25.5 / 22.8 tok/s、Splash が 32.4 / 23.8 / 20.1 だった。2K で Splash が 11% 速く、32K で M1 build が 7%、64K で 13% 速い。upstream は 23.2 / 14.2 / 8.9 だった（[詳細](#サンプリングtemperature-10)）。
-- **M1 build の設定を upstream に与えた効果**：upstream + env は upstream より 2K〜8K で 15%、32K で 9% 速い。
+- **会話全体の時間は、どの長さでも M1 fork が最も短い**：Splash より 2K で 5%、8K で 10%、32K で 13%、64K で 15%、128K で 20% 短い。
+  どちらのエンジンも、今回から Neural Engine を使って prompt を読む。M1 fork は 8K 以上の prompt を 7〜20% 速く読み、続きのターンを 3〜5 倍早く始め、32K 以上では decode も速い。
+  decode は 2K で Splash が 14% 速く、8K でほぼ同じ、32K では M1 fork が 11%、64K で 19%、128K で 38% 速い。
+  読む量より生成する量がずっと多いターン（チャットや、ファイル全体のコード生成）では、2K での Splash の decode の速さが効く。
+- **どちらの新しいリリースも、prompt の読み込みが大きく速くなった**（[詳細](#splash-130-m11-と-m1-fork-v2122-m11)）：M1 fork の会話全体の時間は、前のリリースより 2K で 6%、8K〜128K で 23〜28% 短い（最初の prompt の読み込みは 8K 以上で 1.36〜1.49 倍、2K で 1.23 倍速く、decode は 32K〜64K で 10% 速い）。
+  Splash 1.3.0-m1.1 は 1.2.1-m1 より 2K で 8%、8K〜128K で 20〜33% 短い（prompt の読み込みは 1.46〜1.51 倍速い。decode の差は、8K の −8% と 128K の −5% を除いて 3% 以内）。
+- **サンプリング**（temperature 1.0、top-p 0.95、top-k 20、最大 512 トークン）：2K / 32K / 64K で M1 fork が 31.6 / 28.3 / 23.9 tok/s、Splash が 31.5 / 25.8 / 18.5 だった。2K ではほぼ同じで、32K で M1 fork が 10%、64K で 29% 速い。upstream は 23.2 / 14.2 / 8.9 だった（[詳細](#サンプリングtemperature-10)）。
+- **M1 fork の設定を upstream に与えた効果**：upstream + env は upstream より 2K〜8K で 15%、32K で 9% 速い。
   一方で 64K では 10%、128K では 8% 遅い（context-copy の draft を切ると、upstream の重い長文脈のラウンドが増え、得より損が大きい）。
-  M1 build と upstream + env の差（2K で 9%、32K で 1.7 倍、64K で 3.0 倍、128K で 4.2 倍）は、したがって M1 build のコードによる。
+  M1 fork と upstream + env の差（2K で 9%、32K で 1.7 倍、64K で 3.0 倍、128K で 4.2 倍）は、したがって M1 fork のコードによる。
   中身は、verify・draft・prefill の M1 向け attention の kernel と、セッションバンクの修正である（[変更内容](https://github.com/shunya1810/MTPLX/blob/m1max-longctx/docs/m1max-longctx/CHANGES.ja.md)）。
-- **1ターン目（最初から読む prefill）**：M1 build は 2K〜32K を upstream との差 3% 以内（11.1 秒、55 秒、4.1 分）で読み、64K と 128K では全エンジンで最も速い。64K は 9.3 分（upstream + env 9.7、oMLX 9.7、upstream 9.9、TensorFold 11.9、Splash 11.9）、128K は 24.2 分 †（oMLX 25.1、upstream 28.1、TensorFold 29.2、upstream + env 29.5、Splash 33.3）だった。
-- **2〜3ターン目の最初のトークンまでの時間（TTFT）**：128K では M1 build が **2.1 秒** †、upstream が 3.5 秒、upstream + env が 4.2 秒、Splash が 7.8 秒と 7.4 秒（約 300 トークンを読み直す）、oMLX が 10.9 秒と 7.8 秒、TensorFold が 29 分（後述）だった。
+- **1ターン目（最初から読む prefill）**：2K は Splash が最も速い（8.3 秒、M1 fork は 9.0 秒）。8K からは M1 fork が最も速く、8K / 32K / 64K / 128K で 36 秒、2.8 分、6.9 分、17.8 分だった（Splash は 39 秒、3.2 分、8.0 分、22.1 分。upstream は 53 秒、4.0 分、9.9 分、28.1 分。oMLX の 128K は 25.1 分）。
+- **2〜3ターン目の最初のトークンまでの時間（TTFT）**：128K では M1 fork が **1.8 秒**、upstream が 3.5 秒、upstream + env が 4.2 秒、Splash が 6.4 秒と 6.2 秒（約 300 トークンを読み直す）、oMLX が 10.9 秒と 7.8 秒、TensorFold が 29 分（後述）だった。
   oMLX はプレフィックスキャッシュを 4,096 トークン単位で SSD に保存する。0.7.0 は1ターン目の prompt の末尾も保存するので、2ターン目は新しい約 300 トークンだけを読む。
   3ターン目は最後のブロックの境界から再開し、最大で約 4K トークンを読み直す（0.6.4 は2ターン目と3ターン目の両方でそうなり、1.6 分と 7.9 秒だった）。
-- **メモリ**：Splash が最も少なく、どの長さでも wired が 23〜28 GB だった。
-  最大値は M1 build が 31〜44 GB、upstream が 34〜52 GB、upstream + env が 30〜53 GB、oMLX が 30〜48 GB だった（システム全体の wired の最大値。Splash は重みの持ち方が違うので、比べるときは注意が要る）。
-- **command buffer の設定は upstream には効かない**：MLX の Metal command buffer を 150 処理・1,000 MB に広げる設定（最初の M1 build の既定値）を upstream に与えると、最大メモリが 12〜15 GB 増え、32K〜64K の最初の prefill が 12〜16% 遅くなり、128K では GPU のメモリが足りずに失敗した。decode は変わらなかった。その行は生データに `mtplx-upstream-tuned` として残した。
-- **TensorFold 0.3.5.1（bf16 KV）**：decode は 2K〜8K で M1 build より 6〜13% 遅く、128K では M1 build の3分の1だった（TensorFold 1.0.1 が出ているが、測り直していない）。
+- **メモリ**：Splash が最も少なく、どの長さでも wired が 24〜28 GB だった。
+  最大値は M1 fork が 32〜45 GB（Neural Engine の prefill で v2.12.2-m1 より 1〜2 GB 多い）、upstream が 34〜52 GB、upstream + env が 30〜53 GB、oMLX が 30〜48 GB だった（システム全体の wired の最大値。Splash は重みの持ち方が違うので、比べるときは注意が要る）。
+- **command buffer の設定は upstream には効かない**：MLX の Metal command buffer を 150 処理・1,000 MB に広げる設定（最初の M1 fork の既定値）を upstream に与えると、最大メモリが 12〜15 GB 増え、32K〜64K の最初の prefill が 12〜16% 遅くなり、128K では GPU のメモリが足りずに失敗した。decode は変わらなかった。その行は生データに `mtplx-upstream-tuned` として残した。
+- **TensorFold 0.3.5.1（bf16 KV）**：decode は 2K〜8K で M1 fork より 6〜13% 遅く、128K では M1 fork の3分の1だった（TensorFold 1.0.1 が出ているが、測り直していない）。
   128K では、既定のプロンプトキャッシュ（RAM の8分の1、8 GiB）に会話が入らず、2ターン目と3ターン目で 131K トークンをすべて読み直し、3ターン全体で 89.6 分かかった。`--prompt-cache-gib` を大きくすれば避けられる可能性があるが、このベンチはすべてのエンジンを既定値で測っている。
   draft のトークンは、本体が自分でサンプルしたトークンと一致したときだけ受理する。temperature 0 では問題ないが、サンプリングでは受理が減る。
 - **oMLX 0.7.0**（0.6.4 を置き換えた）：会話全体の時間が 9〜24% 短くなった。おもに、2ターン目が1ターン目の prompt 全体を使えるようになったためである。128K では Splash と upstream より先に終わるようになった（[詳細](#omlx-070-と-064-の比較)）。
-- **256K（3エンジン、各1回）**：prompt の読み込みは M1 build（m1.1）が 67.9 分、oMLX が 69.8 分、Splash 1.2.1-m1 が 100.6 分、decode はそれぞれ 14.5、4.1、9.5 tok/s、続きのターンの TTFT は 3.6 秒、13.5〜19.4 秒、12.6〜13.4 秒だった。メモリは Splash が 31.8 GB、M1 build が 51.8 GB、oMLX が 57.3 GB だった。oMLX はメモリガードを `aggressive` に上げたときだけ動き、既定では prompt を拒否する（[詳細](#256k-の確認)）。
-- **短いプロンプト、推論あり**（Splash の投稿のベンチマーク）：Splash の decode が 29% 速く、1トークンあたりのエネルギーは約3分の2だった。44K の prompt の読み込みは M1 build が 20% 速かった（[詳細](#短いプロンプトsplash-の投稿と同じ条件)）。
+- **256K（3エンジン、各1回）**：prompt の読み込みは M1 fork（m1.2）が 58.5 分、Splash 1.3.0-m1.1 が 67.1 分、oMLX が 69.8 分、decode はそれぞれ 14.2、10.2、4.1 tok/s、続きのターンの TTFT は 2.9 秒、9.8〜10.3 秒、13.5〜19.4 秒だった。メモリは Splash が 32.7 GB、M1 fork が 50.1 GB、oMLX が 57.3 GB だった。m1.1 はメモリガードがこの prompt を拒否した（m1.2 で M1 の見積もりを直した）。oMLX はメモリガードを `aggressive` に上げたときだけ動く（[詳細](#256k-の確認)）。
+- **短いプロンプト、推論あり**（Splash の投稿のベンチマーク）：Splash の decode が 29% 速く、1トークンあたりのエネルギーは約3分の2だった。44K の prompt の読み込みは M1 fork が 20% 速かった（[詳細](#短いプロンプトsplash-の投稿と同じ条件)）。
 - **出力の確認**：3ターン目では、文脈の中央に1行だけ埋め込んだ特別な行（needle）をそのまま引用させた。完了したすべての回で、すべてのエンジンが正しく答えた。
 
-### M1 build が decode より prompt の読み込みを優先する理由
+### M1 fork が decode より prompt の読み込みを優先する理由
 
 最初のリリース（`v2.12.0-m1`）は、M1 で MLX の Metal command buffer の上限を上げていた。
 このベンチでは decode が 3〜9% 速くなる一方、2K〜32K の最初の prompt の読み込みがアイドル時で 2〜9% 遅くなっていた（別の試験では、マシンの使用中や電力不足のときに 13〜21% 遅くなった）。片方だけを得る設定は見つからなかった。
@@ -90,39 +88,39 @@ m1 の行（`mtplx-fork-m1`）は、2K / 8K / 32K / 64K / 128K で decode が 31
 ## decode の速さ
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=1008">
-  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-dark.svg?v=1013">
+  <img alt="プロンプト長ごとの decode tok/s（5エンジン）" src="charts/decode-light.svg?v=1013">
 </picture>
 
 
-256K の確認をした3エンジンについて、256K まで伸ばしたもの（M1 build の 256K は v2.12.0-m1.1 で、SSD キャッシュの修正を除けば m1.2 と同じ。oMLX の 256K はメモリガードを `aggressive` にして測った）：
+256K の確認をした3エンジンについて、256K まで伸ばしたもの（M1 fork の 256K は v2.12.2-m1.2。m1.1 はメモリガードが prompt を拒否した。oMLX の 256K はメモリガードを `aggressive` にして測った）：
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-256k-dark.svg?v=1008">
-  <img alt="2K から 256K までの decode tok/s（MTPLX M1 build、MTPLX upstream、oMLX、Splash 1.2.1-m1）" src="charts/decode-256k-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/decode-256k-dark.svg?v=1013">
+  <img alt="2K から 256K までの decode tok/s（MTPLX M1 fork、MTPLX upstream、oMLX、Splash 1.3.0-m1.1）" src="charts/decode-256k-light.svg?v=1013">
 </picture>
 
 ## 2〜3ターン目の TTFT
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=1008">
-  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/ttft-followup-dark.svg?v=1013">
+  <img alt="2〜3ターン目の TTFT（対数目盛り、5エンジン）" src="charts/ttft-followup-light.svg?v=1013">
 </picture>
 
 ## 3ターンの合計所要時間
 
-最後のパネルは 256K の確認である（各1回。M1 build は v2.12.0-m1.1、oMLX はメモリガードを `aggressive` にして測った）。
+最後のパネルは 256K の確認である（各1回。M1 fork は v2.12.2-m1.2、oMLX はメモリガードを `aggressive` にして測った）。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=1008">
-  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/conversation-dark.svg?v=1013">
+  <img alt="エンジンとプロンプト長ごとの3ターンの所要時間" src="charts/conversation-light.svg?v=1013">
 </picture>
 
 ## 最大メモリ使用量
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=1008">
-  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/memory-dark.svg?v=1013">
+  <img alt="プロンプト長ごとの wired メモリの最大値" src="charts/memory-light.svg?v=1013">
 </picture>
 
 ## 計測値の表
@@ -134,82 +132,81 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 
 | 文脈 | エンジン | T1 TTFT（cold） | T2 TTFT | T3 TTFT | decode T1 / T2 / T3（tok/s） | 3ターンの合計 | cache T2 / T3 | 最大 wired | needle |
 |---|---|---|---|---|---|---|---|---|---|
-| 2K | MTPLX M1 build | 11.1 s | 0.54 s | 0.52 s | 29.3 / 29.9 / 29.8 | 35.3 s | 1,936 / 2,243 | 31.0 GB | 2/2 |
+| 2K | MTPLX M1 fork (m1.1) | 9.02 s | 0.55 s | 0.53 s | 29.0 / 31.9 / 27.3 | 33.3 s | 1,936 / 2,243 | 31.6 GB | 2/2 |
 | 2K | MTPLX upstream | 11.4 s | 0.63 s | 0.64 s | 25.0 / 22.8 / 23.1 | 41.8 s | 1,936 / 2,243 | 34.0 GB | 2/2 |
 | 2K | MTPLX upstream + env | 11.4 s | 0.64 s | 0.63 s | 24.5 / 31.6 / 25.4 | 37.5 s | 1,928 / 2,234 | 29.8 GB | 2/2 |
 | 2K | oMLX | 11.4 s | 13.6 s | 4.69 s | 21.2 / 22.9 / 20.8 | 1.0 min | 0 / 1,673 | 29.8 GB | 2/2 |
-| 2K | Splash 1.2.1-m1 | 12.1 s | 2.73 s | 2.75 s | 30.0 / 40.4 / 33.1 | 38.0 s | 1,664 / 1,952 | 23.2 GB | 2/2 |
+| 2K | Splash 1.3.0-m1.1 | 8.34 s | 2.72 s | 2.64 s | 28.9 / 40.7 / 31.3 | 34.8 s | 1,664 / 1,952 | 24.1 GB | 2/2 |
 | 2K | TensorFold (bf16 KV) | 15.7 s | 3.47 s | 3.48 s | 26.1 / 28.9 / 28.0 | 47.0 s | 1,673 / 1,980 | 22.9 GB | 2/2 |
-| 8K | MTPLX M1 build | 54.5 s | 0.59 s | 0.60 s | 29.0 / 30.9 / 27.7 | 1.3 min | 8,089 / 8,396 | 31.3 GB | 2/2 |
+| 8K | MTPLX M1 fork (m1.1) | 36.5 s | 0.59 s | 0.58 s | 28.6 / 30.8 / 28.3 | 1.0 min | 8,089 / 8,396 | 33.2 GB | 2/2 |
 | 8K | MTPLX upstream | 53.2 s | 0.74 s | 0.77 s | 22.9 / 23.0 / 21.5 | 1.4 min | 8,089 / 8,396 | 35.5 GB | 2/2 |
 | 8K | MTPLX upstream + env | 55.5 s | 0.78 s | 0.79 s | 25.1 / 27.2 / 25.2 | 1.4 min | 8,089 / 8,396 | 31.3 GB | 2/2 |
 | 8K | oMLX | 54.5 s | 2.95 s | 2.58 s | 20.7 / 21.9 / 17.8 | 1.6 min | 7,826 / 8,192 | 33.6 GB | 2/2 |
-| 8K | Splash 1.2.1-m1 | 57.9 s | 2.96 s | 2.80 s | 30.3 / 36.8 / 29.0 | 1.4 min | 7,808 / 8,128 | 23.5 GB | 2/2 |
+| 8K | Splash 1.3.0-m1.1 | 38.9 s | 2.83 s | 2.74 s | 28.1 / 31.7 / 29.0 | 1.1 min | 7,808 / 8,128 | 24.3 GB | 2/2 |
 | 8K | TensorFold (bf16 KV) | 1.2 min | 3.68 s | 3.69 s | 24.6 / 26.0 / 26.0 | 1.8 min | 7,826 / 8,132 | 22.6 GB | 2/2 |
-| 32K | MTPLX M1 build | 4.1 min | 0.86 s | 0.86 s | 25.9 / 25.4 / 25.3 | 4.6 min | 32,665 / 32,972 | 34.0 GB | 2/2 |
+| 32K | MTPLX M1 fork (m1.1) | 2.8 min | 0.81 s | 0.80 s | 27.5 / 28.9 / 27.9 | 3.3 min | 32,665 / 32,972 | 36.2 GB | 2/2 |
 | 32K | MTPLX upstream | 4.0 min | 1.32 s | 1.34 s | 17.3 / 12.7 / 12.0 | 5.0 min | 32,665 / 32,972 | 42.5 GB | 2/2 |
 | 32K | MTPLX upstream + env | 4.0 min | 1.31 s | 1.34 s | 19.8 / 14.5 / 11.6 | 4.9 min | 32,665 / 32,972 | 38.1 GB | 2/2 |
 | 32K | oMLX | 4.2 min | 4.73 s | 3.54 s | 14.4 / 14.1 / 14.3 | 5.1 min | 32,402 / 32,768 | 36.3 GB | 2/2 |
-| 32K | Splash 1.2.1-m1 | 4.8 min | 3.95 s | 3.66 s | 24.2 / 29.4 / 22.8 | 5.4 min | 32,384 / 32,704 | 24.3 GB | 2/2 |
+| 32K | Splash 1.3.0-m1.1 | 3.2 min | 3.56 s | 3.48 s | 24.3 / 28.5 / 23.2 | 3.8 min | 32,384 / 32,704 | 25.2 GB | 2/2 |
 | 32K | TensorFold (bf16 KV) | 5.3 min | 4.31 s | 4.31 s | 15.4 / 18.9 / 16.5 | 6.1 min | 32,402 / 32,709 | 27.1 GB | 2/2 |
-| 64K | MTPLX M1 build | 9.3 min | 1.21 s | 1.21 s | 22.8 / 23.9 / 22.6 | 9.9 min | 65,419 / 65,726 | 37.5 GB | 2/2 |
+| 64K | MTPLX M1 fork (m1.1) | 6.9 min | 1.12 s | 1.13 s | 24.4 / 28.7 / 23.4 | 7.3 min | 65,419 / 65,726 | 40.1 GB | 2/2 |
 | 64K | MTPLX upstream | 9.9 min | 2.07 s | 2.09 s | 8.8 / 8.8 / 8.4 | 11.3 min | 65,419 / 65,726 | 48.6 GB | 2/2 |
 | 64K | MTPLX upstream + env | 9.7 min | 2.09 s | 2.12 s | 8.2 / 6.9 / 8.2 | 11.3 min | 65,419 / 65,726 | 44.5 GB | 2/2 |
 | 64K | oMLX | 9.7 min | 6.77 s | 4.99 s | 10.6 / 11.0 / 10.1 | 10.9 min | 65,156 / 65,536 | 41.3 GB | 2/2 |
-| 64K | Splash 1.2.1-m1 | 11.9 min | 4.72 s | 5.21 s | 19.2 / 26.9 / 17.9 | 12.6 min | 65,152 / 65,440 | 25.4 GB | 2/2 |
+| 64K | Splash 1.3.0-m1.1 | 8.0 min | 4.27 s | 4.50 s | 19.2 / 26.4 / 18.8 | 8.7 min | 65,152 / 65,440 | 26.5 GB | 2/2 |
 | 64K | TensorFold (bf16 KV) | 11.9 min | 5.25 s | 5.19 s | 10.8 / 13.1 / 10.0 | 13.1 min | 65,156 / 65,463 | 33.2 GB | 2/2 |
-| 128K | MTPLX M1 build (m1.2) | 24.2 min | 2.11 s | 2.10 s | 18.4 / 20.3 / 18.5 | 24.9 min | 130,969 / 131,276 | 43.5 GB | 1/1 |
+| 128K | MTPLX M1 fork (m1.1) | 17.8 min | 1.83 s | 1.83 s | 18.3 / 22.1 / 18.9 | 18.4 min | 130,969 / 131,276 | 44.9 GB | 1/1 |
 | 128K | MTPLX upstream | 28.1 min | 3.53 s | 3.50 s | 4.7 / 5.1 / 5.0 | 30.6 min | 130,969 / 131,276 | 52.4 GB | 1/1 |
 | 128K | MTPLX upstream + env | 29.5 min | 4.19 s | 4.16 s | 4.4 / 4.9 / 4.5 | 32.2 min | 130,969 / 131,276 | 52.7 GB | 1/1 |
 | 128K | oMLX | 25.1 min | 10.9 s | 7.84 s | 7.3 / 7.4 / 6.6 | 27.0 min | 130,706 / 131,072 | 48.0 GB | 1/1 |
-| 128K | Splash 1.2.1-m1 | 33.3 min | 7.83 s | 7.36 s | 13.5 / 17.4 / 14.0 | 34.3 min | 130,688 / 131,008 | 27.6 GB | 1/1 |
+| 128K | Splash 1.3.0-m1.1 | 22.1 min | 6.42 s | 6.19 s | 12.9 / 17.0 / 13.0 | 23.1 min | 130,688 / 131,008 | 28.4 GB | 1/1 |
 | 128K | TensorFold (bf16 KV) | 29.2 min | 29.3 min | 29.4 min | 6.3 / 6.5 / 6.3 | 89.6 min | 0 / 0 | 37.2 GB | 1/1 |
 
 **2K：fp16 KV と 8-bit KV**（decode tok/s、ターン1〜3の平均）
 
 | エンジン | fp16 KV | 8-bit KV | 変化 |
 |---|---|---|---|
-| MTPLX M1 build | 28.3 | 29.6 | +4.6% |
+| MTPLX M1 fork (m1.1) | 29.1 | 29.4 | +1.2% |
 | MTPLX upstream | 24.8 | 23.6 | -5.0% |
 | MTPLX upstream + env | 28.1 | 27.2 | -3.3% |
 | oMLX | 23.4 | 21.6 | -7.4% |
-| Splash 1.2.1-m1 | 33.5 | 34.5 | +2.8% |
-
+| Splash 1.3.0-m1.1 | 33.5 | 33.6 | +0.5% |
 生データは [`results/2026-09-m1max-64gb/rows.jsonl`](results/2026-09-m1max-64gb/rows.jsonl)、ターンごとの CSV は [`summary.csv`](results/2026-09-m1max-64gb/summary.csv)、計測環境は [`environment.json`](results/2026-09-m1max-64gb/environment.json) にある。
 各ターンの生成テキストは `results/2026-09-m1max-64gb/cells/*/` に置いた。
 
-## Splash 1.2.1-m1 と M1 build v2.12.2-m1
+## Splash 1.3.0-m1.1 と M1 fork v2.12.2-m1.1
 
-2つは 2026-10-08 に同じ計画で交互に測った。前のリリースは生データに残した（`splash-m1-110` は 2026-09-28〜29、`mtplx-fork-m1.2` は 2026-09-30）。各セルは 旧 → 新 の順である。
+2つは 2026-10-13 に、前のリリース（2026-10-08）と同じ計画で交互に測った。前のリリースは生データに残した（`splash-m1-121`、`mtplx-fork-m1-2122`）。
+どちらのリリースも、Neural Engine（ANE）を使う prefill を入れた。各層の MLP の一部を ANE で計算し、残りを GPU が同時に計算する。各セルは 旧 → 新 の順である。
 
-**Splash 1.1.0-m1 → 1.2.1-m1**
+**Splash 1.2.1-m1 → 1.3.0-m1.1**
 
 | | 2K | 8K | 32K | 64K | 128K | 256K |
 |---|---|---|---|---|---|---|
-| 3ターンの合計 | 37.8 → 38.0 秒 | 83.7 → 85.1 秒 | 5.1 → 5.4 分 | 11.5 → 12.6 分 | 29.4 → 34.3 分 | 88.5 → 102.3 分 |
-| T1 TTFT（cold） | 12.0 → 12.1 秒 | 56.8 → 57.9 秒 | 4.5 → 4.8 分 | 10.9 → 11.9 分 | 28.5 → 33.3 分 | 87.3 → 100.6 分 |
-| decode（ターンの平均、tok/s） | 33.1 → 34.5 | 32.5 → 32.1 | 27.1 → 25.5 | 24.1 → 21.3 | 18.7 → 15.0 | 12.9 → 9.5 |
-| 最大 wired | 21.9 → 23.2 GB | 22.1 → 23.5 GB | 22.9 → 24.3 GB | 24.1 → 25.4 GB | 26.2 → 27.6 GB | 30.4 → 31.8 GB |
+| 3ターンの合計 | 38.0 → 34.8 秒 | 85.1 → 68.0 秒 | 5.4 → 3.8 分 | 12.6 → 8.7 分 | 34.3 → 23.1 分 | 102.3 → 68.6 分 |
+| T1 TTFT（cold） | 12.1 → 8.3 秒 | 57.9 → 38.9 秒 | 4.8 → 3.2 分 | 11.9 → 8.0 分 | 33.3 → 22.1 分 | 100.6 → 67.1 分 |
+| decode（ターンの平均、tok/s） | 34.5 → 33.6 | 32.1 → 29.6 | 25.5 → 25.4 | 21.3 → 21.4 | 15.0 → 14.3 | 9.5 → 10.2 |
+| 最大 wired | 23.2 → 24.1 GB | 23.5 → 24.3 GB | 24.3 → 25.2 GB | 25.4 → 26.5 GB | 27.6 → 28.4 GB | 31.8 → 32.7 GB |
 
-- 8K までは2つのリリースの差は 2% 以内だった（2K の decode は 4% 速い）。32K 以上では 1.2.1-m1 のほうが遅く、長いほど差が大きい。最初の prompt の読み込みは 7%（32K）から 17%（128K）、decode は 6% から 27% 遅く、会話全体は 7〜17% 長くなった。
-- 1.2.1-m1 のリリースノートは、8K と 32K の最初の prompt の処理が速くなったと書いている（137.6 と 119.6 tok/s、1.1.0-m1 は 134 と 116）。ここでは 32K を 1.2.1-m1 が 112 tok/s、1.1.0-m1 が 119 tok/s で読んだ。
-  1.2.1-m1 は既定で prefill を約 2 秒ずつの GPU コマンドに分ける（`--prefill-mode full` で upstream と同じになる）。これと長い文脈での decode の低下の原因は調べていない。2K の canary は夜を通して 28.7〜29.6 tok/s だった。
-- 生成テキストは、ほとんどのターンで 1.1.0-m1 と違う（同じだったのは 21 のうち 5）。
+- 最初の prompt の読み込みは、どの長さでも 1.46〜1.51 倍速くなり、会話全体は 8%（2K）から 33%（128K）短くなった。decode の差は、8K（−8%）と 128K（−5%）を除いて 3% 以内だった。
+- 2K の canary はセッションを通して 22.7〜23.8 tok/s で、1.2.1-m1 の 28.7〜29.6 より低かった（canary は 1.9K トークンを最初から読む1ターンだけ。2K のセルの decode の差は 3% 以内）。Splash の3つのセル（1回目の 64K と、サンプリングの 64K の2回）は canary の基準より 3% 以上低く、1回測り直した。測り直した値を使っている。
 
-**M1 build v2.12.0-m1.2 → v2.12.2-m1**（2K〜64K。128K では v2.12.2-m1 が2ターン目を拒否した。後述）
+**M1 fork v2.12.2-m1 → v2.12.2-m1.1**（128K は v2.12.2-m1 が2ターン目を拒否したので、旧は v2.12.0-m1.2 の値）
 
-| | 2K | 8K | 32K | 64K |
-|---|---|---|---|---|
-| 3ターンの合計 | 36.0 → 35.3 秒 | 78.3 → 79.0 秒 | 4.6 → 4.6 分 | 10.1 → 9.9 分 |
-| T1 TTFT（cold） | 11.4 → 11.1 秒 | 53.3 → 54.5 秒 | 4.1 → 4.1 分 | 9.5 → 9.3 分 |
-| T2 / T3 TTFT | 0.62 → 0.53 秒 | 0.69 → 0.60 秒 | 0.96 → 0.86 秒 | 1.34 → 1.21 秒 |
-| decode（ターンの平均、tok/s） | 29.3 → 29.6 | 28.8 → 29.2 | 25.5 → 25.6 | 23.4 → 23.1 |
-| 最大 wired | 30.1 → 31.0 GB | 30.6 → 31.3 GB | 33.8 → 34.0 GB | 37.8 → 37.5 GB |
+| | 2K | 8K | 32K | 64K | 128K |
+|---|---|---|---|---|---|
+| 3ターンの合計 | 35.3 → 33.3 秒 | 79.0 → 61.0 秒 | 4.6 → 3.3 分 | 9.9 → 7.3 分 | 24.9 → 18.4 分 |
+| T1 TTFT（cold） | 11.1 → 9.0 秒 | 54.5 → 36.5 秒 | 4.1 → 2.8 分 | 9.3 → 6.9 分 | 24.2 → 17.8 分 |
+| T2 / T3 TTFT | 0.53 → 0.54 秒 | 0.60 → 0.58 秒 | 0.86 → 0.81 秒 | 1.21 → 1.13 秒 | 2.10 → 1.83 秒 |
+| decode（ターンの平均、tok/s） | 29.6 → 29.4 | 29.2 → 29.2 | 25.6 → 28.1 | 23.1 → 25.5 | 19.0 → 19.8 |
+| 最大 wired | 31.0 → 31.6 GB | 31.3 → 33.2 GB | 34.0 → 36.2 GB | 37.5 → 40.1 GB | 43.5 → 44.9 GB |
 
-- どこでも差は 2% 以内で、続きのターンは 0.1 秒早く始まる。17 のうち 16 のターンで m1.2 と同じテキストを生成した。
-- **128K**：v2.12.2-m1 は1ターン目を 23.4 分（m1.2 は 24.2 分）で読んだあと、2ターン目を読み始める前に拒否した。
-  upstream 2.12.2 から取り込んだメモリガードが、ほかのアプリが残す空き（12.1 GiB。前の計測と同じく、ブラウザ、チャットのアプリ2つ、エディタを開いていた）が予測の増加分に 0.5 GiB 足りないと判断し、swap を避けるために `insufficient_memory` を返した（`--allow-swap` か `MTPLX_ALLOW_SWAP=1` で通せる）。
-  そのため、この README の M1 build の 128K は m1.2 の値、256K は m1.1 の値である。
+- 最初の prompt の読み込みは 8K 以上で 1.36〜1.49 倍（2K は 1.23 倍）、decode は 32K〜64K で 10% 速くなり（decode の1ラウンドあたりのホストとの往復を減らし、draft のキャッシュをその場で書くようにした）、会話全体は 8K 以上で 23〜28% 短くなった。最大メモリは 1〜2.6 GB 多い（ANE 用のバッファ）。v2.12.2-m1 が2ターン目を拒否した 128K も、最後まで動いた。
+- **256K には m1.2 が必要だった。** m1.1 のメモリガードは、258K トークンの1ターン目を拒否した（見積もり 54.7 GiB、上限 48 GiB）。同じ会話を `--allow-swap` で流すと、スワップを使わずにピーク 53.2 GB で最後まで動いた。
+  v2.12.2-m1.2 は、M1 のメモリの見積もりを実際に合わせ、32K 以上の prompt を 8-bit のページに直接 prefill し（速さは同じで、メモリが少ない）、M1 のエンジンが RAM の 13/16（64 GB で 52 GiB）まで使えるようにした。既定の設定のまま、ピーク 50.1 GB で 256K の会話を動かした。
+  コードが m1.1 と違うのは 32K 以上の prompt と見積もりだけなので、2K〜128K の列は m1.1 の計測を使っている。
+- fork の 2K の canary はセッションを通して 31.0〜32.2 tok/s だった（v2.12.2-m1 は 30.3〜30.9）。
 
 ## oMLX 0.7.0 と 0.6.4 の比較
 
@@ -228,7 +225,7 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
   0.7.0 は1ターン目の prompt の末尾でもプレフィックスキャッシュを保存するので、2ターン目は、最後の 4,096 トークンのブロックより後ろをすべて読み直すのではなく、新しい約 300 トークンだけを読む（32K でのキャッシュ済みトークンは 28,672 から 32,402 になった）。
   3ターン目は 0.6.4 と同じく、最後のブロックの境界から再開する。2K では、2ターン目は今も prompt 全体を読み直し、3ターン目が1ターン目の prompt を使う。
 - **最初の prompt の読み込みは 8K 以上で 3〜6% 速くなった。decode はどの長さでも 0.6.4 との差が 5% 以内だった。**
-- **128K では、oMLX の会話全体（27.0 分）が upstream（30.6 分）と、どちらの Splash（1.1.0-m1 は 29.4 分、1.2.1-m1 は 34.3 分）よりも短くなった。** M1 build は 24.9 分である。
+- **128K では、oMLX の会話全体（27.0 分）が upstream（30.6 分）と、Splash 1.1.0-m1（29.4 分）、1.2.1-m1（34.3 分）よりも短くなった。** その後に測った Splash 1.3.0-m1.1 は 23.1 分、M1 fork は 18.4 分である。
 - **作り直されたメモリガード**（既定で有効、tier は `balanced`）は、128K の1ターン目を一度止めたあと、4,096 ではなく 1,024 トークンずつ読ませた（止める前に読んだ 4,096 トークンは、そのターンの `cached` に表れる）。それでも 0.6.4 より速かった。
   256K では1ターン目を最初から拒否する（[後述](#256k-の確認)）。
 - **出力**：2K の fp16 KV と 32K の生成テキストは 0.6.4 とバイト単位で一致した。ほかのセルは一部のターンで違う（0.7.0 自身の 2K 8-bit の2回も違う）。すべての回で needle の行を正しく引用した。
@@ -236,40 +233,41 @@ needle の列は、3ターン目で needle を正しく引用した回数であ�
 ## 256K の確認
 
 258,048 トークンの文脈で、各エンジンを1回ずつ測った（3ターン目で約 258K トークンになり、各エンジンの 262,144 トークンの窓に収まる）。
-MTPLX M1 build **v2.12.0-m1.1**（表の下の注を参照）は 2026-09-29、oMLX 0.7.0 は 2026-10-07、Splash 1.2.1-m1 は 2026-10-08 に測った。
+MTPLX M1 fork **v2.12.2-m1.2** と Splash 1.3.0-m1.1 は 2026-10-13、oMLX 0.7.0 は 2026-10-07 に測った。
 MTPLX upstream の2つの列と TensorFold は 128K で decode が 4.6〜6.4 tok/s で、256K の1ターン目だけで1時間を大きく超える見込みなので測っていない。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="charts/spot256k-dark.svg?v=1008">
-  <img alt="256K の確認：MTPLX M1 build m1.1、oMLX 0.7.0、Splash 1.2.1-m1 の最初の prefill、続きのターンの TTFT、decode、最大メモリ" src="charts/spot256k-light.svg?v=1008">
+  <source media="(prefers-color-scheme: dark)" srcset="charts/spot256k-dark.svg?v=1013">
+  <img alt="256K の確認：MTPLX M1 fork (m1.2)、oMLX 0.7.0、Splash 1.3.0-m1.1 の最初の prefill、続きのターンの TTFT、decode、最大メモリ" src="charts/spot256k-light.svg?v=1013">
 </picture>
 
-| | Splash 1.2.1-m1 | MTPLX M1 build m1.1 | oMLX 0.7.0（メモリガード aggressive） |
+| | Splash 1.3.0-m1.1 | MTPLX M1 fork (m1.2) | oMLX 0.7.0（メモリガード aggressive） |
 |---|---|---|---|
-| T1 TTFT（cold） | 100.6 分 | **67.9 分** | 69.8 分 |
-| T2 / T3 TTFT | 12.6 秒 / 13.4 秒 | **3.6 秒 / 3.6 秒** | 19.4 秒 / 13.5 秒 |
-| decode T1 / T2 / T3（tok/s） | 8.8 / 9.7 / 9.9 | 14.5 / 14.9 / 14.2 | 4.1 / 4.5 / 3.8 |
-| decode（ターンの平均） | 9.5 | **14.5** | 4.1 |
-| 3ターンの合計 | 102.3 分 | **68.9 分** | 73.1 分 |
-| 最大 wired | **31.8 GB** | 51.8 GB | 57.3 GB |
+| T1 TTFT（cold） | 67.1 分 | **58.5 分** | 69.8 分 |
+| T2 / T3 TTFT | 9.8 秒 / 10.3 秒 | **2.9 秒 / 2.9 秒** | 19.4 秒 / 13.5 秒 |
+| decode T1 / T2 / T3（tok/s） | 9.1 / 13.3 / 8.3 | 14.4 / 14.4 / 13.8 | 4.1 / 4.5 / 3.8 |
+| decode（ターンの平均） | 10.2 | **14.2** | 4.1 |
+| 3ターンの合計 | 68.6 分 | **59.4 分** | 73.1 分 |
+| 最大 wired | **32.7 GB** | 50.1 GB | 57.3 GB |
 | needle | 1/1 | 1/1 | 1/1 |
 
-- **Splash 1.1.0-m1 のほうが速かった**（2026-09-29、`splash-m1-110`）：1ターン目 87.3 分、decode 12.9 tok/s、続きのターン 9.3 秒と 10.1 秒、合計 88.5 分、30.4 GB だった。
+- **M1 fork は 256K に m1.2 が必要だった。** v2.12.2-m1.1 のメモリガードは、1ターン目を読み始める前に拒否した（見積もり 54.7 GiB、上限 48 GiB）。`--allow-swap` を付けると、m1.1 は同じ会話をスワップを使わずに最後まで動かした（58.9 分、14.4 tok/s、続きのターン 3.0 秒、ピーク 53.2 GB。生データの `mtplx-fork-allowswap`）。
+  m1.2 は、M1 fork の prefill の見積もりを実測に合わせ、32K 以上の prompt を 8-bit のページに直接読み、M1 のエンジンが RAM の 13/16 まで使えるようにした。既定の設定のまま動いた。
+- **Splash 1.3.0-m1.1 は 1.2.1-m1 より prompt を 33% 速く読み**（67.1 分と 100.6 分）、decode も 7% 速かった（10.2 と 9.5 tok/s）。
 - **oMLX は既定の設定では 256K を動かせない。**
   0.7.0 の prefill のメモリガード（tier は `balanced`）は、1ターン目を読み始める前に HTTP 400 で拒否した（予測の最大 約 46.1 GB に対して上限が 39.4 GB。その行は生データに残した）。
   上の列は `memory_guard_tier: aggressive` にして測り直した回で、このベンチで oMLX の既定値を変えたのはこの設定だけである。
   それでもメモリガードは、約 40 分のところで1ターン目を一度止め、prefill の単位を 4,096 から 1,024 トークンに下げた（止める前に読んだトークンは `cached` に数えられる）。最大 wired は 57.3 GB だった。
-- oMLX の 256K の prompt の読み込みは M1 build とほぼ同じ速さ（69.8 分と 67.9 分）だったが、decode は 4.1 tok/s で、M1 build（14.5）の3分の1に届かなかった。
-- それぞれ1回の計測である。計測前の 2K の canary は、Splash が 29.0 tok/s（その夜の範囲は 28.7〜29.6）、M1 build が 30.0 tok/s（m1.1 の最良値より 2% 低い）、oMLX が 21.0 tok/s（その日の最良値）だった。
-- ここでの M1 build は **v2.12.0-m1.1** である。m1.2 との違いは、このベンチが使っていない SSD のプロンプトキャッシュの修正だけである。v2.12.2-m1 は 128K の2ターン目をメモリガードが拒否したので、256K は測っていない。
+- **メモリ**：Splash は 256K の会話全体を 32.7 GB で動かし、M1 fork は 50.1 GB を使う。差のうち約 6 GB はモデルファイルの違い（埋め込み、出力層、最後の 8 層の MLP が 8bit）で、残りの多くは、続きのターンを速く始めるためにセッションバンクが持つ会話のもう1組のコピーである。
+- それぞれ1回の計測である。計測前の 2K の canary は、Splash が 23.8 tok/s、M1 fork が 30.9 tok/s、oMLX が 21.0 tok/s だった。
 
 ## 短いプロンプト（Splash の投稿と同じ条件）
 
-「Splash on M1, part 2」の投稿のベンチマーク5を、MTPLX M1 build（v2.12.0-m1.2）と Splash 1.1.0-m1 だけで測り直した。
+「Splash on M1, part 2」の投稿のベンチマーク5を、MTPLX M1 fork（v2.12.0-m1.2）と Splash 1.1.0-m1 だけで測り直した。
 npanj の splash-plus の5つのプロンプトを5分間ループし（250 トークン、temperature 0、reasoning xhigh。両エンジンで入力トークン数が同じことを確認した）、3分休んだあと、44K のプロンプトを1回コールドで読ませた。
 2026-09-30 に ABBA の順で各2回、macmon で1秒ごとに記録した（[`scripts/erp_repro.py`](scripts/erp_repro.py)、[`run_erp.sh`](run_erp.sh)、生データは [`results/2026-09-m1max-64gb-erp/`](results/2026-09-m1max-64gb-erp/)）。値は2回の平均である。
 
-| | MTPLX M1 build m1.2 | Splash 1.1.0-m1 |
+| | MTPLX M1 fork v2.12.0-m1.2 | Splash 1.1.0-m1 |
 |---|---|---|
 | decode（5分間のループ、1リクエストの平均） | 31.5 tok/s | **40.7 tok/s** |
 | ループ中の GPU 温度（平均 / 最大） | 88.4 / 94.5 °C | 90.1 / 92.8 °C |
@@ -310,27 +308,27 @@ thinking オン、reasoning xhigh、モデルのサンプリングの設定（te
 ## サンプリング（temperature 1.0）
 
 temperature 0 で 256 トークンという条件は、比べるために揃えた課題で、普段の使い方ではない。
-そこで 2K、32K、64K の同じ会話を、モデル本来のサンプリングの設定（`generation_config.json`：temperature 1.0、top-p 0.95、top-k 20）、各ターン最大 512 トークン、8-bit KV で、順番を逆にして2回測った（upstream の列は 2026-09-29、M1 build v2.12.2-m1 と Splash 1.2.1-m1 は 2026-10-08 に一緒に）。
+そこで 2K、32K、64K の同じ会話を、モデル本来のサンプリングの設定（`generation_config.json`：temperature 1.0、top-p 0.95、top-k 20）、各ターン最大 512 トークン、8-bit KV で、順番を逆にして2回測った（upstream の列は 2026-09-29、M1 fork v2.12.2-m1.1 と Splash 1.3.0-m1.1 は 2026-10-13 に一緒に）。
 サンプリングでは回ごとに生成テキストが変わるので、2〜3ターン目のプロンプトもエンジンと回で異なる。
 受理率はエンジン自身の数え方（MTPLX は MTP の draft、Splash は DFlash2 の draft で1回 7 トークン）なので、方式をまたいで比べられない。
 
 | コンテキスト | エンジン | T1 TTFT（コールド） | decode T1 / T2 / T3 (tok/s) | decode 平均 | ドラフト受理率 T1 / T2 / T3 | 生成トークン T1 / T2 / T3 | needle |
 |---|---|---|---|---|---|---|---|
-| 2K | MTPLX M1 build | 11.2 s | 27.8 / 30.5 / 29.4 | **29.2** | 57% / 67% / 63% | 358 / 322 / 187 | 2/2 |
+| 2K | MTPLX M1 fork (m1.1) | 9.00 s | 30.2 / 33.1 / 31.7 | **31.6** | 58% / 67% / 63% | 286 / 326 / 186 | 2/2 |
 | 2K | MTPLX upstream | 11.4 s | 23.1 / 25.3 / 21.2 | **23.2** | 58% / 77% / 59% | 314 / 413 / 200 | 2/2 |
 | 2K | MTPLX upstream + env | 11.6 s | 24.8 / 27.0 / 27.3 | **26.4** | 56% / 64% / 66% | 294 / 328 / 188 | 2/2 |
-| 2K | Splash 1.2.1-m1 | 12.2 s | 28.2 / 34.8 / 34.1 | **32.4** | 29% / 38% / 38% | 286 / 348 / 174 | 2/2 |
-| 32K | MTPLX M1 build | 4.1 min | 24.2 / 26.5 / 25.8 | **25.5** | 58% / 67% / 65% | 266 / 355 / 179 | 2/2 |
+| 2K | Splash 1.3.0-m1.1 | 8.41 s | 30.4 / 34.5 / 29.6 | **31.5** | 33% / 39% / 32% | 278 / 328 / 182 | 2/2 |
+| 32K | MTPLX M1 fork (m1.1) | 2.8 min | 28.0 / 28.3 / 28.5 | **28.3** | 62% / 63% / 66% | 351 / 311 / 174 | 2/2 |
 | 32K | MTPLX upstream | 4.0 min | 17.1 / 12.9 / 12.7 | **14.2** | 56% / 66% / 63% | 276 / 322 / 202 | 2/2 |
 | 32K | MTPLX upstream + env | 4.1 min | 17.5 / 12.7 / 12.4 | **14.2** | 53% / 61% / 62% | 292 / 321 / 172 | 2/2 |
-| 32K | Splash 1.2.1-m1 | 4.8 min | 22.6 / 25.1 / 23.7 | **23.8** | 29% / 35% / 32% | 300 / 380 / 170 | 2/2 |
-| 64K | MTPLX M1 build | 9.4 min | 22.3 / 24.4 / 21.8 | **22.8** | 59% / 69% / 59% | 278 / 353 / 195 | 2/2 |
+| 32K | Splash 1.3.0-m1.1 | 3.2 min | 24.1 / 27.3 / 26.0 | **25.8** | 33% / 39% / 37% | 316 / 312 / 186 | 2/2 |
+| 64K | MTPLX M1 fork (m1.1) | 6.9 min | 21.7 / 25.0 / 25.1 | **23.9** | 48% / 61% / 62% | 293 / 274 / 182 | 2/2 |
 | 64K | MTPLX upstream | 9.7 min | 8.3 / 9.0 / 9.3 | **8.9** | 55% / 70% / 60% | 322 / 330 / 208 | 2/2 |
 | 64K | MTPLX upstream + env | 10.2 min | 7.6 / 8.8 / 8.1 | **8.2** | 56% / 69% / 61% | 295 / 298 / 204 | 2/2 |
-| 64K | Splash 1.2.1-m1 | 11.9 min | 17.9 / 23.1 / 19.2 | **20.1** | 29% / 41% / 32% | 314 / 391 / 170 | 2/2 |
+| 64K | Splash 1.3.0-m1.1 | 7.9 min | 17.5 / 20.0 / 17.9 | **18.5** | 30% / 35% / 30% | 278 / 320 / 188 | 2/2 |
 
-- **2K では Splash が速く（32.4 と 29.2 tok/s）、32K（25.5 と 23.8）と 64K（22.8 と 20.1）では M1 build が速い**。1.1.0-m1 と m1.2（2026-09-29〜30）では、Splash が 32.7 / 25.8 / 22.0、M1 build が 27.5 / 25.2 / 23.8 だった（生データの `splash-m1-110`、`mtplx-fork-m1.2`）。
-- **サンプリングで速さが大きく変わるのは Splash の方**：Splash は temperature 0 よりどの長さでも 6〜7% 遅い。M1 build の差は 1% 以内だった。
+- **2K ではほぼ同じ（31.6 と 31.5 tok/s）で、32K（28.3 と 25.8）と 64K（23.9 と 18.5）では M1 fork が速い**。v2.12.2-m1 と 1.2.1-m1（2026-10-08）では、M1 fork が 29.2 / 25.5 / 22.8、Splash が 32.4 / 23.8 / 20.1 だった（生データの `mtplx-fork-m1-2122`、`splash-m1-121`）。
+- **サンプリングで速さが大きく変わるのは Splash の方**：Splash は temperature 0 より 2K と 64K で 6〜14% 遅い。M1 fork の差は 7% 以内で、2K ではむしろ速い。
 - **upstream + env** は upstream より 2K で 14% 速く、32K で同じ、64K で 8% 遅い。temperature 0 と同じ傾向である。
 - ターンの終わりはモデルが決めるので、生成トークン数はエンジンごとに異なる（1ターン目で 266〜358）。すべての回で、すべてのエンジンが needle を正しく引用した。
 
@@ -362,9 +360,9 @@ Splash 1.1.0-m1 の1回目、8-bit KV の値である。
 
 - **draft がよく受理されるのは2ターン目だけ**：受理率は 37〜50% で、1ターン目と3ターン目は 26〜36% だった。そのため1回で確定するトークンが、2.8〜3.4 でなく 3.6〜4.5 になる。
   1回の時間はターンによらないので、この差がそのまま decode の速さの差になる。
-  2ターン目の回答は、1ターン目で決まった比較の型を繰り返す。7 トークンの draft は、3トークンの MTP の draft より先まで当てられると考えられる。MTPLX M1 build は、2ターン目で1ラウンド 2.8〜3.0 トークン、1ターン目と3ターン目で 2.7〜2.9 トークンで、上限は 4 である。
-- **短い文脈では、Splash は近い時間で2倍の位置を verify する**：2K で、8 位置の verify と 7 トークンの draft が1回 105 ms だった。M1 build は、4 位置の verify と3トークンの MTP の draft で1ラウンド 93〜98 ms である（m1.2 の verify と draft の時間）。
-- **1回の時間は、プロンプトが長いほど大きく伸びる**：Splash は 2K の 105 ms から 128K の 189〜197 ms へ、M1 build は 93〜98 ms から 141〜144 ms へ伸びた。
+  2ターン目の回答は、1ターン目で決まった比較の型を繰り返す。7 トークンの draft は、3トークンの MTP の draft より先まで当てられると考えられる。MTPLX M1 fork は、2ターン目で1ラウンド 2.8〜3.0 トークン、1ターン目と3ターン目で 2.7〜2.9 トークンで、上限は 4 である。
+- **短い文脈では、Splash は近い時間で2倍の位置を verify する**：2K で、8 位置の verify と 7 トークンの draft が1回 105 ms だった。M1 fork は、4 位置の verify と3トークンの MTP の draft で1ラウンド 93〜98 ms である（m1.2 の verify と draft の時間）。
+- **1回の時間は、プロンプトが長いほど大きく伸びる**：Splash は 2K の 105 ms から 128K の 189〜197 ms へ、M1 fork は 93〜98 ms から 141〜144 ms へ伸びた。
   1回ごとに履歴全体への attention を、4 位置でなく 8 位置ぶん計算するためと考えられ、長い文脈の1ターン目と3ターン目で Splash が遅れる理由もこれだと推定している（kernel ごとの時間はまだ測っていない）。
 - **前に測ったソース版との違い**：1.1.0-m1 は1回の時間が短い（64K で 163〜166 ms に対して 146〜157 ms、128K で 218〜225 ms に対して 189〜197 ms）。受理率はほぼ同じなので、長い文脈での速さの差はこの時間の差から来ている。
 
@@ -389,9 +387,9 @@ Splash 1.1.0-m1 の1回目、8-bit KV の値である。
   - 2回目は、エンジンの順番を逆にした。
   - canary がそのエンジンの最良値より 3% 以上遅いセルは、5 分休んでから測り直した。
   - MTPLX upstream と upstream + env は 2026-09-29 に一緒に測った（測り直しは起きなかった）。128K は1回だけで、command buffer ありの upstream + env はメモリ不足で失敗し、公開した upstream + env（command buffer なし）の 128K はその後に測った。128K の canary は、各エンジンの 2K〜64K の最良値から 2.4% 以内だった。
-  - M1 build（v2.12.0-m1.2）は 2026-09-30 に同じ計画で単独で測った。先に 2K の確認を行い、canary が 29.9 tok/s 以上であること（実際は 30.6）を条件にした。同じ日の午後の最初の試みは、マシンが約 5% 遅い状態（canary 28.0〜29.1）だったので止め、その行は `rows-fork-m12-aborted-20260930.jsonl` に移した。使った回では、2回目の 2K と 8K の canary がその回の最良値より 3.1% 低く、1回ずつ測り直した（測り直しも 3% 低く、測り直した値を使った）。128K の canary は最良値より 2.6% 低かった。最初のリリース（m1）は 2026-09-29 に他の MTPLX の列と一緒に測り、`mtplx-fork-m1` として残した。
-  - M1 build v2.12.2-m1 と Splash 1.2.1-m1 は 2026-10-08 に同じ計画で交互に測った（1回目は Splash が先、2回目は逆。128K は Splash が先）。そのあとサンプリングの条件と Splash の 256K を測った（[`run_refresh_1008.sh`](run_refresh_1008.sh)）。canary は fork が 30.3〜30.9 tok/s、Splash が 28.7〜29.6 で、Splash の1回目の 64K だけが最良値より 3.1% 低く、1回測り直した。
-  - oMLX 0.7.0 は 2026-10-07 に同じ計画で単独で測った。M1 build の 2K の確認で canary が 31.1 tok/s（条件は 29.9 以上）であることを確かめてからである。8-bit の canary は最良値（21.0 tok/s）から 0.3% 以内で、測り直しは起きなかった。
+  - M1 fork（v2.12.0-m1.2）は 2026-09-30 に同じ計画で単独で測った。先に 2K の確認を行い、canary が 29.9 tok/s 以上であること（実際は 30.6）を条件にした。同じ日の午後の最初の試みは、マシンが約 5% 遅い状態（canary 28.0〜29.1）だったので止め、その行は `rows-fork-m12-aborted-20260930.jsonl` に移した。使った回では、2回目の 2K と 8K の canary がその回の最良値より 3.1% 低く、1回ずつ測り直した（測り直しも 3% 低く、測り直した値を使った）。128K の canary は最良値より 2.6% 低かった。最初のリリース（m1）は 2026-09-29 に他の MTPLX の列と一緒に測り、`mtplx-fork-m1` として残した。
+  - M1 fork v2.12.2-m1.1 と Splash 1.3.0-m1.1 は 2026-10-13 に同じ計画で交互に測った（1回目は Splash が先、2回目は逆。128K は Splash が先）。そのあとサンプリングの条件と 256K を測った（[`run_refresh_1013.sh`](run_refresh_1013.sh)）。M1 fork の 256K の行は v2.12.2-m1.2 で測った（[`run_256k_m12b.sh`](run_256k_m12b.sh)）。canary は fork が 31.0〜32.2 tok/s、Splash が 22.7〜23.8 で、Splash の3つのセルを1回測り直した（上記）。前のリリースも 2026-10-08 に同じ方法で測った（[`run_refresh_1008.sh`](run_refresh_1008.sh)）。
+  - oMLX 0.7.0 は 2026-10-07 に同じ計画で単独で測った。M1 fork の 2K の確認で canary が 31.1 tok/s（条件は 29.9 以上）であることを確かめてからである。8-bit の canary は最良値（21.0 tok/s）から 0.3% 以内で、測り直しは起きなかった。
   - Splash と TensorFold は、それより前のセッションで同じ計画で測った（詳細と canary は [METHODOLOGY.md](METHODOLOGY.md)）。
 - **回ごとのばらつき**：2026-09-29 の計測で、2回測ったセルの decode の差は中央値で 0.7% だった。
   最大は upstream + env の 64K の1ターン（生成テキストはバイト単位で同じだが 5.2 と 8.7 tok/s。verify の時間が 47 秒と 27 秒だった）で、このセルの2ターン目の中央値は 6.9 になった。
@@ -405,7 +403,8 @@ python3 scripts/prepare_omlx.py                   # oMLX 用のモデルフォ�
 ./run_day.sh                                      # 2K〜64K、2回（約 3 時間）
 ./run_night.sh                                    # 128K、1回（約 3 時間）
 ./run_fair.sh                                     # MTPLX の3つとサンプリングの条件
-./run_refresh_1008.sh                             # M1 build v2.12.2-m1 と Splash 1.2.1-m1（約 7 時間）
+./run_refresh_1013.sh                             # M1 fork v2.12.2-m1.1 と Splash 1.3.0-m1.1（約 6 時間）
+./run_256k_m12b.sh                                # M1 fork v2.12.2-m1.2 の 256K（約 1 時間）
 ./run_omlx070.sh                                  # oMLX 0.7.0：2K〜128K（約 2 時間）。256K は既定では拒否される
 ./run_omlx070_256k_aggressive.sh                  # oMLX 0.7.0 の 256K、メモリガード aggressive（約 75 分）
 python3 scripts/summarize.py results/2026-09-m1max-64gb

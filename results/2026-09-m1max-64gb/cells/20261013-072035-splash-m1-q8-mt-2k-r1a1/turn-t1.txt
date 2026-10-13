@@ -1,0 +1,6 @@
+The provided telemetry data exhibits a distinct, linear downward trend in sensor values, starting at 0.0 and decreasing by approximately 5.7 units per record until reaching a low point near 2.7. Following this initial decline, the values reset to a high range (96.8–99.6) and continue the same descending pattern, suggesting a cyclic or batched data generation process rather than continuous real-time monitoring. The status field follows a rigid, repeating five-state cycle: nominal, degraded, recovering, offline, and calibrating. This status sequence is perfectly synchronized with the record index, independent of the actual sensor magnitude. For instance, every fifth record is "nominal," regardless of whether the sensor reading is high or low. The zone identifiers alternate between prefixes 'A' and 'N' with varying numeric suffixes, showing no clear correlation with sensor health or value.
+
+Three concrete observations are:
+1. The sensor values decrease linearly by exactly 5.7 units per step within each cycle.
+2. The status field repeats a fixed five-state sequence (nominal, degraded, recovering, offline, calibrating) every five records.
+3. One record contains a non-telemetry maintenance override message for zone

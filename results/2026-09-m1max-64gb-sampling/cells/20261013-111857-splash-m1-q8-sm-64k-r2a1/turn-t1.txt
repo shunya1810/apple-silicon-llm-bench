@@ -1,0 +1,6 @@
+The dataset contains 2,635 records where sensor values, status fields, and zone assignments follow strict, repeating patterns rather than organic randomization. The "NEEDLE" record at index 001316 is an anomaly, containing non-telemetry maintenance text instead of standard data, but the surrounding records adhere to precise mathematical sequences.
+
+Three concrete observations are:
+1.  **Sensor Values:** The sensor values start at 0.0 and decrease linearly by 5.7 units per step until reaching 0.0, after which they reset to a high value (starting near 100) and decrease again. This creates a sawtooth wave pattern.
+2.  **Status Cycle:** The status field cycles through five fixed states—nominal, degraded, recovering, offline, and calibrating—in that specific order, repeating every five records regardless of the sensor value magnitude.
+3.  **Zone Progression:** The zone field alternates between 'A' and 'N' prefixes. The numerical suffix increases by 17 for each record within a prefix group (e.g., A10, N27, A44), indicating a deterministic, non-random spatial or logical mapping.
