@@ -1,0 +1,77 @@
+  ███╗   ███╗ ████████╗ ██████╗  ██╗      ██╗  ██╗
+  ████╗ ████║ ╚══██╔══╝ ██╔══██╗ ██║      ╚██╗██╔╝
+  ██╔████╔██║    ██║    ██████╔╝ ██║       ╚███╔╝ 
+  ██║╚██╔╝██║    ██║    ██╔═══╝  ██║       ██╔██╗ 
+  ██║ ╚═╝ ██║    ██║    ██║      ███████╗ ██╔╝ ██╗
+  ╚═╝     ╚═╝    ╚═╝    ╚═╝      ╚══════╝ ╚═╝  ╚═╝
+
+  Native MTP speculative decoding · Apple Silicon
+
+╭─ MTPLX 2.12.2 ───────────────────────────────────────────────────────────────╮
+│                                                                              │
+│      Model  mtplx-qwen36-35b-a3b-optimized-speed-fp16                        │
+│    Profile  turbo                                                            │
+│        API  http://127.0.0.1:18106/v1                                        │
+│       Mode  turbo MTP                                                        │
+│    Browser  http://127.0.0.1:18106/                                          │
+│  Listening  127.0.0.1:18106                                                  │
+│    Loading  /Users/nakano/.mtplx/models/Youssofal--Qwen3.6-35B-A3B-MTPLX-O…  │
+│     Warmup  0 tokens                                                         │
+│       Auth  API key: leave blank for localhost                               │
+│       Stop  Ctrl-C                                                           │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+[1/6] Server config ready: http://127.0.0.1:18106/v1
+[2/6] Model resolved: /Users/nakano/.mtplx/models/Youssofal--Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16
+[3/6] Runtime contract verified — profile: turbo
+      Loading the model can take about a minute on first start.
+
+[4/6] Preparing turbo MTP runtime
+[mtplx] profile env override: MTPLX_PREFILL_CHUNK_SIZE_DENSE=4096 (profile turbo default 2048; operator env wins)
+[mtplx] profile env override: MTPLX_PREFILL_CHUNK_SIZE_REPAGE=4096 (profile turbo default 2048; operator env wins)
+[4/6] Checking local acceleration runtime
+      This may take a few seconds.
+[4/6] Runtime checks complete
+[5/6] Loading model weights: /Users/nakano/.mtplx/models/Youssofal--Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16
+      This is the long step; MTPLX is mapping the model into MLX.
+      Model load in progress (this may take a minute).
+[proj-fusion] groups=attn,gdn gdn=30 attn=10 mlp=0 skipped=2 max_fused_rows=4 freed=0.50GiB reasons=['attn: not an affine-quantized nn.QuantizedLinear']
+[mtplx] gdn-blocked-prefill {'installed': True, 'already': False, 'sites': ['mlx_lm.models.gated_delta', 'mlx_lm.models.qwen3_next', 'mlx_lm.models.qwen3_5'], 'min_t': 16}
+[5/6] Model loaded in 4.2s
+[5/6] Installing native-MTP draft head
+[frspec] install report: {'installed': True, 'n': 103887, 'vocab_rows': 248320, 'bits': 4, 'group_size': 64, 'mode': 'affine', 'bytes_ratio': 0.4184, 'source': 'configured_draft_head', 'output_mode': 'full', 'legacy_swap': True, 'elapsed_s': 0.018}
+[5/6] Chat template profile: local_qwen36
+[5/6] Context window: 262144 tokens
+[mtplx] dense-decode ceiling auto: 262144 tokens (15% RAM over 20480 B/token, from the model config)
+[5/6] Memory plan: 64G Mac: engine budget 52.0G, weights 19.5G, context 262144, session bank up to 29.5G (yields to 26.7G under long-context load)
+[5/6] GPU residency keepalive: every 1s for 600s after each request
+[mtplx] session-bank budget: 29.5G total (auto: machine memory plan, yields to live KV), 14.7G per-session cap, 24 entries max, model weights 19.5G. Override: MTPLX_SESSION_BANK_MAX_BYTES / MTPLX_SESSION_BANK_PER_SESSION_BYTES (sizes like 12G or 12GiB).
+[6/6] Warmup skipped (--warmup-tokens 0)
+
+MTPLX is ready.
+Chat UI: http://127.0.0.1:18106/
+OpenAI API Base URL: http://127.0.0.1:18106/v1
+Model: mtplx-qwen36-35b-a3b-optimized-speed-fp16
+Reasoning history: scoped (active round only) (policy auto)
+API key: leave blank for localhost
+Health check: http://127.0.0.1:18106/health
+Keep this terminal open. Press Ctrl-C to stop MTPLX.
+[mtplx] compiled-verify prewarm {"buckets": [{"bucket": 1024, "s": 0.064}, {"bucket": 2048, "s": 0.029}, {"bucket": 4096, "s": 0.031}, {"bucket": 8192, "s": 0.029}, {"bucket": 16384, "s": 0.029}], "skipped": [], "already": [], "elapsed_s": 0.183, "complete": false}
+{"event": "mtplx_openai_generation", "prompt_tokens": 16, "completion_tokens": 16, "max_tokens": 16, "effective_max_tokens": 16, "finish_reason": "length", "elapsed_s": 0.832311, "tok_s": 43.986678, "end_to_end_tok_s": 19.223572, "seed": 634206943, "attempts": 1, "blank_retries": 0, "text_preview": "Thinking Process:\n1.  **Analyze the Request:** The user wants"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-49201e88e71ebf2f", "count": 1, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 20, "completion_tokens": 1024, "max_tokens": 1024, "effective_max_tokens": 1024, "finish_reason": "length", "elapsed_s": 8.618854, "tok_s": 120.561045, "end_to_end_tok_s": 118.809294, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "1.  **Analyze the Request:**\n    *   **Subject:** A white pelican riding a bright red bicycle.\n    *   **Style:** Flat v"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-0bf7b31b64c3afa7", "count": 2, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 403, "completion_tokens": 1024, "max_tokens": 1024, "effective_max_tokens": 1024, "finish_reason": "length", "elapsed_s": 9.463261, "tok_s": 116.453508, "end_to_end_tok_s": 108.207941, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand User Requirements:**\n   - **Visual:** 20 balls bouncing inside a spinning h"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-075e19cb5a4adbad", "count": 3, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f", "anon-0bf7b31b64c3afa7"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 32, "completion_tokens": 1024, "max_tokens": 1024, "effective_max_tokens": 1024, "finish_reason": "length", "elapsed_s": 8.440803, "tok_s": 123.023552, "end_to_end_tok_s": 121.315468, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand User Request:**\n   - **Goal:** Write a thread-safe LRU (Least Recently Used"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-6d65ea6df43c2759", "count": 4, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f", "anon-0bf7b31b64c3afa7", "anon-075e19cb5a4adbad"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 40, "completion_tokens": 1024, "max_tokens": 1024, "effective_max_tokens": 1024, "finish_reason": "length", "elapsed_s": 8.777704, "tok_s": 118.724149, "end_to_end_tok_s": 116.659206, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand the User Request:**\n   - **Language:** Rust\n   - **Task:** Parse an ISO 860"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-49201e88e71ebf2f", "count": 4, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-0bf7b31b64c3afa7", "anon-075e19cb5a4adbad", "anon-6d65ea6df43c2759"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 20, "completion_tokens": 2048, "max_tokens": 2048, "effective_max_tokens": 2048, "finish_reason": "length", "elapsed_s": 17.275955, "tok_s": 119.213856, "end_to_end_tok_s": 118.546268, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "The user wants an SVG illustration of a pelican riding a bicycle. Let me create a detailed, visually appealing SVG with:"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-0bf7b31b64c3afa7", "count": 4, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f", "anon-075e19cb5a4adbad", "anon-6d65ea6df43c2759"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 403, "completion_tokens": 2048, "max_tokens": 2048, "effective_max_tokens": 2048, "finish_reason": "length", "elapsed_s": 19.171745, "tok_s": 110.463943, "end_to_end_tok_s": 106.823871, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand User Requirements:**\n   - 20 balls bouncing inside a spinning heptagon.\n   "}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-075e19cb5a4adbad", "count": 4, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f", "anon-0bf7b31b64c3afa7", "anon-6d65ea6df43c2759"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 32, "completion_tokens": 2048, "max_tokens": 2048, "effective_max_tokens": 2048, "finish_reason": "length", "elapsed_s": 18.438781, "tok_s": 111.841045, "end_to_end_tok_s": 111.07025, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand User Request:**\n   - **Goal:** Create a thread-safe LRU (Least Recently Use"}
+[mtplx] postcommit cross-session yield {"admitting_session_id": "anon-6d65ea6df43c2759", "count": 4, "reason": "cross_session_foreground_preempted", "sessions": ["anon-4beceb662a5cc441", "anon-49201e88e71ebf2f", "anon-0bf7b31b64c3afa7", "anon-075e19cb5a4adbad"]}
+{"event": "mtplx_openai_generation", "prompt_tokens": 40, "completion_tokens": 2048, "max_tokens": 2048, "effective_max_tokens": 2048, "finish_reason": "length", "elapsed_s": 18.284742, "tok_s": 112.904295, "end_to_end_tok_s": 112.005955, "seed": 1, "attempts": 1, "blank_retries": 0, "text_preview": "Here's a thinking process:\n\n1.  **Understand the Goal**: The user wants a Rust function that parses an ISO 8601 duration"}

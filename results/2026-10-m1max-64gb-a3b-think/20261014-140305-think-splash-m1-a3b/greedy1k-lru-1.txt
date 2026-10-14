@@ -1,0 +1,112 @@
+Here's a thinking process:
+
+1.  **Understand User Request:**
+   - **Goal:** Write a thread-safe LRU (Least Recently Used) cache in Python.
+   - **Features:** `get`, `put`, max size.
+   - **Additional Requirement:** Unit tests.
+   - **Key Constraints:** Thread-safety, LRU eviction, Python implementation.
+
+2.  **Core Concepts of LRU Cache:**
+   - Needs a data structure that supports:
+     - Fast lookup (O(1))
+     - Fast insertion/deletion (O(1))
+     - Order tracking (most recent vs least recent)
+   - Standard Python solution: `collections.OrderedDict`
+   - Thread-safety: Use `threading.Lock` to protect concurrent access.
+
+3.  **Design the LRU Cache Class:**
+   - Class name: `LRUCache`
+   - Constructor: `__init__(self, max_size)`
+   - Methods:
+     - `get(self, key)` -> returns value or None/-1
+     - `put(self, key, value)` -> inserts/updates, evicts if over max_size
+   - Internal state:
+     - `self.cache`: `OrderedDict`
+     - `self.max_size`: int
+     - `self.lock`: `threading.Lock()`
+   - Implementation details:
+     - `get(key)`:
+       - Acquire lock
+       - If key in cache, move to end (most recent), return value
+       - Else, return None (or -1, but None is more Pythonic)
+       - Release lock
+     - `put(key, value)`:
+       - Acquire lock
+       - If key exists, update value and move to end
+       - If key doesn't exist:
+         - If cache is full, pop first item (least recent)
+         - Add new key-value pair to end
+       - Release lock
+
+4.  **Draft Code (Mental Refinement):**
+   ```python
+   import threading
+   from collections import OrderedDict
+
+   class LRUCache:
+       def __init__(self, max_size: int):
+           if max_size <= 0:
+               raise ValueError("max_size must be positive")
+           self.max_size = max_size
+           self.cache = OrderedDict()
+           self.lock = threading.Lock()
+
+       def get(self, key):
+           with self.lock:
+               if key in self.cache:
+                   self.cache.move_to_end(key)
+                   return self.cache[key]
+               return None
+
+       def put(self, key, value):
+           with self.lock:
+               if key in self.cache:
+                   self.cache.move_to_end(key)
+                   self.cache[key] = value
+               else:
+                   if len(self.cache) >= self.max_size:
+                       self.cache.popitem(last=False)
+                   self.cache[key] = value
+   ```
+
+5.  **Thread-Safety Considerations:**
+   - Using `with self.lock:` ensures mutual exclusion.
+   - `OrderedDict` operations are atomic in CPython, but thread-safety requires explicit locking for cross-thread operations.
+   - The lock covers the entire `get` and `put` operations, which is correct for consistency.
+   - Could optimize by not holding the lock during long operations, but here operations are O(1), so it's fine.
+
+6.  **Unit Tests Design:**
+   - Use `unittest` module.
+   - Test cases:
+     - Basic put and get
+     - Eviction when max size reached
+     - Update existing key (moves to most recent)
+     - Thread-safety: concurrent reads/writes
+     - Edge cases: max_size = 1, empty cache, negative/zero max_size
+   - Thread test: Use `threading.Thread` to run multiple `put` and `get` operations concurrently, verify no exceptions and final state consistency.
+
+   Draft test structure:
+   ```python
+   import unittest
+   import threading
+   import time
+
+   class TestLRUCache(unittest.TestCase):
+       def setUp(self):
+           self.cache = LRUCache(max_size=3)
+
+       def test_basic_get_put(self):
+           self.cache.put(1, 'a')
+           self.assertEqual(self.cache.get(1), 'a')
+           self.assertIsNone(self.cache.get(2))
+
+       def test_eviction(self):
+           self.cache.put(1, 'a')
+           self.cache.put(2, 'b')
+           self.cache.put(3, 'c')
+           self.cache.put(4, 'd') # evicts 1
+           self.assertIsNone(self.cache.get(1))
+           self.assertEqual(self.cache.get(2), 'b')
+
+       def test_update_moves_to_end(self
+=====

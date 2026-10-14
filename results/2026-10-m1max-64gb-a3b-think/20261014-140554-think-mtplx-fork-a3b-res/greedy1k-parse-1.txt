@@ -1,0 +1,34 @@
+Here's a thinking process:
+
+1.  **Understand the User Request:**
+   - **Language:** Rust
+   - **Task:** Parse an ISO 8601 duration string (e.g., "P3DT4H5M6S") into total seconds
+   - **Requirement:** Include tests
+   - **Key Format:** ISO 8601 duration format: `P[n]Y[n]M[n]W[n]DT[n]H[n]M[n]S`
+   - **Output:** Total seconds as a number (likely `f64` or `i64` or `u64` - I'll use `f64` to handle fractional seconds, but I should clarify or stick to a reasonable type. Actually, ISO 8601 allows fractional seconds, so `f64` is appropriate. I'll make it return `f64`.)
+
+2.  **Analyze ISO 8601 Duration Format:**
+   - Starts with `P`
+   - Date components: `Y` (years), `M` (months), `W` (weeks), `D` (days)
+   - Time separator: `T` (optional, but if present, time components follow)
+   - Time components: `H` (hours), `M` (minutes), `S` (seconds)
+   - Note: `M` is used for both months and minutes. Context (before/after `T`) disambiguates.
+   - Years and months don't have fixed second equivalents (leap years, varying month lengths). Standard practice: ignore them or convert using fixed averages (365.25 days/year, 30.44 days/month). However, for a simple parser, it's common to either:
+     a) Only support time components (D, H, M, S)
+     b) Convert Y/M to seconds using fixed averages
+     c) Return an error for Y/M
+   - I'll implement a robust parser that handles all components, using fixed conversions for Y and M (365.25 days/year, 30.4375 days/month) or just ignore them with a warning? Actually, the standard library `chrono` has `Duration` but doesn't parse ISO 8601 directly. I'll write a custom parser.
+   - Let's stick to a practical approach: support D, H, M, S. For Y and M, I'll convert using fixed averages (365.25 days/year, 30.4375 days/month) or just return an error. Given the prompt says "like P3DT4H5M6S", I'll focus on D, H, M, S, but I'll make it extensible. Actually, I'll just parse D, H, M, S and ignore Y/M or return an error. Let's return an error for Y/M to be safe, or convert them. I'll convert them using fixed averages: 1 year = 365.25 * 24 * 3600 seconds, 1 month = 365.25/12 * 24 * 3600 seconds. But that's messy. Better to just support D, H, M, S as requested, and mention Y/M handling. Actually, I'll implement full support with fixed conversions, but clearly document it. Or I'll just parse D, H, M, S and return an error for Y/M. The prompt example is `P3DT4H5M6S`, so D, H, M, S are the focus.
+
+   Let's design the parser:
+   - Validate starts with `P`
+   - Parse optional date part: `[0-9]+Y?`, `[0-9]+M?`, `[0-9]+W?`, `[0-9]+D?`
+   - Expect `T` (optional)
+   - Parse optional time part: `[0-9]+H?`, `[0-9]+M?`, `[0-9]+S?` (with optional fractional part)
+   - Calculate total seconds
+   - Handle errors gracefully
+
+   I'll use a state machine or regex. Regex is easier in Rust: `^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`
+   Wait, regex for ISO 8601 is tricky because of the `M` ambiguity. But with the `T` separator, it's unambiguous.
+   Let's use a manual parser for better control and
+=====

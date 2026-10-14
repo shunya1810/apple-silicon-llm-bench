@@ -1,0 +1,65 @@
+1.  **Analyze the Request:**
+    *   **Subject:** A white pelican riding a bright red bicycle.
+    *   **Style:** Flat vector style, bold black outlines.
+    *   **Key Elements:** Large orange beak, long orange pouch, spoked wheels, handlebars.
+    *   **Output:** ONLY valid SVG code, enclosed in an `xml` codeblock.
+
+2.  **Deconstruct the Scene:**
+    *   **Bicycle:** Bright red frame, black tires, grey/silver rims, orange pedals, black handlebars, black seat.
+    *   **Pelican:** White body (using overlapping circles and paths for a fluffy, flat-vector look), large orange beak with a distinct orange pouch, orange legs, orange webbed feet.
+    *   **Composition:** Side profile. The pelican's body will overlap the bicycle frame. The legs will extend down to the pedals. The wings will be positioned to hold the handlebars.
+
+3.  **Drafting the SVG Elements (Mental Sandbox & Coordinate Mapping):**
+    *   *Canvas:* 800x600.
+    *   *Wheels:* Center at (250, 450) and (550, 450). Radius 80.
+    *   *Frame:* Connect hubs to bottom bracket (400, 450), seat cluster (330, 280), and head tube (530, 300).
+    *   *Pelican Body:* Center around (380, 250).
+    *   *Beak:* Extending from the head (480, 180) to the front (620, 220).
+    *   *Pouch:* A distinct path hanging from the beak.
+    *   *Legs:* Paths from the body down to the pedals at (350, 450) and (450, 450).
+    *   *Wings:* Curved paths reaching to the handlebars at (540, 240).
+
+4.  **Refining the Style (Flat Vector & Bold Outlines):**
+    *   Use `stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"` globally for the bold outlines.
+    *   Use solid, vibrant colors: `#FF3333` (Red), `#FF8C00` (Orange), `#FFFFFF` (White), `#111111` (Black).
+    *   Add details like chainrings, seat post, and handlebar grips to make the bicycle recognizable and detailed.
+
+5.  **Code Construction & Validation:**
+    *   Ensure all tags are properly closed.
+    *   Check layering: Background -> Wheels -> Frame -> Chain -> Seat/Handlebars -> Pelican Body -> Pelican Legs -> Pelican Wings -> Beak/Pouch.
+    *   Verify SVG namespace and attributes.
+
+=====
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <style>
+      .outline {
+        stroke: #000000;
+        stroke-width: 6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .thick-outline {
+        stroke: #000000;
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#E0F7FA" />
+
+  <!-- Ground Line -->
+  <line x1="50" y1="530" x2="750" y2="530" class="thick-outline" stroke-width="10" />
+
+  <!-- ================= BICYCLE ================= -->
+  <g id="bicycle">
+    <!-- Wheels -->
+    <g id="wheels">
+      <!-- Rear Wheel -->
+      <circle cx="250" cy="450" r="80" fill="none" class="outline" />
+      <circle cx="250" cy="450" r="70" fill="none" class="outline" stroke-width="4" />
+      <circle cx="250" cy="450"

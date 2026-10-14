@@ -1,0 +1,37 @@
+05:13:40 round 1 mt-32k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.49573408300057054, "decode_tok_s": 24.51476447607437, "e2e_s": 0.816014708019793, "peak_wired": 23920197632, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7781285409582779, "decode_tok_s": 87.04279220236168, "e2e_s": 3.2709717910038307, "peak_wired": 26309771264, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 32409, "cached_tokens_usage": 0, "ttft_s": 35.50606937496923, "decode_tok_s": 77.69447387796833, "e2e_s": 38.860395708004944, "peak_wired": 29519790080, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 32712, "cached_tokens_usage": 32344, "ttft_s": 0.8760602080728859, "decode_tok_s": 79.89135402443559, "e2e_s": 4.14161225000862, "peak_wired": 27302920192, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 33012, "cached_tokens_usage": 32344, "ttft_s": 1.5911092499736696, "decode_tok_s": 73.86936269911784, "e2e_s": 4.346758624888025, "peak_wired": 27583545344, "needle_ok": true, "error": null}
+05:14:42   canary 87.04279220236168 ref None slow=False
+05:16:12 round 1 mt-64k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4933887079823762, "decode_tok_s": 24.800291224040052, "e2e_s": 0.8094416670501232, "peak_wired": 23906500608, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7784590419614688, "decode_tok_s": 87.11561734066872, "e2e_s": 3.271537124994211, "peak_wired": 26327859200, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 65163, "cached_tokens_usage": 0, "ttft_s": 94.53267474996392, "decode_tok_s": 69.86010206266275, "e2e_s": 98.29223537503276, "peak_wired": 29757882368, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 65466, "cached_tokens_usage": 65098, "ttft_s": 1.1865519999992102, "decode_tok_s": 70.82694989753375, "e2e_s": 4.874563833000138, "peak_wired": 28322381824, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 65766, "cached_tokens_usage": 65098, "ttft_s": 2.309641540981829, "decode_tok_s": 67.14068824156855, "e2e_s": 5.353928416036069, "peak_wired": 28806725632, "needle_ok": true, "error": null}
+05:18:15   canary 87.11561734066872 ref 87.04279220236168 slow=False
+05:19:45 round 2 mt-32k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4906849580584094, "decode_tok_s": 24.742555919464234, "e2e_s": 0.8078058750834316, "peak_wired": 23956029440, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7741667500231415, "decode_tok_s": 87.76115422137602, "e2e_s": 3.255883542005904, "peak_wired": 26307231744, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 32409, "cached_tokens_usage": 0, "ttft_s": 35.43196233396884, "decode_tok_s": 77.32457086560996, "e2e_s": 38.80245858395938, "peak_wired": 29494902784, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 32712, "cached_tokens_usage": 32344, "ttft_s": 0.8552672499790788, "decode_tok_s": 79.64665619641146, "e2e_s": 4.1301314170705155, "peak_wired": 27289403392, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 33012, "cached_tokens_usage": 32344, "ttft_s": 1.5614689579233527, "decode_tok_s": 74.38650387209512, "e2e_s": 4.296734708012082, "peak_wired": 27447410688, "needle_ok": true, "error": null}
+05:20:46   canary 87.76115422137602 ref 87.11561734066872 slow=False
+05:22:16 round 2 mt-64k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4936767499893904, "decode_tok_s": 24.906086973471815, "e2e_s": 0.809112292015925, "peak_wired": 23960813568, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.772108625038527, "decode_tok_s": 87.32076429472815, "e2e_s": 3.261389167048037, "peak_wired": 26293764096, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 65163, "cached_tokens_usage": 0, "ttft_s": 93.87760804209393, "decode_tok_s": 69.96693856459265, "e2e_s": 97.6316574170487, "peak_wired": 29629382656, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 65466, "cached_tokens_usage": 65098, "ttft_s": 1.1863603339297697, "decode_tok_s": 70.53954836032209, "e2e_s": 4.879737125011161, "peak_wired": 28692742144, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 65766, "cached_tokens_usage": 65098, "ttft_s": 2.303766082972288, "decode_tok_s": 67.97111202954625, "e2e_s": 5.309373624972068, "peak_wired": 28526084096, "needle_ok": true, "error": null}
+05:24:18   canary 87.32076429472815 ref 87.76115422137602 slow=False
+05:25:48 plan done
+05:27:48 round 1 mt-128k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4929612500127405, "decode_tok_s": 25.26934039582749, "e2e_s": 0.8038354580057785, "peak_wired": 23949443072, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7770319170085713, "decode_tok_s": 87.03216714044818, "e2e_s": 3.270625083008781, "peak_wired": 26332594176, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 130713, "cached_tokens_usage": 0, "ttft_s": 272.2173804999329, "decode_tok_s": 58.615092586439474, "e2e_s": 276.7613504999317, "peak_wired": 30688755712, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 131016, "cached_tokens_usage": 130648, "ttft_s": 1.8932432499714196, "decode_tok_s": 57.16581581797274, "e2e_s": 6.5462167910300195, "peak_wired": 30082138112, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 131315, "cached_tokens_usage": 130648, "ttft_s": 3.8319759169826284, "decode_tok_s": 54.330870062799406, "e2e_s": 8.076885416987352, "peak_wired": 30277238784, "needle_ok": true, "error": null}
+05:32:55   canary 87.03216714044818 ref None slow=False
+05:34:25 plan done

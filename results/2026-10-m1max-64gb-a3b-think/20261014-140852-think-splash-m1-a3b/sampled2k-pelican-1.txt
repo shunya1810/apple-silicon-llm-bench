@@ -1,0 +1,116 @@
+The user wants an SVG of a pelican riding a bicycle. Let me create a detailed, visually appealing SVG illustration. I'll design a pelican with its characteristic large beak and pouch, sitting on a bicycle with handlebars, wheels, pedals, etc.
+
+Let me plan the composition:
+- A bicycle with two wheels (circles with spokes), frame, handlebars, seat, pedals
+- A pelican on top with:
+  - Body (oval shape)
+  - Neck (curved)
+  - Head with large beak and pouch
+  - Wings (one on handlebars, one maybe holding something)
+  - Legs pedaling
+  - Orange/yellow coloring typical of pelicans
+
+I'll use a viewBox of about 0 0 500 500 and build this step by step.
+
+Let me think about the coordinate system and design:
+- Bicycle center around x=250, y=300
+- Wheels at bottom, frame going up
+- Pelican body on top of the bike
+
+I'll use nice colors:
+- Pelican: white body, gray wing tips, orange beak/pouch
+- Bike: dark frame, black tires, silver spokes
+
+Let me craft this carefully with good proportions.
+
+=====
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="100%" stop-color="#E0F7FA"/>
+    </linearGradient>
+    <linearGradient id="pouch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FF8C00"/>
+    </linearGradient>
+    <linearGradient id="beak" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FF6B00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky background -->
+  <rect width="500" height="500" fill="url(#sky)"/>
+
+  <!-- Ground -->
+  <ellipse cx="250" cy="440" rx="230" ry="20" fill="#90EE90" opacity="0.5"/>
+  <rect x="0" y="435" width="500" height="65" fill="#7BC67B"/>
+  <line x1="0" y1="435" x2="500" y2="435" stroke="#5BA35B" stroke-width="3"/>
+
+  <!-- Road lines -->
+  <line x1="50" y1="425" x2="450" y2="425" stroke="#FFD700" stroke-width="2" stroke-dasharray="15,10"/>
+
+  <!-- === BICYCLE === -->
+
+  <!-- Back wheel -->
+  <circle cx="150" cy="390" r="55" fill="none" stroke="#333" stroke-width="8"/>
+  <circle cx="150" cy="390" r="48" fill="none" stroke="#555" stroke-width="2"/>
+  <!-- Spokes back -->
+  <g stroke="#AAA" stroke-width="1.5">
+    <line x1="150" y1="390" x2="150" y2="342"/>
+    <line x1="150" y1="390" x2="194" y2="363"/>
+    <line x1="150" y1="390" x2="198" y2="417"/>
+    <line x1="150" y1="390" x2="150" y2="438"/>
+    <line x1="150" y1="390" x2="106" y2="417"/>
+    <line x1="150" y1="390" x2="102" y2="363"/>
+  </g>
+  <!-- Hub back -->
+  <circle cx="150" cy="390" r="6" fill="#666" stroke="#444" stroke-width="2"/>
+
+  <!-- Front wheel -->
+  <circle cx="350" cy="390" r="55" fill="none" stroke="#333" stroke-width="8"/>
+  <circle cx="350" cy="390" r="48" fill="none" stroke="#555" stroke-width="2"/>
+  <!-- Spokes front -->
+  <g stroke="#AAA" stroke-width="1.5">
+    <line x1="350" y1="390" x2="350" y2="342"/>
+    <line x1="350" y1="390" x2="394" y2="363"/>
+    <line x1="350" y1="390" x2="398" y2="417"/>
+    <line x1="350" y1="390" x2="350" y2="438"/>
+    <line x1="350" y1="390" x2="306" y2="417"/>
+    <line x1="350" y1="390" x2="302" y2="363"/>
+  </g>
+  <!-- Hub front -->
+  <circle cx="350" cy="390" r="6" fill="#666" stroke="#444" stroke-width="2"/>
+
+  <!-- Bike frame -->
+  <g stroke="#C62828" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Seat tube -->
+    <line x1="230" y1="300" x2="230" y2="390"/>
+    <!-- Down tube -->
+    <line x1="230" y1="300" x2="310" y2="390"/>
+    <!-- Seat stay -->
+    <line x1="230" y1="300" x2="150" y2="390"/>
+    <!-- Chain stay -->
+    <line x1="310" y1="390" x2="150" y2="390"/>
+    <!-- Top tube -->
+    <line x1="230" y1="300" x2="310" y2="300"/>
+    <!-- Fork -->
+    <line x1="310" y1="300" x2="350" y2="390"/>
+    <!-- Head tube -->
+    <line x1="310" y1="290" x2="310" y2="310"/>
+  </g>
+
+  <!-- Seat -->
+  <ellipse cx="230" cy="290" rx="22" ry="8" fill="#333" stroke="#222" stroke-width="2"/>
+  <line x1="230" y1="298" x2="230" y2="300" stroke="#333" stroke-width="4"/>
+
+  <!-- Handlebars -->
+  <path d="M310 300 Q305 280 290 270 Q275 262 265 265" stroke="#444" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="262" cy="267" rx="8" ry="5" fill="#555" transform="rotate(-15,262,267)"/>
+
+  <!-- Pedals and crank -->
+  <circle cx="310" cy="390" r="10" fill="#666" stroke="#444" stroke-width="2"/>
+  <!-- Left pedal (down) -->
+  <line x1="310" y1="390" x2="295" y2="415"

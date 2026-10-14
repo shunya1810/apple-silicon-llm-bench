@@ -264,41 +264,52 @@ MTPLX upstream の2つの列と TensorFold は 128K で decode が 4.6〜6.4 tok
 ## Qwen3.6-35B-A3B（MoE）
 
 MoE の Qwen3.6-35B-A3B（35B のパラメータのうち、1 トークンで約 3B を使う）で、同じ 3 ターンの会話を流しました。8-bit KV、temperature 0 です。
-MTPLX M1 fork [`v2.12.2-m1.4`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.4) は `Youssofal/Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16` を MTP（depth 1）で、Splash 1.3.0-m1.1 は `incoai/Qwen3.6-35B-A3B-Splash`（4bit と DFlash2 の draft）で動かしています。
-2 つは 2026-10-14 に交互に計測しました（2K〜64K は 2 回、128K と 256K は 1 回）。fork の v2.12.2-m1.2 の行は 2026-10-13 の計測で、比較のために載せています。
+MTPLX M1 fork [`v2.12.2-m1.5`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.5) は `Youssofal/Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16` を MTP（depth 1）で、Splash 1.3.0-m1.1 は `incoai/Qwen3.6-35B-A3B-Splash`（4bit と DFlash2 の draft）で動かしています。
+2 つは 2026-10-14 の午後に交互に計測しました（2K〜64K は 2 回、128K は 1 回）。fork の v2.12.2-m1.4 の行は同じ日の午前の計測で、比較のために載せています。
 表は `scripts/summarize_a3b.py` で作り、生のデータは `results/2026-09-m1max-64gb-qwen36-a3b/` にあります。
 
 | 文脈 | エンジン | 会話全体 | 1ターン目の応答開始 | 2・3ターン目の応答開始 | cold の prefill | decode（3ターンの平均） | ピークのメモリ | 回数 |
 |---|---|---|---|---|---|---|---|---|
-| 2K | **MTPLX M1 fork (m1.4)** | **10.9 s** | 1.6 s | 0.7 s | 1068 tok/s | **90.1 tok/s** | 26.5 GB | 2 |
-| 2K | Splash 1.3.0-m1.1 | 9.7 s | 1.8 s | 0.5 s | 934 tok/s | 93.6 tok/s | 26.1 GB | 2 |
-| 2K | MTPLX M1 fork (m1.2) | 16.7 s | 1.7 s | 0.8 s | 966 tok/s | 55.1 tok/s | 25.9 GB | 2 |
-| 8K | **MTPLX M1 fork (m1.4)** | **17.3 s** | 7.2 s | 0.8 s | 1088 tok/s | **87.6 tok/s** | 27.6 GB | 2 |
-| 8K | Splash 1.3.0-m1.1 | 18.6 s | 8.6 s | 0.6 s | 906 tok/s | 77.9 tok/s | 26.3 GB | 2 |
-| 8K | MTPLX M1 fork (m1.2) | 25.1 s | 8.2 s | 0.9 s | 960 tok/s | 47.6 tok/s | 26.3 GB | 2 |
-| 32K | **MTPLX M1 fork (m1.4)** | **47.3 s** | 35.5 s | 1.2 s | 914 tok/s | **77.1 tok/s** | 29.5 GB | 2 |
-| 32K | Splash 1.3.0-m1.1 | 63.6 s | 49.9 s | 1.0 s | 650 tok/s | 58.7 tok/s | 26.5 GB | 2 |
-| 32K | MTPLX M1 fork (m1.2) | 62.1 s | 39.7 s | 1.3 s | 817 tok/s | 36.0 tok/s | 27.7 GB | 2 |
-| 64K | **MTPLX M1 fork (m1.4)** | **108.2 s** | 94.2 s | 1.7 s | 692 tok/s | **69.4 tok/s** | 29.8 GB | 2 |
-| 64K | Splash 1.3.0-m1.1 | 2.6 min | 2.3 min | 1.4 s | 466 tok/s | 50.6 tok/s | 26.8 GB | 2 |
-| 64K | MTPLX M1 fork (m1.2) | 2.1 min | 97.7 s | 1.7 s | 667 tok/s | 30.4 tok/s | 27.7 GB | 2 |
-| 128K | **MTPLX M1 fork (m1.4)** | **4.9 min** | 4.5 min | 2.9 s | 480 tok/s | **56.7 tok/s** | 30.7 GB | 1 |
-| 128K | Splash 1.3.0-m1.1 | 8.2 min | 7.7 min | 2.2 s | 282 tok/s | 35.4 tok/s | 27.5 GB | 1 |
-| 128K | MTPLX M1 fork (m1.2) | 5.2 min | 4.6 min | 2.6 s | 478 tok/s | 20.7 tok/s | 29.6 GB | 1 |
-| 256K | **MTPLX M1 fork (m1.4)** | **17.9 min** | 17.4 min | 5.0 s | 246 tok/s | **42.8 tok/s** | 33.8 GB | 1 |
-| 256K | Splash 1.3.0-m1.1 | 27.0 min | 26.3 min | 4.0 s | 163 tok/s | 21.5 tok/s | 28.8 GB | 1 |
+| 2K | **MTPLX M1 fork (m1.5)** | **9.3 s** | 1.5 s | 0.7 s | 1109 tok/s | **111.8 tok/s** | 27.0 GB | 2 |
+| 2K | Splash 1.3.0-m1.1 | 9.5 s | 1.8 s | 0.5 s | 947 tok/s | 96.1 tok/s | 26.1 GB | 2 |
+| 2K | MTPLX M1 fork (m1.4) | 10.9 s | 1.6 s | 0.7 s | 1068 tok/s | 90.1 tok/s | 26.5 GB | 2 |
+| 8K | **MTPLX M1 fork (m1.5)** | **14.4 s** | 6.4 s | 0.8 s | 1218 tok/s | **110.8 tok/s** | 27.1 GB | 2 |
+| 8K | Splash 1.3.0-m1.1 | 18.1 s | 8.5 s | 0.6 s | 918 tok/s | 80.8 tok/s | 26.4 GB | 2 |
+| 8K | MTPLX M1 fork (m1.4) | 17.3 s | 7.2 s | 0.8 s | 1088 tok/s | 87.6 tok/s | 27.6 GB | 2 |
+| 32K | **MTPLX M1 fork (m1.5)** | **41.3 s** | 30.7 s | 1.1 s | 1054 tok/s | **86.4 tok/s** | 28.2 GB | 2 |
+| 32K | Splash 1.3.0-m1.1 | 60.7 s | 48.1 s | 0.9 s | 674 tok/s | 63.8 tok/s | 26.5 GB | 2 |
+| 32K | MTPLX M1 fork (m1.4) | 47.3 s | 35.5 s | 1.2 s | 914 tok/s | 77.1 tok/s | 29.5 GB | 2 |
+| 64K | **MTPLX M1 fork (m1.5)** | **92.7 s** | 80.2 s | 1.6 s | 813 tok/s | **76.5 tok/s** | 29.1 GB | 2 |
+| 64K | Splash 1.3.0-m1.1 | 2.5 min | 2.2 min | 1.3 s | 488 tok/s | 57.7 tok/s | 26.8 GB | 2 |
+| 64K | MTPLX M1 fork (m1.4) | 108.2 s | 94.2 s | 1.7 s | 692 tok/s | 69.4 tok/s | 29.8 GB | 2 |
+| 128K | **MTPLX M1 fork (m1.5)** | **4.3 min** | 4.0 min | 2.5 s | 543 tok/s | **61.2 tok/s** | 30.5 GB | 1 |
+| 128K | Splash 1.3.0-m1.1 | 7.7 min | 7.4 min | 2.1 s | 296 tok/s | 43.9 tok/s | 27.5 GB | 1 |
+| 128K | MTPLX M1 fork (m1.4) | 4.9 min | 4.5 min | 2.9 s | 480 tok/s | 56.7 tok/s | 30.7 GB | 1 |
 
-- **8K 以上では、メモリ以外のすべての項目で M1 fork が上回りました。**
-  - 会話全体の時間は 7〜40% 短くなりました（8K で 17.3 秒対 18.6 秒、128K で 4.9 分対 8.2 分、256K で 17.9 分対 27.0 分）。
-  - decode は 12〜99% 速く、cold の prefill は 20〜70% 速くなりました。
-  - 2K では、Splash の decode がまだ 4% 速く（93.6 対 90.1 tok/s）、会話全体も 1.2 秒早く終わります。
-- **m1.4 と m1.2 の比較:** decode は、どの長さでも 1.6〜2.7 倍になりました（2K で 55.1 → 90.1 tok/s、128K で 20.7 → 56.7）。主な変更は次のとおりです（詳しくは fork の [CHANGES.ja.md](https://github.com/shunya1810/MTPLX/blob/m1max-longctx/docs/m1max-longctx/CHANGES.ja.md)）。
-  - A3B の verify を capture_commit にしました。
-  - 上流の MoE の融合カーネルを fp16 に移植して、M1 でも使えるようにしました。
-  - 1 round あたりのホストとの同期を減らしました。
-  - prompt を 4,096 トークンの chunk で、expert ごとに区切った gather で読むようにしました。
-- **メモリ:** ピークは Splash が 26〜29 GB、fork が 27〜34 GB です。
-- 各計測の前の 2K の canary: fork は 87〜90 tok/s、Splash は 87〜92 tok/s でした。
+- **メモリ以外のすべての項目で、どの長さでも M1 fork が上回りました。**
+  - 会話全体の時間は 2〜44% 短くなりました（2K で 9.3 秒対 9.5 秒、8K で 14.4 秒対 18.1 秒、128K で 4.3 分対 7.7 分）。
+  - decode は 16〜39% 速く（2K で 111.8 対 96.1 tok/s、128K で 61.2 対 43.9）、cold の prefill は 17〜83% 速くなりました。
+- **m1.5 と m1.4 の比較:** decode は 2K で +24%、8K で +26%、32K で +12%、64K で +10%、128K で +8% です。会話全体は 12〜17% 短くなりました。主な変更は次のとおりです（詳しくは fork の [CHANGES.ja.md](https://github.com/shunya1810/MTPLX/blob/m1max-longctx/docs/m1max-longctx/CHANGES.ja.md)）。
+  - MTP の round を GPU の上で続けて回し、前の round の結果を host が読む前に次の round を積むようにしました。greedy の出力は今までと同じで、sampling にも対応しています。
+  - prefill の一部を Neural Engine で計算するようにしました。
+- **メモリ:** ピークは Splash が 26〜28 GB、fork が 27〜31 GB です。
+- 256K は測り直していません。2026-10-14 の午前の計測では、m1.4 が 17.9 分（42.8 tok/s）、Splash が 27.0 分（21.5 tok/s）でした。
+
+### A3B、thinking ありの短いプロンプト
+
+Splash 自身の数字の条件（`docs/performance.md`: コーディングの短いプロンプト、reasoning あり、greedy、出力の上限 1,024 トークン）に加えて、sampling の条件（temperature 1.0、top_p 0.95、top_k 20、2,048 トークン）でも測りました。
+プロンプトは 4 つ（ペリカンの SVG、heptagon、LRU キャッシュ、ISO 8601 の parser）で、各エンジンを交互に 2 回ずつ流しています（`scripts/think_short.py`、生のデータは `results/2026-10-m1max-64gb-a3b-think/`）。
+すべての実行が出力の上限に達しました。decode には reasoning のトークンも含みます。
+
+| decode（tok/s） | MTPLX M1 fork（m1.5） | Splash 1.3.0-m1.1 |
+|---|---|---|
+| greedy、1,024 トークン | 120.8 | **132.0** |
+| sampling、2,048 トークン | 114.6 | **131.6** |
+
+- **この条件では Splash が 9〜15% 速いです。** プロンプト別では、ほぼ互角のもの（heptagon と ISO の parser。greedy で 117〜120 対 120〜124）から、15〜26% 差がつくもの（ペリカンと LRU）まであります。
+  - thinking の文章と定型的なコードは、Splash の DFlash2（ブロック単位の draft）が最も当てやすい文章です。
+  - fork の MTP は 1 round に 1 トークンを draft するので、1 round で最大 2 トークンです（ここでは 1.7〜1.9）。
+- Splash の README の数字（このモデルで 210 tok/s）は M5 Pro での計測で、M1 Max とは比べられません。
 
 ## 短いプロンプト（Splash の投稿と同じ条件）
 

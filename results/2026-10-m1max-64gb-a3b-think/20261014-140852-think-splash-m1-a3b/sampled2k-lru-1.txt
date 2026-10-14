@@ -1,0 +1,174 @@
+Here's a thinking process:
+
+1.  **Understand User Request:**
+   - **Goal:** Write a thread-safe LRU (Least Recently Used) cache in Python.
+   - **Features:** `get`, `put`, max size limit.
+   - **Additional:** Include unit tests.
+   - **Key Requirements:** Thread-safety, LRU eviction, max size, Python implementation.
+
+2.  **Core Concepts of LRU Cache:**
+   - **Data Structure:** Typically uses a combination of a hash map (dictionary) and a doubly-linked list.
+     - Hash map: O(1) lookups.
+     - Doubly-linked list: Maintains insertion/access order (most recent at front, least recent at back).
+   - **Operations:**
+     - `get(key)`: If exists, move to front, return value. Else, return None/raise KeyError.
+     - `put(key, value)`: If exists, update value and move to front. If not exists, add to front. If max size exceeded, remove least recent (back of list) and corresponding hash map entry.
+   - **Thread-safety:** Requires synchronization mechanism. In Python, `threading.Lock` is standard. Alternatively, `collections.OrderedDict` can be used with a lock, but a custom linked list approach is more efficient and educational. I'll implement a proper doubly-linked list + dict approach with a lock.
+
+3.  **Design Decisions:**
+   - **Language:** Python
+   - **Synchronization:** `threading.Lock`
+   - **Data Structures:**
+     - `head` and `tail` pointers for doubly-linked list.
+     - `node` class representing cache entries.
+     - `cache` dictionary mapping keys to nodes.
+   - **Methods:** `get(key)`, `put(key, value)`, maybe `__len__` for completeness (not strictly requested but good practice).
+   - **Thread-safety:** Wrap all state-modifying operations in a `with self._lock:` block.
+   - **Unit Tests:** Use `unittest` or `pytest`. I'll use `unittest` for standard library compatibility, but structure it to be easily runnable. I'll include concurrent stress tests.
+
+4.  **Implementation Details (Mental Draft):**
+   ```python
+   import threading
+   from collections import OrderedDict  # Actually, I can use OrderedDict directly with a lock, but custom linked list is better for performance/learning. However, Python's OrderedDict is already optimized in C. Let's stick to OrderedDict for simplicity and reliability, but wrap it in a lock. Wait, the prompt says "Write a thread-safe LRU cache", not necessarily from scratch. But implementing it properly shows depth. I'll implement a custom one with OrderedDict-like behavior using a doubly-linked list for clarity, OR just use OrderedDict with threading.Lock. Actually, using OrderedDict is standard and efficient. Let's do the custom doubly-linked list approach to demonstrate understanding, but keep it clean.
+
+   Actually, Python's `functools.lru_cache` exists but isn't thread-safe by default and is for functions. For a general cache, a custom implementation is better.
+
+   Let's design a simple but robust version:
+   ```python
+   import threading
+   from typing import Any, Optional
+
+   class LRUNode:
+       def __init__(self, key, value):
+           self.key = key
+           self.value = value
+           self.prev = None
+           self.next = None
+
+   class LRUCache:
+       def __init__(self, capacity: int):
+           if capacity <= 0:
+               raise ValueError("Capacity must be positive")
+           self.capacity = capacity
+           self.cache = {}  # key -> LRUNode
+           self.head = LRUNode(None, None)  # dummy
+           self.tail = LRUNode(None, None)  # dummy
+           self.head.next = self.tail
+           self.tail.prev = self.head
+           self._lock = threading.Lock()
+
+       def _remove(self, node: LRUNode):
+           prev_node = node.prev
+           next_node = node.next
+           prev_node.next = next_node
+           next_node.prev = prev_node
+
+       def _add_to_front(self, node: LRUNode):
+           node.prev = self.head
+           node.next = self.head.next
+           self.head.next.prev = node
+           self.head.next = node
+
+       def get(self, key: Any) -> Optional[Any]:
+           with self._lock:
+               if key in self.cache:
+                   node = self.cache[key]
+                   self._remove(node)
+                   self._add_to_front(node)
+                   return node.value
+               return None
+
+       def put(self, key: Any, value: Any):
+           with self._lock:
+               if key in self.cache:
+                   node = self.cache[key]
+                   node.value = value
+                   self._remove(node)
+                   self._add_to_front(node)
+               else:
+                   if len(self.cache) >= self.capacity:
+                       # Remove least recently used (before tail)
+                       lru_node = self.tail.prev
+                       self._remove(lru_node)
+                       del self.cache[lru_node.key]
+                   new_node = LRUNode(key, value)
+                   self.cache[key] = new_node
+                   self._add_to_front(new_node)
+   ```
+   This is solid. Thread-safe due to `threading.Lock()`. O(1) operations. Handles max size.
+
+5.  **Unit Tests Design:**
+   - Use `unittest` module.
+   - Test basic `put` and `get`.
+   - Test eviction when capacity exceeded.
+   - Test update existing key.
+   - Test thread-safety: Concurrent reads/writes, verify no race conditions, verify final state consistency.
+   - Use `concurrent.futures.ThreadPoolExecutor` for stress testing.
+
+   Draft tests:
+   ```python
+   import unittest
+   import threading
+   import time
+   from concurrent.futures import ThreadPoolExecutor, as_completed
+
+   class TestLRUCache(unittest.TestCase):
+       def setUp(self):
+           self.cache = LRUCache(3)
+
+       def test_put_get(self):
+           self.cache.put(1, 'a')
+           self.assertEqual(self.cache.get(1), 'a')
+           self.assertIsNone(self.cache.get(2))
+
+       def test_eviction(self):
+           self.cache.put(1, 'a')
+           self.cache.put(2, 'b')
+           self.cache.put(3, 'c')
+           self.cache.put(4, 'd')  # triggers eviction
+           self.assertIsNone(self.cache.get(1))
+           self.assertEqual(self.cache.get(2), 'b')
+           self.assertEqual(self.cache.get(3), 'c')
+           self.assertEqual(self.cache.get(4), 'd')
+
+       def test_update_existing(self):
+           self.cache.put(1, 'a')
+           self.cache.put(1, 'b')  # update
+           self.assertEqual(self.cache.get(1), 'b')
+           self.cache.put(2, 'c')
+           self.cache.put(3, 'd')
+           self.cache.put(4, 'e')  # evicts 2
+           self.assertIsNone(self.cache.get(2))
+           self.assertEqual(self.cache.get(4), 'e')
+
+       def test_thread_safety(self):
+           cache = LRUCache(100)
+           errors = []
+           def worker(key, value):
+               try:
+                   cache.put(key, value)
+                   time.sleep(0.001)  # simulate work
+                   cache.get(key)
+               except Exception as e:
+                   errors.append(e)
+
+           # Run multiple threads concurrently
+           keys = list(range(200))
+           values = list(range(200))
+           with ThreadPoolExecutor(max_workers=10) as executor:
+               futures = [executor.submit(worker, k, v) for k, v in zip(keys, values)]
+               for f in as_completed(futures):
+                   f.result()
+
+           self.assertEqual(len(errors), 0, f"Errors during concurrent execution: {errors}")
+           # Verify cache consistency (all 100 keys should be present)
+           for k in range(100):
+               self.assertEqual(cache.get(k), k)
+   ```
+
+6.  **Refine & Self-Correction/Verification:**
+   - **Thread-safety:** The lock wraps all state changes. `get` and `put` are fully synchronized. This prevents race conditions like two threads trying to evict simultaneously or corrupting the linked list.
+   - **Edge Cases:** Capacity <= 0? Handled with ValueError. What if capacity is 0? I'll keep the check or allow 0 (just never stores anything). I'll stick to positive capacity for simplicity, but maybe remove the check or handle it gracefully. Actually, capacity 0 is valid (cache that drops everything). I'll adjust to allow capacity > 0 or handle 0 properly. Let's just enforce `capacity > 0` for simplicity, or change condition to `len(self.cache) > self.capacity` to allow 0. I'll keep `capacity > 0` but maybe relax it. Actually, standard LRU caches allow capacity=0. I'll change to `if self.capacity > 0 and len(self.cache) >= self.capacity:` to be robust.
+   - **Type Hints:** Added for clarity.
+   - **Dictionary `len()`:**
+=====

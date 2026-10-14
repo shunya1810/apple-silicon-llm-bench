@@ -1,0 +1,68 @@
+The user wants me to generate an SVG image of a pelican riding a bicycle. This is a creative illustration task. I need to design an SVG that shows:
+
+1. A pelican (with its distinctive large beak/pouch)
+2. A bicycle
+3. The pelican positioned as if riding the bicycle
+
+Let me think about the composition:
+- The bicycle should have two wheels, a frame, handlebars, pedals, and a seat
+- The pelican should be sitting on the seat, with its feet on the pedals
+- The pelican's wings could be on the handlebars
+- I'll use simple geometric shapes and paths to create a cartoonish, charming illustration
+
+Let me design this step by step:
+
+Bicycle components:
+- Two circles for wheels with spokes
+- Lines for the frame (triangle shape)
+- Handlebars
+- Seat
+- Pedals and crank
+
+Pelican:
+- Body (ellipse/rounded shape)
+- Long beak with pouch
+- Eye
+- Wings reaching to handlebars
+- Feet on pedals
+
+I'll use a viewBox of about 0 0 800 600 to give plenty of space.
+
+Let me create a nice, detailed SVG with good colors and styling.
+
+=====
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Sky background -->
+  <rect x="0" y="0" width="800" height="600" fill="#87CEEB"/>
+  
+  <!-- Ground -->
+  <rect x="0" y="520" width="800" height="80" fill="#7CB342"/>
+  <rect x="0" y="520" width="800" height="15" fill="#558B2F"/>
+  
+  <!-- Road -->
+  <rect x="0" y="510" width="800" height="20" fill="#757575"/>
+  <line x1="0" y1="520" x2="800" y2="520" stroke="#FFD600" stroke-width="2" stroke-dasharray="30,20"/>
+  
+  <!-- Clouds -->
+  <ellipse cx="150" cy="60" rx="60" ry="25" fill="white" opacity="0.9"/>
+  <ellipse cx="180" cy="50" rx="45" ry="20" fill="white" opacity="0.9"/>
+  <ellipse cx="120" cy="55" rx="40" ry="18" fill="white" opacity="0.9"/>
+  
+  <ellipse cx="650" cy="80" rx="55" ry="22" fill="white" opacity="0.8"/>
+  <ellipse cx="680" cy="70" rx="40" ry="18" fill="white" opacity="0.8"/>
+  
+  <!-- Sun -->
+  <circle cx="720" cy="70" r="40" fill="#FFD600"/>
+  <circle cx="720" cy="70" r="50" fill="#FFD600" opacity="0.3"/>
+  
+  <!-- === BICYCLE === -->
+  
+  <!-- Back wheel -->
+  <circle cx="250" cy="470" r="65" fill="none" stroke="#333" stroke-width="6"/>
+  <circle cx="250" cy="470" r="58" fill="none" stroke="#555" stroke-width="2"/>
+  <!-- Back wheel spokes -->
+  <line x1="250" y1="405" x2="250" y2="535" stroke="#888" stroke-width="1.5"/>
+  <line x1="185" y1="470" x2="315" y2="470" stroke="#888" stroke-width="1.5"/>
+  <line x1="204" y1="424" x2="296" y2="516" stroke="#888" stroke-width="1.5"/>
+  <line x1="296" y1="424" x2="204"

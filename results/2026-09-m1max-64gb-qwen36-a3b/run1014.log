@@ -1,0 +1,136 @@
+03:23:08 battery 100%  Wattage = 100W
+03:23:08 round 1 mt-2k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.1376946249511093, "decode_tok_s": 102.30309837713537, "e2e_s": 0.20629437500610948, "peak_wired": 25684754432, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9944343339884654, "decode_tok_s": 87.34036887547884, "e2e_s": 3.44941437500529, "peak_wired": 25789595648, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 1680, "cached_tokens_usage": 0, "ttft_s": 1.8094389999751002, "decode_tok_s": 91.33850261552038, "e2e_s": 4.6014998749597, "peak_wired": 25881034752, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 1983, "cached_tokens_usage": 1664, "ttft_s": 0.5532125829486176, "decode_tok_s": 107.97047766280184, "e2e_s": 2.915205499972217, "peak_wired": 25995362304, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 2283, "cached_tokens_usage": 1952, "ttft_s": 0.5436900410568342, "decode_tok_s": 79.63657196992325, "e2e_s": 2.2265676660463214, "peak_wired": 26079543296, "needle_ok": true, "error": null}
+03:23:36   canary 87.34036887547884 ref None slow=False
+03:25:06 round 1 mt-2k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.8565626249182969, "decode_tok_s": 23.236543444518027, "e2e_s": 1.1914846249856055, "peak_wired": 25043877888, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.770685291965492, "decode_tok_s": 88.81610580172075, "e2e_s": 3.2337474999949336, "peak_wired": 26132217856, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 1680, "cached_tokens_usage": 0, "ttft_s": 1.5719719999469817, "decode_tok_s": 87.96423718949002, "e2e_s": 4.505346333957277, "peak_wired": 26462158848, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 1983, "cached_tokens_usage": 1615, "ttft_s": 0.5174765840638429, "decode_tok_s": 92.21761811310309, "e2e_s": 3.317280999966897, "peak_wired": 26058407936, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 2283, "cached_tokens_usage": 1615, "ttft_s": 0.9179010840598494, "decode_tok_s": 90.95880429430584, "e2e_s": 3.007715625106357, "peak_wired": 26040483840, "needle_ok": true, "error": null}
+03:25:31   canary 88.81610580172075 ref None slow=False
+03:27:01 round 1 mt-8k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.13233329204376787, "decode_tok_s": 106.1412846612803, "e2e_s": 0.19847820908762515, "peak_wired": 25632899072, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9868094170233235, "decode_tok_s": 87.80830388787156, "e2e_s": 3.433463833061978, "peak_wired": 25754025984, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 7833, "cached_tokens_usage": 0, "ttft_s": 8.667707959073596, "decode_tok_s": 77.30451486730402, "e2e_s": 11.966461249976419, "peak_wired": 26102972416, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 8136, "cached_tokens_usage": 7808, "ttft_s": 0.6147384999785572, "decode_tok_s": 83.94743327995525, "e2e_s": 3.653273957897909, "peak_wired": 26180993024, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 8436, "cached_tokens_usage": 8128, "ttft_s": 0.6240283749066293, "decode_tok_s": 67.98116125696906, "e2e_s": 3.154560374910943, "peak_wired": 26312261632, "needle_ok": true, "error": null}
+03:27:38   canary 87.80830388787156 ref 87.34036887547884 slow=False
+03:29:08 round 1 mt-8k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.48315712506882846, "decode_tok_s": 25.1890678871, "e2e_s": 0.7962335840566084, "peak_wired": 24462999552, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7750895000062883, "decode_tok_s": 87.6660939228672, "e2e_s": 3.2580362079897895, "peak_wired": 26391920640, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 7833, "cached_tokens_usage": 0, "ttft_s": 7.221696041058749, "decode_tok_s": 84.41659223324524, "e2e_s": 10.284630415961146, "peak_wired": 27646951424, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 8136, "cached_tokens_usage": 7768, "ttft_s": 0.616412042058073, "decode_tok_s": 93.1576171521785, "e2e_s": 3.396232375060208, "peak_wired": 26261405696, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 8436, "cached_tokens_usage": 7768, "ttft_s": 1.0856844580266625, "decode_tok_s": 83.49949430888675, "e2e_s": 3.7515714580658823, "peak_wired": 25955893248, "needle_ok": true, "error": null}
+03:29:39   canary 87.6660939228672 ref 88.81610580172075 slow=False
+03:31:09 round 1 mt-32k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.133858458022587, "decode_tok_s": 106.12626431464341, "e2e_s": 0.1999889580765739, "peak_wired": 25632440320, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.978965500020422, "decode_tok_s": 88.43430715261547, "e2e_s": 3.4155208750162274, "peak_wired": 25789267968, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 32409, "cached_tokens_usage": 0, "ttft_s": 50.107877541915514, "decode_tok_s": 58.94850546492455, "e2e_s": 54.4337812080048, "peak_wired": 26371850240, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 32712, "cached_tokens_usage": 32384, "ttft_s": 0.9822055409895256, "decode_tok_s": 62.362189878325, "e2e_s": 5.071464041015133, "peak_wired": 26445938688, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 33012, "cached_tokens_usage": 32704, "ttft_s": 1.0040903330082074, "decode_tok_s": 52.53978731472251, "e2e_s": 4.48753358295653, "peak_wired": 26549256192, "needle_ok": true, "error": null}
+03:32:32   canary 88.43430715261547 ref 87.80830388787156 slow=False
+03:34:02 round 1 mt-32k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.47245362505782396, "decode_tok_s": 25.880387655538353, "e2e_s": 0.7770684170536697, "peak_wired": 23914971136, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7669687080197036, "decode_tok_s": 88.32854742123328, "e2e_s": 3.2386890000198036, "peak_wired": 26270810112, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": null, "cached_tokens_usage": null, "ttft_s": null, "decode_tok_s": null, "e2e_s": 7.433465916081332, "peak_wired": 27983364096, "needle_ok": null, "error": {"message": "Failed to load the metallib from </Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-moe-m1-5cab6269/native_extensions/mfa_attn/mtplx_mfa_attn/mtplx_mfa_attn.metallib> with error library not found", "type": "server_error", "code": "RuntimeError", "param": null}}
+03:34:24   canary 88.32854742123328 ref 88.81610580172075 slow=False
+03:35:54 round 1 mt-64k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.13164754095487297, "decode_tok_s": 106.28989432376018, "e2e_s": 0.19768304098397493, "peak_wired": 25590824960, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9784968328895047, "decode_tok_s": 88.50347157995417, "e2e_s": 3.4137212499044836, "peak_wired": 25689636864, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 65163, "cached_tokens_usage": 0, "ttft_s": 139.9048020830378, "decode_tok_s": 47.993172169250236, "e2e_s": 145.21814024995547, "peak_wired": 26571227136, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 65466, "cached_tokens_usage": 65152, "ttft_s": 1.337916958029382, "decode_tok_s": 59.6299214985656, "e2e_s": 5.614534666994587, "peak_wired": 26670137344, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 65766, "cached_tokens_usage": 65440, "ttft_s": 1.399359832983464, "decode_tok_s": 39.806825174945956, "e2e_s": 6.247915416024625, "peak_wired": 26822164480, "needle_ok": true, "error": null}
+03:38:50   canary 88.50347157995417 ref 88.43430715261547 slow=False
+03:40:20 round 1 mt-64k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.48227745899930596, "decode_tok_s": 25.682120233311363, "e2e_s": 0.7888227499788627, "peak_wired": 24362713088, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7764235410140827, "decode_tok_s": 88.59727230831383, "e2e_s": 3.243987249908969, "peak_wired": 26306215936, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": null, "cached_tokens_usage": null, "ttft_s": null, "decode_tok_s": null, "e2e_s": 7.479417250026017, "peak_wired": 28444999680, "needle_ok": null, "error": {"message": "Failed to load the metallib from </Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-moe-m1-5cab6269/native_extensions/mfa_attn/mtplx_mfa_attn/mtplx_mfa_attn.metallib> with error library not found", "type": "server_error", "code": "RuntimeError", "param": null}}
+03:40:42   canary 88.59727230831383 ref 88.81610580172075 slow=False
+03:42:12 round 2 mt-2k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4788280000211671, "decode_tok_s": 25.620457390088557, "e2e_s": 0.7858887080801651, "peak_wired": 23954718720, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.771973374998197, "decode_tok_s": 89.97702840213462, "e2e_s": 3.216521374997683, "peak_wired": 26304839680, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 1680, "cached_tokens_usage": 0, "ttft_s": 1.573812291957438, "decode_tok_s": 87.48911390592329, "e2e_s": 4.522654957952909, "peak_wired": 26483326976, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 1983, "cached_tokens_usage": 1615, "ttft_s": 0.5193137919995934, "decode_tok_s": 91.7668354891735, "e2e_s": 3.333820458035916, "peak_wired": 26164740096, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 2283, "cached_tokens_usage": 1615, "ttft_s": 0.9094639589311555, "decode_tok_s": 90.33663502754128, "e2e_s": 3.0136521250242367, "peak_wired": 26336575488, "needle_ok": true, "error": null}
+03:42:37   canary 89.97702840213462 ref 88.81610580172075 slow=False
+03:44:07 round 2 mt-2k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.1255243750056252, "decode_tok_s": 105.37070723799353, "e2e_s": 0.19214058306533843, "peak_wired": 25557008384, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9738783750217408, "decode_tok_s": 90.38620258426013, "e2e_s": 3.379187542013824, "peak_wired": 25649758208, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 1680, "cached_tokens_usage": 0, "ttft_s": 1.7897215419216082, "decode_tok_s": 94.88581134913669, "e2e_s": 4.4773148749955, "peak_wired": 25770885120, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 1983, "cached_tokens_usage": 1664, "ttft_s": 0.5363754159770906, "decode_tok_s": 107.68778520949701, "e2e_s": 2.9047461659647524, "peak_wired": 25899220992, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 2283, "cached_tokens_usage": 1952, "ttft_s": 0.5415732089895755, "decode_tok_s": 79.8871723169041, "e2e_s": 2.2193695419700816, "peak_wired": 26010484736, "needle_ok": true, "error": null}
+03:44:35   canary 90.38620258426013 ref 88.50347157995417 slow=False
+03:46:05 round 2 mt-8k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.476150874979794, "decode_tok_s": 25.98534333798652, "e2e_s": 0.7799560830462724, "peak_wired": 24370937856, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7696308749727905, "decode_tok_s": 89.89213653376603, "e2e_s": 3.216164708021097, "peak_wired": 26275299328, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 7833, "cached_tokens_usage": 0, "ttft_s": 7.177782999933697, "decode_tok_s": 85.77972699559666, "e2e_s": 10.193632749957033, "peak_wired": 27600175104, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 8136, "cached_tokens_usage": 7768, "ttft_s": 0.6147847500396892, "decode_tok_s": 94.1462203203915, "e2e_s": 3.367679583025165, "peak_wired": 26149830656, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 8436, "cached_tokens_usage": 7768, "ttft_s": 1.0404569159727544, "decode_tok_s": 84.57811554610929, "e2e_s": 3.672606333042495, "peak_wired": 26118127616, "needle_ok": true, "error": null}
+03:46:36   canary 89.89213653376603 ref 89.97702840213462 slow=False
+03:48:06 round 2 mt-8k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.1277221670607105, "decode_tok_s": 107.3142314962072, "e2e_s": 0.19305695896036923, "peak_wired": 25549406208, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9704270829679444, "decode_tok_s": 88.31834311908196, "e2e_s": 3.4089851250173524, "peak_wired": 25675694080, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 7833, "cached_tokens_usage": 0, "ttft_s": 8.628384625073522, "decode_tok_s": 79.813861555827, "e2e_s": 11.823482375009917, "peak_wired": 25974669312, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 8136, "cached_tokens_usage": 7808, "ttft_s": 0.6005961250048131, "decode_tok_s": 88.40934044953242, "e2e_s": 3.485295624937862, "peak_wired": 26104086528, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 8436, "cached_tokens_usage": 8128, "ttft_s": 0.6140921249752864, "decode_tok_s": 70.24105853362022, "e2e_s": 3.0629477909533307, "peak_wired": 26214400000, "needle_ok": true, "error": null}
+03:48:42   canary 88.31834311908196 ref 90.38620258426013 slow=False
+03:50:12 round 2 mt-32k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.492196207982488, "decode_tok_s": 24.897217441568813, "e2e_s": 0.8082298750523478, "peak_wired": 23954456576, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7763932920061052, "decode_tok_s": 87.70771989750973, "e2e_s": 3.2590129589661956, "peak_wired": 26423754752, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": null, "cached_tokens_usage": null, "ttft_s": null, "decode_tok_s": null, "e2e_s": 7.473528833012097, "peak_wired": 27925037056, "needle_ok": null, "error": {"message": "Failed to load the metallib from </Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-moe-m1-5cab6269/native_extensions/mfa_attn/mtplx_mfa_attn/mtplx_mfa_attn.metallib> with error library not found", "type": "server_error", "code": "RuntimeError", "param": null}}
+03:50:33   canary 87.70771989750973 ref 89.97702840213462 slow=False
+03:52:03 round 2 mt-32k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.12917854194529355, "decode_tok_s": 105.17617004268213, "e2e_s": 0.19589104200713336, "peak_wired": 25524518912, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9722387079382315, "decode_tok_s": 90.71227163759988, "e2e_s": 3.372407207963988, "peak_wired": 25667944448, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 32409, "cached_tokens_usage": 0, "ttft_s": 49.68331108300481, "decode_tok_s": 59.11151053306434, "e2e_s": 53.99732804193627, "peak_wired": 26216824832, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 32712, "cached_tokens_usage": 32384, "ttft_s": 0.9432406249688938, "decode_tok_s": 66.67142226468182, "e2e_s": 4.768141582957469, "peak_wired": 26371473408, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 33012, "cached_tokens_usage": 32704, "ttft_s": 0.9787710839882493, "decode_tok_s": 52.79861892730576, "e2e_s": 4.44492799998261, "peak_wired": 26464960512, "needle_ok": true, "error": null}
+03:53:25   canary 90.71227163759988 ref 90.38620258426013 slow=False
+03:54:55 round 2 mt-64k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4693397090304643, "decode_tok_s": 26.077375983600152, "e2e_s": 0.770310917054303, "peak_wired": 23881957376, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7657740840222687, "decode_tok_s": 88.41016936960489, "e2e_s": 3.2359121249755844, "peak_wired": 26324074496, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": null, "cached_tokens_usage": null, "ttft_s": null, "decode_tok_s": null, "e2e_s": 7.5069962500128895, "peak_wired": 28454207488, "needle_ok": null, "error": {"message": "Failed to load the metallib from </Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-moe-m1-5cab6269/native_extensions/mfa_attn/mtplx_mfa_attn/mtplx_mfa_attn.metallib> with error library not found", "type": "server_error", "code": "RuntimeError", "param": null}}
+03:55:16   canary 88.41016936960489 ref 89.97702840213462 slow=False
+03:56:46 round 2 mt-64k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.13316308392677456, "decode_tok_s": 105.41652708878075, "e2e_s": 0.19969699997454882, "peak_wired": 25562923008, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9750013330485672, "decode_tok_s": 92.34264658049305, "e2e_s": 3.350473083090037, "peak_wired": 25673138176, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 65163, "cached_tokens_usage": 0, "ttft_s": 139.62555416696705, "decode_tok_s": 51.13942012301377, "e2e_s": 144.61208112491295, "peak_wired": 26573619200, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 65466, "cached_tokens_usage": 65152, "ttft_s": 1.3389707499882206, "decode_tok_s": 61.673441099230494, "e2e_s": 5.4738716669380665, "peak_wired": 26686226432, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 65766, "cached_tokens_usage": 65440, "ttft_s": 1.390099124982953, "decode_tok_s": 43.26761755648721, "e2e_s": 5.850841916981153, "peak_wired": 26828734464, "needle_ok": true, "error": null}
+03:59:41   canary 92.34264658049305 ref 90.71227163759988 slow=False
+04:01:11 plan done
+04:06:11 battery 100%  Wattage = 100W
+04:06:11 round 1 mt-128k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.13251295895315707, "decode_tok_s": 107.10064582056505, "e2e_s": 0.1980772919487208, "peak_wired": 25525698560, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9720069579780102, "decode_tok_s": 90.08206513800404, "e2e_s": 3.381977624958381, "peak_wired": 25671712768, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 130713, "cached_tokens_usage": 0, "ttft_s": 464.3135698750848, "decode_tok_s": 36.85491678744133, "e2e_s": 471.2329021251062, "peak_wired": 27287060480, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 131016, "cached_tokens_usage": 130688, "ttft_s": 2.2782324999570847, "decode_tok_s": 39.3798996504172, "e2e_s": 8.753772082971409, "peak_wired": 27449409536, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 131316, "cached_tokens_usage": 131008, "ttft_s": 2.1754723750054836, "decode_tok_s": 29.921135760935243, "e2e_s": 9.093840416986495, "peak_wired": 27516354560, "needle_ok": true, "error": null}
+04:14:39   canary 90.08206513800404 ref None slow=False
+04:16:09 round 1 mt-128k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.4970326249022037, "decode_tok_s": 24.972452261596132, "e2e_s": 0.8120426669484004, "peak_wired": 23937155072, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7784450420876965, "decode_tok_s": 88.63351116021519, "e2e_s": 3.2447925420710817, "peak_wired": 26292568064, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": null, "cached_tokens_usage": null, "ttft_s": null, "decode_tok_s": null, "e2e_s": 7.730729416012764, "peak_wired": 29424730112, "needle_ok": null, "error": {"message": "Failed to load the metallib from </Users/nakano/Desktop/work/llm-bench/work/worktrees/mtplx-moe-m1-5cab6269/native_extensions/mfa_attn/mtplx_mfa_attn/mtplx_mfa_attn.metallib> with error library not found", "type": "server_error", "code": "RuntimeError", "param": null}}
+04:16:32   canary 88.63351116021519 ref None slow=False
+04:18:02 plan done
+04:23:02 battery 100%  Wattage = 100W
+04:23:02 round 1 mt-256k q8 splash-m1-a3b attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.1308574159629643, "decode_tok_s": 105.8688519107812, "e2e_s": 0.19714041601400822, "peak_wired": 25562775552, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.9824597500264645, "decode_tok_s": 86.99377925652307, "e2e_s": 3.4428066660184413, "peak_wired": 25707397120, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 257672, "cached_tokens_usage": 0, "ttft_s": 1579.9746585419634, "decode_tok_s": 22.15141411015478, "e2e_s": 1591.4867943329737, "peak_wired": 28612116480, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 257975, "cached_tokens_usage": 257664, "ttft_s": 3.8570624579442665, "decode_tok_s": 22.639390895426036, "e2e_s": 15.120864333002828, "peak_wired": 28697591808, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 258275, "cached_tokens_usage": 257952, "ttft_s": 4.062026625033468, "decode_tok_s": 19.60996761913764, "e2e_s": 16.047216832987033, "peak_wired": 28818178048, "needle_ok": true, "error": null}
+04:50:27   canary 86.99377925652307 ref None slow=False
+04:51:57 round 1 mt-256k q8 mtplx-fork-a3b-moe attempt 1
+{"phase": "warmup", "turn": null, "prompt_tokens": 18, "cached_tokens_usage": 0, "ttft_s": 0.8702432080172002, "decode_tok_s": 22.049064131512534, "e2e_s": 1.2234713750658557, "peak_wired": 25117458432, "needle_ok": null, "error": null}
+{"phase": "canary", "turn": null, "prompt_tokens": 1856, "cached_tokens_usage": 0, "ttft_s": 1.7880494580604136, "decode_tok_s": 87.68057435787856, "e2e_s": 3.269939332967624, "peak_wired": 26065371136, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 1, "prompt_tokens": 257672, "cached_tokens_usage": 0, "ttft_s": 1046.7072219169931, "decode_tok_s": 42.36054437845375, "e2e_s": 1053.0889017919544, "peak_wired": 32833257472, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 2, "prompt_tokens": 257974, "cached_tokens_usage": 257536, "ttft_s": 3.440124750020914, "decode_tok_s": 43.49052540539327, "e2e_s": 9.62067787500564, "peak_wired": 33309949952, "needle_ok": null, "error": null}
+{"phase": "turn", "turn": 3, "prompt_tokens": 258274, "cached_tokens_usage": 257536, "ttft_s": 6.58111316699069, "decode_tok_s": 42.64073602379407, "e2e_s": 11.84396241698414, "peak_wired": 33755250688, "needle_ok": true, "error": null}
+05:10:08   canary 87.68057435787856 ref None slow=False
+05:11:38 plan done

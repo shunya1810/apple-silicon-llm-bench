@@ -1,0 +1,94 @@
+Here's a thinking process:
+
+1.  **Understand User Request:**
+   - **Goal:** Write a thread-safe LRU (Least Recently Used) cache in Python.
+   - **Features:** `get`, `put`, max size.
+   - **Additional Requirement:** Unit tests.
+   - **Key Constraints:** Thread-safety, LRU eviction, Python implementation.
+
+2.  **Core Concepts of LRU Cache:**
+   - Needs a data structure that supports:
+     - Fast lookup (O(1))
+     - Fast insertion/deletion (O(1))
+     - Order tracking (most recent vs least recent)
+   - Standard Python solution: `collections.OrderedDict`
+   - Thread-safety: Need a lock (e.g., `threading.Lock`) to protect concurrent access.
+
+3.  **Design the LRU Cache Class:**
+   - `__init__(self, maxsize)`: Initialize OrderedDict, maxsize, and a lock.
+   - `get(self, key)`: 
+     - Acquire lock
+     - Check if key exists
+     - If yes, move to end (most recent), return value
+     - If no, return None (or raise KeyError, but typically LRU caches return None or a default)
+     - Release lock
+   - `put(self, key, value)`:
+     - Acquire lock
+     - If key exists, update value and move to end
+     - If key doesn't exist:
+       - If at maxsize, pop the first item (least recent)
+       - Add new key-value pair to end
+     - Release lock
+   - Thread-safety: Use `threading.Lock` for both methods. Consider using `RLock` if needed, but `Lock` is fine for simple get/put.
+
+   Wait, should I use `collections.OrderedDict`? Yes, it's standard and efficient.
+   Let's draft the class:
+
+   ```python
+   import threading
+   from collections import OrderedDict
+
+   class LRUCache:
+       def __init__(self, maxsize):
+           self.maxsize = maxsize
+           self.cache = OrderedDict()
+           self.lock = threading.Lock()
+
+       def get(self, key):
+           with self.lock:
+               if key in self.cache:
+                   self.cache.move_to_end(key)
+                   return self.cache[key]
+               return None
+
+       def put(self, key, value):
+           with self.lock:
+               if key in self.cache:
+                   self.cache.move_to_end(key)
+               self.cache[key] = value
+               if len(self.cache) > self.maxsize:
+                   self.cache.popitem(last=False)
+   ```
+
+   Wait, there's a subtle bug in `put`: If the key exists, I update it and move to end. But if it doesn't exist, I add it, then check size. The current code does:
+   ```python
+   if key in self.cache:
+       self.cache.move_to_end(key)
+   self.cache[key] = value
+   if len(self.cache) > self.maxsize:
+       self.cache.popitem(last=False)
+   ```
+   This works, but it's slightly inefficient because it always does `self.cache[key] = value` even if it exists. Actually, `OrderedDict.__setitem__` already moves the key to the end if it exists. So I can simplify:
+   ```python
+   def put(self, key, value):
+       with self.lock:
+           if key in self.cache:
+               self.cache.move_to_end(key)
+           self.cache[key] = value
+           if len(self.cache) > self.maxsize:
+               self.cache.popitem(last=False)
+   ```
+   Actually, `self.cache[key] = value` when key exists moves it to the end automatically in Python 3.8+. But to be explicit and safe across versions, I'll keep `move_to_end` or just rely on `__setitem__`. Let's stick with explicit `move_to_end` for clarity, or just use `__setitem__` and note it. Actually, `OrderedDict`'s `__setitem__` moves existing keys to the end. So:
+   ```python
+   def put(self, key, value):
+       with self.lock:
+           if key in self.cache:
+               self.cache.move_to_end(key)
+           self.cache[key] = value
+           if len(self.cache) > self.maxsize:
+               self.cache.popitem(last=False)
+   ```
+   This is fine.
+
+   Wait, what about `get` returning a default value? Standard LRU caches often allow a default. I'll stick to returning `None` for simplicity, but I'll add a `default` parameter to `get` to
+=====

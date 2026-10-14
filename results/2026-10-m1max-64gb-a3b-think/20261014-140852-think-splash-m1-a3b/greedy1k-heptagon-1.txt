@@ -1,0 +1,47 @@
+Here's a thinking process:
+
+1.  **Understand User Requirements:**
+   - **Visual:** 20 balls bouncing inside a spinning heptagon.
+   - **Balls:** Same radius, numbered 1-20, drop from center, specific colors provided.
+   - **Physics:** Gravity, friction, realistic bouncing off rotating walls, ball-ball collisions.
+   - **Constraints:** Bounce height limited by heptagon radius but > ball radius. Balls rotate with friction (numbers indicate spin). Heptagon spins at 360°/5s (72°/s). Heptagon large enough for all balls.
+   - **Tech:** No pygame. Use tkinter, math, numpy, dataclasses, typing, sys. Single Python file.
+   - **Implementation:** Custom collision detection/response, physics simulation.
+
+2.  **Key Components to Implement:**
+   - **Canvas/Rendering:** Tkinter canvas for drawing.
+   - **Heptagon:** 7-sided polygon, rotating around center. Need to calculate vertices dynamically based on rotation angle.
+   - **Balls:** Position (x, y), velocity (vx, vy), angular velocity (spin), radius, color, number.
+   - **Physics Engine:**
+     - Gravity: constant downward acceleration.
+     - Friction: air resistance/damping on linear and angular velocity.
+     - Wall collisions: Detect intersection with heptagon edges, reflect velocity with appropriate restitution, account for wall rotation (tangential velocity of wall at contact point).
+     - Ball-ball collisions: Elastic/inelastic collisions with friction, transfer of angular momentum.
+     - Rotation: Balls spin, numbers rotate visually.
+   - **Heptagon Rotation:** 360° per 5 seconds = 72°/s. Update vertices each frame.
+   - **Collision Detection:**
+     - Ball vs Heptagon edges: Line-circle intersection, find closest point on line segment, check distance vs radius.
+     - Ball vs Ball: Distance between centers vs 2*radius.
+   - **Collision Response:**
+     - Wall: Reflect velocity relative to wall's local velocity at contact point. Apply restitution coefficient.
+     - Ball-Ball: Standard 2D elastic collision with friction/spin transfer.
+   - **Rendering:** Draw heptagon, draw balls with numbers, handle rotation of numbers.
+
+3.  **Detailed Physics & Math:**
+   - **Heptagon:** Center (cx, cy), radius R (distance from center to vertex). Vertices: $V_i = (cx + R \cos(\theta_i), cy + R \sin(\theta_i))$ where $\theta_i = \theta_{base} + i \cdot 2\pi/7$.
+   - **Rotation:** $\theta_{base}(t) = \theta_0 + \omega t$, $\omega = 2\pi / 5$ rad/s.
+   - **Wall Velocity at Contact:** For a point on the wall at distance $r$ from center, tangential velocity is $\vec{v}_{wall} = \vec{\omega} \times \vec{r}_{contact}$. In 2D: $v_{wx} = -\omega (y - cy)$, $v_{wy} = \omega (x - cx)$.
+   - **Ball-Wall Collision:**
+     - Find closest point on edge to ball center.
+     - If distance < radius, push ball out along normal.
+     - Relative velocity: $\vec{v}_{rel} = \vec{v}_{ball} - \vec{v}_{wall}$.
+     - Reflect normal component: $v_{rel,n}' = -e \cdot v_{rel,n}$, where $e$ is restitution (0.8-0.9).
+     - Tangential component affected by friction: $v_{rel,t}' = v_{rel,t} (1 - \mu)$, where $\mu$ is friction coefficient.
+     - Update ball velocity: $\vec{v}_{ball}' = \vec{v}_{rel}' + \vec{v}_{wall}$.
+     - Apply angular impulse from tangential friction: $\Delta \omega = -\mu \cdot v_{rel,t} \cdot r_{ball} / I$ (simplified).
+   - **Ball-Ball Collision:**
+     - Distance $d < 2r$.
+     - Normal $\vec{n} = (\vec{p}_2 - \vec{p}_1) / d$.
+     - Relative velocity $\vec{v}_{rel} = \vec{v}_1 - \vec{v}_2$.
+     - Normal impulse: $j_n = -(1+e) (\vec{v}_{rel} \cdot \vec{n}) / (1/m_1
+=====

@@ -1,0 +1,6 @@
+The provided telemetry logs exhibit a highly structured, cyclical pattern governing both sensor values and status fields. The sensor readings follow a deterministic arithmetic progression, decreasing by 5.7 units in each subsequent record, wrapping around from near 100 back to 0. This creates a predictable oscillation between high and low values. Simultaneously, the status field cycles through five distinct states—nominal, degraded, recovering, offline, and calibrating—in a fixed, repeating sequence. The zone identifiers also follow a rigid alternating pattern between 'A' and 'N' prefixes, with the numeric suffixes incrementing by 17 in a specific order. This suggests the data is algorithmically generated rather than random, designed to test parsing logic against consistent, repeating structures.
+
+Three concrete observations are:
+1. Sensor values decrease by exactly 5.7 per record, resetting after reaching near-zero.
+2. The status field strictly alternates through five states in a fixed order, regardless of the sensor value.
+3. Zone IDs alternate between 'A' and 'N' prefixes, with numeric parts following a specific incremental sequence rather than random assignment.

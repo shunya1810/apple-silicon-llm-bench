@@ -16,16 +16,17 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-ENGINES = ["mtplx-fork-a3b-moe", "splash-m1-a3b", "mtplx-fork-a3b-m12"]
+ENGINES = ["mtplx-fork-a3b-m15", "splash-m1-a3b", "mtplx-fork-a3b-moe"]
 NAMES = {
+    "mtplx-fork-a3b-m15": "MTPLX M1 fork (m1.5)",
     "mtplx-fork-a3b-moe": "MTPLX M1 fork (m1.4)",
     "splash-m1-a3b": "Splash 1.3.0-m1.1",
     "mtplx-fork-a3b-m12": "MTPLX M1 fork (m1.2)",
 }
 # The run each engine's rows come from (run_stamp prefix): the m1.4 / Splash pair
 # was measured together on 2026-10-14, m1.2 the day before.
-RUN = {"mtplx-fork-a3b-moe": "20261014", "splash-m1-a3b": "20261014", "mtplx-fork-a3b-m12": "20261013"}
-CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k", "mt-256k"]
+RUN = {"mtplx-fork-a3b-m15": "20261014-1", "splash-m1-a3b": "20261014-1", "mtplx-fork-a3b-moe": "20261014-0", "mtplx-fork-a3b-m12": "20261013"}
+CTX = ["mt-2k", "mt-8k", "mt-32k", "mt-64k", "mt-128k"]
 LABEL = {"mt-2k": "2K", "mt-8k": "8K", "mt-32k": "32K", "mt-64k": "64K", "mt-128k": "128K", "mt-256k": "256K"}
 
 

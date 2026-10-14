@@ -1,0 +1,6 @@
+The provided telemetry logs exhibit a highly structured, cyclical pattern in both sensor values and status fields. Sensor readings generally decrease in increments of 5.7, starting from high values near 100 and dropping to near zero, before resetting to high values. This creates a repeating sawtooth wave across the dataset. Simultaneously, the status field cycles through five distinct states: nominal, degraded, recovering, offline, and calibrating. These statuses appear to correlate with specific ranges of sensor values, suggesting a deterministic relationship between the metric and the system state.
+
+Three concrete observations are:
+1. The status field follows a strict five-step cycle (nominal, degraded, recovering, offline, calibrating) that repeats consistently every five records, regardless of the sensor value's magnitude.
+2. Sensor values decrease by exactly 5.7 units in each subsequent record until they drop below 5.0, at which point they reset to a high value (typically between 96.0 and 99.6) in the next cycle.
+3. A specific maintenance override record (NEEDLE) interrupts the sequence, introducing non-telemetry data for zone Q42, which does not follow the established numerical or status patterns of

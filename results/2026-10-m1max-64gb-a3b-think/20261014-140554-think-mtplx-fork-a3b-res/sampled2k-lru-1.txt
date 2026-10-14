@@ -1,0 +1,175 @@
+Here's a thinking process:
+
+1.  **Understand User Request:**
+   - **Goal:** Create a thread-safe LRU (Least Recently Used) cache in Python.
+   - **Features:** `get` method, `put` method, configurable max size.
+   - **Additional Requirement:** Unit tests.
+   - **Language:** Python.
+
+2.  **Key Concepts & Components:**
+   - **LRU Cache:** Needs to track access order, evict least recently used items when exceeding max size.
+   - **Thread Safety:** Must handle concurrent reads/writes safely. Python's GIL helps with some operations, but for custom data structures, explicit locking (e.g., `threading.Lock` or `threading.RLock`) is needed.
+   - **Data Structures:** 
+     - A dictionary for O(1) lookups: `cache: dict`
+     - A doubly-linked list (or ordered dict) for maintaining order. Python 3.7+ `dict` maintains insertion order, but for LRU we need to efficiently move items to the "most recently used" end. `collections.OrderedDict` has `move_to_end()` which is perfect for this.
+   - **Operations:**
+     - `get(key)`: Returns value if exists, else None. If found, move to end (MRU).
+     - `put(key, value)`: Adds/updates key-value pair. If max size exceeded, remove first item (LRU). If key exists, update and move to end.
+   - **Thread Safety:** Use a lock around both `get` and `put` operations. Since they might be called concurrently, a single lock is sufficient and simple.
+
+3.  **Design Decisions:**
+   - Use `collections.OrderedDict` for O(1) get, put, and move operations.
+   - Use `threading.Lock` for thread safety.
+   - Max size: configurable in `__init__`.
+   - Return `None` for missing keys (standard behavior, but can be made configurable or return a sentinel if needed; I'll stick to standard).
+   - Handle edge cases: max_size <= 0, invalid key types (dict keys must be hashable, which is standard).
+
+4.  **Implementation Draft (Mental):**
+   ```python
+   import threading
+   from collections import OrderedDict
+   from typing import Any, Optional, Dict
+
+   class LRUCache:
+       def __init__(self, capacity: int):
+           if capacity <= 0:
+               raise ValueError("Capacity must be positive")
+           self.capacity = capacity
+           self.cache = OrderedDict()
+           self.lock = threading.Lock()
+
+       def get(self, key: Any) -> Optional[Any]:
+           with self.lock:
+               if key not in self.cache:
+                   return None
+               # Move to end (most recently used)
+               self.cache.move_to_end(key)
+               return self.cache[key]
+
+       def put(self, key: Any, value: Any) -> None:
+           with self.lock:
+               if key in self.cache:
+                   self.cache.move_to_end(key)
+               self.cache[key] = value
+               if len(self.cache) > self.capacity:
+                   self.cache.popitem(last=False)  # Remove least recently used
+   ```
+
+5.  **Refine & Consider Thread Safety:**
+   - Is a single lock enough? Yes, for simplicity and correctness. It's a standard approach for thread-safe LRU caches in Python unless lock-free algorithms are explicitly requested.
+   - Should I use `RLock`? Not necessary unless `get` or `put` calls each other recursively, which they don't.
+   - What about the `get` returning a value that's still being modified by another thread? The lock ensures atomicity of the operation. Value types should be immutable or thread-safe, which is standard.
+   - Edge case: `capacity <= 0`. Handled.
+   - Type hints: Added for clarity.
+
+6.  **Unit Tests Design:**
+   - Use `unittest` module.
+   - Test cases:
+     - Basic put and get
+     - LRU eviction (exceed max size)
+     - Update existing key (should move to MRU)
+     - Thread safety: concurrent reads/writes
+     - Edge cases: capacity 1, empty cache get
+   - For thread safety testing, use `threading.Thread` and maybe `concurrent.futures` or just `threading` to run multiple workers, then verify state consistency.
+   - Mock/verify no race conditions by checking cache state after concurrent operations.
+
+   Draft test structure:
+   ```python
+   import unittest
+   import threading
+   import time
+
+   class TestLRUCache(unittest.TestCase):
+       def test_basic_operations(self):
+           cache = LRUCache(2)
+           cache.put("a", 1)
+           cache.put("b", 2)
+           self.assertEqual(cache.get("a"), 1)
+           self.assertEqual(cache.get("b"), 2)
+           self.assertIsNone(cache.get("c"))
+
+       def test_eviction(self):
+           cache = LRUCache(2)
+           cache.put("a", 1)
+           cache.put("b", 2)
+           cache.put("c", 3)  # Should evict "a"
+           self.assertIsNone(cache.get("a"))
+           self.assertEqual(cache.get("b"), 2)
+           self.assertEqual(cache.get("c"), 3)
+
+       def test_update_key(self):
+           cache = LRUCache(2)
+           cache.put("a", 1)
+           cache.put("b", 2)
+           cache.put("a", 10)  # Update "a"
+           cache.put("c", 3)  # Should evict "b", not "a"
+           self.assertIsNone(cache.get("b"))
+           self.assertEqual(cache.get("a"), 10)
+           self.assertEqual(cache.get("c"), 3)
+
+       def test_thread_safety(self):
+           cache = LRUCache(3)
+           errors = []
+
+           def writer(start_id):
+               try:
+                   for i in range(start_id, start_id + 10):
+                       cache.put(f"key{i}", i)
+               except Exception as e:
+                   errors.append(e)
+
+           def reader(key_id):
+               try:
+                   for i in range(key_id, key_id + 10):
+                       cache.get(f"key{i}")
+               except Exception as e:
+                   errors.append(e)
+
+           threads = []
+           for i in range(3):
+               threads.append(threading.Thread(target=writer, args=(i*10,)))
+               threads.append(threading.Thread(target=reader, args=(i*10,)))
+
+           for t in threads:
+               t.start()
+           for t in threads:
+               t.join()
+
+           self.assertEqual(errors, [], f"Thread safety errors: {errors}")
+           # Verify cache state consistency (size <= capacity)
+           self.assertLessEqual(len(cache.cache), 3)
+   ```
+
+7.  **Self-Correction/Refinement during thought:**
+   - The thread safety test is good but basic. It checks for exceptions and final size. A better approach might be to verify that the cache never exceeds capacity even under stress, and that concurrent operations don't corrupt the OrderedDict.
+   - Python's `OrderedDict` is not inherently thread-safe, so the lock is crucial. The implementation correctly uses `with self.lock:`.
+   - Should I add a sentinel for "key not found" vs "value is None"? The prompt says "get", standard behavior is returning None or raising KeyError. I'll stick to returning None, but mention it. Actually, `functools.lru_cache` returns None for missing keys too. I'll keep it simple.
+   - What about `__contains__` or other methods? Not requested, but could be added for completeness. I'll stick to `get` and `put` as requested.
+   - Type hints: `typing.Optional`, `typing.Any` are fine.
+   - Thread safety: Using a single lock is fine for this scope. If high concurrency is needed, a more complex structure (like sharded locks) would be overkill.
+   - I should make sure the tests are comprehensive and use `unittest` properly.
+   - I'll add a small stress test to ensure no deadlocks or data corruption under concurrent access.
+
+   Let's structure the final code properly with docstrings, type hints, and clear separation of implementation and tests.
+
+   One thing: `OrderedDict.popitem(last=False)` removes the first item (least recently used). This is correct.
+   `move_to_end(key)` moves to the right (MRU). Correct.
+   Capacity check: `if len(self.cache) > self.capacity:` then `popitem(last=False)`. Correct.
+
+   I'll write it out carefully.
+
+8.  **Final Code Structure:**
+   ```python
+   import threading
+   from collections import OrderedDict
+   from typing import Any, Optional, Dict
+
+   class ThreadSafeLRUCache:
+       """A thread-safe, maximum-size, least-recently-used (LRU) cache."""
+       def __init__(self, capacity: int):
+           if capacity <= 0:
+               raise ValueError("Capacity must be a positive integer.")
+           self.capacity = capacity
+           self.cache = OrderedDict()
+           self.lock =
+=====

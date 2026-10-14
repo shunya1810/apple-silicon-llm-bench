@@ -1,0 +1,16 @@
+Splash model incoai/Qwen3.6-35B-A3B-Splash is already installed in /Users/nakano/Library/Application Support/Splash/models/incoai/Qwen3.6-35B-A3B-Splash
+14:03:08 Loading · incoai/Qwen3.6-35B-A3B-Splash
+14:03:09 Chat template · renders later system messages in place, generation prompt 5-7 tokens
+14:03:12 Weights loaded in 3.68 s.
+14:03:12 Kernel policy for GPU family 7 with 32 cores.
+14:03:16 Ready · incoai/Qwen3.6-35B-A3B-Splash · context 256K · http://127.0.0.1:18107
+14:03:17 Done · input 18 · cached 0 · output 8 · TTFT 0.1s · 96.2 tok/s
+14:03:24 Done · input 20 · cached 0 · output 1,024 · TTFT 0.1s · 140.0 tok/s
+14:03:33 Done · input 403 · cached 0 · output 1,024 · TTFT 0.6s · 122.5 tok/s
+14:03:40 Done · input 32 · cached 0 · output 1,024 · TTFT 0.1s · 146.2 tok/s
+14:03:49 Done · input 40 · cached 0 · output 1,024 · TTFT 0.2s · 123.5 tok/s
+14:04:02 Done · input 20 · cached 0 · output 2,048 · TTFT 0.1s · 153.0 tok/s
+14:04:21 Done · input 403 · cached 384 · output 2,048 · TTFT 0.1s · 111.2 tok/s
+14:04:36 Done · input 32 · cached 0 · output 2,048 · TTFT 0.1s · 136.5 tok/s
+14:04:52 Done · input 40 · cached 32 · output 2,048 · TTFT 0.1s · 124.0 tok/s
+14:04:52 Stopping · releasing engine resources

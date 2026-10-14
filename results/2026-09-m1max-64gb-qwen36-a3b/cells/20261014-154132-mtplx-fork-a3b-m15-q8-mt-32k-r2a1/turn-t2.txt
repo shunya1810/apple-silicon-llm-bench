@@ -1,0 +1,6 @@
+Records with "nominal" status consistently exhibit high sensor values, typically ranging between 85.0 and 99.6, indicating optimal performance. In contrast, "offline" records display significantly lower sensor readings, generally falling between 2.8 and 96.8, with a strong tendency toward lower values (often below 50.0) or specific high outliers like 96.8. This suggests that "offline" status correlates with either critically low sensor activity or specific failure modes distinct from the stable high readings of "nominal" states.
+
+Regarding zones, "nominal" records predominantly feature "A" prefixed zones (e.g., A10, A44), whereas "offline" records frequently utilize "N" prefixed zones (e.g., N61, N39), though exceptions exist. This implies a spatial or categorical distinction where "nominal" operations are concentrated in "A" zones, while "offline" states are more common in "N" zones, or that specific zones experience different failure patterns.
+
+Three specific records illustrate these differences:
+1. Record 000000 is "nominal" with a high sensor value of 0.0 (an outlier for nominal

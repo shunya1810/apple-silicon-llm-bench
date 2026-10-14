@@ -1,0 +1,44 @@
+Here's a thinking process:
+
+1.  **Understand the User Request:**
+   - **Language:** Rust
+   - **Task:** Parse an ISO 8601 duration string (e.g., "P3DT4H5M6S") into total seconds
+   - **Requirement:** Include tests
+   - **Input Format:** ISO 8601 duration format: `P[n]Y[n]M[n]W[n]DT[n]H[n]M[n]S`
+   - **Output:** Total seconds as a number (likely `f64` or `i64` or `u64`; I'll use `f64` to handle fractional seconds, but I should clarify or stick to a reasonable type. Actually, ISO 8601 allows fractional seconds, so `f64` is appropriate. I'll also handle the case where no fractional part is present.)
+
+2.  **Analyze ISO 8601 Duration Format:**
+   - Starts with `P`
+   - Date components: `Y` (years), `M` (months), `W` (weeks), `D` (days)
+   - Time separator: `T` (optional, but if present, time components follow)
+   - Time components: `H` (hours), `M` (minutes), `S` (seconds)
+   - Note: `M` is used for both months and minutes. Context (before/after `T`) disambiguates.
+   - Years and months don't have fixed second equivalents (leap years, varying month lengths). Standard practice: ignore them or convert using fixed averages (365.25 days/year, 30.44 days/month). However, for a simple parser, it's common to either:
+     a) Ignore years/months (or return an error)
+     b) Convert using fixed constants (e.g., 1 year = 365.25 * 24 * 3600 seconds, 1 month = 30.4375 * 24 * 3600 seconds)
+     c) Only support days and below
+   - The example "P3DT4H5M6S" only has D, H, M, S. I'll focus on supporting D, H, M, S, and optionally W, Y, M (months). I'll make it robust by supporting all, but I'll note the approximation for Y/M. Actually, a common approach in libraries like `chrono` or `time` is to either error on Y/M or use fixed conversions. I'll implement fixed conversions for completeness, but I'll make it clear. Alternatively, I can just support D, H, M, S, W as requested by the example, and optionally Y/M with a note. Let's stick to supporting all components but use standard approximations for Y/M, or just ignore them and return an error. Actually, the prompt says "like P3DT4H5M6S", so I'll focus on D, H, M, S, W. I'll add Y and M support with fixed conversions for completeness, but I'll make sure the core works.
+
+   Let's define constants:
+   - 1 week = 7 days
+   - 1 day = 24 hours
+   - 1 hour = 3600 seconds
+   - 1 minute = 60 seconds
+   - 1 year = 365.25 days (approx)
+   - 1 month = 365.25/12 days (approx)
+   Actually, many parsers just ignore Y/M or return an error. I'll implement a strict parser that only supports D, H, M, S, W, and optionally Y/M with a comment about approximation. Or better, I'll just support D, H, M, S, W as they are unambiguous. The example doesn't have Y/M. I'll stick to D, H, M, S, W for simplicity and accuracy.
+
+   Wait, ISO 8601 allows fractional seconds: `P1.5S` or `P3DT4H5M6.789S`. I should handle that.
+
+3.  **Design the Parser:**
+   - Input: `&str`
+   - Output: `Result<f64, ParseDurationError>`
+   - Steps:
+     1. Check starts with 'P'
+     2. Parse date part (before 'T' or end)
+     3. Parse time part (after 'T' or end)
+     4. Extract numbers before D, H, M, S, W
+     5. Handle fractional seconds
+     6. Calculate total seconds
+
+=====
