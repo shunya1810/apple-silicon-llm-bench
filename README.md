@@ -2,6 +2,191 @@
 
 English | [日本語](README.ja.md)
 
+<!-- b2:start -->
+## Latest: newest releases, thinking on, same weights (2026-10-18/19)
+
+All four engines at their newest release on 2026-10-18, on the same MacBook Pro (M1 Max,
+64 GB), with **thinking on** and the **same body weights** for every engine. Each cell is a
+3-turn conversation over a synthetic telemetry prompt (the same as the sections below), up
+to 4,096 generated tokens per turn, thinking tokens included.
+
+| engine | version | weights |
+|---|---|---|
+| **MTPLX M1 fork** | [`v2.12.2-m1.9`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.9) (code `9c73c4ce`) | MTPLX pack below, MTP depth from the pack (27B: 3; A3B: 1), `--profile turbo`, q8 KV |
+| **MTPLX upstream** | [`v2.12.2`](https://github.com/youssofal/MTPLX/releases/tag/v2.12.2) (`9882703f`, `main` at run time) | same pack and flags as the fork |
+| **oMLX** | [0.7.1rc1](https://github.com/jundot/omlx/releases/tag/v0.7.1rc1) (wheel, mlx 0.32.4) | same pack as MTPLX through a text-only symlinked view (MTP head renamed for mlx-lm), MTP with 3 draft tokens, **fp16 KV** (see below) |
+| **Splash** | [paperniuk/splash 1.3.2-m1.1](https://github.com/paperniuk/splash/releases/tag/1.3.2-m1.1) | `mlx-community/Qwen3.8-27B-4bit` / `mlx-community/Qwen3.6-35B-A3B-4bit` as published, plus the DFlash2 draft Splash selects, INT8 KV |
+| oMLX + oQ4e (extra row) | oMLX 0.7.1rc1 | `Jundot/Qwen3.8-27B-oQ4e-fp16-mtp` / `Jundot/Qwen3.6-35B-A3B-oQ4e-mtp`: oMLX's own mixed 4/5/6-bit quantization, **different weights** from the other rows |
+
+**Same weights.** Splash loads the mlx-community 4-bit checkpoints unchanged. The MTPLX and
+oMLX rows load the same 4-bit codes with Qwen's native MTP head added (MTPLX needs it; the
+mlx-community checkpoints drop it):
+- **27B**: `mlx-community/Qwen3.8-27B-4bit` (4-bit, group 64, every layer) with the bf16
+  floats (scales, biases, norms) cast to fp16, as MTPLX's forge does for M1, plus the MTP
+  head of `Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed-FP16` (INT4, group 64). The packed
+  codes are byte-identical to mlx-community's.
+- **A3B**: `Youssofal/Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16` as published. Its body is
+  tensor-for-tensor identical to `mlx-community/Qwen3.6-35B-A3B-4bit` after the same fp16
+  cast (all 2,090 tensors compared: 512 packed, 1,578 float); the extra size is the MoE MTP
+  head and the vision tower.
+
+**Conditions.** Thinking on, `reasoning_effort` medium on every engine (without it Splash
+renders the template's xhigh instruction and the prompts differ by 42 tokens), temperature
+1.0, top_p 0.95, top_k 20, seed 7 (the models' `generation_config`). Each engine was checked
+to tokenize the first turn to the same 1,678 tokens at 2K. Turns 2–3 send the previous
+answer back without its thinking (engines differ in what they do with an echoed
+`reasoning_content`; with the answer alone every engine builds the same next prompt). Every
+cell starts the engine fresh; one run per cell. The 256K row uses a 246,000-token prompt so
+three 4,096-token turns fit the 262,144-token window.
+
+**Read with care.**
+- This telemetry text is easy to predict: the M1 fork's MTP drafts 3.5–3.7 tokens per verify
+  round here, against 3.1 in the author's real coding-agent sessions. Decode speeds are
+  higher than in agent use for every speculative engine (Splash's DFlash2 included), and
+  1–2 tok/s differences are within run-to-run noise.
+- At temperature 1.0 each engine thinks for a different number of tokens, so whole-
+  conversation times are not compared, and the needle answer (turn 3) mostly shows whether
+  the thinking ended within 4,096 tokens.
+- **oMLX runs fp16 KV**: 0.7.1rc1's TurboQuant 8-bit KV fails on M1 (`sdpa_vector_2pass`
+  quantized kernel asks for 960 threads per threadgroup; M1's limit is 896), so oMLX keeps
+  more KV in memory than the 8-bit rows.
+- **oMLX on the 27B re-reads the whole prompt every turn** (its prefix cache cannot restore a
+  hybrid model's recurrent state where the history changes), so its 27B 246K cell, and the
+  oQ4e row's 27B 128K / 246K and A3B 246K cells, ran turn 1 only (each further turn would
+  have taken about an hour). On the A3B it reuses part of the prompt up to 128K.
+- **MTPLX upstream failed the 27B at 246K**: its memory guard stopped turn 1 mid-prefill
+  (sustained critical memory pressure, 58.4 GB wired).
+- **The M1 fork's turn 3 at 27B 32K / 128K / 246K** re-read part (3,061 tokens) or all
+  (246K: 248,809 tokens, 51 min) of the prompt: turn 2's thinking hit the 4,096-token cap,
+  and the save of turn 2's state had not finished when turn 3 arrived. At 246K the re-read
+  also left the MTP drafts far less accurate for that turn (2.2 instead of 3.5 tokens per
+  round; decode 12.8 tok/s). Known issue in the fork, fix in progress; the A3B does not show
+  it.
+
+### Qwen3.8-27B (dense)
+
+**Turn 1, cold prompt: time to first token (prefill speed)**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 8 s (201 tok/s) | 11 s (148 tok/s) | 11 s (148 tok/s) | 8 s (214 tok/s) | 11 s (147 tok/s) |
+| 8K | 33 s (234 tok/s) | 52 s (150 tok/s) | 50 s (157 tok/s) | 37 s (211 tok/s) | 50 s (156 tok/s) |
+| 32K | 151 s (215 tok/s) | 237 s (136 tok/s) | 236 s (138 tok/s) | 184 s (176 tok/s) | 237 s (137 tok/s) |
+| 64K | 383 s (170 tok/s) | 565 s (115 tok/s) | 554 s (118 tok/s) | 455 s (143 tok/s) | 556 s (117 tok/s) |
+| 128K | 992 s (132 tok/s) | 1,649 s (79 tok/s) | 1,435 s (91 tok/s) | 1,263 s (103 tok/s) | 1,439 s (91 tok/s) |
+| 246K | 3,029 s (81 tok/s) | failed | 3,762 s (65 tok/s) | 3,534 s (70 tok/s) | 3,770 s (65 tok/s) |
+
+**Decode, tok/s (turns 1 / 2 / 3, thinking tokens included)**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 42.1 / 40.7 / 40.6 | 31.4 / 27.8 / 30.1 | 34.3 / 35.1 / 35.3 | 48.8 / 57.3 / 57.2 | 33.5 / 35.2 / 33.6 |
+| 8K | 40.5 / 42.9 / 40.5 | 29.5 / 29.3 / 25.7 | 31.6 / 31.5 / 30.5 | 47.4 / 59.4 / 58.9 | 29.7 / 33.2 / 30.9 |
+| 32K | 36.7 / 35.8 / 36.9 | 16.0 / 17.1 / 15.6 | 24.7 / 24.2 / 24.6 | 41.4 / 43.0 / 30.1 | 23.0 / 24.2 / 21.1 |
+| 64K | 31.5 / 33.2 / 30.7 | 10.1 / 11.0 / 10.6 | 18.1 / 21.1 / 19.1 | 36.0 / 33.6 / 23.1 | 17.8 / 19.7 / 19.4 |
+| 128K | 25.1 / 27.5 / 27.0 | 6.0 / 6.1 / 5.9 | 11.5 / 13.2 / 11.8 | 31.7 / 25.0 / 17.5 | 11.0 / - / - |
+| 246K | 21.2 / 21.0 / 12.8 | failed | 6.6 / - / - | 14.4 / 14.3 / 17.2 | 6.7 / - / - |
+
+**Turns 2 / 3: time to first token, s**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 3.9 / 3.7 | 4.1 / 4.4 | 13.4 / 13.3 | 3.3 / 0.9 | 2.8 / 2.9 |
+| 8K | 1.3 / 1.5 | 1.0 / 1.3 | 25.7 / 25.7 | 3.6 / 1.0 | 27.2 / 27.4 |
+| 32K | 1.2 / 21.8 | 2.3 / 2.6 | 32.7 / 32.7 | 3.3 / 1.2 | 32.8 / 32.9 |
+| 64K | 2.4 / 2.7 | 3.0 / 3.0 | 42.9 / 42.6 | 1.2 / 1.4 | 46.4 / 45.7 |
+| 128K | 2.1 / 31.5 | 6.2 / 7.3 | 1,437.2 / 1,438.7 | 1.8 / 1.5 | - / - |
+| 246K | 3.1 / 3,094.5 | failed | - / - | 9.0 / 10.8 | - / - |
+
+**Peak wired memory**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 26.2 GB | 28.7 GB | 24.2 GB | 24.0 GB | 23.5 GB |
+| 8K | 28.4 GB | 30.5 GB | 28.0 GB | 24.3 GB | 29.1 GB |
+| 32K | 31.2 GB | 33.1 GB | 30.4 GB | 25.1 GB | 31.1 GB |
+| 64K | 34.2 GB | 43.2 GB | 36.4 GB | 26.1 GB | 36.6 GB |
+| 128K | 38.4 GB | 49.7 GB | 51.6 GB | 28.2 GB | 50.7 GB |
+| 246K | 42.0 GB | 58.4 GB (failed) | 56.8 GB | 32.5 GB | 57.7 GB |
+
+### Qwen3.6-35B-A3B (MoE)
+
+**Turn 1, cold prompt: time to first token (prefill speed)**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 2 s (947 tok/s) | 2 s (864 tok/s) | 2 s (1,002 tok/s) | 1 s (1,133 tok/s) | 2 s (728 tok/s) |
+| 8K | 7 s (1,124 tok/s) | 8 s (940 tok/s) | 7 s (1,048 tok/s) | 7 s (1,047 tok/s) | 12 s (639 tok/s) |
+| 32K | 33 s (994 tok/s) | 43 s (760 tok/s) | 44 s (741 tok/s) | 44 s (729 tok/s) | 74 s (438 tok/s) |
+| 64K | 91 s (718 tok/s) | 121 s (538 tok/s) | 122 s (533 tok/s) | 126 s (516 tok/s) | 217 s (301 tok/s) |
+| 128K | 284 s (460 tok/s) | 482 s (271 tok/s) | 381 s (343 tok/s) | 429 s (305 tok/s) | 703 s (186 tok/s) |
+| 246K | 871 s (282 tok/s) | 1,670 s (147 tok/s) | 1,162 s (211 tok/s) | 1,363 s (180 tok/s) | 2,200 s (112 tok/s) |
+
+**Decode, tok/s (turns 1 / 2 / 3, thinking tokens included)**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 110.6 / 111.7 / 115.7 | 61.0 / 60.4 / 64.0 | 105.2 / 102.1 / 112.8 | 122.6 / 122.3 / 127.3 | 92.8 / 92.2 / 92.3 |
+| 8K | 114.0 / 113.0 / 115.8 | 54.0 / 60.4 / 56.4 | 103.7 / 90.1 / 84.9 | 106.0 / 116.1 / 109.0 | 84.9 / 78.6 / 85.2 |
+| 32K | 97.4 / 99.3 / 99.0 | 43.9 / 44.1 / 44.7 | 65.1 / 74.7 / 65.8 | 91.7 / 88.8 / 88.8 | 64.3 / 59.2 / 76.9 |
+| 64K | 76.5 / 72.9 / 80.7 | 33.4 / 37.9 / 32.4 | 49.3 / 50.9 / 49.7 | 69.2 / 66.4 / 82.9 | 47.0 / 46.0 / 54.0 |
+| 128K | 64.3 / 61.4 / 62.2 | 23.0 / 24.4 / 24.0 | 33.5 / 33.1 / 34.3 | 49.3 / 48.9 / 52.6 | 31.0 / 32.0 / 31.6 |
+| 246K | 49.1 / 46.8 / 46.5 | 11.5 / 13.2 / 12.6 | 19.4 / 21.2 / 20.1 | 34.1 / 33.9 / 35.8 | 16.6 / - / - |
+
+**Turns 2 / 3: time to first token, s**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 0.6 / 1.0 | 0.4 / 0.7 | 1.8 / 1.9 | 0.4 / 0.2 | 2.5 / 2.6 |
+| 8K | 0.4 / 0.5 | 0.5 / 0.5 | 3.9 / 4.0 | 0.6 / 0.5 | 6.7 / 7.4 |
+| 32K | 1.1 / 1.3 | 1.3 / 1.4 | 7.9 / 8.1 | 0.8 / 0.3 | 12.6 / 12.6 |
+| 64K | 1.6 / 1.8 | 1.2 / 1.2 | 11.5 / 11.3 | 1.7 / 1.3 | 22.5 / 1.0 |
+| 128K | 1.6 / 2.0 | 3.8 / 3.5 | 19.9 / 19.5 | 3.1 / 2.0 | 39.6 / 41.4 |
+| 246K | 2.5 / 3.3 | 6.8 / 11.5 | 1,163.7 / 1,164.5 | 4.1 / 1.0 | - / - |
+
+**Peak wired memory**
+
+| context | MTPLX M1 fork m1.9 | MTPLX upstream 2.12.2 | oMLX 0.7.1rc1 | Splash 1.3.2-m1.1 | oMLX 0.7.1rc1 + Jundot oQ4e |
+|---|---|---|---|---|---|
+| 2K | 28.1 GB | 26.8 GB | 27.0 GB | 26.0 GB | 27.4 GB |
+| 8K | 27.8 GB | 27.6 GB | 28.8 GB | 26.2 GB | 29.3 GB |
+| 32K | 29.8 GB | 32.2 GB | 31.0 GB | 26.4 GB | 31.5 GB |
+| 64K | 29.8 GB | 35.4 GB | 31.6 GB | 26.7 GB | 32.3 GB |
+| 128K | 31.5 GB | 39.0 GB | 35.1 GB | 27.4 GB | 35.8 GB |
+| 246K | 34.4 GB | 49.6 GB | 44.8 GB | 28.6 GB | 44.2 GB |
+
+### What the numbers say
+
+- **Short prompts: Splash.** At 2K Splash is the fastest engine on both models (27B decode
+  57 vs 41 tok/s on turns 2–3, A3B 122–127 vs 111–116), and its DFlash2 draft commits 5–6.6
+  tokens per verify round where MTP depth 3 commits at most 4 (the fork's 27B rounds are
+  25–40% shorter, but carry 3.5 tokens). Splash also uses the least memory at every length
+  (27B 24–33 GB, A3B 26–29 GB).
+- **Long prompts: the M1 fork.** From 8K on, the fork reads prompts fastest on both models,
+  and the gap grows with length: 27B 1.11× Splash at 8K, 1.28× at 128K; A3B 1.07× at 8K,
+  1.51× at 128K, 1.57× at 246K. Its decode holds up deeper too: the 27B is level with Splash
+  at 64K and ahead from 128K (turns 2–3: 27 vs 25 and 17.5 tok/s; 246K: 21 vs 14), the A3B level
+  at 8K and ahead from 32K (32K: 97–99 vs 89–92 tok/s; 128K: 61–64 vs 49–53; 246K: 47–49 vs 34–36). Splash's 27B decode drops
+  on later turns from 32K on (32K turn 3: 30 tok/s; 64K: 23; 128K: 17.5).
+- **Against MTPLX upstream 2.12.2** (same weights, same flags), the fork reads prompts
+  1.1–1.9× faster and decodes 1.3–4.4× faster (27B 128K: 25–28 vs 6 tok/s; A3B 246K: 47–49 vs
+  12–13), with less memory from 32K on. Upstream could not finish the 27B at 246K.
+- **oMLX 0.7.1rc1** sits between upstream and the fork on decode, but on the 27B it re-reads
+  the whole prompt on every turn (turn 2 starts after 13 s at 2K, 43 s at 64K, 24 min at
+  128K) and runs fp16 KV on M1. On the A3B it reuses the prompt up to 128K (turn 2: 2–20 s)
+  and re-reads it at 246K.
+- **oMLX's own oQ4e quantization** (extra row, different weights) runs about as fast as
+  oMLX on the shared weights for the 27B (decode within ±10%), and slower for the A3B
+  (prefill 0.5–0.75×, decode 0.8–1.0×): its 5–6-bit layers cost bandwidth. Its quality is
+  not measured here.
+
+Raw rows: [`results/2026-10-m1max-64gb-b2/`](results/2026-10-m1max-64gb-b2/), summary
+`python scripts/summarize_b2.py results/2026-10-m1max-64gb-b2 --readme 27b` (or `a3b`),
+plans `plans/b2-27b.json` / `plans/b2-a3b.json`, run script `run_b2.sh`.
+<!-- b2:end -->
+
+## Earlier runs: thinking off (2026-09 to 2026-10-14)
+
 How fast is a **3-turn conversation over a long prompt** on a Mac, depending on the
 inference engine? On a MacBook Pro with M1 Max and 64 GB, five inference engines serve
 Qwen3.8-27B with speculative decoding and 8-bit KV cache (TensorFold has no 8-bit KV and

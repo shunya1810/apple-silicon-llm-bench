@@ -1,0 +1,41 @@
+{
+ "id": "b2-splash-a3b",
+ "label": "Splash 1.3.2-m1.1 (paperniuk M1/M2 build), Qwen3.6-35B-A3B",
+ "port": 18127,
+ "model_id": "splash",
+ "tokenizer_dir": "${B2_MODEL_A3B}",
+ "model_artifact": "mlx-community/Qwen3.6-35B-A3B-4bit (Splash prepares it for its kernels on first start) + its automatically selected DFlash2 draft",
+ "mtp_impl": "DFlash2 block-diffusion draft (separate model), Splash's own verify kernels",
+ "stats": "splash-status",
+ "health_path": "/v1/models",
+ "start_timeout_s": 2400,
+ "cmd": [
+  "${SPLASH_M1_132}",
+  "serve",
+  "--model",
+  "mlx-community/Qwen3.6-35B-A3B-4bit",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "18127",
+  "--served-model-name",
+  "splash",
+  "--max-context",
+  "256K",
+  "--no-webui",
+  "--language-only"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "Splash INT8 target KV (default)",
+   "cmd_extra": [
+    "--kv-format",
+    "int8"
+   ]
+  }
+ },
+ "version_cmds": {
+  "version": "${SPLASH_M1_132} --version"
+ }
+}

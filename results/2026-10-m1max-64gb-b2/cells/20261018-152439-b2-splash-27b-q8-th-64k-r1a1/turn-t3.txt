@@ -1,0 +1,30 @@
+The user wants me to:
+1. Quote the non-telemetry line exactly.
+2. Explain in about 120 words how it differs from other records.
+
+Let me find the non-telemetry line. Looking through the data, I can see:
+
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This is the odd one out. Let me quote it exactly and then explain how it differs.
+
+Differences from normal records:
+- Normal records have format: "Record NNNNNN: sensor=X.X status=STATUS zone=ZONE."
+- The NEEDLE record has a non-numeric identifier (NEEDLE instead of a number)
+- It doesn't have a sensor value
+- It doesn't have a status field
+- It doesn't follow the standard zone pattern (Q42 instead of A## or N##)
+- It contains free-text description rather than structured fields
+- It explicitly states "this is not telemetry"
+- It references a "maintenance override" and a "code" (7391-ALPHA) which don't appear in any normal record
+
+Let me write about 120 words explaining these differences.
+
+=====
+**Quoted line:**
+
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+**Explanation (~120 words):**
+
+This line deviates from every other record in several structural ways. First, its identifier is the literal string "NEEDLE" rather than a zero-padded sequential integer (e.g., 001316). Second, it lacks the three standard telemetry fields—sensor (a floating-point value), status (one of five enumerated states), and zone (a letter followed by two digits from the A/N sets). Instead of key=value pairs, it contains a free-text sentence describing a "maintenance override" and a human-readable code "7391-ALPHA." Third, its zone reference "Q42" uses the letter Q, which never appears in the legitimate A or N zone prefixes. Finally, the record explicitly disclaims its own legitimacy with the phrase "this is not telemetry," confirming it is an inserted annotation or injection rather than a genuine sensor reading.

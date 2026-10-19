@@ -1,0 +1,404 @@
+We need answer user's request. Need compare records with status offline vs nominal, ~150 words, describe differences in sensor values and zones, cite three records by number. Then quote exact non-normal line, then ~120 words explain how differs. Need likely ensure counts maybe 150 and 120 words "about". Need produce final only.
+
+Need analyze data.
+Records offline: indices:
+000003 sensor=82.6 status=offline zone=N61
+000008 sensor=54.1 offline A56
+000013 sensor=25.6 offline N51
+000018 sensor=96.8 offline A46
+000023 sensor=68.3 offline N41
+000028 sensor=39.8 offline A36
+000033 sensor=11.3 offline N31
+000038 sensor=82.5 offline A26
+000043 sensor=54.0 offline N21
+000048 sensor=25.5 offline A16
+000053 sensor=96.7 offline N11
+000058 sensor=68.2 offline A96
+000063 sensor=39.7 offline N91
+
+Nominal:
+000000 0.0 nominal A10
+000005 71.2 nominal N95
+000010 42.7 nominal A90
+000015 14.2 nominal N85
+000020 85.4 nominal A80
+000025 56.9 nominal N75
+000030 28.4 nominal A70
+000035 99.6 nominal N65
+000040 71.1 nominal A60
+000045 42.6 nominal N55
+000050 14.1 nominal A50
+000055 85.3 nominal N45
+000060 56.8 nominal A40
+
+Need compare differences in sensor values and zones. Since status cycles independent of sensor values; offline and nominal are both part of same ramp but offset by 3? status sequence: 0 nominal,1 degraded,2 recovering,3 offline,4 calibrating. Thus offline records are records where index mod 5 = 3, nominal mod 5=0. Both have all values across range; not systematically higher/lower. Zones: offline zone prefixes alternate? Let's see index mod 10? zone prefix A for even records? record even prefix A, odd prefix N? Record 000003 odd? 3 is odd -> N. 8 even -> A. 13 odd -> N. 18 even -> A. So offline includes both A and N alternately. Numeric suffix? For status offline, zone numbers maybe: 61,56,51,46,41,36,31,26,21,16,11,96,91 decreasing by 5? Actually 61,56,51... 16,11,96,91; decreasing by 5 wrap. Nominal: 10,95,90,85,80,75,70,65,60,55,50,45,40; also decreasing by 5. So zones both similar: suffix decreases 5 per same-status occurrence, but offset: nominal first 10, offline first 61. Prefix alternates A/N by record parity; among same status every 5 records, since 5 odd, prefix alternates every occurrence. Need cite three records by number. Need about 150 words. Need maybe include specific examples: 000003 (82.6,N61), 000018 (96.8,A46), 000053 (96.7,N11) offline vs 000000 (0.0,A10), 000020 (85.4,A80), 000035 (99.6,N65) nominal. But user says cite three records by number, not necessarily three total? "citing three records by number" likely cite three records in comparison. Could cite one offline and two nominal? Better cite three records total, perhaps 000003, 000018, 000000. Need describe differences in sensor values and zones. Could cite three records by number: offline 000003, offline 000018, nominal 000000. Need compare groups. The 150-word paragraph should mention offline values are not inherently lower/higher; they share same decreasing ramp. Zones: nominal start with A10 and decrease by 5, offline start N61 and decrease by 5. Need exact maybe.
+
+Need second: Quote line exactly:
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+Then about 120 words explain differs. Need maybe separate section. Could be concise.
+
+Need word counts. Let's draft 150 words exactly? "In about 150 words" likely not strict, but aim 150. Let's count. Need perhaps use word count manually. Draft:
+
+"Offline and nominal records do not form distinct sensor classes. Because status repeats every five records, each status samples the same sawtooth sensor sequence, so offline values range widely just as nominal values do. For example, record 000003 has sensor=82.6 and zone=N61, while record 000018 has sensor=96.8 and zone=A46, and record 000000 has sensor=0.0 and zone=A10. Nominal records appear at indices 0, 5, 10, etc., and their zone suffixes fall by five: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. Offline records appear at indices 3, 8, 13, etc., with suffixes 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91. Their prefix alternates A and N because every fifth index flips parity. Thus the main difference is offset, not level: offline zones are shifted upward relative to nominal, and their sensor values are simply the ramp values at positions mod five equal to three rather than zero. No threshold separates the two statuses; both include near-zero and near-hundred sensor readings, and both include A and N zones."
+
+Count? Let's count.
+Offline1 and2 nominal3 records? Need "records do" count? Let's count manually with tokenizer spaces/punctuation maybe. I'll count words separated by spaces:
+1 Offline
+2 and
+3 nominal
+4 records
+5 do
+6 not
+7 form
+8 distinct
+9 sensor
+10 classes.
+11 Because
+12 status
+13 repeats
+14 every
+15 five
+16 records,
+17 each
+18 status
+19 samples
+20 the
+21 same
+22 sawtooth
+23 sensor
+24 sequence,
+25 so
+26 offline
+27 values
+28 range
+29 widely
+30 just
+31 as
+32 nominal
+33 values
+34 do.
+35 For
+36 example,
+37 record
+38 000003
+39 has
+40 sensor=82.6
+41 and
+42 zone=N61,
+43 while
+44 record
+45 000018
+46 has
+47 sensor=96.8
+48 and
+49 zone=A46,
+50 and
+51 record
+52 000000
+53 has
+54 sensor=0.0
+55 and
+56 zone=A10.
+57 Nominal
+58 records
+59 appear
+60 at
+61 indices
+62 0,
+63 5,
+64 10,
+65 etc.,
+66 and
+67 their
+68 zone
+69 suffixes
+70 fall
+71 by
+72 five:
+73 10,
+74 95,
+75 90,
+76 85,
+77 80,
+78 75,
+79 70,
+80 65,
+81 60,
+82 55,
+83 50,
+84 45,
+85 40.
+86 Offline
+87 records
+88 appear
+89 at
+90 indices
+91 3,
+92 8,
+93 13,
+94 etc.,
+95 with
+96 suffixes
+97 61,
+98 56,
+99 51,
+100 46,
+101 41,
+102 36,
+103 31,
+104 26,
+105 21,
+106 16,
+107 11,
+108 96,
+109 91.
+110 Their
+111 prefix
+112 alternates
+113 A
+114 and
+115 N
+116 because
+117 every
+118 fifth
+119 index
+120 flips
+121 parity.
+122 Thus
+123 the
+124 main
+125 difference
+126 is
+127 offset,
+128 not
+129 level:
+130 offline
+131 zones
+132 are
+133 shifted
+134 upward
+135 relative
+136 to
+137 nominal,
+138 and
+139 their
+140 sensor
+141 values
+142 are
+143 simply
+144 the
+145 ramp
+146 values
+147 at
+148 positions
+149 mod
+150 five
+151 equal
+152 to
+153 three
+154 rather
+155 than
+156 zero.
+157 No
+158 threshold
+159 separates
+160 the
+161 two
+162 statuses;
+163 both
+164 include
+165 near-zero
+166 and
+167 near-hundred
+168 sensor
+169 readings,
+170 and
+171 both
+172 include
+173 A
+174 and
+175 N
+176 zones.
+
+176 words. Need about 150. Trim 26 words. We need about 150, can be 150 exactly. Let's target 150. Remove some details. Maybe:
+"Offline and nominal records do not form distinct sensor classes. Because status repeats every five records, each status samples the same sawtooth sensor sequence, so offline values range widely just as nominal values do. For example, record 000003 has sensor=82.6 and zone=N61, while record 000018 has sensor=96.8 and zone=A46, and record 000000 has sensor=0.0 and zone=A10. Nominal records appear at indices 0, 5, 10, etc., and their zone suffixes fall by five: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. Offline records appear at indices 3, 8, 13, etc., with suffixes 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91. Their prefix alternates A and N because every fifth index flips parity. Thus the main difference is offset, not level: offline zones are shifted relative to nominal, and their sensor values are simply the ramp values at positions mod five equal to three rather than zero. No threshold separates the two statuses; both include near-zero and near-hundred readings, and both include A and N zones."
+Count:
+1 Offline
+2 and
+3 nominal
+4 records
+5 do
+6 not
+7 form
+8 distinct
+9 sensor
+10 classes.
+11 Because
+12 status
+13 repeats
+14 every
+15 five
+16 records,
+17 each
+18 status
+19 samples
+20 the
+21 same
+22 sawtooth
+23 sensor
+24 sequence,
+25 so
+26 offline
+27 values
+28 range
+29 widely
+30 just
+31 as
+32 nominal
+33 values
+34 do.
+35 For
+36 example,
+37 record
+38 000003
+39 has
+40 sensor=82.6
+41 and
+42 zone=N61,
+43 while
+44 record
+45 000018
+46 has
+47 sensor=96.8
+48 and
+49 zone=A46,
+50 and
+51 record
+52 000000
+53 has
+54 sensor=0.0
+55 and
+56 zone=A10.
+57 Nominal
+58 records
+59 appear
+60 at
+61 indices
+62 0,
+63 5,
+64 10,
+65 etc.,
+66 and
+67 their
+68 zone
+69 suffixes
+70 fall
+71 by
+72 five:
+73 10,
+74 95,
+75 90,
+76 85,
+77 80,
+78 75,
+79 70,
+80 65,
+81 60,
+82 55,
+83 50,
+84 45,
+85 40.
+86 Offline
+87 records
+88 appear
+89 at
+90 indices
+91 3,
+92 8,
+93 13,
+94 etc.,
+95 with
+96 suffixes
+97 61,
+98 56,
+99 51,
+100 46,
+101 41,
+102 36,
+103 31,
+104 26,
+105 21,
+106 16,
+107 11,
+108 96,
+109 91.
+110 Their
+111 prefix
+112 alternates
+113 A
+114 and
+115 N
+116 because
+117 every
+118 fifth
+119 index
+120 flips
+121 parity.
+122 Thus
+123 the
+124 main
+125 difference
+126 is
+127 offset,
+128 not
+129 level:
+130 offline
+131 zones
+132 are
+133 shifted
+134 relative
+135 to
+136 nominal,
+137 and
+138 their
+139 sensor
+140 values
+141 are
+142 simply
+143 the
+144 ramp
+145 values
+146 at
+147 positions
+148 mod
+149 five
+150 equal
+151 to
+152 three
+153 rather
+154 than
+155 zero.
+156 No
+157 threshold
+158 separates
+159 the
+160 two
+161 statuses;
+162 both
+163 include
+164 near-zero
+165 and
+166 near-hundred
+167 readings,
+168 and
+169 both
+170 include
+171 A
+172 and
+173 N
+174 zones.
+Still 174. Need reduce 24 words. Could shorten zone lists? "about 150" 174 may be acceptable but better around 150. Need 150-ish. Maybe use fewer enumerated values. Need still concrete. Let's aim 150 exactly or 148-152.
+
+Draft shorter:
+"Offline and nominal records do not form distinct sensor classes. Because status repeats every five records, each status samples the same sawtooth sensor sequence, so both groups span similar values. For example, record 000003 has sensor=82.6 and zone=N61, record 000018 has sensor=96.8 and zone=A46, and record 000000 has sensor=0.0 and zone=A10. Nominal records appear at indices 0, 5, 1
+=====

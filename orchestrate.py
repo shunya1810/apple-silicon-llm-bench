@@ -33,6 +33,34 @@ def last_canary(rows_path: Path, engine: str, kv: str, scenario: str, rnd: int, 
     return value
 
 
+def battery() -> tuple[int | None, str]:
+    """Battery percent and power source line from pmset (None when unreadable)."""
+    out = subprocess.run(["pmset", "-g", "batt"], capture_output=True, text=True).stdout
+    pct = None
+    for tok in out.replace(";", " ").split():
+        if tok.endswith("%") and tok[:-1].isdigit():
+            pct = int(tok[:-1])
+    return pct, ("AC" if "AC Power" in out else "battery")
+
+
+def wait_for_battery(plan: dict, note) -> None:
+    """Start a cell only with enough charge: below battery_min_pct (default 30), or while a
+    battery guard's PAUSED file exists, wait until battery_resume_pct (default 40) on AC."""
+    lo, hi = int(plan.get("battery_min_pct", 30)), int(plan.get("battery_resume_pct", 40))
+    paused = Path(plan.get("battery_paused_file", str(Path.home() / "Desktop/work/bench-engines/guard/PAUSED")))
+    pct, src = battery()
+    if pct is None or (pct >= lo and src == "AC" and not paused.exists()):
+        note(f"  battery {pct}% {src}")
+        return
+    note(f"  battery {pct}% {src}: waiting for {hi}% on AC")
+    while True:
+        time.sleep(60)
+        pct, src = battery()
+        if pct is not None and pct >= hi and src == "AC" and not paused.exists():
+            note(f"  battery {pct}% {src}: resuming")
+            return
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--plan", required=True)
@@ -56,6 +84,7 @@ def main() -> None:
             for pos, engine in enumerate(order, 1):
                 kv = cell.get("kv", "q8")
                 for attempt in (1, 2):
+                    wait_for_battery(plan, note)
                     note(f"round {rnd} {cell['scenario']} {kv} {engine} attempt {attempt}")
                     cmd = [sys.executable, str(ROOT / "runner.py"), "--engine", str(ROOT / "engines" / f"{engine}.json"),
                            "--scenario", str(ROOT / "scenarios" / f"{cell['scenario']}.json"), "--out", str(out),

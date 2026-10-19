@@ -1,0 +1,18 @@
+{
+ "rounds": [
+  [
+   "b2-splash-27b",
+   "b2-omlx-oq4e-27b"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "th-256k"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.05,
+ "battery_min_pct": 30,
+ "battery_resume_pct": 40
+}

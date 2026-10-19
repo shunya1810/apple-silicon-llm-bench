@@ -1,0 +1,192 @@
+Let me analyze the offline vs nominal records carefully.
+
+**Status cycle:** nominal (position 0), degraded (position 1), recovering (position 2), offline (position 3), calibrating (position 4) - repeating every 5 records.
+
+So:
+- nominal: records 0, 5, 10, 15, 20, 25, 30, 35, ...
+- offline: records 3, 8, 13, 18, 23, 28, 33, 38, ...
+
+Let me check specific records:
+
+**Nominal records:**
+- Record 0: sensor=0.0, zone=A10
+- Record 5: sensor=71.2, zone=N95
+- Record 10: sensor=42.7, zone=A90
+- Record 15: sensor=14.2, zone=N85
+- Record 20: sensor=85.4, zone=A80
+- Record 25: sensor=56.9, zone=N75
+- Record 30: sensor=28.4, zone=A70
+- Record 35: sensor=99.6, zone=N65
+- Record 40: sensor=71.1, zone=A60
+- Record 45: sensor=42.6, zone=N55
+
+**Offline records:**
+- Record 3: sensor=82.6, zone=N61
+- Record 8: sensor=54.1, zone=A56
+- Record 13: sensor=25.6, zone=N51
+- Record 18: sensor=96.8, zone=A46
+- Record 23: sensor=68.3, zone=N41
+- Record 28: sensor=39.8, zone=A36
+- Record 33: sensor=11.3, zone=N31
+- Record 38: sensor=82.5, zone=A26
+- Record 43: sensor=54.0, zone=N21
+- Record 48: sensor=25.5, zone=A16
+
+Now let me look at patterns:
+
+**Nominal zones:** A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15, A10, N95...
+
+So nominal zones: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15 (18 zones, then repeats)
+
+The A zones: 10, 90, 80, 70, 60, 50, 40, 30, 20, 10... (decreasing by 10)
+The N zones: 95, 85, 75, 65, 55, 45, 35, 25, 15, 95... (decreasing by 10)
+
+**Offline zones:** N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A6, N99...
+
+Wait let me recheck:
+- Record 3: zone=N61
+- Record 8: zone=A56
+- Record 13: zone=N51
+- Record 18: zone=A46
+- Record 23: zone=N41
+- Record 28: zone=A36
+- Record 33: zone=N31
+- Record 38: zone=A26
+- Record 43: zone=N21
+- Record 48: zone=A16
+- Record 53: zone=N11
+- Record 58: zone=A96
+- Record 63: zone=N91
+- Record 68: zone=A86
+- Record 73: zone=N81
+- Record 78: zone=A76
+- Record 83: zone=N71
+- Record 88: zone=A66
+- Record 93: zone=N61 (back to start)
+
+So offline zones: N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91, A86, N81, A76, N71, A66 (18 zones)
+
+The A zones for offline: 56, 46, 36, 26, 16, 96, 86, 76, 66 (decreasing by 10)
+The N zones for offline: 61, 51, 41, 31, 21, 11, 91, 81, 71 (decreasing by 10)
+
+**Sensor values for nominal:**
+- Record 0: 0.0
+- Record 5: 71.2
+- Record 10: 42.7
+- Record 15: 14.2
+- Record 20: 85.4
+- Record 25: 56.9
+- Record 30: 28.4
+- Record 35: 99.6
+- Record 40: 71.1
+- Record 45: 42.6
+- Record 50: 14.1
+
+Pattern: 0.0, 71.2, 42.7, 14.2, then 85.4, 56.9, 28.4, 99.6, then 71.1, 42.6, 14.1, 99.5...
+
+The differences within a cycle: 0→71.2 (jump), 71.2→42.7 (-28.5), 42.7→14.2 (-28.5), 14.2→85.4 (jump), 85.4→56.9 (-28.5), 56.9→28.4 (-28.5), 28.4→99.6 (jump), 99.6→71.1 (-28.5)...
+
+So nominal sensor values: they span the full range 0-99.6, with values at specific positions in the sawtooth. The values are approximately: 0, 71, 43, 14, 85, 57, 28, 100, 71, 43, 14, ...
+
+**Sensor values for offline:**
+- Record 3: 82.6
+- Record 8: 54.1
+- Record 13: 25.6
+- Record 18: 96.8
+- Record 23: 68.3
+- Record 28: 39.8
+- Record 33: 11.3
+- Record 38: 82.5
+- Record 43: 54.0
+- Record 48: 25.5
+- Record 53: 96.7
+
+Pattern: 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7...
+
+Differences: 82.6→54.1 (-28.5), 54.1→25.6 (-28.5), 25.6→96.8 (jump), 96.8→68.3 (-28.5), 68.3→39.8 (-28.5), 39.8→11.3 (-28.5), 11.3→82.5 (jump)...
+
+So both nominal and offline span the full 0-99 range. The key difference is their phase within the sawtooth cycle. Nominal hits 0.0 at the very bottom, while offline hits its lowest around 11.3. Nominal's peak is 99.6, offline's peak is ~96.8.
+
+Wait, let me look at this more carefully. In the 18-record sawtooth cycle:
+- Position 0: 0.0 (nominal)
+- Position 1: 94.0 (degraded)
+- Position 2: 88.3 (recovering)
+- Position 3: 82.6 (offline)
+- Position 4: 76.9 (calibrating)
+- Position 5: 71.2 (nominal)
+- Position 6: 65.5 (degraded)
+- Position 7: 59.8 (recovering)
+- Position 8: 54.1 (offline)
+- Position 9: 48.4 (calibrating)
+- Position 10: 42.7 (nominal)
+- Position 11: 37.0 (degraded)
+- Position 12: 31.3 (recovering)
+- Position 13: 25.6 (offline)
+- Position 14: 19.9 (calibrating)
+- Position 15: 14.2 (nominal)
+- Position 16: 8.5 (degraded)
+- Position 17: 2.8 (recovering)
+
+So in each 18-record sawtooth, the 5 status cycle means:
+- nominal appears at positions 0, 5, 10, 15 in the 18-record cycle → sensor values 0.0, 71.2, 42.7, 14.2
+- offline appears at positions 3, 8, 13 in the 18-record cycle → sensor values 82.6, 54.1, 25.6
+
+Wait, but 18/5 = 3 remainder 3. So in 18 records, nominal appears at positions 0, 5, 10, 15 (4 times) and offline appears at positions 3, 8, 13 (3 times). Since the status cycle is 5 and the sensor cycle is 18, and gcd(5,18)=1, over LCM(5,18)=90 records, each status appears exactly 18 times (90/5=18), and each sensor position appears exactly 5 times (90/18=5).
+
+So in 90 records:
+- nominal: 18 records, hitting all 18 sensor positions (since 18 and 5 are coprime, over 90 records each nominal record hits a different sensor position)
+
+Wait no. Let me think again. In 90 records, there are 90/5 = 18 nominal records. These are at record numbers 0, 5, 10, 15, 20, 25, ..., 85. The sensor position for record n is n mod 18. So:
+- Record 0: pos 0, sensor 0.0
+- Record 5: pos 5, sensor 71.2
+- Record 10: pos 10, sensor 42.7
+- Record 15: pos 15, sensor 14.2
+- Record 20: pos 2, sensor 88.3 (approximately, in the second cycle it's 85.4)
+- Record 25: pos 7, sensor 59.8 (approximately 56.9 in cycle 2)
+- Record 30: pos 12, sensor 31.3 (approximately 28.4)
+- Record 35: pos 17, sensor 2.8 (approximately 99.6)
+
+Hmm, the sensor values shift slightly between cycles. Let me not get too deep into this.
+
+The key observations for comparison:
+
+**Sensor values:**
+- Both nominal and offline span the full 0-99 range over the dataset
+- But within any single 18-record sawtooth, nominal hits the extreme low (0.0) while offline avoids the very bottom (its lowest is ~11)
+- Nominal's highest in a cycle is ~99.6 (at the peak of the next cycle); offline's highest is ~96.8 (slightly below peak)
+- Actually wait, in the first cycle: nominal at pos 0 = 0.0, offline at pos 3 = 82.6. In the next 18-record window (records 18-35): nominal at pos 5 = 71.2 (record 20), pos 10 = 42.7 (record 25), pos 15 = 14.2 (record 30), and then record 35 pos 17 = 99.6. Offline at pos 8 = 54.1 (record 23... wait no.
+
+Let me recheck. Record 18 is the start of cycle 2 (pos 0 of that cycle). Status of record 18: 18 mod 5 = 3, so offline. Sensor = 96.8.
+Record 23: 23 mod 5 = 3, offline. Sensor = 68.3.
+Record 28: 28 mod 5 = 3, offline. Sensor = 39.8.
+Record 33: 33 mod 5 = 3, offline. Sensor = 11.3.
+
+Record 20: 20 mod 5 = 0, nominal. Sensor = 85.4.
+Record 25: 25 mod 5 = 0, nominal. Sensor = 56.9.
+Record 30: 30 mod 5 = 0, nominal. Sensor = 28.4.
+Record 35: 35 mod 5 = 0, nominal. Sensor = 99.6.
+
+So in the window records 18-35:
+- Nominal: 85.4, 56.9, 28.4, 99.6 (range: 28.4 to 99.6)
+- Offline: 96.8, 68.3, 39.8, 11.3 (range: 11.3 to 96.8)
+
+Interesting! In this window, offline actually has a WIDER range (11.3 to 96.8 = 85.5) than nominal (28.4 to 99.6 = 71.2). But they're offset - nominal tends to be slightly higher at the top and slightly lower at the bottom in different cycle positions.
+
+Actually, I think the clearest comparison is:
+- Both span the full 0-99 range over the full dataset
+- They are phase-shifted by 3 positions within the sawtooth (offline is 3 steps after nominal in the status cycle)
+- Zone patterns differ: nominal uses zones with one set of numbers, offline uses a different set
+
+Let me look at zones more carefully:
+
+Nominal zones (records 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85):
+A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15
+
+Offline zones (records 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63, 68, 73, 78, 83, 88):
+N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91, A86, N81, A76, N71, A66
+
+So:
+- Nominal A-zones: 10, 90, 80, 70, 60, 50, 40, 30, 20 (all multiples of 10)
+- Nominal N-zones: 95, 85, 75, 65, 55, 45, 35, 25, 15 (all ≡ 5 mod 10)
+- Offline A-zones: 56, 46, 36, 26, 16, 96, 86, 76
+=====

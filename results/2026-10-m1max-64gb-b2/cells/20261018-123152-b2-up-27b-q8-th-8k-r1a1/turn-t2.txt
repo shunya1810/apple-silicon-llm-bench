@@ -1,0 +1,177 @@
+Let me identify all records with status "offline" and "nominal" and compare their sensor values and zones.
+
+**Nominal records:**
+- Record 0: sensor=0.0, zone=A10
+- Record 5: sensor=71.2, zone=N95
+- Record 10: sensor=42.7, zone=A90
+- Record 15: sensor=14.2, zone=N85
+- Record 20: sensor=85.4, zone=A80
+- Record 25: sensor=56.9, zone=N75
+- Record 30: sensor=28.4, zone=A70
+- Record 35: sensor=99.6, zone=N65
+- Record 40: sensor=71.1, zone=A60
+- Record 45: sensor=42.6, zone=N55
+- Record 50: sensor=14.1, zone=A50
+- Record 55: sensor=85.3, zone=N45
+- Record 60: sensor=56.8, zone=A40
+- Record 65: sensor=28.3, zone=N35
+- Record 70: sensor=99.5, zone=A30
+- Record 75: sensor=71.0, zone=N25
+- Record 80: sensor=42.5, zone=A20
+- Record 85: sensor=14.0, zone=N15
+- Record 90: sensor=85.2, zone=A10
+- Record 95: sensor=56.7, zone=N95
+- Record 100: sensor=28.2, zone=A90
+- Record 105: sensor=99.4, zone=N85
+- Record 110: sensor=70.9, zone=A80
+- Record 115: sensor=42.4, zone=N75
+- Record 120: sensor=13.9, zone=A70
+- Record 125: sensor=85.1, zone=N65
+- Record 130: sensor=56.6, zone=A60
+- Record 135: sensor=28.1, zone=N55
+- Record 140: sensor=99.3, zone=A50
+- Record 145: sensor=70.8, zone=N45
+- Record 150: sensor=42.3, zone=A40
+- Record 155: sensor=13.8, zone=N35
+- Record 160: sensor=85.0, zone=A30
+- Record 165: sensor=56.5, zone=N25
+- Record 170: sensor=28.0, zone=A20
+- Record 175: sensor=99.2, zone=N15
+- Record 180: sensor=70.7, zone=A10
+- Record 185: sensor=42.2, zone=N95
+- Record 190: sensor=13.7, zone=A90
+- Record 195: sensor=84.9, zone=N85
+- Record 200: sensor=56.4, zone=A80
+- Record 205: sensor=27.9, zone=N75
+- Record 210: sensor=99.1, zone=A70
+- Record 215: sensor=70.6, zone=N65
+- Record 220: sensor=42.1, zone=A60
+- Record 225: sensor=13.6, zone=N55
+- Record 230: sensor=84.8, zone=A50
+- Record 235: sensor=56.3, zone=N45
+- Record 240: sensor=27.8, zone=A40
+- Record 245: sensor=99.0, zone=N35
+- Record 250: sensor=70.5, zone=A30
+- Record 255: sensor=42.0, zone=N25
+- Record 260: sensor=13.5, zone=A20
+- Record 265: sensor=84.7, zone=N15
+- Record 270: sensor=56.2, zone=A10
+- Record 275: sensor=27.7, zone=N95
+- Record 280: sensor=98.9, zone=A90
+- Record 285: sensor=70.4, zone=N85
+- Record 290: sensor=41.9, zone=A80
+- Record 295: schema=13.4, zone=N75
+- Record 300: sensor=84.6, zone=A70
+- Record 305: sensor=56.1, zone=N65
+- Record 310: sensor=27.6, zone=A60
+
+Wait, let me recheck. The status cycle is: nominal (0), degraded (1), recovering (2), offline (3), calibrating (4), then repeats. So nominal is at positions 0, 5, 10, 15, 20, 25... (every 5th starting from 0). Offline is at positions 3, 8, 13, 18, 23, 28... (every 5th starting from 3).
+
+**Offline records:**
+- Record 3: sensor=82.6, zone=N61
+- Record 8: sensor=54.1, zone=A56
+- Record 13: sensor=25.6, zone=N51
+- Record 18: sensor=96.8, zone=A46
+- Record 23: sensor=68.3, zone=N41
+- Record 28: sensor=39.8, zone=A36
+- Record 33: sensor=11.3, zone=N31
+- Record 38: sensor=82.5, zone=A26
+- Record 43: sensor=54.0, zone=N21
+- Record 48: sensor=25.5, zone=A16
+- Record 53: sensor=96.7, zone=N11
+- Record 58: sensor=68.2, zone=A96
+- Record 63: sensor=39.7, zone=N91
+- Record 68: sensor=11.2, zone=A86
+- Record 73: sensor=82.4, zone=N81
+- Record 78: sensor=53.9, zone=A76
+- Record 83: sensor=25.4, zone=N71
+- Record 88: sensor=96.6, zone=A66
+- Record 93: sensor=68.1, zone=N61
+- Record 98: sensor=39.6, zone=A56
+- Record 103: sensor=11.1, zone=N51
+- Record 108: sensor=82.3, zone=A46
+- Record 113: sensor=53.8, zone=N41
+- Record 118: sensor=25.3, zone=A36
+- Record 123: sensor=96.5, zone=N31
+- Record 128: sensor=68.0, zone=A26
+- Record 133: sensor=39.5, zone=N21
+- Record 138: sensor=11.0, zone=A16
+- Record 143: sensor=82.2, zone=N11
+- Record 148: sensor=53.7, zone=A96
+- Record 153: sensor=25.2, zone=N91
+- Record 158: sensor=96.4, zone=A86
+- Record 163: sensor=67.9, zone=N81
+- Record 168: sensor=39.4, zone=A76
+- Record 173: sensor=10.9, zone=N71
+- Record 178: sensor=82.1, zone=A66
+- Record 183: sensor=53.6, zone=N61
+- Record 188: sensor=25.1, zone=A56
+- Record 193: sensor=96.3, zone=N51
+- Record 198: sensor=67.8, zone=A46
+- Record 203: sensor=39.3, zone=N41
+- Record 208: sensor=10.8, zone=A36
+- Record 213: sensor=82.0, zone=N31
+- Record 218: sensor=53.5, zone=A26
+- Record 223: sensor=25.0, zone=N21
+- Record 228: sensor=96.2, zone=A16
+- Record 233: sensor=67.7, zone=N11
+- Record 238: sensor=39.2, zone=A96
+- Record 243: sensor=10.7, zone=N91
+- Record 248: sensor=81.9, zone=A86
+- Record 253: sensor=53.4, zone=N81
+- Record 258: sensor=24.9, zone=A76
+- Record 263: sensor=96.1, zone=N71
+- Record 268: sensor=67.6, zone=A66
+- Record 273: sensor=39.1, zone=N61
+- Record 278: sensor=10.6, zone=A56
+- Record 283: sensor=81.8, zone=N51
+- Record 288: sensor=53.3, zone=A46
+- Record 293: sensor=24.8, zone=N41
+- Record 298: sensor=96.0, zone=A36
+- Record 303: sensor=67.5, zone=N31
+- Record 308: sensor=39.0, zone=A26
+- Record 313: sensor=10.5, zone=N21
+
+Now let me compare:
+
+**Nominal sensor values:** 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, 71.0, 42.5, 14.0, 85.2, 56.7, 28.2, 99.4, 70.9, 42.4, 13.9, 85.1, 56.6, 28.1, 99.3, 70.8, 42.3, 13.8, 85.0, 56.5, 28.0, 99.2, 70.7, 42.2, 13.7, 84.9, 56.4, 27.9, 99.1, 70.6, 42.1, 13.6, 84.8, 56.3, 27.8, 99.0, 70.5, 42.0, 13.5, 84.7, 56.2, 27.7, 98.9, 70.4, 41.9, 13.4, 84.6, 56.1, 27.6
+
+**Offline sensor values:** 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7, 11.2, 82.4, 53.9, 25.4, 96.6, 68.1, 39.6, 11.1, 82.3, 53.8, 25.3, 96.5, 68.0, 39.5, 11.0, 82.2, 53.7, 25.2, 96.4, 67.9, 39.4, 10.9, 82.1, 53.6, 25.1, 96.3, 67.8, 39.3, 10.8, 82.0, 53.5, 25.0, 96.2, 67.7, 39.2, 10.7, 81.9, 53.4, 24.9, 96.1, 67.6, 39.1, 10.6, 81.8, 53.3, 24.8, 96.0, 67.5, 39.0, 10.5
+
+Both follow the same sawtooth pattern (decreasing by 5.7), but they are offset in phase. Since nominal starts at record 0 (sensor=0.0) and offline starts at record 3 (sensor=82.6), the offline records are 3 positions ahead in the cycle. So at any given cycle, offline values are about 3×5.7 = 17.1 higher than nominal values (when both are in the descending portion).
+
+Wait, let me think about this differently. In each 18-record cycle:
+- Position 0 in cycle: nominal (starts at ~0 or ~99)
+- Position 3 in cycle: offline
+
+Actually the status cycle is 5 (nominal, degraded, recovering, offline, calibrating), and the sensor cycle is 18. So the relationship between status and sensor value depends on where in the 18-cycle the 5-cycle lands.
+
+Let me look at specific examples:
+- Record 0: nominal, sensor=0.0, zone=A10
+- Record 3: offline, sensor=82.6, zone=N61
+- Record 5: nominal, sensor=71.2, zone=N95
+- Record 8: offline, sensor=54.1, zone=A56
+- Record 10: nominal, sensor=42.7, zone=A90
+- Record 13: offline, sensor=25.6, zone=N51
+- Record 15: nominal, sensor=14.2, zone=N85
+- Record 18: offline, sensor=96.8, zone=A46
+- Record 20: nominal, sensor=85.4, zone=A80
+- Record 23: offline, sensor=68.3, zone=N41
+- Record 25: nominal, sensor=56.9, zone=N75
+- Record 28: offline, sensor=39.8, zone=A36
+- Record 30: nominal, sensor=28.4, zone=A70
+- Record 33: offline, sensor=11.3, zone=N31
+
+So comparing pairs in the same cycle:
+- Nominal rec 0 (0.0) vs Offline rec 3 (82.6): offline is much higher
+- Nominal rec 5 (71.2) vs Offline rec 8 (54.1): nominal is higher
+- Nominal rec 10 (42.7) vs Offline rec 13 (25.6): nominal is higher
+- Nominal rec 15 (14.2) vs Offline rec 18 (96.8): offline is much higher (next cycle)
+- Nominal rec 20 (85.4) vs Offline rec 23 (68.3): nominal is higher
+- Nominal rec 25 (56.9) vs Offline rec 28 (39.8): nominal is higher
+- Nominal rec 30 (28.4) vs Offline rec 33 (11.3): nominal is higher
+
+So the pattern is: offline records are 3 positions after the preceding nominal in the sawtooth. When the sawtooth is descending, the offline value is lower than the corresponding nominal (since it's 3 steps further down). But at the cycle boundary, the offline can be at the peak (96.8) while nominal is at the trough (14.2).
+
+Actually, let me reconsider. The status cycles every 5 records. The sensor sawtooth has a period of 18 records. LCM(5,18) = 90. So the full pattern repeats every 90 records.
+=====

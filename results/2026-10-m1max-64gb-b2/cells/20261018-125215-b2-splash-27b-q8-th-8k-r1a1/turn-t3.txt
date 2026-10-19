@@ -1,0 +1,72 @@
+The user asks two things:
+1. Quote the anomalous line exactly.
+2. In about 120 words, explain how it differs from the other records.
+
+The anomalous line is:
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+Let me verify by scanning the data. Yes, between Record 000156 and Record 000157, there is:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Now I need to explain in about 120 words how it differs from the other records.
+
+Key differences:
+- The record ID is "NEEDLE" instead of a six-digit zero-padded number (000000, 000001, etc.)
+- It lacks the structured "sensor=X status=Y zone=Z" triplet that every other record has.
+- It contains free-form prose ("maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.") rather than the key=value fields.
+- The zone "Q42" uses a "Q" prefix, whereas all normal zones use only "A" or "N" prefixes.
+- It has no sensor value, no status field, no numeric zone code following the +17 pattern.
+- It explicitly self-identifies as not telemetry.
+
+Let me draft about 120 words for the explanation.
+
+"Every normal record follows the template 'Record NNNNNN: sensor=F status=S zone=XD' where NNNNNN is a six-digit zero-padded integer, sensor is a float, status is one of five fixed keywords, and zone is a single letter (A or N) plus two digits. The NEEDLE line violates each of these conventions. Its identifier is a non-numeric word rather than a sequential number. It omits the sensor, status, and structured zone fields entirely, replacing them with a free-text sentence. Its zone label uses the letter Q, a prefix absent from every other record. Finally, the line explicitly disclaims itself as non-telemetry, confirming it is an out-of-band maintenance annotation rather than a measurement sample."
+
+Let me count: Every(1) normal(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) F(10) status(11) S(12) zone(13) XD(14) where(15) NNNNNN(16) is(17) a(18) six-digit(19) zero-padded(20) integer(21) sensor(22) is(23) a(24) float(25) status(26) is(27) one(28) of(29) five(30) fixed(31) keywords(32) and(33) zone(34) is(35) a(36) single(37) letter(38) A(39) or(40) N(41) plus(42) two(43) digits(44). The(45) NEEDLE(46) line(47) violates(48) each(49) of(50) these(51) conventions(52). Its(53) identifier(54) is(55) a(56) non-numeric(57) word(58) rather(59) than(60) a(61) sequential(62) number(63). It(64) omits(65) the(66) sensor(67) status(68) and(69) structured(70) zone(71) fields(72) entirely(73) replacing(74) them(75) with(76) a(77) free-text(78) sentence(79). Its(80) zone(81) label(82) uses(83) the(84) letter(85) Q(86) a(87) prefix(88) absent(89) from(90) every(91) other(92) record(93). Finally(94) the(95) line(96) explicitly(97) disclaims(98) itself(99) as(100) non-telemetry(101) confirming(102) it(103) is(104) an(105) out-of-band(106) maintenance(107) annotation(108) rather(109) than(110) a(111) measurement(112) sample(113).
+
+That's about 113 words. Close to 120. Let me adjust slightly to get closer to 120.
+
+Let me recount more carefully:
+
+"Every normal record follows the template 'Record NNNNNN: sensor=F status=S zone=XD' where NNNNNN is a six-digit zero-padded integer, sensor is a float, status is one of five fixed keywords, and zone is a single letter (A or N) plus two digits."
+
+Every(1) normal(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) F(10) status(11) S(12) zone(13) XD(14) where(15) NNNNNN(16) is(17) a(18) six-digit(19) zero-padded(20) integer(21) sensor(22) is(23) a(24) float(25) status(26) is(27) one(28) of(29) five(30) fixed(31) keywords(32) and(33) zone(34) is(35) a(36) single(37) letter(38) A(39) or(40) N(41) plus(42) two(43) digits(44) = 44 words
+
+"The NEEDLE line violates each of these conventions."
+The(45) NEEDLE(46) line(47) violates(48) each(49) of(50) these(51) conventions(52) = 8 words → 52
+
+"Its identifier is a non-numeric word rather than a sequential number."
+Its(53) identifier(54) is(55) a(56) non-numeric(57) word(58) rather(59) than(60) a(61) sequential(62) number(63) = 11 → 63
+
+"It omits the sensor, status, and structured zone fields entirely, replacing them with a free-text sentence."
+It(64) omits(65) the(66) sensor(67) status(68) and(69) structured(70) zone(71) fields(72) entirely(73) replacing(74) them(75) with(76) a(77) free-text(78) sentence(79) = 16 → 79
+
+"Its zone label uses the letter Q, a prefix absent from every other record."
+Its(80) zone(81) label(82) uses(83) the(84) letter(85) Q(86) a(87) prefix(88) absent(89) from(90) every(91) other(92) record(93) = 14 → 93
+
+"Finally, the line explicitly disclaims itself as non-telemetry, confirming it is an out-of-band maintenance annotation rather than a measurement sample."
+Finally(94) the(95) line(96) explicitly(97) disclaims(98) itself(99) as(100) non-telemetry(101) confirming(102) it(103) is(104) an(105) out-of-band(106) maintenance(107) annotation(108) rather(109) than(110) a(111) measurement(112) sample(113) = 20 → 113
+
+113 words. I can add a few more to get closer to 120. Let me expand slightly.
+
+Let me try:
+
+"Every normal record follows the template 'Record NNNNNN: sensor=F status=S zone=XD' where NNNNNN is a six-digit zero-padded integer, sensor is a float, status is one of five fixed keywords, and zone is a single letter (A or N) plus two digits. The NEEDLE line violates each of these conventions. Its identifier is a non-numeric word rather than a sequential number. It omits the sensor, status, and structured zone fields entirely, replacing them with a free-text sentence. Its zone label uses the letter Q, a prefix absent from every other record. Finally, the line explicitly disclaims itself as non-telemetry, confirming it is an out-of-band maintenance annotation inserted between records 156 and 157 rather than a measurement sample."
+
+Adding "inserted between records 156 and 157" adds about 7 words → ~120. Good.
+
+Let me recount the final version:
+Every(1) normal(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) F(10) status(11) S(12) zone(13) XD(14) where(15) NNNNNN(16) is(17) a(18) six-digit(19) zero-padded(20) integer(21) sensor(22) is(23) a(24) float(25) status(26) is(27) one(28) of(29) five(30) fixed(31) keywords(32) and(33) zone(34) is(35) a(36) single(37) letter(38) A(39) or(40) N(41) plus(42) two(43) digits(44) The(45) NEEDLE(46) line(47) violates(48) each(49) of(50) these(51) conventions(52) Its(53) identifier(54) is(55) a(56) non-numeric(57) word(58) rather(59) than(60) a(61) sequential(62) number(63) It(64) omits(65) the(66) sensor(67) status(68) and(69) structured(70) zone(71) fields(72) entirely(73) replacing(74) them(75) with(76) a(77) free-text(78) sentence(79) Its(80) zone(81) label(82) uses(83) the(84) letter(85) Q(86) a(87) prefix(88) absent(89) from(90) every(91) other(92) record(93) Finally(94) the(95) line(96) explicitly(97) disclaims(98) itself(99) as(100) non-telemetry(101) confirming(102) it(103) is(104) an(105) out-of-band(106) maintenance(107) annotation(108) inserted(109) between(110) records(111) 156(112) and(113) 157(114) rather(115) than(116) a(117) measurement(118) sample(119)
+
+That's 119 words. Close enough to "about 120."
+
+Now let me format the response: quote the line first, then the explanation.
+
+=====
+**Quoted line:**
+
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+**Explanation:**
+
+Every normal record follows the template "Record NNNNNN: sensor=F status=S zone=XD" where NNNNNN is a six-digit zero-padded integer, sensor is a float, status is one of five fixed keywords, and zone is a single letter (A or N) plus two digits. The NEEDLE line violates each of these conventions. Its identifier is a non-numeric word rather than a sequential number. It omits the sensor, status, and structured zone fields entirely, replacing them with a free-text sentence. Its zone label uses the letter Q, a prefix absent from every other record. Finally, the line explicitly disclaims itself as non-telemetry, confirming it is an out-of-band maintenance annotation inserted between records 156 and 157 rather than a measurement sample.

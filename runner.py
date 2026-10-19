@@ -105,6 +105,25 @@ def get_json(url: str, timeout: float = 30.0):
         return json.load(response)
 
 
+def missing_native_extensions(pythonpath: str) -> None:
+    """Refuse an MTPLX checkout whose native extensions were never built or copied in.
+
+    A fork worktree made with `git worktree add` has the extension sources but not the
+    built `_ext*.so` (and the metallib): MTPLX then silently falls back to its GPU-only
+    prefill attention and drops the Neural Engine prefill (2026-10-16: four heptagon runs
+    measured that way). Copy them in with scripts/make_fork_worktree.sh, or set
+    "allow_missing_native_extensions": true in the engine spec.
+    """
+    for entry in filter(None, pythonpath.split(":")):
+        root = Path(entry) / "native_extensions"
+        if not root.is_dir():
+            continue
+        for name in ("mfa_attn", "ane_ffn"):
+            if (root / name).is_dir() and not list((root / name / f"mtplx_{name}").glob("_ext*.so")):
+                raise RuntimeError(f"{root / name} has no built extension: run scripts/make_fork_worktree.sh "
+                                   f"or copy native_extensions/{name}/mtplx_{name}/ from a built checkout")
+
+
 class Engine:
     def __init__(self, spec: dict, cell_dir: Path, vars_: dict):
         self.spec = expand(spec, {**os.environ, **vars_})
@@ -118,6 +137,8 @@ class Engine:
         for path in self.spec.get("wipe_before_start", []):
             shutil.rmtree(path, ignore_errors=True)
         env = dict(os.environ, PYTHONUNBUFFERED="1", **self.spec.get("env", {}))
+        if not self.spec.get("allow_missing_native_extensions"):
+            missing_native_extensions(env.get("PYTHONPATH", ""))
         log = (self.cell_dir / "server.log").open("w")
         t0 = time.time()
         self.proc = subprocess.Popen(self.spec["cmd"], stdout=log, stderr=subprocess.STDOUT, env=env,
@@ -142,6 +163,10 @@ class Engine:
                     os.killpg(self.proc.pid, signal.SIGKILL)
                 except (ProcessLookupError, PermissionError):
                     pass  # group already gone (the child re-exec'd into its own session)
+            # The engine's on-disk prefix cache is wiped at the next start anyway; wiping it at the
+            # end too keeps a long run's caches from piling up on a small disk.
+            for path in self.spec.get("wipe_before_start", []):
+                shutil.rmtree(path, ignore_errors=True)
 
     def version(self) -> dict:
         out = {}
@@ -212,6 +237,18 @@ class Engine:
                             out["tokens_per_round"] = out["completion_tokens"] / out["rounds"]
                         if out["drafted_tokens"]:
                             out["acceptance_rate"] = out["accepted_drafts"] / out["drafted_tokens"]
+                        return out
+                    time.sleep(0.25)
+                return {}
+            if kind == "qwisp-log":
+                path = self.cell_dir / "server.log"
+                for _ in range(20):  # one "[qwisp] stream ..." line per request, after the stream closes
+                    text = path.read_text(errors="replace")[log_offset:]
+                    lines = [l for l in text.splitlines() if l.startswith("[qwisp]") and "decode=" in l]
+                    if lines:
+                        out = {"server_line": lines[-1]}
+                        for k, v in re.findall(r"(\w+)=([-\d.]+)", lines[-1]):
+                            out[k] = float(v)
                         return out
                     time.sleep(0.25)
                 return {}
@@ -317,6 +354,8 @@ def stream_chat(base: str, payload: dict, timeout: float) -> dict:
     t0 = time.perf_counter()
     first = last = None
     parts: list[str] = []
+    content_parts: list[str] = []
+    reasoning_parts: list[str] = []
     chunks = 0
     usage = finish = error = None
     try:
@@ -337,6 +376,8 @@ def stream_chat(base: str, payload: dict, timeout: float) -> dict:
                 for ch in obj.get("choices") or []:
                     delta = ch.get("delta") or {}
                     piece = "".join(delta.get(k) or "" for k in ("content", "reasoning_content", "reasoning"))
+                    content_parts.append(delta.get("content") or "")
+                    reasoning_parts.append(delta.get("reasoning_content") or delta.get("reasoning") or "")
                     if piece:
                         now = time.perf_counter() - t0
                         first = now if first is None else first
@@ -348,15 +389,20 @@ def stream_chat(base: str, payload: dict, timeout: float) -> dict:
         error = repr(exc)
     text = "".join(parts)
     return {"e2e_s": time.perf_counter() - t0, "ttft_s": first, "last_token_s": last, "chunks": chunks,
-            "text": text, "usage": usage, "finish_reason": finish, "error": error}
+            "text": text, "content": "".join(content_parts), "reasoning": "".join(reasoning_parts),
+            "usage": usage, "finish_reason": finish, "error": error}
 
 
 def run_turn(engine: Engine, spec: dict, messages: list, max_tokens: int, timeout: float, tokenizer,
-             sampling: dict | None = None) -> dict:
+             sampling: dict | None = None, thinking: bool = False, effort: str | None = None) -> dict:
     payload = {"model": engine.spec["model_id"], "messages": messages, "max_tokens": max_tokens,
                "temperature": 0.0, "top_p": 1.0, "stream": True,
                "stream_options": {"include_usage": True},
-               "chat_template_kwargs": {"enable_thinking": False}}
+               "chat_template_kwargs": {"enable_thinking": bool(thinking)}}
+    if effort:
+        # Both spellings: the OpenAI field (MTPLX, Splash) and the template variable (oMLX, mlx-lm).
+        payload["reasoning_effort"] = effort
+        payload["chat_template_kwargs"]["reasoning_effort"] = effort
     payload.update(spec.get("request_extra", {}))
     payload.update(sampling or {})
     offset = engine.log_size()
@@ -377,6 +423,10 @@ def run_turn(engine: Engine, spec: dict, messages: list, max_tokens: int, timeou
         "finish_reason": r["finish_reason"],
         "error": r["error"],
         "text": r["text"],
+        "content": r["content"],
+        "reasoning": r["reasoning"],
+        "reasoning_chars": len(r["reasoning"]),
+        "content_chars": len(r["content"]),
         "text_sha256": hashlib.sha256(r["text"].encode()).hexdigest(),
         "engine_stats": engine.stats(offset),
     }
@@ -432,6 +482,10 @@ def main() -> None:
 
         def emit(row: dict) -> None:
             text = row.pop("text", "")
+            if row.get("reasoning"):
+                text = row["reasoning"] + "\n=====\n" + row.get("content", "")
+            row.pop("reasoning", None)
+            row.pop("content", None)
             (cell_dir / f"{row['phase']}-t{row.get('turn', 0)}.txt").write_text(text)
             with out.open("a") as fh:
                 fh.write(json.dumps({**base_row, **row}) + "\n")
@@ -441,6 +495,9 @@ def main() -> None:
 
         # warmup (JIT/compile), excluded from results but recorded
         sampler.reset_window()
+        thinking = bool(scen.get("thinking"))
+        base_row["thinking"] = thinking
+        base_row["reasoning_effort"] = scen.get("reasoning_effort")
         w = run_turn(engine, spec, [{"role": "user", "content": "Say hello in five words."}], 16, 600, tok)
         emit({"phase": "warmup", **w, **{f"peak_{k}": v for k, v in sampler.reset_window().items()}})
 
@@ -451,15 +508,29 @@ def main() -> None:
         emit({"phase": "canary", **c, **{f"peak_{k}": v for k, v in sampler.reset_window().items()}})
 
         messages: list = []
+        # An engine may stop a scenario early ("max_turns": {scenario id: n}): oMLX re-reads the whole
+        # prompt on every turn of a hybrid model, so its deep turns take an hour each.
+        turn_limit = (spec.get("max_turns") or {}).get(scen["id"])
+        base_row["turn_limit"] = turn_limit
         for i, q in enumerate(scen["turns"], 1):
+            if turn_limit and i > int(turn_limit):
+                break
             content = (context + q) if i == 1 else q
             messages.append({"role": "user", "content": content})
             sampler.reset_window()
-            r = run_turn(engine, spec, messages, scen["max_tokens"], timeout, tok, scen.get("sampling"))
+            r = run_turn(engine, spec, messages, scen["max_tokens"], timeout, tok, scen.get("sampling"), thinking,
+                         scen.get("reasoning_effort"))
             peaks = sampler.reset_window()
+            answer = r["content"] if thinking else r["text"]
             r.update(phase="turn", turn=i, peak_rss=peaks["rss"], peak_wired=peaks["wired"],
-                     needle_ok=(NEEDLE_ANSWER in r["text"]) if scen.get("needle_turn") == i else None)
-            messages.append({"role": "assistant", "content": r["text"]})
+                     needle_ok=(NEEDLE_ANSWER in answer) if scen.get("needle_turn") == i else None)
+            if thinking:
+                # Only the answer goes back: engines differ in what they do with an echoed
+                # reasoning_content (MTPLX drops past thinking by default), so with the answer alone
+                # every engine renders the same next prompt.
+                messages.append({"role": "assistant", "content": r["content"]})
+            else:
+                messages.append({"role": "assistant", "content": r["text"]})
             emit(r)
             if r["error"]:
                 break

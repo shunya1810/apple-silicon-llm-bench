@@ -1,0 +1,98 @@
+
+The user wants me to describe how sensor values and status fields vary across the records in about 150 words, then list three concrete observations. Let me analyze the data.
+
+Sensor values: They start at 0.0 and decrease by 5.7 each record (0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8, then jumps to 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, then jumps to 99.6, etc.)
+
+Wait, let me re-examine. The first cycle: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8 — that's 18 values decreasing by 5.7 each. Then 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, 99.6... 
+
+Wait, let me look more carefully. The difference between consecutive values is consistently -5.7 (decreasing). But there's a periodic "wrap" where it jumps back up. Let me check:
+- 0.0 to 94.0: +94.0 (or wrap)
+- 94.0 to 88.3: -5.7
+- 88.3 to 82.6: -5.7
+- ...continues decreasing by 5.7
+- 2.8 to 96.8: +94.0 (wrap)
+- 96.8 to 91.1: -5.7
+- ...
+- 5.6 to 99.6: +94.0 (wrap)
+
+So the pattern is: values decrease by 5.7 each step, wrapping around (adding ~99.5 or so) every 18 records. Actually let me check: 0.0, then 94.0 (jump of +94), then decreasing by 5.7... 94.0 - 17*5.7 = 94.0 - 96.9 = -2.9, but we see 2.8. Hmm, not exactly. Let me recheck.
+
+Actually: 94.0 - 5.7 = 88.3 ✓, 88.3 - 5.7 = 82.6 ✓, etc. And 2.8 + 94.0 = 96.8 ✓. Then 96.8 - 5.7 = 91.1 ✓. 5.6 + 94.0 = 99.6 ✓. Then 99.6 - 5.7 = 93.9 ✓.
+
+Wait, but the first one is 0.0, then 94.0. 0.0 + 94.0 = 94.0. Then it decreases. Then at the wrap it adds 94.0 again? Let me check: 2.8 + 94.0 = 96.8 ✓. 5.6 + 94.0 = 99.6 ✓. 5.4 + 94.0 = 99.4 ✓. 
+
+So the pattern: every 18 records, the sensor wraps. The initial value starts at 0.0, then cycles.
+
+Status fields: They cycle through: nominal, degraded, recovering, offline, calibrating — a 5-cycle pattern. Let me verify:
+- Record 0: nominal
+- Record 1: degraded
+- Record 2: recovering
+- Record 3: offline
+- Record 4: calibrating
+- Record 5: nominal
+- Record 6: degraded
+- ...
+
+Yes, it's a simple 5-step cycle: nominal → degraded → recovering → offline → calibrating → repeat.
+
+Zone: Alternates between A and N prefixes, with the number cycling. Let me check: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18, N35, A52, N69, A86, N13, A30, N47, A64, N81, A98, N25, A42, N59, A76, N93, A20, N37, A54, N71, A88, N15, A32, N49, A66, N83, A10, N27...
+
+The zone numbers increase by 17 each step (mod 100 or so): 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50, 67, 84, 11, 28, 45, 62, 79, 96, 23, 40, 57, 74, 91, 18, 35, 52, 69, 86, 13, 30, 47, 64, 81, 98, 25, 42, 59, 76, 93, 20, 37, 54, 71, 88, 15, 32, 49, 66, 83, 10, 27...
+
+Yes, increasing by 17 each time, wrapping at 100. And the prefix alternates A, N, A, N...
+
+Now, there's also a "NEEDLE" record inserted between 000156 and 000157 that says "maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry." This is an anomaly/injection.
+
+Now let me write about 150 words describing the variation, then list three concrete observations.
+
+Let me draft:
+
+The sensor values follow a strict arithmetic sequence, decreasing by 5.7 per record until they drop below a threshold, at which point they wrap upward by approximately 94 (e.g., 2.8 → 96.8), creating a sawtooth pattern that repeats every 18 records. The status field cycles deterministically through five states—nominal, degraded, recovering, offline, calibrating—in a fixed 5-record loop, independent of the sensor magnitude. The zone identifier alternates between an "A" and "N" prefix while the numeric suffix increments by 17 per record, wrapping modulo 100, so zone assignments shift smoothly across the log.
+
+Three concrete observations:
+
+1. Record "NEEDLE" (between 000156 and 000157) breaks the format entirely, containing free-text maintenance override language ("zone Q42 uses code 7391-ALPHA") rather than the sensor/status/zone structure—flagging it as a non-telemetry injection.
+
+2. The sensor wrap is not perfectly periodic at 100: the first cycle starts at 0.0 and the next at 94.0, but subsequent cycles start at 96.8, 99.6, 99.4, 99.3, etc., because the 5.7 decrement accumulated differently over 18 steps (18 × 5.7 = 102.6), so the wrap value drifts.
+
+Wait, let me re-examine. 0.0 → 94.0 (first jump is +94). Then 94.0 decreases by 5.7 for 17 more steps: 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8. That's 18 values. Then 2.8 → 96.8 (jump of +94). Then 96.8, 91.1, ..., 5.6 (18 values). Then 5.6 → 99.6 (jump of +94). Then 99.6, 93.9, ..., 5.4 (18 values). Then 5.4 → 99.4? Wait, 5.4 + 94 = 99.4. But looking at the data: Record 000104 is 5.4, Record 000105 is 99.4. Yes! So the wrap is always +94.0.
+
+But wait: 0.0 + 94 = 94.0 ✓. 2.8 + 94 = 96.8 ✓. 5.6 + 94 = 99.6 ✓. 5.4 + 94 = 99.4 ✓. 5.3 + 94 = 99.3 ✓. 5.2 + 94 = 99.2 ✓.
+
+Hmm, but 2.8 and 5.6 and 5.4 are close together. Let me trace more carefully.
+
+Cycle 1 (records 0-17): 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8
+Cycle 2 (records 18-35): 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, 99.6
+
+Wait, record 35 is 99.6? Let me check. Record 000035: sensor=99.6. And record 000036: sensor=93.9. So cycle 2 is records 18-35, ending at 99.6? That's 18 values: 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, 99.6. Hmm, that's 18 values but the last one (99.6) is higher than the first (96.8). That breaks the pattern.
+
+Wait, let me recount. 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6 — that's 17 values. Then the next would be 5.6 - 5.7 = -0.1, which wraps to 99.6. So the cycle is 18 values where the 18th is the wrap.
+
+Actually, I think the pattern is simpler: each successive record's sensor value is previous - 5.7, and when it would go below 0 (or below some threshold), it wraps by adding 100 (or some value). Let me check: 2.8 - 5.7 = -2.9, and 96.8 = -2.9 + 99.7? No. 2.8 + 94 = 96.8. Or maybe it wraps at 100: 2.8 - 5.7 = -2.9, and -2.9 + 99.7... no.
+
+Actually, I think the simplest description is: values decrease by 5.7 per record, with a periodic wrap (adding ~94) every 18 records, creating a sawtooth. The exact wrap point shifts slightly because 18 × 5.7 = 102.6, so each cycle's starting point drifts.
+
+Let me not overcomplicate. The key observations for my 150 words + 3 observations:
+
+Description (~150 words):
+- Sensor: sawtooth, -5.7 per step, wraps every 18 records
+- Status: fixed 5-cycle (nominal, degraded, recovering, offline, calibrating)
+- Zone: alternating A/N prefix, number +17 mod 100
+
+Three observations:
+1. The NEEDLE record is a format-breaking injection (free text, zone Q42, code 7391-ALPHA)
+2. The sensor wrap causes each 18-record cycle to start slightly higher than the last (0.0 → 94.0 → 96.8 → 99.6 → 99.4...), a slow drift
+3. The status cycle (period 5) and sensor cycle (period 18) have a combined period of LCM(5,18) = 90 records before the full pattern repeats
+
+Let me count LCM(5,18) = 90. And the zone cycle: 17 mod 100 has period 100/gcd(17,100) = 100/1 = 100. And A/N alternation has period 2. So zone pattern period is LCM(100,2) = 100.
+
+So the full repeating period would be LCM(90, 100) = 900 records.
+
+Let me write this up in about 150 words for the description, then 3 observations.
+
+=====
+
+
+## Description of Variation
+
+Sensor values follow a strict sawtooth: each record's reading is 5.7 lower than the previous, and every 18 records the value wraps upward by roughly 94, producing a repeating decline from near 100 down to near 0. The status field ignores magnitude entirely,

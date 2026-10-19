@@ -1,0 +1,195 @@
+The user wants me to analyze the synthetic telemetry records and describe how sensor values and status fields vary, then list three concrete observations. Let me analyze the patterns.
+
+Sensor values: Starting at 0.0, they decrease by 5.7 each record until they hit a low (around 2.0-2.8), then jump back up to around 96-99 and start decreasing again. This creates a sawtooth pattern. Let me verify:
+- Record 0: 0.0
+- Record 1: 94.0 (jump up)
+- Record 2: 88.3 (decrease by 5.7)
+- Record 3: 82.6 (decrease by 5.7)
+- ...continuing down by 5.7 each time...
+- Record 17: 2.8
+- Record 18: 96.8 (jump up)
+- Record 19: 91.1
+- ...
+
+So the pattern is: starts high (~94-99), decreases by 5.7 per record, wraps around at the bottom, jumps back to high. The starting value of each cycle increases slightly: 94.0, 96.8, 99.6, 99.5, 99.4, 99.3... Actually let me check more carefully.
+
+Record 0: 0.0 (this is the very first, an outlier)
+Record 1: 94.0
+Record 17: 2.8
+Record 18: 96.8
+Record 34: 5.6
+Record 35: 99.6
+Record 51: 8.4
+Record 52: 2.7... wait, let me recheck.
+
+Actually looking more carefully:
+- Record 1: 94.0, decreases by 5.7 each step
+- Record 17: 94.0 - 16*5.7 = 94.0 - 91.2 = 2.8 ✓
+- Record 18: 96.8 (new cycle starts higher)
+- Record 34: 96.8 - 16*5.7 = 96.8 - 91.2 = 5.6 ✓
+- Record 35: 99.6
+- Record 51: 99.6 - 16*5.7 = 99.6 - 91.2 = 8.4 ✓
+- Record 52: 2.7... wait that doesn't match. Let me recheck.
+
+Record 35: 99.6
+Record 36: 93.9 (decrease by 5.7)
+...
+Record 51: 99.6 - 16*5.7 = 8.4 ✓
+Record 52: 2.7... 8.4 - 5.7 = 2.7 ✓
+
+So each cycle is 16 records long, decreasing by 5.7. The starting values of each cycle:
+- Cycle 1 (records 1-17): starts at 94.0
+- Cycle 2 (records 18-34): starts at 96.8
+- Cycle 3 (records 35-51): starts at 99.6
+- Cycle 4 (records 52-69): starts at 99.5... wait, record 52 is 2.7, record 53 is 96.7
+
+Hmm, let me re-examine. Record 52: 2.7, Record 53: 96.7. So the cycle is actually 16 records (1-17 is 17 records). Let me recount.
+
+Records 1-17: 17 records (94.0 down to 2.8)
+Records 18-34: 17 records (96.8 down to 5.6)
+Records 35-51: 17 records (99.6 down to 8.4)
+Records 52-68: 17 records (2.7 down to...) wait, that's only 17.
+
+Actually, I think the pattern is: the sensor value follows a linear decrease of 5.7 per step, with a sawtooth wrap. The "peak" values increase slightly each cycle initially (94.0, 96.8, 99.6) then start decreasing (99.5, 99.4, 99.3, 99.2, 99.1, 99.0, 98.9, 98.8, 98.7, 98.6, 98.5, 98.4, 98.3, 98.2, 98.1, 98.0, 97.9, 97.8, 97.7, 97.6, 97.5, 97.4, 97.3, 97.2, 97.1, 97.0, 96.9, 96.8, 96.7, 96.6, 96.5, 96.4, 96.3, 96.2, 96.1, 96.0, 95.9, 95.8, 95.7, 95.6, 95.5, 95.4, 95.3, 95.2, 95.1, 95.0, 94.9, 94.8, 94.7, 94.6, 94.5, 94.4, 94.3, 94.2, 94.1, 94.0, 93.9...)
+
+Wait, I think I'm overcomplicating this. Let me just note the general pattern: sensor values follow a sawtooth pattern, decreasing linearly and wrapping around. The status field cycles through 5 values: nominal, degraded, recovering, offline, calibrating - repeating every 5 records. The zone field cycles through a set of zones.
+
+Let me verify status:
+Record 0: nominal
+Record 1: degraded
+Record 2: recovering
+Record 3: offline
+Record 4: calibrating
+Record 5: nominal
+Record 6: degraded
+...
+
+Yes! Status cycles: nominal → degraded → recovering → offline → calibrating → nominal → ...
+
+Zone: Let me check the pattern.
+Record 0: A10
+Record 1: N27
+Record 2: A44
+Record 3: N61
+Record 4: A78
+Record 5: N95
+Record 6: A22
+Record 7: N39
+Record 8: A56
+Record 9: N73
+Record 10: A90
+Record 11: N17
+Record 12: A34
+Record 13: N51
+Record 14: A68
+Record 15: N85
+Record 16: A12
+Record 17: N29
+Record 18: A46
+Record 19: N63
+Record 20: A80
+Record 21: N97
+Record 22: A24
+Record 23: N41
+Record 24: A58
+Record 25: N75
+Record 26: A92
+Record 27: N19
+Record 28: A36
+Record 29: N53
+Record 30: A70
+Record 31: N87
+Record 32: A14
+Record 33: N31
+Record 34: A48
+Record 35: N65
+Record 36: A82
+Record 37: N99
+Record 38: A26
+Record 39: N43
+Record 40: A60
+Record 41: N77
+Record 42: A94
+Record 43: N21
+Record 44: A38
+Record 45: N55
+Record 46: A72
+Record 47: N89
+Record 48: A16
+Record 49: N33
+Record 50: A50
+Record 51: N67
+Record 52: A84
+Record 53: N11
+Record 54: A28
+Record 55: N45
+Record 56: A62
+Record 57: N79
+Record 58: A96
+Record 59: N23
+Record 60: A40
+Record 61: N57
+Record 62: A74
+Record 63: N91
+Record 64: A18
+Record 65: N35
+Record 66: A52
+Record 67: N69
+Record 68: A86
+Record 69: N13
+Record 70: A30
+Record 71: N47
+Record 72: A64
+Record 73: N81
+Record 74: A98
+Record 75: N25
+Record 76: A42
+Record 77: N59
+Record 78: A76
+Record 79: N93
+Record 80: A20
+Record 81: N37
+Record 82: A54
+Record 83: N71
+Record 84: A88
+Record 85: N15
+Record 86: A32
+Record 87: N49
+Record 88: A66
+Record 89: N83
+Record 90: A10 (back to start!)
+
+So the zone pattern repeats every 17 records (or maybe it's a cycle of specific zones). Let me check: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18, N35, A52, N69, A86, N13, A30, N47, A64, N81, A98, N25, A42, N59, A76, N93, A20, N37, A54, N71, A88, N15, A32, N49, A66, N83, A10...
+
+That's 85 unique zones before it repeats? No wait, record 90 is A10, same as record 0. So the zone cycle is 90 records? Let me check: 90 - 0 = 90. But the pattern within seems to be: A-prefixed zones and N-prefixed zones alternating, with the numbers following a pattern of +17 (mod 100) for the numeric part.
+
+A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18, N35, A52, N69, A86, N13, A30, N47, A64, N81, A98, N25, A42, N59, A76, N93, A20, N37, A54, N71, A88, N15, A32, N49, A66, N83, A10
+
+The numbers increase by 17 each time (mod 100): 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50, 67, 84, 11, 28, 45, 62, 79, 96, 23, 40, 57, 74, 91, 18, 35, 52, 69, 86, 13, 30, 47, 64, 81, 98, 25, 42, 59, 76, 93, 20, 37, 54, 71, 88, 15, 32, 49, 66, 83, 10
+
+That's 90 values before repeating. And the prefix alternates A, N, A, N...
+
+Now for the NEEDLE record: "Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry." - This is an injected non-telemetry record.
+
+Now let me write a ~150 word description plus three concrete observations.
+
+The description should cover:
+1. Sensor values: sawtooth pattern, linear decrease of 5.7/step, wrapping around
+2. Status: 5-state cycle (nominal → degraded → recovering → offline → calibrating)
+3. Zone: 90-zone cycle with A/N prefixes, numbers incrementing by 17 mod 100
+
+Three concrete observations:
+1. The sensor value decreases by exactly 5.7 per record within each sawtooth cycle
+2. The status field follows a fixed 5-record cycle
+3. There's an injected "NEEDLE" record that breaks the telemetry format
+
+Let me write this in about 150 words for the description part, then list three observations.
+
+=====
+## Description of Variation
+
+The **sensor** field traces a repeating sawtooth waveform: within each ~16-record cycle it declines linearly by 5.7 per step (e.g., 94.0 → 88.3 → 82.6 …), then snaps back to a near-peak value near the top of the 0–100 range before descending again. Across successive cycles the peak drifts slowly (94.0, 96.8, 99.6, then gradually back down), so the envelope is nearly flat but not perfectly periodic. The **status** field cycles rigidly through five states—nominal, degraded, recovering, offline, calibrating—repeating every five records, independent of the sensor magnitude. The **zone** field steps through a 90-slot sequence (alternating "A" and "N" prefixes, numeric suffixes advancing by 17 mod 100), so the same zones reappear at a fixed 90-record period.
+
+## Three Concrete Observations
+
+1. **Exact arithmetic decrement:** Consecutive sensor values within a cycle differ by precisely 5.7 (e.g., Record 000001 = 94.0, Record 000002 = 

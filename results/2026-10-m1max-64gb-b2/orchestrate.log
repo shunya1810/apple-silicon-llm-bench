@@ -1,0 +1,191 @@
+11:47:46   battery 32% AC
+11:47:46 round 1 th-2k q8 b2-fork-27b attempt 1
+11:53:22   canary 31.026659334176948 ref None slow=False
+11:54:52   battery 32% AC
+11:54:52 round 1 th-2k q8 b2-up-27b attempt 1
+12:02:20   canary 22.939044794060013 ref None slow=False
+12:03:50   battery 34% AC
+12:03:50 round 1 th-2k q8 b2-omlx-27b attempt 1
+12:10:06   canary 24.650186318934512 ref None slow=False
+12:11:36   battery 35% AC
+12:11:36 round 1 th-2k q8 b2-splash-27b attempt 1
+12:15:39   canary 30.86941832482397 ref None slow=False
+12:17:09   battery 38% AC
+12:17:09 round 1 th-2k q8 b2-omlx-oq4e-27b attempt 1
+12:22:52   canary 25.519172407007833 ref None slow=False
+12:24:22   battery 39% AC
+12:24:22 round 1 th-8k q8 b2-fork-27b attempt 1
+12:30:22   canary 31.572076227450673 ref 31.026659334176948 slow=False
+12:31:52   battery 40% AC
+12:31:52 round 1 th-8k q8 b2-up-27b attempt 1
+12:40:31   canary 22.95427982908387 ref 22.939044794060013 slow=False
+12:42:01   battery 42% AC
+12:42:01 round 1 th-8k q8 b2-omlx-27b attempt 1
+12:50:45   canary 24.27730125835761 ref 24.650186318934512 slow=False
+12:52:15   battery 43% AC
+12:52:15 round 1 th-8k q8 b2-splash-27b attempt 1
+12:57:04   canary 30.523683058724004 ref 30.86941832482397 slow=False
+12:58:34   battery 45% AC
+12:58:34 round 1 th-8k q8 b2-omlx-oq4e-27b attempt 1
+13:07:18   canary 26.519046989846952 ref 25.519172407007833 slow=False
+13:08:48   battery 47% AC
+13:08:48 round 1 th-32k q8 b2-fork-27b attempt 1
+13:17:14   canary 31.434858019972577 ref 31.572076227450673 slow=False
+13:18:44   battery 47% AC
+13:18:44 round 1 th-32k q8 b2-up-27b attempt 1
+13:35:56   canary 23.012506877616797 ref 22.95427982908387 slow=False
+13:37:26   battery 49% AC
+13:37:26 round 1 th-32k q8 b2-omlx-27b attempt 1
+13:51:15   canary 25.048269074283198 ref 24.650186318934512 slow=False
+13:52:45   battery 51% AC
+13:52:45 round 1 th-32k q8 b2-splash-27b attempt 1
+14:00:13   canary 30.511889501103116 ref 30.86941832482397 slow=False
+14:01:43   battery 54% AC
+14:01:43 round 1 th-32k q8 b2-omlx-oq4e-27b attempt 1
+14:16:16   canary 27.030584411249478 ref 26.519046989846952 slow=False
+14:17:46   battery 56% AC
+14:17:46 round 1 th-64k q8 b2-fork-27b attempt 1
+14:31:09   canary 30.5766463603308 ref 31.572076227450673 slow=False
+14:32:39   battery 56% AC
+14:32:39 round 1 th-64k q8 b2-up-27b attempt 1
+14:59:56   canary 23.090596146312336 ref 23.012506877616797 slow=False
+15:01:26   battery 59% AC
+15:01:26 round 1 th-64k q8 b2-omlx-27b attempt 1
+15:23:08   canary 25.862196240531368 ref 25.048269074283198 slow=False
+15:24:38   battery 62% AC
+15:24:38 round 1 th-64k q8 b2-splash-27b attempt 1
+15:37:21   canary 30.459271546643464 ref 30.86941832482397 slow=False
+15:38:51   battery 66% AC
+15:38:51 round 1 th-64k q8 b2-omlx-oq4e-27b attempt 1
+15:59:39   canary 27.463204104795786 ref 27.030584411249478 slow=False
+16:01:09   battery 69% AC
+16:01:09 round 1 th-128k q8 b2-fork-27b attempt 1
+16:25:09   canary 31.78160714239456 ref 31.572076227450673 slow=False
+16:26:39   battery 69% AC
+16:26:39 round 1 th-128k q8 b2-up-27b attempt 1
+17:28:55   canary 22.922388206568602 ref 23.090596146312336 slow=False
+17:30:25   battery 78% AC
+17:30:25 round 1 th-128k q8 b2-omlx-27b attempt 1
+18:59:39   canary 25.093232928976764 ref 25.862196240531368 slow=False
+19:01:09   battery 95% AC
+19:01:09 round 1 th-128k q8 b2-splash-27b attempt 1
+19:28:26   canary 30.624698020634455 ref 30.86941832482397 slow=False
+19:29:56   battery 95% AC
+19:29:56 round 1 th-128k q8 b2-omlx-oq4e-27b attempt 1
+20:00:09   canary 26.830507406693446 ref 27.463204104795786 slow=False
+20:01:39   battery 95% AC
+20:01:39 round 1 th-256k q8 b2-fork-27b attempt 1
+21:55:22   canary 31.009899958926336 ref 31.78160714239456 slow=False
+21:56:52   battery 78% AC
+21:56:52 round 1 th-256k q8 b2-up-27b attempt 1
+22:55:30   canary 23.24622770447953 ref 23.090596146312336 slow=False
+22:57:00   battery 84% AC
+22:57:00 round 1 th-256k q8 b2-omlx-27b attempt 1
+00:09:02   canary 23.697626129247052 ref 25.862196240531368 slow=True
+00:10:32   canary slow: resting 300 s and re-running once
+00:10:58   battery 95% AC
+00:10:58 round 1 th-256k q8 b2-splash-27b attempt 1
+01:21:25   canary 30.620766728750354 ref None slow=False
+01:22:55   battery 95% AC
+01:22:55 round 1 th-256k q8 b2-omlx-oq4e-27b attempt 1
+02:36:36   canary 27.359213573499986 ref None slow=False
+02:38:06 plan done
+02:38:06   battery 95% AC
+02:38:06 round 1 th-2k q8 b2-fork-a3b attempt 1
+02:40:01   canary 106.04022965722449 ref None slow=False
+02:41:31   battery 95% AC
+02:41:31 round 1 th-2k q8 b2-up-a3b attempt 1
+02:44:33   canary 48.25493882674763 ref None slow=False
+02:46:03   battery 95% AC
+02:46:03 round 1 th-2k q8 b2-omlx-a3b attempt 1
+02:47:44   canary 76.66777115565583 ref None slow=False
+02:49:14   battery 95% AC
+02:49:14 round 1 th-2k q8 b2-splash-a3b attempt 1
+02:50:53   canary 83.24731613164418 ref None slow=False
+02:52:23   battery 95% AC
+02:52:23 round 1 th-2k q8 b2-omlx-oq4e-a3b attempt 1
+02:54:49   canary 72.52341632926667 ref None slow=False
+02:56:19   battery 95% AC
+02:56:19 round 1 th-8k q8 b2-fork-a3b attempt 1
+02:58:32   canary 100.52560246286548 ref 106.04022965722449 slow=True
+03:00:02   canary slow: resting 300 s and re-running once
+03:05:02   battery 95% AC
+03:05:02 round 1 th-8k q8 b2-fork-a3b attempt 2
+03:07:11   canary 109.4001779928065 ref 106.04022965722449 slow=False
+03:08:41   battery 95% AC
+03:08:41 round 1 th-8k q8 b2-up-a3b attempt 1
+03:12:42   canary 48.37779170024021 ref 48.25493882674763 slow=False
+03:14:13   battery 95% AC
+03:14:13 round 1 th-8k q8 b2-omlx-a3b attempt 1
+03:16:54   canary 77.73857862785532 ref 76.66777115565583 slow=False
+03:18:24   battery 95% AC
+03:18:24 round 1 th-8k q8 b2-splash-a3b attempt 1
+03:20:16   canary 84.47599966453234 ref 83.24731613164418 slow=False
+03:21:46   battery 95% AC
+03:21:46 round 1 th-8k q8 b2-omlx-oq4e-a3b attempt 1
+03:24:20   canary 78.58881308569522 ref 72.52341632926667 slow=False
+03:25:50   battery 95% AC
+03:25:50 round 1 th-32k q8 b2-fork-a3b attempt 1
+03:28:45   canary 109.34577399885816 ref 109.4001779928065 slow=False
+03:30:15   battery 95% AC
+03:30:15 round 1 th-32k q8 b2-up-a3b attempt 1
+03:35:24   canary 48.18122589192796 ref 48.37779170024021 slow=False
+03:36:54   battery 95% AC
+03:36:54 round 1 th-32k q8 b2-omlx-a3b attempt 1
+03:40:30   canary 77.66583186864916 ref 77.73857862785532 slow=False
+03:42:01   battery 95% AC
+03:42:01 round 1 th-32k q8 b2-splash-a3b attempt 1
+03:44:59   canary 85.05287288051302 ref 84.47599966453234 slow=False
+03:46:29   battery 95% AC
+03:46:29 round 1 th-32k q8 b2-omlx-oq4e-a3b attempt 1
+03:51:23   canary 74.38105773627214 ref 78.58881308569522 slow=True
+03:52:53   canary slow: resting 300 s and re-running once
+03:57:53   battery 95% AC
+03:57:53 round 1 th-32k q8 b2-omlx-oq4e-a3b attempt 2
+04:02:54   canary 75.4378513890236 ref 78.58881308569522 slow=False
+04:04:24   battery 95% AC
+04:04:24 round 1 th-64k q8 b2-fork-a3b attempt 1
+04:08:40   canary 109.4450503676191 ref 109.4001779928065 slow=False
+04:10:10   battery 95% AC
+04:10:10 round 1 th-64k q8 b2-up-a3b attempt 1
+04:18:26   canary 48.35334109467847 ref 48.37779170024021 slow=False
+04:19:56   battery 95% AC
+04:19:56 round 1 th-64k q8 b2-omlx-a3b attempt 1
+04:26:41   canary 77.0541451872702 ref 77.73857862785532 slow=False
+04:28:11   battery 95% AC
+04:28:11 round 1 th-64k q8 b2-splash-a3b attempt 1
+04:32:58   canary 84.56802044053293 ref 85.05287288051302 slow=False
+04:34:28   battery 95% AC
+04:34:28 round 1 th-64k q8 b2-omlx-oq4e-a3b attempt 1
+04:42:27   canary 77.171910759089 ref 78.58881308569522 slow=False
+04:43:57   battery 95% AC
+04:43:57 round 1 th-128k q8 b2-fork-a3b attempt 1
+04:52:21   canary 109.23456384739704 ref 109.4450503676191 slow=False
+04:53:51   battery 94% AC
+04:53:51 round 1 th-128k q8 b2-up-a3b attempt 1
+05:10:55   canary 48.356958892265666 ref 48.37779170024021 slow=False
+05:12:25   battery 94% AC
+05:12:25 round 1 th-128k q8 b2-omlx-a3b attempt 1
+05:25:45   canary 76.71091001386185 ref 77.73857862785532 slow=False
+05:27:15   battery 94% AC
+05:27:15 round 1 th-128k q8 b2-splash-a3b attempt 1
+05:37:52   canary 84.13110209217616 ref 85.05287288051302 slow=False
+05:39:22   battery 94% AC
+05:39:22 round 1 th-128k q8 b2-omlx-oq4e-a3b attempt 1
+05:56:27   canary 77.80339572138264 ref 78.58881308569522 slow=False
+05:57:57   battery 94% AC
+05:57:57 round 1 th-256k q8 b2-fork-a3b attempt 1
+06:17:14   canary 109.080102582936 ref 109.4450503676191 slow=False
+06:18:44   battery 91% AC
+06:18:44 round 1 th-256k q8 b2-up-a3b attempt 1
+06:58:08   canary 47.747178308388705 ref 48.37779170024021 slow=False
+06:59:38   battery 95% AC
+06:59:38 round 1 th-256k q8 b2-omlx-a3b attempt 1
+08:08:03   canary 76.30379413221853 ref 77.73857862785532 slow=False
+08:09:33   battery 95% AC
+08:09:33 round 1 th-256k q8 b2-splash-a3b attempt 1
+08:37:40   canary 84.30694998865725 ref 85.05287288051302 slow=False
+08:39:10   battery 95% AC
+08:39:10 round 1 th-256k q8 b2-omlx-oq4e-a3b attempt 1
+09:19:21   canary 74.40734114691159 ref 78.58881308569522 slow=True
+09:20:51   canary slow: resting 300 s and re-running once

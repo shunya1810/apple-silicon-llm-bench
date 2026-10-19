@@ -1,0 +1,120 @@
+
+The user asks two things:
+
+1. Compare records with status "offline" vs status "nominal" in about 150 words, describing differences in sensor values and zones, citing three records by number.
+
+2. Quote the non-telemetry line exactly, then in about 120 words explain how it differs.
+
+Let me identify the offline and nominal records:
+
+**Nominal records:**
+- 000000: sensor=0.0, zone=A10
+- 000005: sensor=71.2, zone=N95
+- 000010: sensor=42.7, zone=A90
+- 000015: sensor=14.2, zone=N85
+- 000020: sensor=85.4, zone=A80
+- 000025: sensor=56.9, zone=N75
+- 000030: sensor=28.4, zone=A70
+- 000035: sensor=99.6, zone=N65
+- 000040: sensor=71.1, zone=A60
+- 000045: sensor=42.6, zone=N55
+- 000050: sensor=14.1, zone=A50
+- 000055: sensor=85.3, zone=N45
+- 000060: sensor=56.8, zone=A40
+
+**Offline records:**
+- 000003: sensor=82.6, zone=N61
+- 000008: sensor=54.1, zone=A56
+- 000013: sensor=25.6, zone=N51
+- 000018: sensor=96.8, zone=A46
+- 000023: sensor=68.3, zone=N41
+- 000028: sensor=39.8, zone=A36
+- 000033: sensor=11.3, zone=N31
+- 000038: sensor=82.5, zone=A26
+- 000043: sensor=54.0, zone=N21
+- 000048: sensor=25.5, zone=A16
+- 000053: sensor=96.7, zone=N11
+- 000058: sensor=68.2, zone=A96
+- 000063: sensor=39.7, zone=N91
+
+Now let me compare:
+
+Nominal zones: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40
+- Pattern: starts at A10, then N95, A90, N85... The zone numbers go: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. So from 95 downward by 5, but the first is 10. Actually let me re-examine: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40. The numbers are 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. So after the first (10), it goes 95, 90, 85... decreasing by 5. Prefixes alternate A, N, A, N...
+
+Offline zones: N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91
+- Numbers: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91. Decreasing by 5, wrapping from 11 to 96. Prefixes alternate N, A, N, A...
+
+So the key differences:
+- Zone prefixes: Nominal starts with A then alternates (A, N, A, N...); Offline starts with N then alternates (N, A, N, A...).
+- Zone numbers: Nominal are multiples of 5 (10, 95, 90, 85...); Offline are 1 mod 5 (61, 56, 51, 46...), i.e., numbers ending in 1 or 6. Wait: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91. These are all ≡ 1 (mod 5). Yes.
+- Nominal zone numbers: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. These are all ≡ 0 (mod 5).
+
+So zones differ in their modular class: nominal zones have numbers divisible by 5, offline zones have numbers ≡ 1 (mod 5).
+
+Sensor values:
+- Nominal: 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8
+- Offline: 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7
+
+The sensor values are just the linear sequence sampled at different offsets. Nominal is at positions 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60 (every 5th starting at 0). Offline is at positions 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63 (every 5th starting at 3).
+
+The sensor values themselves don't have a structural difference beyond being sampled at different points in the linear sequence. They span the same range (roughly 0-99). But their specific values differ because they're at different offsets.
+
+Let me pick three records to cite. I'll cite one nominal and one offline pair, plus maybe another.
+
+Let me write ~150 words for the comparison.
+
+Now for the second part:
+
+The non-telemetry line is:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Let me quote it exactly as it appears.
+
+Now explain in ~120 words how it differs:
+- It has no numeric record ID (uses "NEEDLE" instead of a 6-digit number)
+- It has no sensor= field
+- It has no status= field (or rather, it doesn't follow the status pattern)
+- It has no zone= field in the standard format (mentions zone Q42 but not in the "zone=" format)
+- It contains free-text description
+- It references a zone (Q42) that doesn't follow the A/N prefix pattern
+- It contains a code (7391-ALPHA) not seen in any other record
+- It explicitly states "this is not telemetry"
+
+Let me draft both parts now.
+
+**Part 1 (~150 words):**
+
+Let me count carefully.
+
+"Comparing the 13 nominal records against the 13 offline records, both groups sample the same linear sensor sequence at fixed offsets, so their values span the full 0–99 range without clustering. The structural differences appear in zone fields. Nominal zones (e.g., Record 000000, zone A10; Record 000020, zone A80) carry A or N prefixes with numeric components that are multiples of five (10, 90, 80, 70…). Offline zones (e.g., Record 000003, zone N61; Record 000018, zone A46) also alternate A/N prefixes but their numeric components are all congruent to 1 mod 5 (61, 46, 31…). The prefix alternation direction is inverted: nominal sequences begin with A, offline sequences begin with N. Sensor values show no group-specific bias; for instance, Record 000035 (nominal) reads 99.6 while nearby Record 000038 (offline) reads 82.5—both simply reflect their position in the shared decrement."
+
+Let me count words... Let me recount.
+
+"Comparing the 13 nominal records against the 13 offline records, both groups sample the same linear sensor sequence at fixed offsets, so their values span the full 0–99 range without clustering." - 32 words
+
+"The structural differences appear in zone fields." - 8 words (total 40)
+
+"Nominal zones (e.g., Record 000000, zone A10; Record 000020, zone A80) carry A or N prefixes with numeric components that are multiples of five (10, 90, 80, 70…)." - 30 words (total 70)
+
+"Offline zones (e.g., Record 000003, zone N61; Record 000018, zone A46) also alternate A/N prefixes but their numeric components are all congruent to 1 mod 5 (61, 46, 31…)." - 30 words (total 100)
+
+"The prefix alternation direction is inverted: nominal sequences begin with A, offline sequences begin with N." - 17 words (total 117)
+
+"Sensor values show no group-specific bias; for instance, Record 000035 (nominal) reads 99.6 while nearby Record 000038 (offline) reads 82.5—both simply reflect their position in the shared decrement." - 33 words (total 150)
+
+That's about 150. Good. I cited records 000000, 000020, 000003, 000018, 000035, 000038. That's more than three. The prompt says "citing three records by number." Let me trim to exactly three cited records. Let me restructure.
+
+"Comparing the 13 nominal records against the 13 offline records, both sample the same linear sensor sequence at fixed five-record offsets, so values span the full 0–99 range with no group-specific clustering. The structural distinction lies in zone fields. Nominal zones use numeric components divisible by five—Record 000000 sits in A10—while offline zones use components congruent to 1 mod 5—Record 000003 sits in N61. The A/N prefix alternation also inverts: nominal zones begin the cycle with A, offline zones with N. A third contrast is visible in Record 000018 (offline, zone A46, sensor 96.8) versus Record 000020 (nominal, zone A80, sensor 85.4): the offline entry lands on a higher sensor value purely because its offset in the shared decrement is different, not because of any status-driven signal. In summary, sensor magnitudes are offset artifacts; the real grouping signature is the zone arithmetic."
+
+Let me count: Comparing(1) the(2) 13(3) nominal(4) records(5) against(6) the(7) 13(8) offline(9) records(10) both(11) sample(12) the(13) same(14) linear(15) sensor(16) sequence(17) at(18) fixed(19) five-record(20) offsets(21) so(22) values(23) span(24) the(25) full(26) 0–99(27) range(28) with(29) no(30) group-specific(31) clustering(32). The(33) structural(34) distinction(35) lies(36) in(37) zone(38) fields(39). Nominal(40) zones(41) use(42) numeric(43) components(44) divisible(45) by(46) five(47)—Record(48) 000000(49) sits(50) in(51) A10(52)—while(53) offline(54) zones(55) use(56) components(57) congruent(58) to(59) 1(60) mod(61) 5(62)—Record(63) 000003(64) sits(65) in(66) N61(67). The(68) A/N(69) prefix(70) alternation(71) also(72) inverts(73): nominal(74) zones(75) begin(76) the(77) cycle(78) with(79) A(80), offline(81) zones(82) with(83) N(84). A(85) third(86) contrast(87) is(88) visible(89) in(90) Record(91) 000018(92) (offline(93), zone(94) A46(95), sensor(96) 96.8(97)) versus(98) Record(99) 000020(100) (nominal(101), zone(102) A80(103), sensor(104) 85.4(105)): the(106) offline(107) entry(108) lands(109) on(110) a(111) higher(112) sensor(113) value(114) purely(115) because(116) its(117) offset(118) in(119) the(120) shared(121) decrement(122) is(123) different(124), not(125) because(126) of(127) any(128) status-driven(129) signal(130). In(131) summary(132), sensor(133) magnitudes(134) are(135) offset(136) artifacts(137); the(138) real(139) grouping(140) signature(141) is(142) the(143) zone(144) arithmetic(145).
+
+That's about 145 words. Close enough to 150. I cited records 000000, 000003, 000018, 000020. That's four. The prompt says "citing three records by number." Let me adjust to cite exactly three.
+
+Let me redo:
+
+"Comparing the 13 nominal records against the 13 offline records, both sample the same linear sensor sequence at fixed five-record offsets, so values span the full 0–99 range with no group-specific clustering. The structural distinction lies in zone fields. Nominal zones use numeric components divisible by five, as seen in Record 000000 (zone A10), while offline zones use components congruent to 1 mod 5, as in Record 000003 (zone N61). The A/N prefix alternation also inverts: nominal zones begin the cycle with A, offline zones with N. Record 000018 (offline, sensor 96.8, zone A46) versus its nominal counterpart Record 000020 (sensor 85.4, zone A80) shows the sensor difference is purely positional—each status group simply reads a different slice of the shared decrement. No status-driven signal shift exists; the zone arithmetic (mod-5 class and prefix phase) is the only consistent grouping signature."
+
+Let me count words more carefully:
+Comparing(1) the(2) 13(3) nominal(4) records(5) against(6) the(7) 
+=====

@@ -1,0 +1,135 @@
+Let me analyze the offline vs nominal records.
+
+Status cycles: nominal, degraded, recovering, offline, calibrating (repeating every 5 records).
+
+So:
+- nominal: records where index mod 5 = 0 → 0, 5, 10, 15, 20, ...
+- offline: records where index mod 5 = 3 → 3, 8, 13, 18, 23, ...
+
+Wait, let me recheck. Record 0: nominal. Record 1: degraded. Record 2: recovering. Record 3: offline. Record 4: calibrating. Record 5: nominal. Yes.
+
+So nominal records: 0, 5, 10, 15, 20, 25, ...
+Offline records: 3, 8, 13, 18, 23, 28, ...
+
+Now let me look at sensor values:
+
+Record 0: sensor=0.0, status=nominal, zone=A10
+Record 5: sensor=71.2, status=nominal, zone=N95
+Record 10: sensor=42.7, status=nominal, zone=A90
+Record 15: sensor=14.2, status=nominal, zone=N85
+Record 20: sensor=85.4, status=nominal, zone=A80
+Record 25: sensor=56.9, status=nominal, zone=N75
+Record 30: sensor=28.4, status=nominal, zone=A70
+Record 35: sensor=99.6, status=nominal, zone=N65
+Record 40: sensor=71.1, status=nominal, zone=A60
+Record 45: sensor=42.6, status=nominal, zone=N55
+Record 50: sensor=14.1, status=nominal, zone=A50
+Record 55: sensor=85.3, status=nominal, zone=N45
+Record 60: sensor=56.8, status=nominal, zone=A40
+Record 65: sensor=28.3, status=nominal, zone=N35
+Record 70: sensor=99.5, status=nominal, zone=A30
+Record 75: sensor=71.0, status=nominal, zone=N25
+Record 80: sensor=42.5, status=nominal, zone=A20
+Record 85: sensor=14.0, status=nominal, zone=N15
+Record 90: sensor=85.2, status=nominal, zone=A10
+...
+
+Offline records:
+Record 3: sensor=82.6, status=offline, zone=N61
+Record 8: sensor=54.1, status=offline, zone=A56
+Record 13: sensor=25.6, status=offline, zone=N51
+Record 18: sensor=96.8, status=offline, zone=A46
+Record 23: sensor=68.3, status=offline, zone=N41
+Record 28: sensor=39.8, status=offline, zone=A36
+Record 33: sensor=11.3, status=offline, zone=N31
+Record 38: sensor=82.5, status=offline, zone=A26
+Record 43: sensor=54.0, status=offline, zone=N21
+Record 48: sensor=25.5, status=offline, zone=A16
+Record 53: sensor=96.7, status=offline, zone=N11
+Record 58: sensor=68.2, status=offline, zone=A96
+Record 63: sensor=39.7, status=offline, zone=N91
+Record 68: sensor=11.2, status=offline, zone=A86
+Record 73: sensor=82.4, status=offline, zone=N81
+Record 78: sensor=53.9, status=offline, zone=A76
+Record 83: sensor=25.4, status=offline, zone=N71
+Record 88: sensor=96.6, status=offline, zone=A66
+Record 93: sensor=68.1, status=offline, zone=N61
+...
+
+Now let me look at patterns:
+
+**Sensor values:**
+- Nominal (mod 5 = 0): 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, 71.0, 42.5, 14.0, 85.2...
+- Offline (mod 5 = 3): 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7, 11.2, 82.4...
+
+The sensor values within each status group follow the same decreasing pattern (by 5.7 per step), but they start at different points in the 18-value cycle. Nominal values cycle through {0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4} then the peak drops. Offline values cycle through {82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3} then peak drops.
+
+Actually, let me think about this differently. Since the sensor value decreases by 5.7 each record and the status has period 5, within one status group, consecutive records of the same status are 5 records apart, so the sensor value decreases by 5 × 5.7 = 28.5 each time. But wait, after 18 records the sensor wraps. 18 mod 5 = 3, so the status doesn't align after one sensor cycle.
+
+Let me just look at the actual values:
+
+Nominal records (every 5th starting at 0): values go 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, ...
+
+The pattern within nominal: after the first 7 values (0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4), the next is 99.6 (which is the start of a new sensor cycle). Then 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, then 99.5...
+
+So nominal sensor values cycle through approximately 7 distinct values: starting at 0.0 (or 99.6, 99.5, 99.4...), then 71.x, 42.x, 14.x, 85.x, 57.x, 28.x, then wraps.
+
+Offline records (every 5th starting at 3): values go 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7, 11.2, 82.4...
+
+So offline sensor values cycle through approximately 7 distinct values: 82.x, 54.x, 25.x, 96.x, 68.x, 39.x, 11.x, then wraps.
+
+**Zones:**
+Nominal zones (every 5th starting at 0): A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15, A10...
+
+The zone numbers decrease by 5 each step! A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15, A10 (wraps). So 18 zones in the cycle, decreasing by 5.
+
+Offline zones (every 5th starting at 3): N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91, A86, N81, A76, N71, A66, N61...
+
+Zone numbers also decrease by 5 each step! N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91, A86, N81, A76, N71, A66, N61 (wraps). Also 18 zones.
+
+So the key differences:
+1. **Sensor values**: Both follow the same 5.7-decrement pattern within their group, but they're offset. Nominal hits values near 0, 14, 28, 42, 57, 71, 85, 99.6. Offline hits values near 11, 25, 39, 54, 68, 82, 96.8. So offline values are shifted by about 3×5.7 = 17.1 higher than the nominal values at the same cycle position. Neither group hits exactly 0; nominal does (at record 0).
+
+2. **Zones**: Both have 18-zone cycles with numbers decreasing by 5. Nominal zones start at A10 and go A10, N95, A90, N85... (alternating A/N, decreasing by 5). Offline zones start at N61 and go N61, A56, N51, A46... (also alternating A/N but starting with N, decreasing by 5). The prefix alternation is the same, but the starting point differs by 51 positions (61-10=51).
+
+Actually wait - both decrease by 5 in zone number. The difference is the starting zone and the A/N phase. Nominal starts with A prefix, offline starts with N prefix.
+
+Let me pick three specific records to cite:
+- Record 0 (nominal): sensor=0.0, zone=A10
+- Record 3 (offline): sensor=82.6, zone=N61
+- Record 5 (nominal): sensor=71.2, zone=N95
+
+Or maybe better to compare a nominal and offline that are close:
+- Record 3 (offline): sensor=82.6, zone=N61
+- Record 5 (nominal): sensor=71.2, zone=N95
+- Record 8 (offline): sensor=54.1, zone=A56
+
+Let me write about 150 words.
+
+Draft:
+
+"Offline and nominal records share the same underlying sensor-decay rhythm (−5.7 per record), but they sample different phases of the 18-value cycle. Nominal values traverse roughly {0, 14, 28, 43, 57, 71, 85, 99.6}; offline values traverse {11, 26, 40, 54, 68, 83, 97}, sitting about 17 units higher at each cycle position. Neither group spans the full 0–100 range in a single 18-record sensor cycle.
+
+Zones for both groups form 18-step sequences whose numeric suffixes decrease by 5, but the starting points and prefix phase differ. For example, record 3 (offline) carries zone N61 and sensor 82.6, whereas record 5 (nominal) carries zone N95 and sensor 71.2—same N prefix, but a 34-unit zone gap. Record 8 (offline, zone A56, sensor 54.1) sits in an A-prefix zone, while the adjacent nominal record 10 (zone A90, sensor 42.7) is in the same prefix family yet 34 zones higher. Record 0 (nominal, zone A10, sensor 0.0) marks the unique zero-sensor anchor that no offline record reaches."
+
+Let me count: that's about 180 words. Let me trim.
+
+Let me try again:
+
+"Offline and nominal records share the same −5.7 sensor-decay rhythm but sample different phases of the 18-value cycle. Nominal values traverse roughly {0, 14, 28, 43, 57, 71, 85, 99.6}; offline values sit about 17 units higher at each position: {11, 26, 40, 54, 68, 83, 97}.
+
+Both groups' zones form 18-step sequences with suffixes decreasing by 5, but their starting points differ. Record 3 (offline) has zone N61, sensor 82.6; the nearby record 5 (nominal) has zone N95, sensor 71.2—same N prefix, 34-unit zone gap. Record 8 (offline, A56, sensor 54.1) sits in an A-prefix zone, while record 10 (nominal, A90, sensor 42.7) shares that prefix but sits 34 zones higher. Record 0 (nominal, A10, sensor 0.0) is the sole zero-sensor anchor; no offline record reaches 0."
+
+Let me count words: "Offline and nominal records share the same −5.7 sensor-decay rhythm but sample different phases of the 18-value cycle." = 20 words. "Nominal values traverse roughly {0, 14, 28, 43, 57, 71, 85, 99.6}; offline values sit about 17 units higher at each position: {11, 26, 40, 54, 68, 83, 97}." = ~25 words. "Both groups' zones form 18-step sequences with suffixes decreasing by 5, but their starting points differ." = ~16 words. "Record 3 (offline) has zone N61, sensor 82.6; the nearby record 5 (nominal) has zone N95, sensor 71.2—same N prefix, 34-unit zone gap." = ~25 words. "Record 8 (offline, A56, sensor 54.1) sits in an A-prefix zone, while record 10 (nominal, A90, sensor 42.7) shares that prefix but sits 34 zones higher." = ~28 words. "Record 0 (nominal, A10, sensor 0.0) is the sole zero-sensor anchor; no offline record reaches 0." = ~17 words.
+
+Total: roughly 131 words. Let me expand slightly to get closer to 150.
+
+Let me refine:
+
+"Offline and nominal records share the same −5.7-per-record sensor decay but sample offset phases of the 18-value cycle. Nominal values traverse approximately {0, 14, 28, 43, 57, 71, 85, 99.6}; offline values sit roughly 17 units higher at each position: {11, 26, 40, 54, 68, 83, 97}. Neither group covers the full 0–100 span within one sensor cycle.
+
+Zone suffixes in both groups decrease by 5 across an 18-step repeating sequence, but the starting points differ. Record 3 (offline) carries zone N61 and sensor 82.6; the nearby record 5 (nominal) carries zone N95 and sensor 71.2—same N prefix, yet a 34-unit zone gap. Record 8 (offline, zone A56, sensor 54.1) and record 10 (nominal, zone A90, sensor 42.7) share the A prefix but are also 34 zones apart. Record 0 (nominal, zone A10, sensor 0.0) is the unique zero-sensor anchor; no offline record reaches 0."
+
+Let me count more carefully:
+- Sentence 1: "Offline and nominal records share the same −
+=====

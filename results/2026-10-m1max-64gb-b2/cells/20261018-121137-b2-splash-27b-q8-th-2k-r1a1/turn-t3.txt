@@ -1,0 +1,39 @@
+The user wants me to:
+1. Quote the anomalous line exactly as it appears in the data.
+2. In about 120 words, explain how it differs from the other records.
+
+The anomalous line is:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Now I need to explain how it differs from the other records in about 120 words. Let me think about the differences:
+
+- Format: Normal records follow "Record NNNNNN: sensor=X.X status=WORD zone=AN." The needle uses "Record NEEDLE:" (non-numeric ID) instead of a six-digit number.
+- Fields: Normal records have exactly three key-value pairs: sensor (float), status (one of five words), zone (letter + two digits, A or N prefix). The needle has no sensor value, no status field, a zone "Q42" (Q prefix, never seen elsewhere), and additional free-text content ("maintenance override... uses code 7391-ALPHA; this is not telemetry").
+- Zone prefix: All normal zones use A or N; this one uses Q.
+- Status: No status field at all.
+- Sensor: No numeric sensor value.
+- It's explicitly self-identified as "not telemetry."
+- It breaks the periodic patterns (5.7 step, 5-state cycle, 17-step zone suffix).
+
+Let me write this in about 120 words. Let me count carefully.
+
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Now the explanation, targeting ~120 words:
+
+"Every normal record follows the template 'Record NNNNNN: sensor=<float> status=<word> zone=<L><DD>.' with a six-digit numeric ID, a decimal sensor reading, one of five rotating statuses, and a zone whose letter is A or N. The NEEDLE line breaks every one of those conventions. Its identifier is the word 'NEEDLE' rather than a number. It contains no sensor value and no status field at all. Its zone uses the prefix Q, which never appears in the sixty-five telemetry entries. The remainder is free-text prose ('maintenance override… uses code 7391-ALPHA') that matches no key=value structure. Finally, the line explicitly disclaims itself: 'this is not telemetry.' In short, it is a manually inserted maintenance note that happens to be formatted as a record header but carries none of the periodic sensor, status, or zone data that define the rest of the stream."
+
+Let me count: Every(1) normal(2) record(3) follows(4) the(5) template(6) 'Record(7) NNNNNN:(8) sensor=(9) float(10) status=(11) word(12) zone=(13) L(14) DD.(15)' with(16) a(17) six-digit(18) numeric(19) ID(20) a(21) decimal(22) sensor(23) reading(24) one(25) of(26) five(27) rotating(28) statuses(29) and(30) a(31) zone(32) whose(33) letter(34) is(35) A(36) or(37) N(38). The(39) NEEDLE(40) line(41) breaks(42) every(43) one(44) of(45) those(46) conventions(47). Its(48) identifier(49) is(50) the(51) word(52) 'NEEDLE'(53) rather(54) than(55) a(56) number(57). It(58) contains(59) no(60) sensor(61) value(62) and(63) no(64) status(65) field(66) at(67) all(68). Its(69) zone(70) uses(71) the(72) prefix(73) Q(74) which(75) never(76) appears(77) in(78) the(79) sixty-five(80) telemetry(81) entries(82). The(83) remainder(84) is(85) free-text(86) prose(87) 'maintenance(88) override…(89) uses(90) code(91) 7391-ALPHA'(92) that(93) matches(94) no(95) key=value(96) structure(97). Finally(98) the(99) line(100) explicitly(101) disclaims(102) itself(103): 'this(104) is(105) not(106) telemetry.(107)' In(108) short(109) it(110) is(111) a(112) manually(113) inserted(114) maintenance(115) note(116) that(117) happens(118) to(119) be(120) formatted(121) as(122) a(123) record(124) header(125) but(126) carries(127) none(128) of(129) the(130) periodic(131) sensor(132) status(133) or(134) zone(135) data(136) that(137) define(138) the(139) rest(140) of(141) the(142) stream(143).
+
+That's about 143 words. I need to trim to ~120. Let me revise.
+
+"Every normal record follows the template 'Record NNNNNN: sensor=<float> status=<word> zone=<L><DD>.' with a six-digit ID, a decimal sensor reading, one of five rotating statuses, and a zone prefixed A or N. The NEEDLE line breaks every convention. Its identifier is the word 'NEEDLE' rather than a number. It contains no sensor value and no status field. Its zone uses the prefix Q, which never appears in the sixty-five telemetry entries. The remainder is free-text prose that matches no key=value structure. Finally, the line explicitly disclaims itself: 'this is not telemetry.' In short, it is a manually inserted maintenance note formatted as a record header but carrying none of the periodic sensor, status, or zone data that define the rest of the stream."
+
+Let me recount: Every(1) normal(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) float(10) status(11) word(12) zone(13) L(14) DD(15) with(16) a(17) six-digit(18) ID(19) a(20) decimal(21) sensor(22) reading(23) one(24) of(25) five(26) rotating(27) statuses(28) and(29) a(30) zone(31) prefixed(32) A(33) or(34) N(35). The(36) NEEDLE(37) line(38) breaks(39) every(40) convention(41). Its(42) identifier(43) is(44) the(45) word(46) NEEDLE(47) rather(48) than(49) a(50) number(51). It(52) contains(53) no(54) sensor(55) value(56) and(57) no(58) status(59) field(60). Its(61) zone(62) uses(63) the(64) prefix(65) Q(66) which(67) never(68) appears(69) in(70) the(71) sixty-five(72) telemetry(73) entries(74). The(75) remainder(76) is(77) free-text(78) prose(79) that(80) matches(81) no(82) key=value(83) structure(84). Finally(85) the(86) line(87) explicitly(88) disclaims(89) itself(90) this(91) is(92) not(93) telemetry(94). In(95) short(96) it(97) is(98) a(99) manually(100) inserted(101) maintenance(102) note(103) formatted(104) as(105) a(106) record(107) header(108) but(109) carrying(110) none(111) of(112) the(113) periodic(114) sensor(115) status(116) or(117) zone(118) data(119) that(120) define(121) the(122) rest(123) of(124) the(125) stream(126).
+
+That's about 126 words. Close enough to 120. Let me trim a tiny bit. Actually "about 120 words" gives me some leeway. 126 is fine. Let me finalize.
+
+=====
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+Every normal record follows the template *Record NNNNNN: sensor=&lt;float&gt; status=&lt;word&gt; zone=&lt;L&gt;&lt;DD&gt;.* with a six-digit ID, a decimal sensor reading, one of five rotating statuses, and a zone prefixed A or N. The NEEDLE line breaks every convention. Its identifier is the word "NEEDLE" rather than a number. It contains no sensor value and no status field. Its zone uses the prefix Q, which never appears in the sixty-five telemetry entries. The remainder is free-text prose that matches no key=value structure. Finally, the line explicitly disclaims itself: "this is not telemetry." In short, it is a manually inserted maintenance note formatted as a record header but carrying none of the periodic sensor, status, or zone data that define the rest of the stream.

@@ -1,0 +1,36 @@
+{
+ "rounds": [
+  [
+   "b2-fork-a3b",
+   "b2-up-a3b",
+   "b2-omlx-a3b",
+   "b2-splash-a3b",
+   "b2-omlx-oq4e-a3b"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "th-2k"
+  },
+  {
+   "scenario": "th-8k"
+  },
+  {
+   "scenario": "th-32k"
+  },
+  {
+   "scenario": "th-64k"
+  },
+  {
+   "scenario": "th-128k"
+  },
+  {
+   "scenario": "th-256k"
+  }
+ ],
+ "cooldown_s": 90,
+ "rest_s": 300,
+ "canary_tolerance": 0.05,
+ "battery_min_pct": 30,
+ "battery_resume_pct": 40
+}

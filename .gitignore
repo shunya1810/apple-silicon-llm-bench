@@ -2,6 +2,7 @@
 config/local.json
 models/
 engines/omlx-base-*/
+engines/omlx-b2-*/
 work/
 phase0/
 # large or machine-specific per-cell artifacts (rows.jsonl carries the measurements)

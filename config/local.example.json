@@ -5,5 +5,11 @@
  "OMLX064_CLI": "/Applications/oMLX-0.6.4.app/Contents/MacOS/omlx-cli",
  "SPLASH_M1": "/Users/you/.local/bin/splash-m1",
  "SPLASH_M1_121": "/Users/you/.local/bin/splash-m1-121",
- "TENSORFOLD": "/Users/you/tensorfold/.venv/bin/tensorfold"
+ "TENSORFOLD": "/Users/you/tensorfold/.venv/bin/tensorfold",
+ "B2_MODEL_27B": "/Users/you/.mtplx/models/bench-mlxc-Qwen3.8-27B-4bit-MTP-FP16",
+ "B2_MODEL_A3B": "/Users/you/.mtplx/models/Youssofal--Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16",
+ "B2_FORK": "/Users/you/llm-bench/work/worktrees/mtplx-9c73c4ce",
+ "B2_UPSTREAM": "/Users/you/worktrees/mtplx-upstream-2122",
+ "B2_OMLX": "/Users/you/bench-engines/omlx-071rc1/bin/omlx",
+ "SPLASH_M1_132": "/Users/you/.local/bin/splash-m1-132"
 }

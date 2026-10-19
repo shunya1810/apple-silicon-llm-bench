@@ -1,0 +1,177 @@
+Let me analyze the offline and nominal records carefully.
+
+**Nominal records:**
+- Record 000000: sensor=0.0, zone=A10
+- Record 000005: sensor=71.2, zone=N95
+- Record 000010: sensor=42.7, zone=A90
+- Record 000015: sensor=14.2, zone=N85
+- Record 000020: sensor=85.4, zone=A80
+- Record 000025: sensor=56.9, zone=N75
+- Record 000030: sensor=28.4, zone=A70
+- Record 000035: sensor=99.6, zone=N65
+- Record 000040: sensor=71.1, zone=A60
+- Record 000045: sensor=42.6, zone=N55
+- Record 000050: sensor=14.1, zone=A50
+- Record 000055: sensor=85.3, zone=N45
+- Record 000060: sensor=56.8, zone=A40
+- Record 000065: sensor=28.3, zone=N35
+- Record 000070: sensor=99.5, zone=A30
+- Record 000075: sensor=71.0, zone=N25
+- Record 000080: sensor=42.5, zone=A20
+- Record 000085: sensor=14.0, zone=N15
+- Record 000090: sensor=85.2, zone=A10
+- Record 000095: sensor=56.7, zone=N95
+- Record 000100: sensor=28.2, zone=A90
+- Record 000105: sensor=99.4, zone=N85
+- Record 000110: sensor=70.9, zone=A80
+- Record 000115: sensor=42.4, zone=N75
+- Record 000120: sensor=13.9, zone=A70
+- Record 000125: sensor=85.1, zone=N65
+- Record 000130: sensor=56.6, zone=A60
+- Record 000135: sensor=28.1, zone=N55
+- Record 000140: sensor=99.3, zone=A50
+- Record 000145: sensor=70.8, zone=N45
+- Record 000150: sensor=42.3, zone=A40
+- Record 000155: sensor=13.8, zone=N35
+- Record 000160: sensor=85.0, zone=A30
+- Record 000165: sensor=56.5, zone=N25
+- Record 000170: sensor=28.0, zone=A20
+- Record 000175: sensor=99.2, zone=N15
+- Record 000180: sensor=70.7, zone=A10
+- Record 000185: sensor=42.2, zone=N95
+- Record 000190: sensor=13.7, zone=A90
+- Record 000195: sensor=84.9, zone=N85
+- Record 000200: sensor=56.4, zone=A80
+- Record 000205: sensor=27.9, zone=N75
+- Record 000210: sensor=99.1, zone=A70
+- Record 000215: sensor=70.6, zone=N65
+- Record 000220: sensor=42.1, zone=A60
+- Record 000225: sensor=13.6, zone=N55
+- Record 000230: sensor=84.8, zone=A50
+- Record 000235: sensor=56.3, zone=N45
+- Record 000240: sensor=27.8, zone=A40
+- Record 000245: sensor=99.0, zone=N35
+- Record 000250: sensor=70.5, zone=A30
+- Record 000255: sensor=42.0, zone=N25
+- Record 000260: sensor=13.5, zone=A20
+- Record 000265: sensor=84.7, zone=N15
+- Record 000270: sensor=56.2, zone=A10
+- Record 000275: sensor=27.7, zone=N95
+- Record 000280: sensor=98.9, zone=A90
+- Record 000285: sensor=70.4, zone=N85
+- Record 000290: sensor=41.9, zone=A80
+- Record 000295: sensor=13.4, zone=N75
+- Record 000300: sensor=84.6, zone=A70
+- Record 000305: sensor=56.1, zone=N65
+- Record 000310: sensor=27.6, zone=A60
+- Record 000315: (doesn't exist, we stop at 313)
+
+Wait, let me recheck. The status cycles: nominal (pos 0), degraded (pos 1), recovering (pos 2), offline (pos 3), calibrating (pos 4). So:
+
+Record index mod 5:
+- 0: nominal
+- 1: degraded
+- 2: recovering
+- 3: offline
+- 4: calibrating
+
+**Offline records (index mod 5 == 3):**
+- Record 000003: sensor=82.6, zone=N61
+- Record 000008: sensor=54.1, zone=A56
+- Record 000013: sensor=25.6, zone=N51
+- Record 000018: sensor=96.8, zone=A46
+- Record 000023: sensor=68.3, zone=N41
+- Record 000028: sensor=39.8, zone=A36
+- Record 000033: sensor=11.3, zone=N31
+- Record 000038: sensor=82.5, zone=A26
+- Record 000043: sensor=54.0, zone=N21
+- Record 000048: sensor=25.5, zone=A16
+- Record 000053: sensor=96.7, zone=N11
+- Record 000058: sensor=68.2, zone=A96
+- Record 000063: sensor=39.7, zone=N91
+- Record 000068: sensor=11.2, zone=A86
+- Record 000073: sensor=82.4, zone=N81
+- Record 000078: sensor=53.9, zone=A76
+- Record 000083: sensor=25.4, zone=N71
+- Record 000088: sensor=96.6, zone=A66
+- Record 000093: sensor=68.1, zone=N61
+- Record 000098: sensor=39.6, zone=A56
+- Record 000103: sensor=11.1, zone=N51
+- Record 000108: sensor=82.3, zone=A46
+- Record 000113: sensor=53.8, zone=N41
+- Record 000118: sensor=25.3, zone=A36
+- Record 000123: sensor=96.5, zone=N31
+- Record 000128: sensor=68.0, zone=A26
+- Record 000133: sensor=39.5, zone=N21
+- Record 000138: sensor=11.0, zone=A16
+- Record 000143: sensor=82.2, zone=N11
+- Record 000148: sensor=53.7, zone=A96
+- Record 000153: sensor=25.2, zone=N91
+- Record 000158: sensor=96.4, zone=A86
+- Record 000163: sensor=67.9, zone=N81
+- Record 000168: sensor=39.4, zone=A76
+- Record 000173: sensor=10.9, zone=N71
+- Record 000178: sensor=82.1, zone=A66
+- Record 000183: sensor=53.6, zone=N61
+- Record 000188: sensor=25.1, zone=A56
+- Record 000193: sensor=96.3, zone=N51
+- Record 000198: sensor=67.8, zone=A46
+- Record 000203: sensor=39.3, zone=N41
+- Record 000208: sensor=10.8, zone=A36
+- Record 000213: sensor=82.0, zone=N31
+- Record 000218: sensor=53.5, zone=A26
+- Record 000223: sensor=25.0, zone=N21
+- Record 000228: sensor=96.2, zone=A16
+- Record 000233: sensor=67.7, zone=N11
+- Record 000238: sensor=39.2, zone=A96
+- Record 000243: sensor=10.7, zone=N91
+- Record 000248: sensor=81.9, zone=A86
+- Record 000253: sensor=53.4, zone=N81
+- Record 000258: sensor=24.9, zone=A76
+- Record 000263: sensor=96.1, zone=N71
+- Record 000268: sensor=67.6, zone=A66
+- Record 000273: sensor=39.1, zone=N61
+- Record 000278: sensor=10.6, zone=A56
+- Record 000283: sensor=81.8, zone=N51
+- Record 000288: sensor=53.3, zone=A46
+- Record 000293: sensor=24.8, zone=N41
+- Record 000298: sensor=96.0, zone=A36
+- Record 000303: sensor=67.5, zone=N31
+- Record 000308: sensor=39.0, zone=A26
+- Record 000313: sensor=10.5, zone=N21
+
+Now let me compare:
+
+**Offline sensor values:** 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7, 11.2, 82.4, 53.9, 25.4, 96.6, 68.1, 39.6, 11.1, 82.3, 53.8, 25.3, 96.5, 68.0, 39.5, 11.0, 82.2, 53.7, 25.2, 96.4, 67.9, 39.4, 10.9, 82.1, 53.6, 25.1, 96.3, 67.8, 39.3, 10.8, 82.0, 53.5, 25.0, 96.2, 67.7, 39.2, 10.7, 81.9, 53.4, 24.9, 96.1, 67.6, 39.1, 10.6, 81.8, 53.3, 24.8, 96.0, 67.5, 39.0, 10.5
+
+Range: ~10.5 to 96.8
+
+**Nominal sensor values:** 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, 71.0, 42.5, 14.0, 85.2, 56.7, 28.2, 99.4, 70.9, 42.4, 13.9, 85.1, 56.6, 28.1, 99.3, 70.8, 42.3, 13.8, 85.0, 56.5, 28.0, 99.2, 70.7, 42.2, 13.7, 84.9, 56.4, 27.9, 99.1, 70.6, 42.1, 13.6, 84.8, 56.3, 27.8, 99.0, 70.5, 42.0, 13.5, 84.7, 56.2, 27.7, 98.9, 70.4, 41.9, 13.4, 84.6, 56.1, 27.6
+
+Range: 0.0 to 99.6
+
+So nominal has a slightly wider range (0.0 to 99.6) vs offline (10.5 to 96.8). Nominal peaks are slightly higher (99.x vs 96.x) and nominal lows are slightly lower (13.x vs 10.x, and the very first is 0.0).
+
+Actually, looking more carefully at the pattern within cycles:
+- In each 18-record cycle, the positions are:
+  - Position 0 (mod 5 = 0): nominal
+  - Position 1 (mod 5 = 1): degraded
+  - Position 2 (mod 5 = 2): recovering
+  - Position 3 (mod 5 = 3): offline
+  - Position 4 (mod 5 = 4): calibrating
+
+So within a cycle of 18 records starting at value V:
+- Record 0 (nominal): V
+- Record 1 (degraded): V - 5.7
+- Record 2 (recovering): V - 11.4
+- Record 3 (offline): V - 17.1
+- Record 4 (calibrating): V - 22.8
+- Record 5 (nominal): V - 28.5
+- Record 6 (degraded): V - 34.2
+- Record 7 (recovering): V - 39.9
+- Record 8 (offline): V - 45.6
+- Record 9 (calibrating): V - 51.3
+- Record 10 (nominal): V - 57.0
+- Record 11 (degraded): V - 62.7
+- Record 12 (recover
+=====

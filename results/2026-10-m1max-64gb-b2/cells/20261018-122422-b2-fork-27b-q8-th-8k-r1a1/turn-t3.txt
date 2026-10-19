@@ -1,0 +1,172 @@
+The user wants me to:
+
+1. Describe how sensor values and status fields vary across the records (~150 words), then list three concrete observations.
+2. Compare offline records with nominal records (~150 words), describing differences in sensor values and zones, citing three records by number.
+3. Identify the non-telemetry line, quote it exactly, then explain in ~120 words how it differs.
+
+Let me analyze the data:
+
+**Pattern of sensor values:**
+- Records cycle through a pattern. Starting at 0.0, decreasing by 5.7 each step for the first 18 records (0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8), then jumping back up to 96.8 and repeating the cycle.
+- Actually looking more carefully: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8, then 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6...
+- So the values decrease by 5.7 each step, and when they get low (~2-3), they reset back up to ~96-99. The cycle is 18 records long.
+- Wait, let me check: 0.0 → 94.0 (jump up), then 94.0-88.3=5.7, 88.3-82.6=5.7... 8.5-2.8=5.7, then 2.8 → 96.8 (jump up). So it's a sawtooth pattern with period 18.
+
+Actually wait: Record 0 is 0.0, Record 1 is 94.0. That's a jump UP. Then it decreases by 5.7 each step. Record 17 is 2.8, Record 18 is 96.8 (jump up). So the cycle is 18 records: it starts high, decreases, then jumps back.
+
+Actually let me re-examine: Record 0: 0.0, Record 1: 94.0. Hmm, that's odd. Let me look at the cycle:
+- Records 0-17: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8
+- Records 18-34: 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6 (and then the NEEDLE record interrupts)
+- Records 35-52: 99.6, 93.9, 88.2, 82.5, 76.8, 71.1, 65.4, 59.7, 54.0, 48.3, 42.6, 36.9, 31.2, 25.5, 19.8, 14.1, 8.4, 2.7
+- Records 53-69: 96.7, 91.0, 85.3, 79.6, 73.9, 68.2, 62.5, 56.8, 51.1, 45.4, 39.7, 34.0, 28.3, 22.6, 16.9, 11.2, 5.5
+- etc.
+
+So the pattern is a sawtooth: values decrease by 5.7 per record, and every 18 records the value resets to a high value (~96-99.6). The starting value of each cycle decreases slightly: 0.0 (or 94.0), 96.8, 99.6, 96.7, 99.5, 96.6, 99.4, 96.5, 99.3, 96.4, 99.2, 96.3, 99.1, 96.2, 99.0, 93.3, 98.9...
+
+Wait, it's not perfectly regular. Let me look more carefully:
+- Cycle 1 (0-17): starts 0.0, then 94.0...2.8
+- Cycle 2 (18-34+NEEDLE): 96.8, 91.1...5.6
+- Cycle 3 (35-52): 99.6, 93.9...2.7
+- Cycle 4 (53-69): 96.7, 91.0...5.5
+- Cycle 5 (70-87): 99.5, 93.8...2.6
+- Cycle 6 (88-104): 96.6, 90.9...5.4
+- Cycle 7 (105-122): 99.4, 93.7...2.5
+- Cycle 8 (123-139): 96.5, 90.8...5.3
+- Cycle 9 (140-156): 99.3, 93.6...8.1
+- NEEDLE interrupts
+- Cycle 10 (157-173): 2.4, 96.4...5.2
+- etc.
+
+The key pattern: values decrease linearly by 5.7 per step, sawtooth with period 18.
+
+**Status pattern:**
+Cycles through: nominal, degraded, recovering, offline, calibrating (5 statuses, period 5)
+- Record 0: nominal
+- Record 1: degraded
+- Record 2: recovering
+- Record 3: offline
+- Record 4: calibrating
+- Record 5: nominal
+- etc.
+
+So status cycles every 5 records.
+
+**Zone pattern:**
+Alternates between A and N prefixes. The numbers cycle: 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29...
+That's increasing by 17 each time (mod 100): 10, 27, 44, 61, 78, 95, 12(=112-100), 29, 46, 63, 80, 97, 14(=114-100), 31, 48, 65, 82, 99, 6(=106-100), 23...
+And the prefix alternates A, N, A, N...
+
+**Part 1: Describe variation + 3 observations (~150 words + 3 observations)**
+
+**Part 2: Compare offline vs nominal**
+
+Offline records: records where (record_number mod 5) == 3
+- Record 3: sensor=82.6, zone=N61
+- Record 8: sensor=54.1, zone=A56
+- Record 13: sensor=25.6, zone=N51
+- Record 18: sensor=96.8, zone=A46
+- Record 23: sensor=68.3, zone=N41
+- Record 28: sensor=39.8, zone=A36
+- Record 33: sensor=11.3, zone=N31
+- etc.
+
+Nominal records: records where (record_number mod 5) == 0
+- Record 0: sensor=0.0, zone=A10
+- Record 5: sensor=71.2, zone=N95
+- Record 10: sensor=42.7, zone=A90
+- Record 15: sensor=14.2, zone=N85
+- Record 20: sensor=85.4, zone=A80
+- Record 25: sensor=56.9, zone=N75
+- Record 30: sensor=28.4, zone=A70
+- Record 35: sensor=99.6, zone=N65
+- etc.
+
+For offline: positions 3, 8, 13, 18, 23, 28, 33, 38, 43, 48...
+Sensor values at these positions in the sawtooth: they're at positions 3, 8, 13 (mod 18) within the cycle... wait no. The sawtooth has period 18, and the status has period 5. LCM(18,5) = 90. So the combined pattern repeats every 90 records.
+
+Let me think about which sensor values correspond to offline:
+- Record 3: 82.6 (position 3 in cycle)
+- Record 8: 54.1 (position 8 in cycle)
+- Record 13: 25.6 (position 13 in cycle)
+- Record 18: 96.8 (position 0 of next cycle)
+- Record 23: 68.3 (position 5)
+- Record 28: 39.8 (position 10)
+- Record 33: 11.3 (position 15)
+- Record 38: 82.5 (position 2 of next cycle... wait)
+
+Hmm, let me recalculate. The sawtooth: within a cycle of 18, the values are at positions 0-17. Record 0 is position 0 of cycle 0. Record 18 is position 0 of cycle 1. Record 36 is position 0 of cycle 2, etc.
+
+Record 3: position 3 of cycle 0 → 94.0 - 3*5.7 = 94.0 - 17.1 = 76.9? But it says 82.6. Let me recheck.
+
+Actually: Record 0: 0.0, Record 1: 94.0, Record 2: 88.3, Record 3: 82.6...
+So from record 1: 94.0, then each step subtracts 5.7.
+Record 1: 94.0
+Record 2: 88.3
+Record 3: 82.6 ✓
+Record 4: 76.9
+...
+Record 17: 94.0 - 16*5.7 = 94.0 - 91.2 = 2.8 ✓
+Record 18: 96.8 (new cycle, slightly different start)
+
+OK so for offline (records 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63, 68, 73, 78, 83, 88, 93, 98, ...):
+
+These are every 5th record starting at 3. The sensor values will vary because the sawtooth period (18) and the status period (5) have LCM 90.
+
+Within one 90-record super-cycle, offline records are at positions 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63, 68, 73, 78, 83, 88 (18 offline records per 90).
+
+And nominal records are at positions 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85 (18 nominal per 90).
+
+The sensor values at these positions within the sawtooth will span the full range because the sawtooth cycles. So both offline and nominal records span the full 0-100 range of sensor values over the full dataset. The difference is more about the zones.
+
+Zones for offline (records 3, 8, 13, 18, 23...):
+- Record 3: N61
+- Record 8: A56
+- Record 13: N51
+- Record 18: A46
+- Record 23: N41
+- Record 28: A36
+- Record 33: N31
+- Record 38: A26
+- Record 43: N21
+- Record 48: A16
+- Record 53: N11
+- Record 58: A96
+- Record 63: N91
+- Record 68: A86
+- Record 73: N81
+- Record 78: A76
+- Record 83: N71
+- Record 88: A66
+
+Zones for nominal (records 0, 5, 10, 15, 20...):
+- Record 0: A10
+- Record 5: N95
+- Record 10: A90
+- Record 15: N85
+- Record 20: A80
+- Record 25: N75
+- Record 30: A70
+- Record 35: N65
+- Record 40: A60
+- Record 45: N55
+- Record 50: A50
+- Record 55: N45
+- Record 60: A40
+- Record 65: N35
+- Record 70: A30
+- Record 75: N25
+- Record 80: A20
+- Record 85: N15
+
+So for nominal zones: the numbers decrease by 5 each step (95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10) and alternate A/N.
+For offline zones: the numbers decrease by 5 each step (61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91, 86, 81, 76, 71, 66) and alternate N/A.
+
+So the key differences:
+- Nominal zones start with A (even-indexed in the zone sequence) and offline zones start with N
+- The zone number sequences are offset by 5: nominal hits 10,15,20,...,95 while offline hits 11,16,21,...,96 (shifted by +1... wait)
+
+Actually let me look at the zone number pattern more carefully:
+Record 0: A10, Record 1: N27, Record 2: A44, Record 3: N61, Record 4: A78, Record 5: N95, Record 6: A22, Record 7: N39, Record 8: A56, Record 9: N73, Record 10: A90...
+
+The numbers increase by 17: 10, 27, 44, 61, 78, 95, then 112→12, 129
+=====

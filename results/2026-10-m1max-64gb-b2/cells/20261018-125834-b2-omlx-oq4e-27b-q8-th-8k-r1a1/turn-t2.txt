@@ -1,0 +1,247 @@
+
+I need to compare records with status=offline versus status=nominal. Let me identify the patterns.
+
+Status cycles in order: nominal, degraded, recovering, offline, calibrating (5-record cycle).
+
+So status=nominal occurs at records where (index mod 5) == 0: 0, 5, 10, 15, 20, 25, ...
+Status=offline occurs at records where (index mod 5) == 3: 3, 8, 13, 18, 23, 28, ...
+
+Let me verify:
+- Record 0: status=nominal ✓ (0 mod 5 = 0)
+- Record 5: status=nominal ✓ (5 mod 5 = 0)
+- Record 10: status=nominal ✓ (10 mod 5 = 0)
+- Record 3: status=offline ✓ (3 mod 5 = 3)
+- Record 8: status=offline ✓ (8 mod 5 = 3)
+- Record 13: status=offline ✓ (13 mod 5 = 3)
+
+Now sensor values: they descend by 5.7 per record, wrapping at 18 records.
+Sensor value for record n: Let me check the pattern.
+Record 0: 0.0
+Record 1: 94.0
+Record 2: 88.3
+Record 3: 82.6
+Record 4: 76.9
+Record 5: 71.2
+Record 6: 65.5
+Record 7: 59.8
+Record 8: 54.1
+Record 9: 48.4
+Record 10: 42.7
+Record 11: 37.0
+Record 12: 31.3
+Record 13: 25.6
+Record 14: 19.9
+Record 15: 14.2
+Record 16: 8.5
+Record 17: 2.8
+Record 18: 96.8
+Record 19: 91.1
+Record 20: 85.4
+Record 21: 79.7
+Record 22: 74.0
+Record 23: 68.3
+Record 24: 62.6
+Record 25: 56.9
+Record 26: 51.2
+Record 27: 45.5
+Record 28: 39.8
+Record 29: 34.1
+Record 30: 28.4
+Record 31: 22.7
+Record 32: 17.0
+Record 33: 11.3
+Record 34: 5.6
+Record 35: 99.6
+...
+
+The sensor values cycle with period 18. The values within each 18-record block are: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8
+
+Then it shifts up by ~5.7 (actually let me check: 96.8 - 0.0 = 96.8? No wait. Let me re-examine.
+
+Actually looking more carefully:
+Record 0: 0.0
+Record 18: 96.8
+Record 36: 99.6 (wait, record 35: 99.6, record 36: 93.9)
+
+Let me re-read:
+Record 0: 0.0
+Record 1: 94.0
+Record 2: 88.3
+Record 3: 82.6
+Record 4: 76.9
+Record 5: 71.2
+Record 6: 65.5
+Record 7: 59.8
+Record 8: 54.1
+Record 9: 48.4
+Record 10: 42.7
+Record 11: 37.0
+Record 12: 31.3
+Record 13: 25.6
+Record 14: 19.9
+Record 15: 14.2
+Record 16: 8.5
+Record 17: 2.8
+Record 18: 96.8
+Record 19: 91.1
+Record 20: 85.4
+Record 21: 79.7
+Record 22: 74.0
+Record 23: 68.3
+Record 24: 62.6
+Record 25: 56.9
+Record 26: 51.2
+Record 27: 45.5
+Record 28: 39.8
+Record 29: 34.1
+Record 30: 28.4
+Record 31: 22.7
+Record 32: 17.0
+Record 33: 11.3
+Record 34: 5.6
+Record 35: 99.6
+Record 36: 93.9
+Record 37: 88.2
+...
+
+So the sensor value formula: it starts at 0.0 and decreases by 5.7 each step, wrapping around. The "range" seems to be 0 to ~99.6.
+
+Let me think of it differently. The sensor value for record n is:
+value = (0.0 - 5.7 * n) mod 100 (approximately)
+
+Let me check: 
+n=0: 0.0 mod 100 = 0.0 ✓
+n=1: -5.7 mod 100 = 94.3... but actual is 94.0. Hmm.
+
+Let me try: value = (99.6 - 5.7 * n) mod 99.6? 
+n=0: 99.6... no, that doesn't match.
+
+Actually let me just look at the pattern more carefully. The difference between consecutive records is always -5.7, and when it would go below 0, it wraps to around 96-99.
+
+n=0: 0.0
+n=1: 94.0 (difference from previous: +94.0, or equivalently 0.0 - 5.7 = -5.7, wrapped to 94.3... but it's 94.0)
+
+Hmm, let me try a different approach. Maybe the formula is:
+sensor(n) = (0.0 + (18 - (n mod 18)) * 5.7 + something) ... this is getting complicated.
+
+Let me just look at the actual values for nominal and offline records.
+
+Nominal (n mod 5 == 0): n = 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315...
+
+Wait, 315 doesn't exist. The last record is 313. So nominal goes up to 310.
+
+Offline (n mod 5 == 3): n = 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63, 68, 73, 78, 83, 88, 93, 98, 103, 108, 113, 118, 123, 128, 133, 138, 143, 148, 153, 158, 163, 168, 173, 178, 183, 188, 193, 198, 203, 208, 213, 218, 223, 228, 233, 238, 243, 248, 253, 258, 263, 268, 273, 278, 283, 288, 293, 298, 303, 308, 313
+
+Let me list sensor values:
+
+Nominal:
+n=0: 0.0, zone=A10
+n=5: 71.2, zone=N95
+n=10: 42.7, zone=A90
+n=15: 14.2, zone=N85
+n=20: 85.4, zone=A80
+n=25: 56.9, zone=N75
+n=30: 28.4, zone=A70
+n=35: 99.6, zone=N65
+n=40: 71.1, zone=A60
+n=45: 42.6, zone=N55
+n=50: 14.1, zone=A50
+n=55: 85.3, zone=N45
+n=60: 56.8, zone=A40
+n=65: 28.3, zone=N35
+n=70: 99.5, zone=A30
+n=75: 71.0, zone=N25
+n=80: 42.5, zone=A20
+n=85: 14.0, zone=N15
+n=90: 85.2, zone=A10
+n=95: 56.7, zone=N95
+n=100: 28.2, zone=A90
+n=105: 99.4, zone=N85
+n=110: 70.9, zone=A80
+n=115: 42.4, zone=N75
+n=120: 13.9, zone=A70
+n=125: 85.1, zone=N65
+n=130: 56.6, zone=A60
+n=135: 28.1, zone=N55
+n=140: 99.3, zone=A50
+n=145: 70.8, zone=N45
+n=150: 42.3, zone=A40
+n=155: 13.8, zone=N35
+n=160: 85.0, zone=A30
+n=165: 56.5, zone=N25
+n=170: 28.0, zone=A20
+n=175: 99.2, zone=N15
+n=180: 70.7, zone=A10
+n=185: 42.2, zone=N95
+n=190: 13.7, zone=A90
+n=195: 84.9, zone=N85
+n=200: 56.4, zone=A80
+n=205: 27.9, zone=N75
+n=210: 99.1, zone=A70
+n=215: 70.6, zone=N65
+n=220: 42.1, zone=A60
+n=225: 13.6, zone=N55
+n=230: 84.8, zone=A50
+n=235: 56.3, zone=N45
+n=240: 27.8, zone=A40
+n=245: 99.0, zone=N35
+n=250: 70.5, zone=A30
+n=255: 42.0, zone=N25
+n=260: 13.5, zone=A20
+n=265: 84.7, zone=N15
+n=270: 56.2, zone=A10
+n=275: 27.7, zone=N95
+n=280: 98.9, zone=A90
+n=285: 70.4, zone=N85
+n=290: 41.9, zone=A80
+n=295: 13.4, zone=N75
+n=300: 84.6, zone=A70
+n=305: 56.1, zone=N65
+n=310: 27.6, zone=A60
+
+Offline:
+n=3: 82.6, zone=N61
+n=8: 54.1, zone=A56
+n=13: 25.6, zone=N51
+n=18: 96.8, zone=A46
+n=23: 68.3, zone=N41
+n=28: 39.8, zone=A36
+n=33: 11.3, zone=N31
+n=38: 82.5, zone=A26
+n=43: 54.0, zone=N21
+n=48: 25.5, zone=A16
+n=53: 96.7, zone=N11
+n=58: 68.2, zone=A96
+n=63: 39.7, zone=N91
+n=68: 11.2, zone=A86
+n=73: 82.4, zone=N81
+n=78: 53.9, zone=A76
+n=83: 25.4, zone=N71
+n=88: 96.6, zone=A66
+n=93: 68.1, zone=N61
+n=98: 39.6, zone=A56
+n=103: 11.1, zone=N51
+n=108: 82.3, zone=A46
+n=113: 53.8, zone=N41
+n=118: 25.3, zone=A36
+n=123: 96.5, zone=N31
+n=128: 68.0, zone=A26
+n=133: 39.5, zone=N21
+n=138: 11.0, zone=A16
+n=143: 82.2, zone=N11
+n=148: 53.7, zone=A96
+n=153: 25.2, zone=N91
+n=158: 96.4, zone=A86
+n=163: 67.9, zone=N81
+n=168: 39.4, zone=A76
+n=173: 10.9, zone=N71
+n=178: 82.1, zone=A66
+n=183: 53.6, zone=N61
+n=188: 25.1, zone=A56
+n=193: 96.3, zone=N51
+n=198: 67.8, zone=A46
+n=203: 39.3, zone=N41
+n=208: 10.8, zone=A36
+n=213: 82.0, zone=N31
+n=218
+=====

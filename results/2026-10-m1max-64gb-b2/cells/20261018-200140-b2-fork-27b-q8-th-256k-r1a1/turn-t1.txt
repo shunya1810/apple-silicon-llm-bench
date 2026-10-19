@@ -1,0 +1,60 @@
+The user wants me to describe how sensor values and status fields vary across the records, then list three concrete observations. Let me analyze the patterns.
+
+Looking at the data:
+
+1. **Sensor values**: They follow a clear pattern. Each record decreases by 5.7 from the previous one (0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8, then wraps back to 96.8, 91.1, 85.4, etc.). So the sensor values cycle through a range roughly from 0.0 to 99.6, decreasing by 5.7 each step, wrapping around. The cycle length is about 18 records (since 99.6/5.7 ≈ 17.5, so about 18 values before wrapping).
+
+Wait, let me look more carefully. The values go: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8, 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, 99.6, 93.9, 88.2...
+
+So each cycle has 18 values, decreasing by 5.7. The first value in each cycle is slightly different (0.0, 96.8, 99.6, 99.5, 99.4, 99.3, 99.2, 99.1, 99.0, 98.9, 98.8, 98.7, 98.6, 98.5, 98.4, 98.3, 98.2, 98.1, 98.0, 97.9, 97.8, 97.7, 97.6, 97.5, 97.4, 97.3, 97.2, 97.1, 97.0, 96.9, 96.8...) - the peak value slowly decreases by 0.1 each cycle.
+
+2. **Status fields**: They cycle through a fixed sequence of 5 statuses: nominal, degraded, recovering, offline, calibrating. Each record advances by one status in this cycle. So status[i] = statuses[i mod 5] where statuses = [nominal, degraded, recovering, offline, calibrating].
+
+3. **Zone fields**: They cycle through a set of zones. Looking at the pattern: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18, N35, A52, N69, A86, N13, A30, N47, A64, N81, A98, N25, A42, N59, A76, N93, A20, N37, A54, N71, A88, N15, A32, N49, A66, N83, A10...
+
+The zones cycle with a period of about 100 (or 200). The zones alternate between A and N prefixes, and the numbers seem to follow a pattern. Let me check: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18, N35, A52, N69, A86, N13, A30, N47, A64, N81, A98, N25, A42, N59, A76, N93, A20, N37, A54, N71, A88, N15, A32, N49, A66, N83, A10...
+
+The numbers increase by 17 each step (10, 27, 44, 61, 78, 95, then wraps: 22 = 95+17-90, 39, 56, 73, 90, 17=90+17-90, 34, 51, 68, 85, 12=85+17-90, 29, 46, 63, 80, 97, 24=97+17-90, 41, 58, 75, 92, 19=92+17-90, 36, 53, 70, 87, 14=87+17-90, 31, 48, 65, 82, 99, 26=99+17-90, 43, 60, 77, 94, 21=94+17-90, 38, 55, 72, 89, 16=89+17-90, 33, 50, 67, 84, 11=84+17-90, 28, 45, 62, 79, 96, 23=96+17-90, 40, 57, 74, 91, 18=91+17-90, 35, 52, 69, 86, 13=86+17-90, 30, 47, 64, 81, 98, 25=98+17-90, 42, 59, 76, 93, 20=93+17-90, 37, 54, 71, 88, 15=88+17-90, 32, 49, 66, 83, 10=83+17-90)
+
+So zone numbers increase by 17, wrapping around 90 (i.e., mod 90, with values from 10 to 99). The prefix alternates A, N, A, N...
+
+Now let me also note the NEEDLE record: "Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry." This is an anomaly - it's not a telemetry record, it's a maintenance note.
+
+Let me now write about 150 words describing the variation and list three concrete observations.
+
+Let me count words carefully. I need about 150 words total for the description + 3 observations.
+
+Let me draft:
+
+"Sensor values follow a strict linear-decay pattern: each record's value is 5.7 lower than the previous, wrapping from near 0 back to near 99.6 (with the cycle peak slowly decreasing by 0.1 per 18-record cycle). Status cycles through five fixed states—nominal, degraded, recovering, offline, calibrating—in that order, one per record. Zone identifiers alternate A/N prefixes, with numeric suffixes advancing by 17 (mod 90), producing a 100-record repeating sequence.
+
+Three concrete observations:
+1. At record 000000 the sensor reads exactly 0.0 with status "nominal"; the next record jumps to 94.0, confirming the wrap-around at the cycle boundary.
+2. Record NEEDLE is not telemetry—it is a maintenance-override note for zone Q42 (code 7391-ALPHA) and lacks any sensor or status field.
+3. Every 18 records the status pattern shifts by 3 positions relative to the sensor-value cycle (18 mod 5 = 3), so after three sensor cycles the status alignment with the original phase is restored."
+
+Let me count... that's roughly 170 words. Let me trim to about 150.
+
+Let me recount more carefully:
+
+"Sensor values follow a strict linear-decay pattern: each record's value is 5.7 lower than the previous, wrapping from near 0 back to near 99.6 (with the cycle peak slowly decreasing by 0.1 per 18-record cycle). Status cycles through five fixed states—nominal, degraded, recovering, offline, calibrating—in order, one per record. Zone identifiers alternate A/N prefixes, with numeric suffixes advancing by 17 (mod 90), producing a 100-record repeating sequence."
+
+That's about 75 words for the description.
+
+"Three concrete observations:
+1. Record 000000 reads sensor=0.0, status=nominal; record 000001 jumps to 94.0, confirming the wrap-around.
+2. Record NEEDLE is a maintenance-override note (zone Q42, code 7391-ALPHA), not telemetry—it lacks sensor and status fields.
+3. Because 18 mod 5 = 3, the status phase shifts by 3 after each sensor-value cycle; full phase realignment requires 5 sensor cycles (90 records)."
+
+That's about 75 words for the observations.
+
+Total: ~150 words. Good.
+
+=====
+Sensor values follow a strict linear-decay pattern: each record's value is 5.7 lower than the previous, wrapping from near 0 back to near 99.6, with the cycle peak slowly decreasing by 0.1 every 18 records. Status cycles through five fixed states—nominal, degraded, recovering, offline, calibrating—in order, one per record. Zone identifiers alternate A/N prefixes, with numeric suffixes advancing by 17 (mod 90), producing a 100-record repeating sequence.
+
+Three concrete observations:
+
+1. Record 000000 reads sensor=0.0, status=nominal; record 000001 jumps to 94.0, confirming the wrap-around at the sensor-value cycle boundary.
+2. Record NEEDLE is a maintenance-override note (zone Q42, code 7391-ALPHA), not telemetry—it contains no sensor or status field and breaks the numeric pattern.
+3. Because 18 mod 5 = 3, the status phase shifts by three positions after each sensor-value cycle; full phase realignment with the original offset requires five sensor cycles (90 records).

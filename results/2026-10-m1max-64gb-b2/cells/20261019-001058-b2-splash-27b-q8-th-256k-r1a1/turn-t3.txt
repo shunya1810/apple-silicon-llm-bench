@@ -1,0 +1,55 @@
+The user wants me to:
+1. Quote the anomalous line exactly as it appears in the data.
+2. In about 120 words, explain how it differs from the other records.
+
+Looking through the data, I can see the anomalous line:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This appears between Record 004970 and Record 004971.
+
+Now I need to explain in about 120 words how it differs from normal telemetry records. Let me think about the differences:
+
+1. The record ID is "NEEDLE" instead of a zero-padded 6-digit number (e.g., 004970).
+2. It has no sensor value field (no "sensor=X.X").
+3. It has no status field (no "status=X").
+4. It references zone Q42, which doesn't follow the A/N prefix pattern seen in all other records.
+5. It contains free-text content ("maintenance override... uses code 7391-ALPHA; this is not telemetry") rather than the structured key=value pairs.
+6. The zone prefix "Q" is never used in any other record.
+
+Let me draft a ~120 word explanation:
+
+The line is:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Explanation (~120 words):
+- Record ID is alphabetic ("NEEDLE") instead of a six-digit zero-padded integer.
+- No sensor= field (all other records have a float value).
+- No status= field (all others cycle through five known statuses).
+- Zone uses prefix "Q" (Q42) whereas every other record uses only "A" or "N".
+- The payload is free prose rather than the strict "key=value key=value key=value" structure.
+- It self-identifies as non-telemetry.
+
+Let me count words carefully to hit ~120.
+
+Let me draft:
+
+"Every regular record follows the template 'Record NNNNNN: sensor=X.X status=WORD zone=XY'. This line breaks that template in four ways. First, its identifier is the word NEEDLE rather than a six-digit zero-padded number. Second, it omits both the sensor and status fields entirely, containing no numeric reading or one of the five known status keywords. Third, its zone is Q42, using the letter prefix Q, which never appears in any other record (all others use only A or N). Fourth, the body is free-form prose—'maintenance override … uses code 7391-ALPHA; this is not telemetry'—instead of the strict key=value triple. In short, it is a hand-entered maintenance note masquerading as a telemetry slot, explicitly disavowing its own telemetry status."
+
+Let me count: Every(1) regular(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) X(10) X(11) status(12) WORD(13) zone(14) XY(15) This(16) line(17) breaks(18) that(19) template(20) in(21) four(22) ways(23) First(24) its(25) identifier(26) is(27) the(28) word(29) NEEDLE(30) rather(31) than(32) a(33) six-digit(34) zero-padded(35) number(36) Second(37) it(38) omits(39) both(40) the(41) sensor(42) and(43) status(44) fields(45) entirely(46) containing(47) no(48) numeric(49) reading(50) or(51) one(52) of(53) the(54) five(55) known(56) status(57) keywords(58) Third(59) its(60) zone(61) is(62) Q42(63) using(64) the(65) letter(66) prefix(67) Q(68) which(69) never(70) appears(71) in(72) any(73) other(74) record(75) all(76) others(77) use(78) only(79) A(80) or(81) N(82) Fourth(83) the(84) body(85) is(86) free-form(87) prose(88) maintenance(89) override(90) uses(91) code(92) 7391-ALPHA(93) this(94) is(95) not(96) telemetry(97) instead(98) of(99) the(100) strict(101) key(102) value(103) triple(104) In(105) short(106) it(107) is(108) a(109) hand-entered(110) maintenance(111) note(112) masquerading(113) as(114) a(115) telemetry(116) slot(117) explicitly(118) disavowing(119) its(120) own(121) telemetry(122) status(123)
+
+That's about 123 words. Close enough to 120. Let me trim slightly.
+
+Let me recount more carefully, treating hyphenated words as one:
+
+"Every regular record follows the template 'Record NNNNNN: sensor=X.X status=WORD zone=XY'. This line breaks that template in four ways. First, its identifier is the word NEEDLE rather than a six-digit zero-padded number. Second, it omits both the sensor and status fields entirely, containing no numeric reading or one of the five known status keywords. Third, its zone is Q42, using the letter prefix Q, which never appears in any other record (all others use only A or N). Fourth, the body is free-form prose—'maintenance override … uses code 7391-ALPHA; this is not telemetry'—instead of the strict key=value triple. In short, it is a hand-entered maintenance note masquerading as a telemetry slot, explicitly disavowing its own telemetry status."
+
+Let me count word by word (treating hyphenated as one, and the quoted parts carefully):
+
+Every(1) regular(2) record(3) follows(4) the(5) template(6) Record(7) NNNNNN(8) sensor(9) X.X(10) status(11) WORD(12) zone(13) XY(14) This(15) line(16) breaks(17) that(18) template(19) in(20) four(21) ways(22) First(23) its(24) identifier(25) is(26) the(27) word(28) NEEDLE(29) rather(30) than(31) a(32) six-digit(33) zero-padded(34) number(35) Second(36) it(37) omits(38) both(39) the(40) sensor(41) and(42) status(43) fields(44) entirely(45) containing(46) no(47) numeric(48) reading(49) or(50) one(51) of(52) the(53) five(54) known(55) status(56) keywords(57) Third(58) its(59) zone(60) is(61) Q42(62) using(63) the(64) letter(65) prefix(66) Q(67) which(68) never(69) appears(70) in(71) any(72) other(73) record(74) all(75) others(76) use(77) only(78) A(79) or(80) N(81) Fourth(82) the(83) body(84) is(85) free-form(86) prose(87) maintenance(88) override(89) uses(90) code(91) 7391-ALPHA(92) this(93) is(94) not(95) telemetry(96) instead(97) of(98) the(99) strict(100) key(101) value(102) triple(103) In(104) short(105) it(106) is(107) a(108) hand-entered(109) maintenance(110) note(111) masquerading(112) as(113) a(114) telemetry(115) slot(116) explicitly(117) disavowing(118) its(119) own(120) telemetry(121) status(122)
+
+That's 122. Close enough. I'll go with this.
+
+=====
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+Every regular record follows the template *Record NNNNNN: sensor=X.X status=WORD zone=XY*. This line breaks that template in four ways. First, its identifier is the word NEEDLE rather than a six-digit zero-padded number. Second, it omits both the sensor and status fields entirely, containing no numeric reading or one of the five known status keywords. Third, its zone is Q42, using the letter prefix Q, which never appears in any other record (all others use only A or N). Fourth, the body is free-form prose—*maintenance override … uses code 7391-ALPHA; this is not telemetry*—instead of the strict key=value triple. In short, it is a hand-entered maintenance note masquerading as a telemetry slot, explicitly disavowing its own telemetry status.

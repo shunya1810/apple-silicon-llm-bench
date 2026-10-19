@@ -1,0 +1,52 @@
+{
+ "id": "b2-fork-a3b",
+ "label": "MTPLX M1 fork v2.12.2-m1.9 (code at 9c73c4ce), Qwen3.6-35B-A3B",
+ "port": 18124,
+ "model_id": "mtplx",
+ "tokenizer_dir": "${B2_MODEL_A3B}",
+ "model_artifact": "Youssofal/Qwen3.6-35B-A3B-MTPLX-Optimized-Speed-FP16: body tensor-identical to mlx-community/Qwen3.6-35B-A3B-4bit after fp16 cast (4-bit g64, 8-bit router gates), + native MoE MTP head (INT4 g32)",
+ "mtp_impl": "MTPLX native MTP, the engine's default depth for the pack",
+ "stats": "mtplx-metrics",
+ "health_path": "/health",
+ "start_timeout_s": 1200,
+ "env": {
+  "PYTHONPATH": "${B2_FORK}"
+ },
+ "cmd": [
+  "${MTPLX_PYTHON}",
+  "-m",
+  "mtplx.cli",
+  "serve",
+  "--model",
+  "${B2_MODEL_A3B}",
+  "--profile",
+  "turbo",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "18124",
+  "--no-auth",
+  "--yes",
+  "--warmup-tokens",
+  "0",
+  "--ssd-session-cache",
+  "off",
+  "--context-window",
+  "262144",
+  "--max-tokens",
+  "4096"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "MTPLX paged KV, affine q8",
+   "cmd_extra": [
+    "--paged-kv-quantization",
+    "q8"
+   ]
+  }
+ },
+ "version_cmds": {
+  "commit": "git -C ${B2_FORK} rev-parse HEAD"
+ }
+}

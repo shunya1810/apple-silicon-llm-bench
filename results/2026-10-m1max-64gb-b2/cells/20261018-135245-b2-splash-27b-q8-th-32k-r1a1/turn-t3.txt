@@ -1,0 +1,27 @@
+The user asks me to quote the non-telemetry line exactly and then explain in about 120 words how it differs from the other records.
+
+Looking through the data, I can see the needle/haystack item:
+
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This is positioned between Record 000653 and Record 000654.
+
+Now I need to explain how it differs from the other records in about 120 words. Let me think about the differences:
+
+1. The record identifier is "NEEDLE" instead of a six-digit zero-padded number (e.g., 000653).
+2. It lacks the structured `sensor=<float>` field.
+3. It lacks the structured `status=<state>` field (no nominal/degraded/recovering/offline/calibrating).
+4. It references zone "Q42" which doesn't follow the A/N prefix pattern of the other records.
+5. It contains free-form text ("maintenance override... uses code 7391-ALPHA; this is not telemetry") rather than the key=value pairs.
+6. It explicitly states "this is not telemetry."
+
+Let me write about 120 words explaining these differences.
+
+=====
+**Quoted line:**
+
+Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.
+
+**Explanation (~120 words):**
+
+Every other record follows a strict template: a zero-padded six-digit sequential identifier, a floating-point `sensor` value, an enumerated `status` keyword (nominal, degraded, recovering, offline, calibrating), and a `zone` code with an A or N prefix. The NEEDLE line breaks all four conventions. Its identifier is the string "NEEDLE" rather than a number, so it disrupts the sequential ordering between records 000653 and 000654. It omits the `sensor` and `status` fields entirely, replacing them with free-form prose about a "maintenance override" and an alphanumeric code. Its zone is "Q42," whose Q prefix never appears in the 90-zone rotation used by genuine telemetry. Finally, it self-identifies as non-telemetry, making it an injected annotation rather than a measurement.

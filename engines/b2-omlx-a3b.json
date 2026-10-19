@@ -1,0 +1,34 @@
+{
+ "id": "b2-omlx-a3b",
+ "label": "oMLX 0.7.1rc1, Qwen3.6-35B-A3B",
+ "port": 18126,
+ "model_id": "b2-qwen36-a3b-mlxc",
+ "tokenizer_dir": "${B2_MODEL_A3B}",
+ "model_artifact": "same files as the MTPLX rows (symlinked view; MoE MTP experts stacked into switch_mlp for oMLX)",
+ "mtp_impl": "oMLX MTP (mlx-lm), mtp_num_draft_tokens 3",
+ "stats": "omlx-log",
+ "health_path": "/v1/models",
+ "start_timeout_s": 600,
+ "cmd": [
+  "${B2_OMLX}",
+  "serve",
+  "--port",
+  "18126"
+ ],
+ "default_kv": "q8",
+ "kv_variants": {
+  "q8": {
+   "kv_impl": "oMLX KV unquantized (fp16): 0.7.1rc1 TurboQuant 8-bit KV fails on M1 (sdpa_vector_2pass qnt kernel requests 960 threads per threadgroup, M1 max 896)",
+   "cmd_extra": [
+    "--base-path",
+    "${ROOT}/engines/omlx-b2-b2-qwen36-a3b-mlxc"
+   ],
+   "wipe_before_start": [
+    "${ROOT}/engines/omlx-b2-b2-qwen36-a3b-mlxc/cache"
+   ]
+  }
+ },
+ "version_cmds": {
+  "version": "${B2_OMLX} --version"
+ }
+}
