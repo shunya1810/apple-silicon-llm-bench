@@ -1,0 +1,163 @@
+Let me analyze the offline and nominal records to find differences in sensor values and zones.
+
+First, let me identify the pattern:
+
+Status cycles: nominal (0), degraded (1), recovering (2), offline (3), calibrating (4) - period 5.
+
+So:
+- Nominal: records where (record_number mod 5) == 0 → 0, 5, 10, 15, 20, 25, 30, ...
+- Offline: records where (record_number mod 5) == 3 → 3, 8, 13, 18, 23, 28, 33, ...
+
+Now let me look at sensor values for these:
+
+**Nominal records (record ≡ 0 mod 5):**
+- Record 0: sensor=0.0, zone=A10
+- Record 5: sensor=71.2, zone=N95
+- Record 10: sensor=42.7, zone=A90
+- Record 15: sensor=14.2, zone=N85
+- Record 20: sensor=85.4, zone=A80
+- Record 25: sensor=56.9, zone=N75
+- Record 30: sensor=28.4, zone=A70
+- Record 35: sensor=99.6, zone=N65
+- Record 40: sensor=71.1, zone=A60
+- Record 45: sensor=42.6, zone=N55
+- Record 50: sensor=14.1, zone=A50
+- Record 55: sensor=85.3, zone=N45
+- Record 60: sensor=56.8, zone=A40
+- Record 65: sensor=28.3, zone=N35
+- Record 70: sensor=99.5, zone=A30
+- Record 75: sensor=71.0, zone=N25
+- Record 80: sensor=42.5, zone=A20
+- Record 85: sensor=14.0, zone=N15
+- Record 90: sensor=85.2, zone=A10
+- Record 95: sensor=56.7, zone=N95
+- Record 100: sensor=28.2, zone=A90
+
+So nominal records have sensor values that cycle through a pattern. The values span the full range 0-99.6. Looking at the pattern: 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, 71.0, 42.5, 14.0, 85.2, 56.7, 28.2...
+
+The sensor values for nominal records decrease by about 5.7 every 5 records (since the overall pattern decreases by 5.7 per record, and nominal hits every 5 records, the decrease per nominal cycle is about 5.7×5 = 28.5... wait no).
+
+Actually, let me think about this differently. The sensor value at record n (for n ≥ 1) follows:
+- Within each 17-record cycle, it decreases by 5.7 per record.
+- The cycles start at various peaks.
+
+For nominal records (n ≡ 0 mod 5): 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100...
+
+The difference between consecutive nominal sensor values:
+71.2 - 0.0 = 71.2
+42.7 - 71.2 = -28.5
+14.2 - 42.7 = -28.5
+85.4 - 14.2 = 71.2
+56.9 - 85.4 = -28.5
+28.4 - 56.9 = -28.5
+99.6 - 28.4 = 71.2
+71.1 - 99.6 = -28.5
+42.6 - 71.1 = -28.5
+14.1 - 42.6 = -28.5
+85.3 - 14.1 = 71.2
+...
+
+So nominal sensor values cycle: they decrease by 28.5 three times (total -85.5) then jump up by 71.2. Wait: 28.5 × 3 = 85.5, and the jump is 71.2. So the net change over 4 nominal records is -85.5 + 71.2 = -14.3. Hmm, that doesn't quite work for a repeating pattern.
+
+Actually, the nominal values have a 4-record sub-cycle (after the initial 0.0): the pattern of differences is +71.2, -28.5, -28.5, -28.5, +71.2, -28.5, -28.5, -28.5... So every 4 nominal records, the net change is 71.2 - 85.5 = -14.3. Over the full range, this means the values drift downward slowly.
+
+**Offline records (record ≡ 3 mod 5):**
+- Record 3: sensor=82.6, zone=N61
+- Record 8: sensor=54.1, zone=A56
+- Record 13: sensor=25.6, zone=N51
+- Record 18: sensor=96.8, zone=A46
+- Record 23: sensor=68.3, zone=N41
+- Record 28: sensor=39.8, zone=A36
+- Record 33: sensor=11.3, zone=N31
+- Record 38: sensor=82.5, zone=A26
+- Record 43: sensor=54.0, zone=N21
+- Record 48: sensor=25.5, zone=A16
+- Record 53: sensor=96.7, zone=N11
+- Record 58: sensor=68.2, zone=A96
+- Record 63: sensor=39.7, zone=N91
+- Record 68: sensor=11.2, zone=A86
+- Record 73: sensor=82.4, zone=N81
+- Record 78: sensor=53.9, zone=A76
+- Record 83: sensor=25.4, zone=N71
+- Record 88: sensor=96.6, zone=A66
+- Record 93: sensor=68.1, zone=N61
+- Record 98: sensor=39.6, zone=A56
+
+Differences:
+54.1 - 82.6 = -28.5
+25.6 - 54.1 = -28.5
+96.8 - 25.6 = 71.2
+68.3 - 96.8 = -28.5
+39.8 - 68.3 = -28.5
+11.3 - 39.8 = -28.5
+82.5 - 11.3 = 71.2
+54.0 - 82.5 = -28.5
+25.5 - 54.0 = -28.5
+96.7 - 25.5 = 71.2
+68.2 - 96.7 = -28.5
+39.7 - 68.2 = -28.5
+11.2 - 39.7 = -28.5
+82.4 - 11.2 = 71.2
+...
+
+Same pattern! The offline records also have a 4-record sub-cycle with differences -28.5, -28.5, -28.5, +71.2.
+
+So both nominal and offline have the same structural pattern in sensor values (the 4-step sub-cycle with -28.5, -28.5, -28.5, +71.2), but they're offset. The nominal values are shifted relative to the offline values.
+
+Let me compare at the same point in the sub-cycle:
+- Nominal sub-cycle start (high values): 71.2, 85.4, 99.6, 71.1, 85.3, 99.5, 71.0, 85.2, 99.4...
+- Offline sub-cycle start (high values): 82.6, 96.8, 82.5, 96.7, 82.4, 96.6, 82.3...
+
+So the "peak" values for nominal are around 71-100, while for offline they're around 82-97. The offline peaks are slightly higher in the first cycle (96.8 vs 99.6 for nominal at record 35... wait).
+
+Actually, let me think about this differently. The key differences:
+
+1. **Sensor value range**: Both span roughly the same range (near 0 to near 100), but the specific values are offset. At any given "phase" in the sawtooth, the offline values are shifted by 3 records (× 5.7 = 17.1) from nominal. So offline values at a given record are about 17.1 units lower than what nominal would be at that same record... wait, no. Let me think again.
+
+Record 3 (offline): 82.6
+Record 0 (nominal): 0.0
+
+These aren't at the same phase. Let me compare records at the same phase of the sawtooth:
+
+The sawtooth has period 17. Within the sawtooth, the sensor decreases by 5.7 per record.
+
+Nominal records hit at positions 0, 5, 10, 15 in each 17-cycle (positions mod 17): 0, 5, 10, 15, 3, 8, 13, 1, 6, 11, 16, 4, 9, 14, 2, 7, 12...
+Wait, that's not right either. The sawtooth period is 17, and nominal hits every 5 records. So in terms of sawtooth position, nominal hits at positions: 0, 5, 10, 15, 3, 8, 13, 1, 6, 11, 16, 4, 9, 14, 2, 7, 12, 0, 5, 10...
+
+So nominal hits all 17 positions in the sawtooth over 17 nominal records (since gcd(5,17)=1). Same for offline.
+
+So both nominal and offline records sample the full range of the sawtooth, but at different phases. The key difference is the offset: offline is 3 records after nominal in the 5-cycle, which means in sawtooth terms, the offset is 3×5.7 = 17.1 units lower (since the sawtooth is decreasing).
+
+Wait, but the sawtooth has period 17 and the status has period 5. The combined period is lcm(17,5) = 85 records. So over 85 records, both nominal and offline will have cycled through all sawtooth positions.
+
+Actually, I think the most notable differences are:
+
+1. **Zones**: 
+   - Nominal zones: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15, A10...
+   - The numeric part decreases by 5 each step (10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10...)
+   - Wait: 10, 95, 90, 85... the difference is -5, -5, -5... but 10 to 95 is +85 (or -15 mod 100). Hmm.
+   
+   Actually the zone number increases by 17 each record. So for nominal (every 5th record): 10, 10+5×17=95, 95+85=180 mod 100=80... wait let me recalculate.
+   
+   Zone number for record n: starts at 10 for record 0, increases by 17 per record.
+   Record 0: 10
+   Record 5: 10 + 5×17 = 95
+   Record 10: 10 + 10×17 = 180 → 80 (mod 100)
+   Record 15: 10 + 15×17 = 265 → 65
+   Record 20: 10 + 20×17 = 350 → 50
+   Record 25: 10 + 25×17 = 435 → 35
+   Record 30: 10 + 30×17 = 520 → 20
+   Record 35: 10 + 35×17 = 605 → 5... wait, 605 mod 100 = 5. But the data shows record 35 zone = N65. Let me recheck.
+
+   Hmm, let me re-examine. Record 0: A10. Record 1: N27. 27-10=17. Record 2: A44. 44-27=17. Record 3: N61. 61-44=17. Yes, +17 per record.
+
+   Record 5: 10+5×17 = 95. Data: N95. ✓
+   Record 10: 10+10×17 = 180. 180 mod 100 = 80. Data: A90. Hmm, that doesn't match.
+
+   Wait, let me recount. Record 0: A10, Record 1: N27, Record 2: A44, Record 3: N61, Record 4: A78, Record 5: N95, Record 6: A22 (95+17=112, mod 100=12? No, 112 mod 100 = 12, but it says A22).
+
+   Hmm, 95+17=112, not 22. Unless it wraps differently. Let me look: 95, then next is 22. 95+17=112. 112 mod 100 = 12. But the data says 22. So maybe it's mod 99? 112 mod 99 = 13. No.
+
+   Let me just look at the actual zone numbers in sequence:
+   10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50, 67, 84, 11, 28, 45, 62, 79, 96, 23, 40, 57, 74, 91, 18, 35, 52, 69, 86, 13, 30, 47, 64, 81, 98, 25, 42, 59, 76, 93, 20, 37, 54, 71, 88, 15
+=====

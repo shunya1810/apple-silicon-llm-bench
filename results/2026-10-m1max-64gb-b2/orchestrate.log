@@ -189,3 +189,45 @@
 08:39:10 round 1 th-256k q8 b2-omlx-oq4e-a3b attempt 1
 09:19:21   canary 74.40734114691159 ref 78.58881308569522 slow=True
 09:20:51   canary slow: resting 300 s and re-running once
+16:21:20   battery 100% AC
+16:21:20 round 1 th-2k q8 b2-fork-27b attempt 1
+16:26:50   canary 31.054284710773587 ref None slow=False
+16:28:20   battery 100% AC
+16:28:20 round 1 th-8k q8 b2-fork-27b attempt 1
+16:34:16   canary 31.901225102484915 ref 31.054284710773587 slow=False
+16:35:46   battery 100% AC
+16:35:46 round 1 th-32k q8 b2-fork-27b attempt 1
+16:43:48   canary 31.34624341085743 ref 31.901225102484915 slow=False
+16:45:18   battery 100% AC
+16:45:18 round 1 th-64k q8 b2-fork-27b attempt 1
+16:58:29   canary 31.79128429664746 ref 31.901225102484915 slow=False
+16:59:59   battery 100% AC
+16:59:59 round 1 th-128k q8 b2-fork-27b attempt 1
+17:24:33   canary 31.70919851305529 ref 31.901225102484915 slow=False
+17:26:03   battery 99% AC
+17:26:03 round 1 th-256k q8 b2-fork-27b attempt 1
+18:22:57   canary 31.640230153855683 ref 31.901225102484915 slow=False
+18:24:27 plan done
+18:24:27   battery 90% AC
+18:24:27 round 1 th-2k q8 b2-fork-a3b attempt 1
+18:26:21   canary 103.12698059162936 ref None slow=False
+18:27:51   battery 90% AC
+18:27:51 round 1 th-8k q8 b2-fork-a3b attempt 1
+18:30:01   canary 105.44688507414628 ref 103.12698059162936 slow=False
+18:31:31   battery 90% AC
+18:31:31 round 1 th-32k q8 b2-fork-a3b attempt 1
+18:34:24   canary 107.40847113780295 ref 105.44688507414628 slow=False
+18:35:54   battery 90% AC
+18:35:54 round 1 th-64k q8 b2-fork-a3b attempt 1
+18:40:08   canary 110.3759514579274 ref 107.40847113780295 slow=False
+18:41:38   battery 90% AC
+18:41:38 round 1 th-128k q8 b2-fork-a3b attempt 1
+18:49:57   canary 109.56025758677686 ref 110.3759514579274 slow=False
+18:51:27   battery 90% AC
+18:51:27 round 1 th-256k q8 b2-fork-a3b attempt 1
+19:12:09   canary 109.15720826131536 ref 110.3759514579274 slow=False
+19:13:39 plan done
+19:32:57   battery 83% AC
+19:32:57 round 1 th-256k q8 b2-fork-a3b attempt 1
+19:53:59   canary 105.97963310446936 ref None slow=False
+19:55:29 plan done

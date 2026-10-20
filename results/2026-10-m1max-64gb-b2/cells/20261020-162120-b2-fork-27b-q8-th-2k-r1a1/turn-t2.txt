@@ -1,0 +1,134 @@
+Let me identify all records with status=offline and status=nominal, then compare their sensor values and zones.
+
+**Offline records:**
+- 000003: sensor=82.6 zone=N61
+- 000008: sensor=54.1 zone=A56
+- 000013: sensor=25.6 zone=N51
+- 000018: sensor=96.8 zone=A46
+- 000023: sensor=68.3 zone=N41
+- 000028: sensor=39.8 zone=A36
+- 000033: sensor=11.3 zone=N31
+- 000038: sensor=82.5 zone=A26
+- 000043: sensor=54.0 zone=N21
+- 000048: sensor=25.5 zone=A16
+- 000053: sensor=96.7 zone=N11
+- 000058: sensor=68.2 zone=A96
+- 000063: sensor=39.7 zone=N91
+
+**Nominal records:**
+- 000000: sensor=0.0 zone=A10
+- 000005: sensor=71.2 zone=N95
+- 000010: sensor=42.7 zone=A90
+- 00015: sensor=14.2 zone=N85
+- 000020: sensor=85.4 zone=A80
+- 000025: sensor=56.9 zone=N75
+- 000030: sensor=28.4 zone=A70
+- 000035: sensor=99.6 zone=N65
+- 000040: sensor=71.1 zone=A60
+- 000045: sensor=42.6 zone=N55
+- 000050: sensor=14.1 zone=A50
+- 000055: sensor=85.3 zone=N45
+- 000060: sensor=56.8 zone=A40
+
+Now let me analyze differences:
+
+**Zone prefix pattern:**
+- Offline: N, A, N, A, N, A, N, A, N, A, N, A, N (alternates N, A, N, A...)
+- Nominal: A, N, A, N, A, N, A, N, A, N, A, N, A (alternates A, N, A, N...)
+
+So offline zones start with N and alternate N,A,N,A... while nominal zones start with A and alternate A,N,A,N...
+
+**Zone numbers for offline:** 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91
+**Zone numbers for nominal:** 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40
+
+Let me check the zone number pattern:
+- Offline zone numbers: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91 — decreasing by 5 each time (modulo 100)
+- Nominal zone numbers: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40 — decreasing by 5 each time (modulo 100)
+
+Wait, let me recheck. The zone numbers in the full data decrease by 17 each record (modulo 100). Since status cycles every 5 records, the zone numbers for a given status should decrease by 17*5 = 85 ≡ -15 (mod 100), i.e., decrease by 15 each cycle... wait let me recalculate.
+
+Actually the zone numbers: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50, N67, A84, N11, A28, N45, A62, N79, A96, N23, A40, N57, A74, N91, A18
+
+The difference between consecutive zone numbers: 27-10=17, 44-27=17, 61-44=17, 78-61=17, 95-78=17, 22-95=-73≡27? No wait... 95+17=112, mod 100=12. But record 6 is A22. Hmm.
+
+Let me re-examine. 10, 27, 44, 61, 78, 95, 12(22?), 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50, 67, 84, 11, 28, 45, 62, 79, 96, 23, 40, 57, 74, 91, 18
+
+Wait, 10+17=27, 27+17=44, 44+17=61, 61+17=78, 78+17=95, 95+17=112→12? But the data says A22. Hmm, that doesn't work with mod 100.
+
+Let me look again: Record 0: A10, Record 1: N27, Record 2: A44, Record 3: N61, Record 4: A78, Record 5: N95, Record 6: A22...
+
+10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50, 67, 84, 11, 28, 45, 62, 79, 96, 23, 40, 57, 74, 91, 18
+
+Differences: 17, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17, 17, 17, 17, -73, 17
+
+So the pattern is: increase by 17 five times, then decrease by 73 (which is equivalent to -73 mod 100 = +27... no, 95-73=22, 22+17=39, etc.). Actually it seems like the zone number goes 10, 27, 44, 61, 78, 95, then wraps: 95+17=112→12? But we see 22. Hmm.
+
+Wait, maybe it's not mod 100. Let me look at the cycle of 16 records (since sensor resets every ~16-17 records). Actually, looking at the sensor resets: records 0-17 form one cycle (0 to 99.6), 18-34 another, 35-52 another, 53-64 (partial). That's 17, 17, 17, 12 records.
+
+Hmm, but the zone pattern seems to have a period. Let me look at zone numbers for records 0-16 (17 records):
+10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12
+
+Then records 17-33 (17 records):
+29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31
+
+Each cycle the starting zone number increases by 19 (10→29→48). And within a cycle, the numbers increase by 17 for 6 values then wrap.
+
+Actually, let me just focus on what I need for the comparison.
+
+**Offline records and their zones:**
+- 000003: sensor=82.6 zone=N61
+- 000008: sensor=54.1 zone=A56
+- 000013: sensor=25.6 zone=N51
+- 000018: sensor=96.8 zone=A46
+- 000023: sensor=68.3 zone=N41
+- 000028: sensor=39.8 zone=A36
+- 000033: sensor=11.3 zone=N31
+- 000038: sensor=82.5 zone=A26
+- 000043: sensor=54.0 zone=N21
+- 000048: sensor=25.5 zone=A16
+- 000053: sensor=96.7 zone=N11
+- 000058: sensor=68.2 zone=A96
+- 000063: sensor=39.7 zone=N91
+
+Zone prefixes for offline: N, A, N, A, N, A, N, A, N, A, N, A, N
+Zone numbers for offline: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91
+
+**Nominal records and their zones:**
+- 000000: sensor=0.0 zone=A10
+- 000005: sensor=71.2 zone=N95
+- 000010: sensor=42.7 zone=A90
+- 000015: sensor=14.2 zone=N85
+- 000020: sensor=85.4 zone=A80
+- 000025: sensor=56.9 zone=N75
+- 000030: sensor=28.4 zone=A70
+- 000035: sensor=99.6 zone=N65
+- 000040: sensor=71.1 zone=A60
+- 000045: sensor=42.6 zone=N55
+- 000050: sensor=14.1 zone=A50
+- 000055: sensor=85.3 zone=N45
+- 000060: sensor=56.8 zone=A40
+
+Zone prefixes for nominal: A, N, A, N, A, N, A, N, A, N, A, N, A
+Zone numbers for nominal: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40
+
+Key differences:
+
+1. **Zone prefix:** Offline zones alternate N, A, N, A... (starting with N). Nominal zones alternate A, N, A, N... (starting with A). So for any given cycle, the offline record's zone prefix is the opposite of the nominal record's zone prefix. Since status cycles 5 positions and zone prefix alternates every record, and offline is at position 3 (0-indexed) within the 5-status cycle while nominal is at position 0, the prefix difference is 3 positions → odd → opposite prefix. Yes, that checks out.
+
+2. **Zone numbers:** 
+   - Offline zone numbers: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91 (decreasing by 5 each time)
+   - Nominal zone numbers: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40 (decreasing by 5 each time)
+   
+   Both decrease by 5 per cycle. The offset between them: In the first cycle, nominal starts at 10 and offline starts at 61. 61-10=51. In the second cycle, nominal starts at 80, offline at 46. 46-80=-34. Hmm, that's not constant.
+
+   Wait, let me be more careful. The records are sequential. Nominal appears at records 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60. Offline appears at records 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63.
+
+   In the first cycle (records 0-16):
+   - Nominal at record 0: zone 10 (A10)
+   - Offline at record 3: zone 61 (N61)
+   - Nominal at record 5: zone 95 (N95)
+   - Offline at record 8: zone 56 (A56)
+   - Nominal at record 10: zone 90 (A90)
+   - Offline at record 13: zone 51 (N51)
+   - Nominal at record 15: zone 85 (N
+=====

@@ -1,6 +1,6 @@
 {
  "id": "b2-fork-27b",
- "label": "MTPLX M1 fork v2.12.2-m1.9 (code at 9c73c4ce), Qwen3.8-27B",
+ "label": "MTPLX M1 fork v2.12.2-m1.10 (code at 25927ca3), Qwen3.8-27B",
  "port": 18120,
  "model_id": "mtplx",
  "tokenizer_dir": "${B2_MODEL_27B}",

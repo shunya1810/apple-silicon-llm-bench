@@ -1,0 +1,208 @@
+The user asks two things:
+
+1. Compare records with status=offline vs status=nominal. Describe differences in sensor values and zones, citing three records by number. About 150 words.
+
+2. Quote the non-telemetry line exactly, then in about 120 words explain how it differs.
+
+Let me identify the offline and nominal records:
+
+Offline records:
+- 000003: sensor=82.6, zone=N61
+- 000008: sensor=54.1, zone=A56
+- 000013: sensor=25.6, zone=N51
+- 000018: sensor=96.8, zone=A46
+- 000023: sensor=68.3, zone=N41
+- 000028: sensor=39.8, zone=A36
+- 000033: sensor=11.3, zone=N31
+- 000038: sensor=82.5, zone=A26
+- 000043: sensor=54.0, zone=N21
+- 000048: sensor=25.5, zone=A16
+- 000053: sensor=96.7, zone=N11
+- 000058: sensor=68.2, zone=A96
+- 000063: sensor=39.7, zone=N91
+
+Nominal records:
+- 000000: sensor=0.0, zone=A10
+- 000005: sensor=71.2, zone=N95
+- 000010: sensor=42.7, zone=A90
+- 000015: sensor=14.2, zone=N85
+- 000020: sensor=85.4, zone=A80
+- 000025: sensor=56.9, zone=N75
+- 000030: sensor=28.4, zone=A70
+- 00035: sensor=99.6, zone=N65
+- 000040: sensor=71.1, zone=A60
+- 000045: sensor=42.6, zone=N55
+- 000050: sensor=14.1, zone=A50
+- 000055: sensor=85.3, zone=N45
+- 000060: sensor=56.8, zone=A40
+
+Now let me look at patterns:
+
+Status cycles: nominal(0), degraded(1), recovering(2), offline(3), calibrating(4) — period 5.
+
+So nominal records are at indices 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60 (every 5th starting from 0).
+Offline records are at indices 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63 (every 5th starting from 3).
+
+Sensor values:
+- Nominal: 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8
+- Offline: 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7
+
+The sensor values follow the same linear decreasing pattern within each cycle, so the absolute values depend on position within the cycle. Since nominal is at position 0 in the cycle and offline is at position 3, offline values are always 3 × 5.7 = 17.1 lower than the nominal that started the same cycle... wait, let me check.
+
+Cycle 1: starts at 0.0 (nominal, rec 0), then 94.0 (degraded, rec 1), 88.3 (recovering, rec 2), 82.6 (offline, rec 3), 76.9 (calibrating, rec 4)
+Wait, that doesn't work. Let me re-examine.
+
+Actually looking more carefully:
+- Record 0: sensor=0.0, nominal
+- Record 1: sensor=94.0, degraded
+- Record 2: sensor=88.3, recovering
+- Record 3: sensor=82.6, offline
+- Record 4: sensor=76.9, calibrating
+- Record 5: sensor=71.2, nominal
+- Record 6: sensor=65.5, degraded
+- Record 7: sensor=59.8, recovering
+- Record 8: sensor=54.1, offline
+- Record 9: sensor=48.4, calibrating
+- Record 10: sensor=42.7, nominal
+
+So the pattern is: within each 5-record cycle, the sensor decreases by 5.7 each step. The cycle resets (jumps up) at record 1 (from 0.0 to 94.0), then again at record 18 (from 2.8 to 96.8), and at record 35 (from 5.6 to 99.6), and at record 53 (from 2.7 to 96.7).
+
+Wait, let me trace more carefully:
+Rec 0: 0.0 (nominal)
+Rec 1: 94.0 (degraded) — jump up!
+Rec 2: 88.3 (recovering) — down 5.7
+Rec 3: 82.6 (offline) — down 5.7
+Rec 4: 76.9 (calibrating) — down 5.7
+Rec 5: 71.2 (nominal) — down 5.7
+Rec 6: 65.5 (degraded) — down 5.7
+Rec 7: 59.8 (recovering) — down 5.7
+Rec 8: 54.1 (offline) — down 5.7
+Rec 9: 48.4 (calibrating) — down 5.7
+Rec 10: 42.7 (nominal) — down 5.7
+...continuing down by 5.7...
+Rec 17: 2.8 (recovering)
+Rec 18: 96.8 (offline) — jump up!
+Rec 19: 91.1 (calibrating) — down 5.7
+Rec 20: 85.4 (nominal) — down 5.7
+...
+Rec 34: 5.6 (calibrating)
+Rec 35: 99.6 (nominal) — jump up!
+...
+Rec 52: 2.7 (recovering)
+Rec 53: 96.7 (offline) — jump up!
+
+So the sensor values are NOT tied to the status in a meaningful way. The sensor just follows a sawtooth pattern independent of status. The status cycles independently.
+
+Now for the comparison:
+
+Offline records and their sensor values: 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7
+Nominal records and their sensor values: 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8
+
+Both sets span the full range. Neither is systematically higher or lower. They both hit the resets.
+
+Zones:
+Offline: N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91
+Nominal: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40
+
+Zone pattern: the zone number decreases by 5 with each record (since zone advances by 17 mod 100, and status has period 5, so within the same status, zones advance by 5 each time: 17×5=85, so 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40 for nominal; 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91 for offline).
+
+Prefix alternation: Let me check.
+Record 0: A, Record 1: N, Record 2: A, Record 3: N, Record 4: A, Record 5: N...
+So odd records are N, even records are A.
+
+Nominal records are at indices 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60.
+- 0 (even): A
+- 5 (odd): N
+- 10 (even): A
+- 15 (odd): N
+- 20 (even): A
+- 25 (odd): N
+- 30 (even): A
+- 35 (odd): N
+- 40 (even): A
+- 45 (odd): N
+- 50 (even): A
+- 55 (odd): N
+- 60 (even): A
+
+So nominal alternates A, N, A, N, A, N, A, N, A, N, A, N, A — starting with A.
+
+Offline records at indices 3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63.
+- 3 (odd): N
+- 8 (even): A
+- 13 (odd): N
+- 18 (even): A
+- 23 (odd): N
+- 28 (even): A
+- 33 (odd): N
+- 38 (even): A
+- 43 (odd): N
+- 48 (even): A
+- 53 (odd): N
+- 58 (even): A
+- 63 (odd): N
+
+So offline alternates N, A, N, A, N, A, N, A, N, A, N, A, N — starting with N.
+
+So the zone prefix alternation is the same (A, N, A, N...) but offset by one. Nominal starts with A, offline starts with N.
+
+Now for citing three records, I should pick specific ones. Let me pick:
+- Offline: 000003 (sensor=82.6, zone=N61), 000018 (sensor=96.8, zone=A46), 000053 (sensor=96.7, zone=N11)
+- Nominal: 000000 (sensor=0.0, zone=A10), 000020 (sensor=85.4, zone=A80), 000035 (sensor=99.6, zone=N65)
+
+Key differences to note:
+1. Sensor values: Both sets span the full range (~0 to ~100). Neither status is associated with a particular magnitude. The values follow the same sawtooth. But within a given cycle, nominal comes at position 0 and offline at position 3, so offline is always 17.1 lower than the nominal that started its cycle... wait, that's only within the same cycle. Let me check: In the first "cycle" (records 0-17), nominal is at rec 0 (0.0), 5 (71.2), 10 (42.7), 15 (14.2). Offline is at rec 3 (82.6), 8 (54.1), 13 (25.6). So within the same linear segment, offline is 3 steps (17.1 units) below the nominal that precedes it. But at the resets, offline can be at the top (96.8 at rec 18) while nominal is lower.
+
+Actually, the key insight is: the sensor value is determined by position in the sawtooth, not by status. Status is just a 5-cycle label. So the "difference" in sensor values is purely positional.
+
+2. Zones: Nominal zones: A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40. Offline zones: N61, A56, N51, A46, N41, A36, N31, A26, N21, A16, N11, A96, N91. The zone numbers for nominal decrease by 5: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40. Offline: 61, 56, 51, 46, 41, 36, 31, 26, 21, 16, 11, 96, 91. Both decrease by 5. The offset between them: nominal starts at 10, offline starts at 61. Difference is 51 (or -49 mod 100). Actually 61-10=51, 56-95=-39, 51-90=-39... hmm let me recalculate.
+
+Wait: the zone number advances by 17 each record. So:
+Rec 0: zone number 10
+Rec 5: zone number 10 + 5×17 = 10+85 = 95 (mod 100)
+Rec 10: 95+85 = 180 mod 100 = 80... but the data says 90. Let me recheck.
+
+Actually let me just look at the data:
+Rec 0: A10
+Rec 5: N95
+Rec 10: A90
+Rec 15: N85
+Rec 20: A80
+Rec 25: N75
+Rec 30: A70
+Rec 35: N65
+Rec 40: A60
+Rec 45: N55
+Rec 50: A50
+Rec 55: N45
+Rec 60: A40
+
+Differences: 95-10=85, 90-95=-5, 85-90=-5, 80-85=-5... So after the first jump of 85, it's -5 each step. That's because 17×5 = 85, and 85 mod 100 = 85, then 85+85=170 mod 100 = 70... hmm that doesn't match.
+
+Wait, let me recheck. Zone advances by 17 each record:
+Rec 0: 10
+Rec 1: 27
+Rec 2: 44
+Rec 3: 61
+Rec 4: 78
+Rec 5: 95
+Rec 6: 12 → 2 (but data says 22)
+
+Hmm, that doesn't work either. Let me re-examine the zone numbers from the data:
+Rec 0: 10
+Rec 1: 27
+Rec 2: 44
+Rec 3: 61
+Rec 4: 78
+Rec 5: 95
+Rec 6: 22
+Rec 7: 39
+Rec 8: 56
+Rec 9: 73
+Rec 10: 90
+Rec 11: 17
+Rec 12: 34
+Rec 13: 51
+Rec 14: 68
+Rec 15: 8
+=====

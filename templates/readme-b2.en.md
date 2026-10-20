@@ -7,7 +7,7 @@ to 4,096 generated tokens per turn, thinking tokens included.
 
 | engine | version | weights |
 |---|---|---|
-| **MTPLX M1 fork** | [`v2.12.2-m1.9`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.9) (code `9c73c4ce`) | MTPLX pack below, MTP depth from the pack (27B: 3; A3B: 1), `--profile turbo`, q8 KV |
+| **MTPLX M1 fork** | [`v2.12.2-m1.10`](https://github.com/shunya1810/MTPLX/releases/tag/v2.12.2-m1.10) (code `25927ca3`) | MTPLX pack below, MTP depth from the pack (27B: 3; A3B: 1), `--profile turbo`, q8 KV |
 | **MTPLX upstream** | [`v2.12.2`](https://github.com/youssofal/MTPLX/releases/tag/v2.12.2) (`9882703f`, `main` at run time) | same pack and flags as the fork |
 | **oMLX** | [0.7.1rc1](https://github.com/jundot/omlx/releases/tag/v0.7.1rc1) (wheel, mlx 0.32.4) | same pack as MTPLX through a text-only symlinked view (MTP head renamed for mlx-lm), MTP with 3 draft tokens, **fp16 KV** (see below) |
 | **Splash** | [paperniuk/splash 1.3.2-m1.1](https://github.com/paperniuk/splash/releases/tag/1.3.2-m1.1) | `mlx-community/Qwen3.8-27B-4bit` / `mlx-community/Qwen3.6-35B-A3B-4bit` as published, plus the DFlash2 draft Splash selects, INT8 KV |
@@ -51,12 +51,16 @@ three 4,096-token turns fit the 262,144-token window.
   have taken about an hour). On the A3B it reuses part of the prompt up to 128K.
 - **MTPLX upstream failed the 27B at 246K**: its memory guard stopped turn 1 mid-prefill
   (sustained critical memory pressure, 58.4 GB wired).
-- **The M1 fork's turn 3 at 27B 32K / 128K / 246K** re-read part (3,061 tokens) or all
-  (246K: 248,809 tokens, 51 min) of the prompt: turn 2's thinking hit the 4,096-token cap,
-  and the save of turn 2's state had not finished when turn 3 arrived. At 246K the re-read
-  also left the MTP drafts far less accurate for that turn (2.2 instead of 3.5 tokens per
-  round; decode 12.8 tok/s). Known issue in the fork, fix in progress; the A3B does not show
-  it.
+- **The M1 fork rows are v2.12.2-m1.10 (re-run 2026-10-20); the other engines' rows are from
+  2026-10-18/19.** On v2.12.2-m1.9 the fork's 27B turn 3 at 32K / 128K / 246K re-read part
+  (3,061 tokens) or all (246K: 248,809 tokens, 51 min) of the prompt, because turn 2's
+  thinking hit the 4,096-token cap and the save of turn 2's state had not finished when turn
+  3 arrived; at 246K that turn also drafted far worse (2.2 instead of 3.5 tokens per round,
+  decode 12.8 tok/s). v2.12.2-m1.10 fixes both: turn 3 starts after 1.6 s (32K), 4.1 s
+  (128K) and 3.3 s (246K), and decodes at 18.2 tok/s (246K, 3.0 tokens per round).
+  The fork's A3B turn 1 at 246K read 11% slower in this re-run than on v2.12.2-m1.9 (973 vs
+  871 s); run back to back on one Mac state the two versions prefilled the same 246K prompt
+  at 291 and 289 tok/s, so that gap is run-to-run variation.
 
 ### Qwen3.8-27B (dense)
 

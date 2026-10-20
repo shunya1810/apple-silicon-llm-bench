@@ -1,0 +1,24 @@
+The user wants me to quote the non-telemetry line exactly and then explain how it differs.
+
+The anomalous line is:
+"Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+Let me explain how it differs from the other records in about 120 words.
+
+Differences:
+1. The record ID is "NEEDLE" instead of a zero-padded 6-digit number
+2. It lacks the "sensor=" field (no numeric sensor value)
+3. It lacks the "status=" field (no status from the 5-value cycle)
+4. It references "zone Q42" instead of the A/N prefix pattern used by all other zones
+5. It contains free-form text ("maintenance override... uses code 7391-ALPHA; this is not telemetry.") instead of the structured key=value pairs
+6. It breaks the predictable cycling patterns of sensor values, status, and zones
+7. It explicitly states "this is not telemetry"
+
+Let me write about 120 words.
+
+=====
+The anomalous line is:
+
+`Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry.`
+
+Every other record follows a rigid template: a zero-padded six-digit identifier, followed by three `key=value` pairs (`sensor=`, `status=`, `zone=`). This line breaks all three conventions. First, its identifier is the word "NEEDLE" rather than a number like 004970. Second, it omits the `sensor=` and `status=` fields entirely, replacing them with free-form prose containing a code string ("7391-ALPHA"). Third, it names zone "Q42," introducing a prefix letter (Q) that never appears in the A/N zone cycle used by every genuine telemetry entry. Finally, the line explicitly self-identifies as non-telemetry, making it a metadata or administrative note mistakenly interleaved into what is otherwise a purely numerical sensor log.

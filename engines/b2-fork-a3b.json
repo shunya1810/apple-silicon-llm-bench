@@ -1,6 +1,6 @@
 {
  "id": "b2-fork-a3b",
- "label": "MTPLX M1 fork v2.12.2-m1.9 (code at 9c73c4ce), Qwen3.6-35B-A3B",
+ "label": "MTPLX M1 fork v2.12.2-m1.10 (code at 64a4ac9c), Qwen3.6-35B-A3B",
  "port": 18124,
  "model_id": "mtplx",
  "tokenizer_dir": "${B2_MODEL_A3B}",

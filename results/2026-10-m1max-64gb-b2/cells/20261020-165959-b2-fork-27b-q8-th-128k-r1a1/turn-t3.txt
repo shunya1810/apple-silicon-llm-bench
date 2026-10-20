@@ -1,0 +1,156 @@
+The user asks me to:
+
+1. In about 150 words, describe how sensor values and status fields vary across the records, then list three concrete observations.
+
+2. Compare records whose status is "offline" with records whose status is "nominal." In about 150 words, describe differences in their sensor values and zones, citing three records by number.
+
+3. One line in the data is not a normal telemetry record. Quote that line exactly, then in about 120 words explain how it differs from the other records.
+
+Let me analyze the data:
+
+**Sensor values:** They start at 0.0 (record 000000) and decrease by 5.7 each step until they hit 2.8 (record 000017), then jump back up to 96.8 (record 000018) and decrease again. This cycle repeats. The pattern is: values go from ~100 down to ~0 in steps of 5.7, then reset. Actually looking more carefully:
+
+- Record 0: 0.0
+- Record 1: 94.0
+- Record 2: 88.3
+- Record 3: 82.6
+- ...decreasing by 5.7 each time...
+- Record 17: 2.8
+- Record 18: 96.8
+- Record 19: 91.1
+- ...decreasing by 5.7...
+- Record 34: 5.6
+- Record 35: 99.6
+- Record 36: 93.9
+- ...
+
+So the pattern is: starting values cycle through ~100, ~97, ~95, ~94... and they decrease by 5.7 each step within a cycle of about 18 records. The starting values of each cycle slowly decrease (100, 97, 95, 94, 94...). Actually let me re-examine:
+
+Record 0: 0.0 (start of first cycle)
+Record 1: 94.0
+Record 2: 88.3
+...
+Record 17: 2.8
+Record 18: 96.8
+Record 19: 91.1
+...
+Record 34: 5.6
+Record 35: 99.6
+Record 36: 93.9
+...
+Record 52: 2.7
+Record 53: 96.7
+...
+
+So each "cycle" is about 18 records, with values decreasing by 5.7 per step. The peak of each cycle decreases slightly over time (94, 96.8, 99.6, 96.7, 96.6, 95.9, 95.8, 95.7, 95.6, 95.5, 95.4, 95.3, 95.2, 95.1, 95.0, 94.9, 94.8, 94.7, 94.6, 94.5, 94.4, 94.3, 94.2, 94.1, 94.0...). Actually the first cycle starts at 0, then the second starts at 94, third at 96.8, fourth at 99.6...
+
+Wait, let me re-read. Record 0 is 0.0, then record 1 is 94.0. So the first "cycle" is just one record at 0.0, then a new cycle begins at 94.0. Then it decreases by 5.7 each step for 17 more records until 2.8, then jumps to 96.8.
+
+Actually the pattern seems to be:
+- The sensor value decreases by 5.7 each record
+- When it would go below 0, it wraps back up to near 100
+- The wrapping point slowly decreases over time
+
+**Status fields:** They cycle in a fixed pattern:
+- nominal, degraded, recovering, offline, calibrating (5 statuses repeating)
+
+Looking at records 0-4: nominal, degraded, recovering, offline, calibrating
+Records 5-9: nominal, degraded, recovering, offline, calibrating
+Yes, it's a fixed 5-cycle: nominal → degraded → recovering → offline → calibrating → repeat
+
+**Zones:** They cycle through a fixed set of 20 zones in a repeating pattern. Looking at the zones:
+A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63...
+
+Then it repeats: A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, N82... wait let me check.
+
+Actually looking more carefully at the zone pattern, it seems to cycle through 20 zones with alternating A and N prefixes. The zones seem to follow a pattern where they increment by 17 (mod 100) or something similar.
+
+Let me check: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63
+
+Differences: 27-10=17, 44-27=17, 61-44=17, 78-61=17, 95-78=17, 22-95=-73 (or +27 mod 100? 95+17=112, 112-100=12... no that's 12 not 22). Hmm.
+
+Wait: 10, 27, 44, 61, 78, 95, 12, 29, 46, 63, 80, 97, 14, 31, 48, 65, 82, 99, 16, 33...
+
+That's incrementing by 17 mod 100! 10+17=27, 27+17=44, 44+17=61, 61+17=78, 78+17=95, 95+17=112→12, 12+17=29, etc.
+
+And the prefix alternates A, N, A, N, A, N...
+
+So zones cycle with period 20 (since 20*17=340, 340 mod 100 = 40... hmm that's not quite right). Actually 17*20 = 340, 340 mod 100 = 40, so after 20 steps we'd be at 10+40=50. Let me verify: after 20 steps: 10 + 20*17 = 10+340 = 350, 350 mod 100 = 50. And the prefix after 20 steps (even) would be A. So zone 20 would be A50. Let me check record 20: zone=A80. Hmm, that doesn't match.
+
+Let me re-examine. Record 0: A10, Record 1: N27, Record 2: A44, Record 3: N61, Record 4: A78, Record 5: N95, Record 6: A22, Record 7: N39, Record 8: A56, Record 9: N73, Record 10: A90, Record 11: N17, Record 12: A34, Record 13: N51, Record 14: A68, Record 15: N85, Record 16: A12, Record 17: N29, Record 18: A46, Record 19: N63.
+
+So after 20 records we're at... the 20th record (index 20) should be A80 (record 000020). Let me verify: 10 + 20*17 = 350, 350 mod 100 = 50. But record 20 is A80. So my formula is wrong.
+
+Wait, let me recount. Record 0 is A10. Record 1 is N27. So the zone number increases by 17 each record, and the prefix alternates. After 20 records (record 20), the zone number would be 10 + 20*17 = 350, mod 100 = 50. But record 20 shows A80. Hmm.
+
+Let me check record 20: "Record 000020: sensor=85.4 status=nominal zone=A80."
+
+And record 19: "Record 000019: sensor=91.1 status=calibrating zone=N63."
+
+63 + 17 = 80. Yes! And the prefix: record 19 is N (odd), record 20 is A (even). So it does increment by 17.
+
+So after 20 records: 10 + 20*17 = 350, 350 mod 100 = 50. But record 20 is 80, not 50. Wait, I'm confusing myself. Record 20 is the 21st record (0-indexed). The zone number for record n is (10 + n*17) mod 100. For n=20: (10+340) mod 100 = 350 mod 100 = 50. But it shows 80.
+
+Hmm, let me just check: record 19 is N63. 63+17=80. Record 20 is A80. ✓. Record 20: 80+17=97. Record 21 should be N97. Let me check: "Record 000021: sensor=79.7 status=degraded zone=N97." ✓.
+
+OK so the formula works. For record 0: zone = 10. For record 1: 10+17=27. For record 20: 10+20*17 = 350, 350 mod 100 = 50. But it shows 80... 
+
+Oh wait, I think I'm miscounting. Let me just trace it:
+- Record 0: 10
+- Record 1: 27
+- Record 2: 44
+- Record 3: 61
+- Record 4: 78
+- Record 5: 95
+- Record 6: 95+17=112→12
+- Record 7: 12+17=29
+- Record 8: 29+17=46
+- Record 9: 46+17=63
+- Record 10: 63+17=80
+- Record 11: 80+17=97
+- Record 12: 97+17=114→14
+- Record 13: 14+17=31
+- Record 14: 31+17=48
+- Record 15: 48+17=65
+- Record 16: 65+17=82
+- Record 17: 82+17=99
+- Record 18: 99+17=116→16
+- Record 19: 16+17=33
+
+Wait, but record 18 shows A46, not A16. Let me recheck.
+
+"Record 000018: sensor=96.8 status=offline zone=A46."
+
+Hmm, 99+17=116, 116 mod 100 = 16. But it shows 46. So my "mod 100" assumption might be wrong, or the increment isn't exactly 17.
+
+Let me recheck: Record 17: N29. Record 18: A46. 46-29=17. ✓
+Record 18: A46. Record 19: N63. 63-46=17. ✓
+Record 19: N63. Record 20: A80. 80-63=17. ✓
+
+OK so the increment IS 17. Let me retrace:
+- Record 0: 10
+- Record 1: 27 (10+17)
+- Record 2: 44
+- Record 3: 61
+- Record 4: 78
+- Record 5: 95
+- Record 6: 112→? 
+
+Record 6 shows A22. 112 mod 100 = 12, not 22. So it's not mod 100.
+
+Wait: 95+17=112. But record 6 shows 22. 112-90=22? Or maybe it's mod 90? 112 mod 90 = 22. Let me check: record 5 is 95, record 6 is 22. 95+17=112, 112-90=22. Hmm.
+
+Or maybe it wraps differently. Let me check another wrap: record 11 is N17, record 5 is N95. 95+17=112, and we get... record 11 is 17. 112-95=17? No that's circular.
+
+Actually wait. Let me look at this differently. The zones that appear are: 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 16, 33, 50, ...
+
+Differences between consecutive values: 17, 17, 17, 17, 17, -73(=27), 17, 17, 17, 17, -73(=27), 17, 17, 17, 17, -73(=27), 17, 17, 17, 17, -73(=27)...
+
+So it's: +17, and when it would exceed 99, it subtracts 90 (not 100). 95+17=112, 112-90=22. 90+17=107, 107-90=17. 85+17=102, 102-90=12.
+
+So the zone number is (10 + n*17) mod 90, with the result mapped to 10-99 range? Let me check: (10 + 0*17) mod 90 = 10. ✓. (10+1*17) mod 90 = 27. ✓. (10+5*17) mod 90 = (10+85) mod 90 = 95. ✓. (10+6*17) mod 90 = (10+102) mod 90 = 112 mod 90 = 22. ✓!
+
+So zone number = (10 + n*17) mod 90, and if the result is less than 10, add 90? Let me check: (10 + 11*17) mod 90 = (10+187) mod 90 = 197 mod 90 = 17. ✓ (record 11 is N17).
+
+What about values that would be 0-9? (10 + n*17) mod 90: the minimum would be... 17 is coprime to 90? GCD(17,90) = 1
+=====

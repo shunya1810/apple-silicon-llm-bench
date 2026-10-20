@@ -1,0 +1,115 @@
+The user wants me to:
+
+1. Describe how sensor values and status fields vary across the records (~150 words), then list three concrete observations.
+2. Compare offline vs nominal records (~150 words), citing three records by number.
+3. Identify the non-telemetry line, quote it exactly, and explain how it differs (~120 words).
+
+Let me analyze the data:
+
+**Sensor values:** They start at 0.0 and decrease by 5.7 per record (mostly), wrapping around. The pattern is: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8, then jumps to 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6, 99.6, 93.9, 88.2, 82.5, 76.8, 71.1, 65.4, 59.7, 54.0, 48.3, 42.6, 36.9, 31.2, 25.5, 19.8, 14.1, 8.4, 2.7...
+
+So the sensor values cycle roughly: starting high (~99-100) and decreasing by ~5.7 each step, wrapping around after hitting near 0. The decrement is 5.7 per record. The cycle length is about 18 records (since 100/5.7 ≈ 17.5). Actually let me check: 0.0, 94.0, 88.3, 82.6, 76.9, 71.2, 65.5, 59.8, 54.1, 48.4, 42.7, 37.0, 31.3, 25.6, 19.9, 14.2, 8.5, 2.8 — that's 18 values. Then 96.8, 91.1, 85.4, 79.7, 74.0, 68.3, 62.6, 56.9, 51.2, 45.5, 39.8, 34.1, 28.4, 22.7, 17.0, 11.3, 5.6 — 17 values. Then 99.6, 93.9, 88.2, 82.5, 76.8, 71.1, 65.4, 59.7, 54.0, 48.3, 42.6, 36.9, 31.2, 25.5, 19.8, 14.1, 8.4, 2.7 — 18 values.
+
+So it's a repeating cycle of roughly 18 values, each decreasing by 5.7, wrapping from near 0 back to near 100. The starting point of each cycle shifts slightly.
+
+**Status fields:** They cycle through: nominal, degraded, recovering, offline, calibrating — repeating every 5 records. Record 0: nominal, 1: degraded, 2: recovering, 3: offline, 4: calibrating, 5: nominal, 6: degraded, etc.
+
+**Zone fields:** They cycle through various zones. Let me look at the pattern: A10, N27, A44, N61, A78, N95, A22, N39, A56, N73, A90, N17, A34, N51, A68, N85, A12, N29, A46, N63, A80, N97, A24, N41, A58, N75, A92, N19, A36, N53, A70, N87, A14, N31, A48, N65, A82, N99, A26, N43, A60, N77, A94, N21, A38, N55, A72, N89, A16, N33, A50...
+
+The zones seem to cycle with a pattern. The prefix alternates A and N. The numbers: 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50...
+
+The increment is 17 each time (mod 100): 10, 27, 44, 61, 78, 95, 12(22? no...) wait: 10, 27, 44, 61, 78, 95, 12, 29, 46, 63, 80, 97, 14, 31, 48, 65, 82, 99, 16, 33, 50...
+
+Actually: 10, 27(+17), 44(+17), 61(+17), 78(+17), 95(+17), 12(112 mod 100), 29(+17), 46(+17), 63(+17), 80(+17), 97(+17), 14(114 mod 100), 31(+17), 48(+17), 65(+17), 82(+17), 99(+17), 16(116 mod 100), 33(+17), 50(+17)...
+
+Yes! The zone number increases by 17 each time, wrapping mod 100. And the prefix alternates A, N, A, N...
+
+**The anomaly:** "Record NEEDLE: maintenance override for zone Q42 uses code 7391-ALPHA; this is not telemetry."
+
+This is between Record 001316 and Record 001317. It doesn't have sensor, status, or zone fields in the normal format. It references zone Q42 (which doesn't appear in the normal A/N pattern), has a "code" field, and explicitly states "this is not telemetry."
+
+Now let me write the three parts:
+
+**Part 1: How sensor values and status fields vary (~150 words) + three concrete observations**
+
+Sensor values: They follow a sawtooth pattern, decreasing by 5.7 per record, wrapping from near 0 back to near 100 approximately every 18 records. Status cycles through 5 values (nominal, degraded, recovering, offline, calibrating) in a fixed repeating order.
+
+Three observations:
+1. The sensor value decreases by exactly 5.7 per successive record before wrapping.
+2. The status field follows a strict 5-record cycle: nominal → degraded → recovering → offline → calibrating.
+3. The zone identifier increments by 17 (mod 100) with alternating A/N prefixes.
+
+**Part 2: Compare offline vs nominal (~150 words, cite 3 records)**
+
+Let me find some offline and nominal records:
+
+Offline records: 000003 (sensor=82.6, zone=N61), 000008 (sensor=54.1, zone=A56), 000013 (sensor=25.6, zone=N51), 000018 (sensor=96.8, zone=A46), 000023 (sensor=68.3, zone=N41), 000028 (sensor=39.8, zone=A36), 000033 (sensor=11.3, zone=N31), 000038 (sensor=82.5, zone=A26)...
+
+Nominal records: 000000 (sensor=0.0, zone=A10), 000005 (sensor=71.2, zone=N95), 000010 (sensor=42.7, zone=A90), 000015 (sensor=14.2, zone=N85), 000020 (sensor=85.4, zone=A80), 000025 (sensor=56.9, zone=N75), 000030 (sensor=28.4, zone=A70), 000035 (sensor=99.6, zone=N65)...
+
+Since the status cycles every 5 records, and the sensor decreases by 5.7 per record, the sensor values for a given status will be distributed across the full range as the records progress. So offline records (every 5th starting at index 3: records 3, 8, 13, 18, 23...) will have various sensor values. Nominal records (every 5th starting at index 0: records 0, 5, 10, 15, 20...) will also have various sensor values.
+
+Let me check: offline records have indices 3, 8, 13, 18, 23, 28, 33, 38...
+- Record 3: sensor=82.6
+- Record 8: sensor=54.1
+- Record 13: sensor=25.6
+- Record 18: sensor=96.8
+- Record 23: sensor=68.3
+- Record 28: sensor=39.8
+- Record 33: sensor=11.3
+- Record 38: sensor=82.5
+
+Nominal records have indices 0, 5, 10, 15, 20, 25, 30, 35...
+- Record 0: sensor=0.0
+- Record 5: sensor=71.2
+- Record 10: sensor=42.7
+- Record 15: sensor=14.2
+- Record 20: sensor=85.4
+- Record 25: sensor=56.9
+- Record 30: sensor=28.4
+- Record 35: sensor=99.6
+
+So both statuses span the full range of sensor values. The difference is in which specific values they hit. Since the offset is 3 records (5.7×3 = 17.1), offline records tend to have sensor values that are about 17.1 lower than the nominal records at the same "cycle position."
+
+For zones: offline zones (indices 3, 8, 13, 18...): N61, A56, N51, A46, N41, A36, N31, A26...
+Nominal zones (indices 0, 5, 10, 15...): A10, N95, A90, N85, A80, N75, A70, N65...
+
+The zone numbers for offline: 61, 56, 51, 46, 41, 36, 31, 26 (decreasing by 5)
+The zone numbers for nominal: 10, 95, 90, 85, 80, 75, 70, 65 (also decreasing by 5, but starting at 10)
+
+Wait, the zone number increases by 17 each record. So for offline (every 5th record starting at 3): the zone number changes by 17×5=85 mod 100 = 85, or equivalently -15 mod 100. Let me verify: 61, 56(61-5? no, 61+17×5=61+85=146 mod 100=46). Hmm that doesn't match. Let me recheck.
+
+Record 3: zone N61
+Record 8: zone A56
+61 + 17×5 = 61 + 85 = 146 mod 100 = 46? But it says 56.
+
+Wait, let me recount. Record 0: A10, Record 1: N27, Record 2: A44, Record 3: N61, Record 4: A78, Record 5: N95, Record 6: A22, Record 7: N39, Record 8: A56.
+
+So from record 3 to record 8 (5 records later): 61 → 56. That's a change of -5, or +95 mod 100. But 17×5 = 85, and 61+85 = 146 mod 100 = 46, not 56.
+
+Hmm, let me recheck. 10, 27, 44, 61, 78, 95, 22, 39, 56. From 61 to 56 is -5. But 61+17=78, 78+17=95, 95+17=112→12, 12+17=29, 29+17=46... wait that gives 46 not 56.
+
+Wait: 10, 27, 44, 61, 78, 95, 12, 29, 46... but the data says record 8 is A56, not A46. Let me re-read.
+
+Record 000000: zone=A10
+Record 000001: zone=N27
+Record 000002: zone=A44
+Record 000003: zone=N61
+Record 000004: zone=A78
+Record 000005: zone=N95
+Record 000006: zone=A22
+Record 000007: zone=N39
+Record 000008: zone=A56
+
+So: 10, 27, 44, 61, 78, 95, 22, 39, 56
+
+Differences: +17, +17, +17, +17, +17, -73(=+27 mod 100? no, 95+17=112 mod 100=12, but it says 22)...
+
+Hmm, 95 to 22: that's +27 mod 100, not +17. Let me recheck.
+
+Actually wait: 95 + 17 = 112, mod 100 = 12. But the data shows 22. So the increment isn't always 17.
+
+Let me look more carefully: 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 92, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 21, 38, 55, 72, 89, 16, 33, 50
+
+Differences: 17, 17, 17, 17, 17
+=====

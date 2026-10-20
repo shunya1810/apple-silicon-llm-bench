@@ -1,0 +1,171 @@
+Let me analyze the offline and nominal records carefully.
+
+**Status cycle (period 5):**
+- Record 0: nominal
+- Record 1: degraded
+- Record 2: recovering
+- Record 3: offline
+- Record 4: calibrating
+- Record 5: nominal
+- Record 6: degraded
+- Record 7: recovering
+- Record 8: offline
+- ...
+
+So status is determined by record number mod 5:
+- 0 mod 5: nominal
+- 1 mod 5: degraded
+- 2 mod 5: recovering
+- 3 mod 5: offline
+- 4 mod 5: calibrating
+
+**Offline records (record number ≡ 3 mod 5):**
+- Record 3: sensor=82.6, zone=N61
+- Record 8: sensor=54.1, zone=A56
+- Record 13: sensor=25.6, zone=N51
+- Record 18: sensor=96.8, zone=A46
+- Record 23: sensor=68.3, zone=N41
+- Record 28: sensor=39.8, zone=A36
+- Record 33: sensor=11.3, zone=N31
+- Record 38: sensor=82.5, zone=A26
+- Record 43: sensor=54.0, zone=N21
+- Record 48: sensor=25.5, zone=A16
+- Record 53: sensor=96.7, zone=N11
+- Record 58: sensor=68.2, zone=A96
+- Record 63: sensor=39.7, zone=N91
+- Record 68: sensor=11.2, zone=A86
+- Record 73: sensor=82.4, zone=N81
+- Record 78: sensor=53.9, zone=A76
+- Record 83: sensor=25.4, zone=N71
+- Record 88: sensor=96.6, zone=A66
+- Record 93: sensor=68.1, zone=N61
+- Record 98: sensor=39.6, zone=A56
+- ...
+
+**Nominal records (record number ≡ 0 mod 5):**
+- Record 0: sensor=0.0, zone=A10
+- Record 5: sensor=71.2, zone=N95
+- Record 10: sensor=42.7, zone=A90
+- Record 15: sensor=14.2, zone=N85
+- Record 20: sensor=85.4, zone=A80
+- Record 25: sensor=56.9, zone=N75
+- Record 30: sensor=28.4, zone=A70
+- Record 35: sensor=99.6, zone=N65
+- Record 40: sensor=71.1, zone=A60
+- Record 45: sensor=42.6, zone=N55
+- Record 50: sensor=14.1, zone=A50
+- Record 55: sensor=85.3, zone=N45
+- Record 60: sensor=56.8, zone=A40
+- Record 65: sensor=28.3, zone=N35
+- Record 70: sensor=99.5, zone=A30
+- Record 75: sensor=71.0, zone=N25
+- Record 80: sensor=42.5, zone=A20
+- Record 85: sensor=14.0, zone=N15
+- Record 90: sensor=85.2, zone=A10
+- ...
+
+Now let me look at patterns:
+
+**Sensor values:**
+- Nominal records (mod 5 = 0): 0.0, 71.2, 42.7, 14.2, 85.4, 56.9, 28.4, 99.6, 71.1, 42.6, 14.1, 85.3, 56.8, 28.3, 99.5, 71.0, 42.5, 14.0, 85.2...
+  - Pattern within a 5-cycle: these are every 5th value in the sawtooth. Since the sawtooth decreases by 5.7, every 5th value decreases by 5×5.7 = 28.5. So: 0.0, 71.2 (jump up), 42.7, 14.2, 85.4 (jump), 56.9, 28.4, 99.6 (jump), 71.1, 42.6, 14.1, 85.3 (jump), 56.8, 28.3, 99.5 (jump)...
+  - The nominal values cycle through roughly: ~71, ~42.5, ~14, then jump to ~85-99, ~56-57, ~28, then jump to ~99, ~71, ~42.5, ~14...
+  - Actually the range is 0.0 to 99.6
+
+- Offline records (mod 5 = 3): 82.6, 54.1, 25.6, 96.8, 68.3, 39.8, 11.3, 82.5, 54.0, 25.5, 96.7, 68.2, 39.7, 11.2, 82.4, 53.9, 25.4, 96.6, 68.1, 39.6...
+  - Pattern: ~82.5, ~54, ~25.5, then jump to ~96.7, ~68, ~39.5, ~11, then jump to ~82, ~54, ~25.5...
+  - The range is roughly 11.2 to 96.8
+
+**Key differences in sensor values:**
+- Nominal records include the very lowest values (0.0, 14.0, 14.1, 14.2) and very highest (99.5, 99.6). Range: 0.0 to 99.6.
+- Offline records have a narrower range: approximately 11.2 to 96.8. They never hit the extremes (never 0, never 99+).
+- The nominal records hit both the bottom (0.0) and top (99.6) of the sawtooth, while offline records are always in the middle-ish range.
+
+Wait, let me re-examine. The sawtooth decreases by 5.7 each step. In a 17-step cycle, values go from peak to trough.
+
+For nominal (every 5th, starting at record 0 which is the very first at 0.0):
+- The nominal records pick up values at positions 0, 5, 10, 15, 20, 25, 30, 35... in the sequence.
+- Since the cycle is 17 records, and nominal picks every 5th, the pattern of which part of the sawtooth they hit repeats with period lcm(5,17) = 85 records.
+
+For offline (every 5th, starting at record 3):
+- The offline records pick up values at positions 3, 8, 13, 18, 23, 28, 33, 38...
+
+Since the sawtooth goes from peak (~94-99) down to trough (~2-5) over 17 steps, the value at position k within a cycle is roughly: peak - k*5.7.
+
+For nominal at positions 0, 5, 10, 15 within a 17-cycle:
+- Position 0: peak (~94-99) or 0.0 (special first record)
+- Position 5: peak - 5*5.7 = peak - 28.5
+- Position 10: peak - 57
+- Position 15: peak - 85.5 (which would be near trough)
+
+For offline at positions 3, 8, 13 within a 17-cycle:
+- Position 3: peak - 3*5.7 = peak - 17.1
+- Position 8: peak - 8*5.7 = peak - 45.6
+- Position 13: peak - 13*5.7 = peak - 74.1
+
+So offline values are: peak-17, peak-46, peak-74 → roughly 77-82, 49-54, 20-25 (then wraps to next cycle's peak-17, etc.)
+Nominal values are: peak, peak-28.5, peak-57, peak-85.5 → roughly 94-99, 65-71, 37-42, 8-14
+
+So the key difference: nominal records span a wider range (hitting both extremes near 0 and near 99), while offline records occupy a middle band (roughly 11-97, never at the very top or very bottom).
+
+**Zones:**
+- Nominal zones (record 0, 5, 10, 15, 20, 25...): A10, N95, A90, N85, A80, N75, A70, N65, A60, N55, A50, N45, A40, N35, A30, N25, A20, N15, A10...
+  - Pattern: A then N, number decreasing by 5 each step (mod 100): 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
+  - Wait, 10→95 is +85 or -15. Let me check: 10, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
+  - From 10 to 95: that's +85 (or -15 mod 100). From 95 to 90: -5. From 90 to 85: -5...
+  - Actually the zone number increments by 17 mod 100 each record. For nominal (every 5 records), it increments by 5×17 = 85 mod 100 = -15 mod 100.
+  - So: 10, 10+85=95, 95+85=180 mod 100=80... wait that doesn't match. Let me recalculate.
+  - Zone for record n: prefix alternates A/N (A for even n, N for odd n), number = (10 + 17n) mod 100
+  - Record 0: A, (10+0) mod 100 = 10 → A10 ✓
+  - Record 5: N, (10+85) mod 100 = 95 → N95 ✓
+  - Record 10: A, (10+170) mod 100 = 80 → A80 ✓ (but data says A90)
+  
+  Hmm, let me recheck. Record 10: zone=A90. (10 + 17*10) mod 100 = (10+170) mod 100 = 180 mod 100 = 80. But data says A90. So my formula is wrong.
+
+Let me look at the zones more carefully:
+Record 0: A10
+Record 1: N27
+Record 2: A44
+Record 3: N61
+Record 4: A78
+Record 5: N95
+Record 6: A22
+Record 7: N39
+Record 8: A56
+Record 9: N73
+Record 10: A90
+Record 11: N17
+Record 12: A34
+Record 13: N51
+Record 14: A68
+Record 15: N85
+Record 16: A12
+Record 17: N29
+Record 18: A46
+Record 19: N63
+Record 20: A80
+Record 21: N97
+Record 22: A24
+Record 23: N41
+Record 24: A58
+Record 25: N75
+
+From record 0 to 1: 10 → 27 (diff +17)
+From record 1 to 2: 27 → 44 (diff +17)
+From record 2 to 3: 44 → 61 (diff +17)
+...
+From record 5 to 6: 95 → 22 (diff +27, or -73... or 95+17=112 mod 100 = 12? No, it's 22)
+
+Wait: 95 + 17 = 112, mod 100 = 12. But record 6 is A22. That doesn't work.
+
+Let me try: the number goes 10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 2, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 11, 28, 45, 62, 79, 96, 13, 30, 47, 64, 81, 98, 5, 22, 39, 56, 73, 90, 7, 24, 41, 58, 75, 92, 9, 26, 43, 60, 77, 94, 1, 18, 35, 52, 69, 86, 3, 20, 37, 54, 71, 88, 5, 22...
+
+Differences: 17, 17, 17, 17, 17, 17(95→112→12? no 22)...
+
+Hmm, 95 to 22: that's -73 or +27. Not 17.
+
+Wait, let me look again. Maybe it wraps differently. 95 + 17 = 112. If we take last two digits: 12. But the data shows 22. So maybe it's not mod 100.
+
+Actually wait, maybe I should look at this differently. Let me list all zone numbers in order:
+10, 27, 44, 61, 78, 95, 22, 39, 56, 73, 90, 17, 34, 51, 68, 85, 12, 29, 46, 63, 80, 97, 24, 41, 58, 75, 2, 19, 36, 53, 70, 87, 14, 31, 48, 65, 82, 99, 26, 43, 60, 77, 94, 11, 28, 45, 62, 79, 96, 13, 30, 47, 64, 81, 98, 5, 22, 39, 56, 73, 90, 7, 24, 41, 58, 75, 92, 9, 26, 43, 60, 77, 94, 1, 18
+=====
