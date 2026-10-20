@@ -1,0 +1,63 @@
+{
+ "rounds": [
+  [
+   "b2-fork-27b",
+   "b2-splash-27b"
+  ]
+ ],
+ "cells": [
+  {
+   "scenario": "g-code-2k"
+  },
+  {
+   "scenario": "g-en-2k"
+  },
+  {
+   "scenario": "g-ja-2k"
+  },
+  {
+   "scenario": "g-agent-2k"
+  },
+  {
+   "scenario": "g-code-8k"
+  },
+  {
+   "scenario": "g-en-8k"
+  },
+  {
+   "scenario": "g-ja-8k"
+  },
+  {
+   "scenario": "g-agent-8k"
+  },
+  {
+   "scenario": "g-code-32k"
+  },
+  {
+   "scenario": "g-en-32k"
+  },
+  {
+   "scenario": "g-ja-32k"
+  },
+  {
+   "scenario": "g-agent-32k"
+  },
+  {
+   "scenario": "g-code-128k"
+  },
+  {
+   "scenario": "g-en-128k"
+  },
+  {
+   "scenario": "g-ja-128k"
+  },
+  {
+   "scenario": "g-agent-128k"
+  }
+ ],
+ "cooldown_s": 15,
+ "rest_s": 60,
+ "canary_tolerance": 0.08,
+ "battery_min_pct": 30,
+ "battery_resume_pct": 40
+}

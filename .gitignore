@@ -12,3 +12,7 @@ results-*.log
 __pycache__/
 .DS_Store
 results/*/*_DONE
+
+# genre bench texts (third-party, rebuilt by scripts/build_genre_corpora.py)
+corpora/*.txt
+corpora/raw/

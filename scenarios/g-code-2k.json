@@ -1,0 +1,21 @@
+{
+ "id": "g-code-2k",
+ "context_tokens": 2048,
+ "reserve_tokens": 400,
+ "corpus": "code-cpython-stdlib.txt",
+ "context_prefix": "Below are Python standard library source files, concatenated.\n\n",
+ "max_tokens": 1024,
+ "turn_timeout_s": 7200,
+ "turns": [
+  "\n\n# ===== end of the files =====\n\nExplain what the last file above does: its main classes and functions and how they work together. Keep the answer under 300 words."
+ ],
+ "canary_question": "\n\nIn about 100 words, summarize the records above.",
+ "thinking": true,
+ "reasoning_effort": "medium",
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 20,
+  "seed": 7
+ }
+}

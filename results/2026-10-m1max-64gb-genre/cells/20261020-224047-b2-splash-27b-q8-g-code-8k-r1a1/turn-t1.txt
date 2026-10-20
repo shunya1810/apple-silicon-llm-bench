@@ -1,0 +1,48 @@
+The user asks me to explain what the last file (`Lib/_ast_unparse.py`) does, its main classes and functions, and how they work together. I need to keep the answer under 300 words.
+
+Let me analyze the file:
+
+1. `_INFSTR` - a constant for representing very large floats as infinity strings
+2. `_Precedence` - an IntEnum defining operator precedence levels (from NAMED_EXPR up to ATOM)
+3. `Unparser` - the main class, a `NodeVisitor` that recursively traverses an AST and outputs source code
+
+Key methods in Unparser:
+- `__init__` - sets up source buffer, precedence tracking, type ignores, indent level
+- `interleave` - calls f on each item in seq, calling inter() between items
+- `items_view` - traverses items separated by commas
+- `maybe_newline` / `maybe_semicolon` - add delimiters
+- `fill` - indents text and appends (handles interactive mode with semicolons)
+- `write` - appends text to source buffer
+- `buffered` - context manager to temporarily swap the source buffer
+- `block` - context manager for blocks (adds colon, manages indent)
+- `delimit` / `delimit_if` - context managers for parenthesizing expressions
+- `require_parens` - adds parens based on precedence
+- `get_precedence` / `set_precedence` - manages precedence tracking
+- `get_raw_docstring` - finds docstring in a node's body
+- `get_type_comment` - gets type ignore comments
+- `traverse` - visits node or list of nodes
+- `visit` - the main entry point that resets source, traverses, returns string
+- `_write_docstring_and_traverse_body` - handles docstrings
+- Various `visit_*` methods for different AST node types (Module, Interactive, FunctionType, Expr, NamedExpr, Import, ImportFrom, Assign, AugAssign, AnnAssign, Return, Pass, Break, Continue)
+
+The file is cut off, but I can explain what's shown.
+
+Let me write a concise explanation under 300 words.
+
+=====
+**`_ast_unparse.py`** provides the backing implementation for `ast.unparse()`, which converts an AST back into Python source code. It is kept in a separate module to keep the `ast` module's import time fast.
+
+**Key components:**
+
+- **`_Precedence`** – an `IntEnum` listing operator precedence levels (from `NAMED_EXPR` up to `ATOM`), with a `next()` helper. This drives the logic for deciding when parentheses are needed.
+
+- **`Unparser`** – the core class, a subclass of `ast.NodeVisitor`. It recursively walks an AST and appends text fragments to an internal `_source` list. Its `visit()` method resets the buffer, calls `traverse()`, and returns the joined string.
+
+  - *Buffering utilities*: `write()`, `fill()` (indentation-aware), `maybe_newline()`, `maybe_semicolon()` (for interactive mode), and the `buffered()` context manager (to use a throwaway buffer).
+  - *Structural helpers*: `block()` (emits a colon, bumps indent), `delimit()`/`delimit_if()` (wrap in parens), and `require_parens()` (adds parens only when the child's precedence is lower than the parent's).
+  - *Precedence tracking*: `set_precedence()`/`get_precedence()` store and retrieve a node's effective precedence in a dict.
+  - *Docstring & type-ignore handling*: `get_raw_docstring()` and `get_type_comment()` mirror CPython's `_PyAST_GetDocString` and type-ignore logic.
+
+  - *Node visitors*: `visit_Module`, `visit_Expr`, `visit_NamedExpr` (walrus `:=`), `visit_Import`, `visit_ImportFrom`, `visit_Assign`, `visit_AugAssign`, `visit_AnnAssign`, `visit_Return`, `visit_Pass`, `visit_Break`, `visit_Continue`, etc. Each emits the correct keywords, operators, and structure while using the helpers above.
+
+Together, the precedence enum, the context-manager helpers, and the per-node visitors ensure the unparser emits syntactically correct, minimally-parenthesized Python source from any supported AST.

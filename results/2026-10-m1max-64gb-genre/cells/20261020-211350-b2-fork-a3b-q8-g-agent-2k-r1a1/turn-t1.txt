@@ -1,0 +1,44 @@
+Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - **Input:** A log of a coding-agent session (messages, tool calls, tool outputs).
+   - **Content provided:** Only the `[system]` prompt/instructions for the "OpenHands agent" is shown. It ends with `[End of the session log]`.
+   - **Task:** Describe what the agent was trying to fix, what it has done so far, and what it should do next, in about 250 words.
+
+2.  **Identify Key Constraints/Issues:**
+   - The provided log is *incomplete*. It only contains the system prompt/instructions, not the actual conversation history, tool calls, or outputs.
+   - I cannot know what the agent was trying to fix, what it did, or what it should do next based *only* on the system prompt.
+   - I need to acknowledge this limitation while fulfilling the prompt's request as best as possible, or state clearly that the session log is empty/missing the actual interaction data.
+
+3.  **Formulate Response Strategy:**
+   - Acknowledge that the provided log only contains the system instructions/prompt.
+   - Explain that without the actual conversation history, tool calls, and outputs, it's impossible to determine the specific bug, actions taken, or next steps.
+   - Provide a template/guidance on what such a review would look like once the full log is provided, or state that the review cannot be completed with the current input.
+   - Keep it around 250 words as requested.
+
+   Draft structure:
+   - State the limitation clearly.
+   - Explain what information is missing (actual user request, agent responses, tool executions, outputs).
+   - Describe what a proper review would require.
+   - Offer to analyze the complete log when provided.
+   - Keep it concise and within the word limit.
+
+4.  **Draft Response (Mental Refinement):**
+   The provided session log only contains the system prompt and instructions for the OpenHands agent, but lacks the actual conversation history, user requests, tool calls, and tool outputs. Without this core interaction data, it is impossible to determine what specific bug or feature the agent was attempting to fix, what commands or code modifications it executed, or what results it encountered. 
+
+   To accurately review this session, the log would need to include the user’s initial request or error report, the agent’s step-by-step reasoning, any file inspections, code edits, or terminal commands executed, and the corresponding outputs or errors returned. With that information, I could summarize the underlying issue (e.g., a failing test, a runtime error, or a missing feature), evaluate the agent’s approach (exploration, debugging, implementation), and suggest logical next steps (e.g., running tests, refactoring a specific module, handling edge cases, or pushing changes if requested).
+
+   Please provide the complete session log, including the user prompt, all agent turns, tool interactions, and outputs. Once shared, I will deliver a concise, ~250-word review detailing the target issue, the agent’s actions, and recommended next steps tailored to the actual workflow. Until then, this review cannot accurately reflect the session’s content or progress. 
+
+   (Word count: ~148) - I'll expand slightly to hit closer to 250 while staying precise.
+
+   Revised:
+   The provided session log contains only the system prompt and agent instructions, but lacks the actual conversation history, user requests, tool calls, and outputs. Without this core interaction data, it is impossible to determine what specific bug, feature, or issue the agent was attempting to address, what commands or code modifications it executed, or what results it encountered.
+
+   To accurately review this session, the log must include the user’s initial request or error report, the agent’s step-by-step reasoning, file inspections, code edits, terminal commands, and the corresponding outputs or errors returned. With that information, I could summarize the underlying problem (e.g., a failing test suite, a runtime exception, or a missing implementation), evaluate the agent’s debugging methodology (exploration, hypothesis testing, implementation), and outline precise next steps (e.g., running validation tests, refactoring a specific module, handling edge cases, or committing changes).
+
+   Please provide the complete session log, including all user prompts, agent turns, tool interactions, and outputs. Once shared, I will deliver a concise, ~250-word review detailing the target issue, the agent’s executed actions, and recommended next steps tailored to the actual workflow. Until the full interaction data is available, this review cannot accurately reflect the session’s progress, decisions, or technical trajectory. 
+
+   (Word count: ~148) - Let's count words properly.
+   "The provided session log contains only the system prompt..." -> ~150. I
+=====

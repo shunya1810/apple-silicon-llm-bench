@@ -1,0 +1,21 @@
+{
+ "id": "g-ja-32k",
+ "context_tokens": 32768,
+ "reserve_tokens": 400,
+ "corpus": "prose-ja-daibosatsu.txt",
+ "context_prefix": "以下は小説の一部です。\n\n",
+ "max_tokens": 1024,
+ "turn_timeout_s": 7200,
+ "turns": [
+  "\n\n（抜粋ここまで）\n\n上の文章の最後の章で起きている出来事を要約し、そこに登場する人物を説明してください。日本語で 300 字程度で答えてください。"
+ ],
+ "canary_question": "\n\nIn about 100 words, summarize the records above.",
+ "thinking": true,
+ "reasoning_effort": "medium",
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 20,
+  "seed": 7
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "id": "g-agent-8k",
+ "context_tokens": 8192,
+ "reserve_tokens": 400,
+ "corpus": "agent-swe-openhands.txt",
+ "context_prefix": "Below is a log of coding-agent sessions: messages, tool calls and tool outputs.\n\n",
+ "max_tokens": 1024,
+ "turn_timeout_s": 7200,
+ "turns": [
+  "\n\n[End of the session log]\n\nYou are reviewing the coding-agent session above. Describe what the agent was trying to fix in the last session, what it has done so far, and what it should do next, in about 250 words."
+ ],
+ "canary_question": "\n\nIn about 100 words, summarize the records above.",
+ "thinking": true,
+ "reasoning_effort": "medium",
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 20,
+  "seed": 7
+ }
+}

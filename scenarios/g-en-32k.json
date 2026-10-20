@@ -1,0 +1,21 @@
+{
+ "id": "g-en-32k",
+ "context_tokens": 32768,
+ "reserve_tokens": 400,
+ "corpus": "prose-en-trollope.txt",
+ "context_prefix": "Below is an excerpt from a novel.\n\n",
+ "max_tokens": 1024,
+ "turn_timeout_s": 7200,
+ "turns": [
+  "\n\n[End of the excerpt]\n\nSummarize what happens in the last chapter of the excerpt above and describe the characters who appear in it, in about 250 words."
+ ],
+ "canary_question": "\n\nIn about 100 words, summarize the records above.",
+ "thinking": true,
+ "reasoning_effort": "medium",
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 20,
+  "seed": 7
+ }
+}

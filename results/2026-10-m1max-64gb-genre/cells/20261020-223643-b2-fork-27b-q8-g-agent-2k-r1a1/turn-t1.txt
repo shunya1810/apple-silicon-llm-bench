@@ -1,0 +1,24 @@
+The user is asking me to review a coding-agent session log and describe what the agent was trying to fix, what it has done so far, and what it should do next.
+
+Looking at the session log carefully, I see:
+
+1. The session is labeled "canonical/charmcraft"
+2. There's a system message defining the OpenHands agent's role and guidelines
+3. Then it says "[End of the session log]"
+
+That's it. There's no actual user message, no tool calls, no tool outputs, and no actions taken by the agent. The session contains only the system prompt and then immediately ends. There is no task, no user request, no exploration, no implementation, nothing.
+
+So I need to be honest about what's actually in this log. The session is essentially empty - it contains only the system prompt for the OpenHands agent in the canonical/charmcraft repository context, with no actual work performed.
+
+Let me write a ~250 word response describing this situation accurately.
+
+=====
+Based on the session log provided, there is very little to describe. The session for the **canonical/charmcraft** repository contains only the system prompt (the OpenHands agent's role, guidelines, and behavioral instructions) and then immediately ends with "[End of the session log]." No user message, task description, tool calls, tool outputs, or agent actions are present in the log.
+
+In other words, the agent was **not** actually trying to fix anything in this session. It was initialized with the standard OpenHands system prompt for working on the Charmcraft codebase (Canonical's tool for building, packaging, and publishing Charm operator software), but the session terminated before any user request was received or any work was performed. There is no evidence of exploration, analysis, implementation, or testing.
+
+**What the agent has done so far:** Nothing beyond loading its system instructions. No files were read, no commands were run, no code was modified, and no commits were made.
+
+**What it should do next:** Since there is no user request in the log, the appropriate next step is simply to wait for the user to provide a task. Once a concrete request arrives (e.g., "fix a bug in the snap packaging logic," "add support for a new OCI remote," "update the lint rules," etc.), the agent should follow its prescribed workflow: first explore the relevant Charmcraft source files and understand the context, then analyze possible approaches, write or identify tests to reproduce/verify the issue, make minimal targeted code changes, verify the fix by running the test suite, and finally commit the changes with proper attribution. Without a user prompt, no further action is possible or appropriate.
+
+If this log was expected to contain a longer session, it is possible the remainder was truncated or the session failed to record the actual interaction.

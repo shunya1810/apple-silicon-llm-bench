@@ -68,6 +68,25 @@ def build_context(tokenizer, target_tokens: int, reserve_tokens: int) -> tuple[s
     return text, len(tokenizer.encode(text).ids)
 
 
+def build_corpus_context(tokenizer, corpus: str, target_tokens: int, reserve_tokens: int) -> tuple[str, int]:
+    """The first ``target_tokens - reserve_tokens`` tokens of a real text (``corpora/<name>.txt``), cut at a
+    line end: every length is a prefix of the same non-repeating source."""
+
+    text = (ROOT / "corpora" / corpus).read_text(encoding="utf-8")
+    budget = max(1, target_tokens - reserve_tokens)
+    window = text[: budget * 8]
+    ends = [i + 1 for i, ch in enumerate(window) if ch == "\n"] or [len(window)]
+    lo, hi = 0, len(ends) - 1
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if len(tokenizer.encode(window[: ends[mid]]).ids) <= budget:
+            lo = mid
+        else:
+            hi = mid - 1
+    body = window[: ends[lo]]
+    return body, len(tokenizer.encode(body).ids)
+
+
 # ---------------------------------------------------------------- engine process
 
 
@@ -463,7 +482,12 @@ def main() -> None:
     cell_dir = out.parent / "cells" / f"{stamp}-{spec['id']}-{kv}-{scen['id']}-r{a.round}a{a.attempt}"
     cell_dir.mkdir(parents=True)
 
-    context, ctx_tokens = build_context(tok, scen["context_tokens"], scen.get("reserve_tokens", 400))
+    if scen.get("corpus"):
+        context, ctx_tokens = build_corpus_context(tok, scen["corpus"], scen["context_tokens"],
+                                                   scen.get("reserve_tokens", 400))
+        context = scen.get("context_prefix", "") + context
+    else:
+        context, ctx_tokens = build_context(tok, scen["context_tokens"], scen.get("reserve_tokens", 400))
     engine = Engine(spec, cell_dir, local_vars())
     base_row = {"run_stamp": stamp, "engine": spec["id"], "engine_label": spec["label"], "kv": kv,
                 "kv_impl": spec.get("kv_impl"), "mtp_impl": spec.get("mtp_impl"),

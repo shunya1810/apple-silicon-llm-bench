@@ -1,0 +1,194 @@
+21:09:01   battery 100% AC
+21:09:01 round 1 g-code-2k q8 b2-fork-a3b attempt 1
+21:09:31   canary 98.33942841328093 ref None slow=False
+21:09:46   battery 100% AC
+21:09:46 round 1 g-code-2k q8 b2-splash-a3b attempt 1
+21:10:25   canary 78.02562201645098 ref None slow=False
+21:10:40   battery 100% AC
+21:10:40 round 1 g-en-2k q8 b2-fork-a3b attempt 1
+21:11:09   canary 98.57387088305099 ref 98.33942841328093 slow=False
+21:11:24   battery 100% AC
+21:11:24 round 1 g-en-2k q8 b2-splash-a3b attempt 1
+21:12:00   canary 85.04640116509616 ref 78.02562201645098 slow=False
+21:12:15   battery 100% AC
+21:12:15 round 1 g-ja-2k q8 b2-fork-a3b attempt 1
+21:12:40   canary 108.78913409576484 ref 98.57387088305099 slow=False
+21:12:55   battery 100% AC
+21:12:55 round 1 g-ja-2k q8 b2-splash-a3b attempt 1
+21:13:34   canary 84.99683926765005 ref 85.04640116509616 slow=False
+21:13:49   battery 100% AC
+21:13:49 round 1 g-agent-2k q8 b2-fork-a3b attempt 1
+21:14:15   canary 109.45480121827335 ref 108.78913409576484 slow=False
+21:14:30   battery 100% AC
+21:14:30 round 1 g-agent-2k q8 b2-splash-a3b attempt 1
+21:15:00   canary 85.19152688662695 ref 85.04640116509616 slow=False
+21:15:15   battery 100% AC
+21:15:15 round 1 g-code-8k q8 b2-fork-a3b attempt 1
+21:15:45   canary 109.40893514400351 ref 109.45480121827335 slow=False
+21:16:00   battery 100% AC
+21:16:00 round 1 g-code-8k q8 b2-splash-a3b attempt 1
+21:16:43   canary 87.06459987785883 ref 85.19152688662695 slow=False
+21:16:58   battery 100% AC
+21:16:58 round 1 g-en-8k q8 b2-fork-a3b attempt 1
+21:17:29   canary 108.55971254470843 ref 109.45480121827335 slow=False
+21:17:44   battery 100% AC
+21:17:44 round 1 g-en-8k q8 b2-splash-a3b attempt 1
+21:18:29   canary 83.97407874930137 ref 87.06459987785883 slow=False
+21:18:44   battery 100% AC
+21:18:44 round 1 g-ja-8k q8 b2-fork-a3b attempt 1
+21:19:14   canary 109.06473595998273 ref 109.45480121827335 slow=False
+21:19:29   battery 100% AC
+21:19:29 round 1 g-ja-8k q8 b2-splash-a3b attempt 1
+21:20:13   canary 84.79264257760687 ref 87.06459987785883 slow=False
+21:20:28   battery 100% AC
+21:20:28 round 1 g-agent-8k q8 b2-fork-a3b attempt 1
+21:20:57   canary 109.33691326358668 ref 109.45480121827335 slow=False
+21:21:12   battery 100% AC
+21:21:12 round 1 g-agent-8k q8 b2-splash-a3b attempt 1
+21:21:51   canary 84.99340488476524 ref 87.06459987785883 slow=False
+21:22:06   battery 100% AC
+21:22:06 round 1 g-code-32k q8 b2-fork-a3b attempt 1
+21:23:04   canary 108.74350200485249 ref 109.45480121827335 slow=False
+21:23:19   battery 100% AC
+21:23:19 round 1 g-code-32k q8 b2-splash-a3b attempt 1
+21:24:43   canary 84.67500246990495 ref 87.06459987785883 slow=False
+21:24:58   battery 100% AC
+21:24:58 round 1 g-en-32k q8 b2-fork-a3b attempt 1
+21:25:56   canary 108.96971240289905 ref 109.45480121827335 slow=False
+21:26:11   battery 100% AC
+21:26:11 round 1 g-en-32k q8 b2-splash-a3b attempt 1
+21:27:36   canary 84.65860761834146 ref 87.06459987785883 slow=False
+21:27:51   battery 100% AC
+21:27:51 round 1 g-ja-32k q8 b2-fork-a3b attempt 1
+21:28:49   canary 109.11330192444086 ref 109.45480121827335 slow=False
+21:29:04   battery 100% AC
+21:29:04 round 1 g-ja-32k q8 b2-splash-a3b attempt 1
+21:30:30   canary 84.19531323634222 ref 87.06459987785883 slow=False
+21:30:45   battery 100% AC
+21:30:45 round 1 g-agent-32k q8 b2-fork-a3b attempt 1
+21:31:40   canary 109.1235250903465 ref 109.45480121827335 slow=False
+21:31:55   battery 100% AC
+21:31:55 round 1 g-agent-32k q8 b2-splash-a3b attempt 1
+21:33:14   canary 84.52015335163077 ref 87.06459987785883 slow=False
+21:33:29   battery 100% AC
+21:33:29 round 1 g-code-128k q8 b2-fork-a3b attempt 1
+21:38:47   canary 109.31441293140675 ref 109.45480121827335 slow=False
+21:39:02   battery 100% AC
+21:39:02 round 1 g-code-128k q8 b2-splash-a3b attempt 1
+21:47:03   canary 85.16815807648779 ref 87.06459987785883 slow=False
+21:47:19   battery 100% AC
+21:47:19 round 1 g-en-128k q8 b2-fork-a3b attempt 1
+21:52:35   canary 109.21114297650054 ref 109.45480121827335 slow=False
+21:52:51   battery 100% AC
+21:52:51 round 1 g-en-128k q8 b2-splash-a3b attempt 1
+22:00:56   canary 84.88239998890845 ref 87.06459987785883 slow=False
+22:01:11   battery 100% AC
+22:01:11 round 1 g-ja-128k q8 b2-fork-a3b attempt 1
+22:06:26   canary 105.88575049070785 ref 109.45480121827335 slow=False
+22:06:41   battery 100% AC
+22:06:41 round 1 g-ja-128k q8 b2-splash-a3b attempt 1
+22:14:49   canary 85.02941400247832 ref 87.06459987785883 slow=False
+22:15:04   battery 100% AC
+22:15:04 round 1 g-agent-128k q8 b2-fork-a3b attempt 1
+22:20:19   canary 108.9913929990603 ref 109.45480121827335 slow=False
+22:20:35   battery 100% AC
+22:20:35 round 1 g-agent-128k q8 b2-splash-a3b attempt 1
+22:28:32   canary 84.62943439748133 ref 87.06459987785883 slow=False
+22:28:47 plan done
+22:28:47   battery 100% AC
+22:28:47 round 1 g-code-2k q8 b2-fork-27b attempt 1
+22:29:36   canary 31.80448141190001 ref None slow=False
+22:29:51   battery 100% AC
+22:29:51 round 1 g-code-2k q8 b2-splash-27b attempt 1
+22:31:01   canary 30.714904203607905 ref None slow=False
+22:31:16   battery 100% AC
+22:31:16 round 1 g-en-2k q8 b2-fork-27b attempt 1
+22:32:07   canary 31.728160120350772 ref 31.80448141190001 slow=False
+22:32:22   battery 100% AC
+22:32:22 round 1 g-en-2k q8 b2-splash-27b attempt 1
+22:33:31   canary 30.58688095918171 ref 30.714904203607905 slow=False
+22:33:46   battery 100% AC
+22:33:46 round 1 g-ja-2k q8 b2-fork-27b attempt 1
+22:34:50   canary 31.36433499496202 ref 31.80448141190001 slow=False
+22:35:05   battery 100% AC
+22:35:05 round 1 g-ja-2k q8 b2-splash-27b attempt 1
+22:36:28   canary 30.48192737523364 ref 30.714904203607905 slow=False
+22:36:43   battery 100% AC
+22:36:43 round 1 g-agent-2k q8 b2-fork-27b attempt 1
+22:37:31   canary 31.691963758291777 ref 31.80448141190001 slow=False
+22:37:46   battery 100% AC
+22:37:46 round 1 g-agent-2k q8 b2-splash-27b attempt 1
+22:38:53   canary 30.672660808990198 ref 30.714904203607905 slow=False
+22:39:08   battery 100% AC
+22:39:08 round 1 g-code-8k q8 b2-fork-27b attempt 1
+22:40:31   canary 31.79757546156735 ref 31.80448141190001 slow=False
+22:40:46   battery 100% AC
+22:40:46 round 1 g-code-8k q8 b2-splash-27b attempt 1
+22:42:30   canary 30.37907887225751 ref 30.714904203607905 slow=False
+22:42:45   battery 100% AC
+22:42:45 round 1 g-en-8k q8 b2-fork-27b attempt 1
+22:44:12   canary 31.724719030756575 ref 31.80448141190001 slow=False
+22:44:27   battery 100% AC
+22:44:27 round 1 g-en-8k q8 b2-splash-27b attempt 1
+22:46:12   canary 30.647502696967624 ref 30.714904203607905 slow=False
+22:46:27   battery 100% AC
+22:46:27 round 1 g-ja-8k q8 b2-fork-27b attempt 1
+22:47:53   canary 31.87353218561878 ref 31.80448141190001 slow=False
+22:48:08   battery 100% AC
+22:48:08 round 1 g-ja-8k q8 b2-splash-27b attempt 1
+22:50:00   canary 30.43920538013947 ref 30.714904203607905 slow=False
+22:50:15   battery 100% AC
+22:50:15 round 1 g-agent-8k q8 b2-fork-27b attempt 1
+22:51:35   canary 31.708295995808463 ref 31.87353218561878 slow=False
+22:51:50   battery 100% AC
+22:51:50 round 1 g-agent-8k q8 b2-splash-27b attempt 1
+22:53:31   canary 30.660763594490334 ref 30.714904203607905 slow=False
+22:53:46   battery 100% AC
+22:53:46 round 1 g-code-32k q8 b2-fork-27b attempt 1
+22:57:02   canary 31.548413853342833 ref 31.87353218561878 slow=False
+22:57:17   battery 100% AC
+22:57:17 round 1 g-code-32k q8 b2-splash-27b attempt 1
+23:01:30   canary 30.717795976030622 ref 30.714904203607905 slow=False
+23:01:45   battery 100% AC
+23:01:45 round 1 g-en-32k q8 b2-fork-27b attempt 1
+23:05:09   canary 31.7093426763001 ref 31.87353218561878 slow=False
+23:05:25   battery 100% AC
+23:05:25 round 1 g-en-32k q8 b2-splash-27b attempt 1
+23:09:48   canary 30.677185587959542 ref 30.717795976030622 slow=False
+23:10:03   battery 100% AC
+23:10:03 round 1 g-ja-32k q8 b2-fork-27b attempt 1
+23:13:32   canary 31.65425543681711 ref 31.87353218561878 slow=False
+23:13:47   battery 100% AC
+23:13:47 round 1 g-ja-32k q8 b2-splash-27b attempt 1
+23:18:16   canary 30.617674822801536 ref 30.717795976030622 slow=False
+23:18:31   battery 100% AC
+23:18:31 round 1 g-agent-32k q8 b2-fork-27b attempt 1
+23:21:53   canary 31.865697711804778 ref 31.87353218561878 slow=False
+23:22:08   battery 100% AC
+23:22:08 round 1 g-agent-32k q8 b2-splash-27b attempt 1
+23:26:24   canary 30.668501486281937 ref 30.717795976030622 slow=False
+23:26:39   battery 100% AC
+23:26:39 round 1 g-code-128k q8 b2-fork-27b attempt 1
+23:44:13   canary 31.55969471786623 ref 31.87353218561878 slow=False
+23:44:28   battery 99% AC
+23:44:28 round 1 g-code-128k q8 b2-splash-27b attempt 1
+00:07:12   canary 30.740586411260377 ref 30.717795976030622 slow=False
+00:07:27   battery 100% AC
+00:07:27 round 1 g-en-128k q8 b2-fork-27b attempt 1
+00:25:18   canary 31.66370815403966 ref 31.87353218561878 slow=False
+00:25:33   battery 100% AC
+00:25:33 round 1 g-en-128k q8 b2-splash-27b attempt 1
+00:48:14   canary 30.843371307977588 ref 30.740586411260377 slow=False
+00:48:29   battery 100% AC
+00:48:29 round 1 g-ja-128k q8 b2-fork-27b attempt 1
+01:06:23   canary 31.306593631726113 ref 31.87353218561878 slow=False
+01:06:38   battery 100% AC
+01:06:38 round 1 g-ja-128k q8 b2-splash-27b attempt 1
+01:29:44   canary 30.407432666556602 ref 30.843371307977588 slow=False
+01:29:59   battery 100% AC
+01:29:59 round 1 g-agent-128k q8 b2-fork-27b attempt 1
+01:47:38   canary 31.633626475934904 ref 31.87353218561878 slow=False
+01:47:53   battery 100% AC
+01:47:53 round 1 g-agent-128k q8 b2-splash-27b attempt 1
+02:11:14   canary 30.67244011867458 ref 30.843371307977588 slow=False
+02:11:29 plan done

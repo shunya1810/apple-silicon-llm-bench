@@ -1,0 +1,27 @@
+The user is asking me to review a coding-agent session log and describe what the agent was trying to fix, what it has done so far, and what it should do next. However, looking at the session log carefully, I notice that the log is essentially empty. It only contains:
+
+1. A system prompt defining the agent's role (OpenHands agent)
+2. The message "[End of the session log]"
+
+There are no actual user messages, no tool calls, no tool outputs, and no code modifications. The session appears to have ended immediately after the system prompt was loaded, without any actual work being performed.
+
+The session is labeled as "canonical/charmcraft" which suggests it was meant to work on the charmcraft repository, but no actual task was given or any work was done.
+
+I should describe this accurately - that the session contains only the system prompt and no actual work was performed. I'll keep my response to about 250 words as requested.
+
+=====
+## Session Review: canonical/charmcraft
+
+**What the agent was trying to fix:** Based solely on the session label "canonical/charmcraft," the session was presumably intended to address an issue in the Charmcraft repository (Canonical's tool for building snaps). However, the session log contains **no user task or problem statement**—only the system prompt defining the OpenHands agent's role, guidelines, and workflows. No actual coding task, bug report, or feature request was ever communicated to the agent.
+
+**What it has done so far:** Nothing. The log shows only the system prompt followed immediately by "[End of the session log]." There are no user messages, no tool calls (no `bash`, `file_editor`, or other tool invocations), no file explorations, no code reads, and no edits. The agent never received a concrete instruction to act on, so it performed zero operations. The session appears to have terminated or been interrupted before any work began.
+
+**What it should do next:** Since no task was actually defined, the immediate next step is for the user to provide the specific issue, feature request, or bug they want addressed in the charmcraft codebase. Once a concrete task is given, the agent should:
+
+1. **Explore** the charmcraft repository structure (e.g., `find . -name "*.py"`, check `pyproject.toml`, read relevant source files) to understand the codebase.
+2. **Analyze** the specific problem area, reading the relevant modules and tests.
+3. **Implement** a focused, minimal fix or feature, modifying existing files directly.
+4. **Verify** by running the project's test suite (likely `pytest` given it's a Python project) to confirm the change works and doesn't break existing functionality.
+5. **Commit** the changes with an appropriate message, per the version-control guidelines in the system prompt.
+
+In summary, this is a null session: the agent was initialized but never received actionable input, so no progress was made.

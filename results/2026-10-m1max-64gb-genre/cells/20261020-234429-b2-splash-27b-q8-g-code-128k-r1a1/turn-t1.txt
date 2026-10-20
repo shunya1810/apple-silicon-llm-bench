@@ -1,0 +1,39 @@
+The user asks me to explain the last file in the concatenated source. The last file is `Lib/_pydecimal.py` — the pure Python implementation of the `decimal` module. I need to explain its main classes and functions and how they work together, in under 300 words.
+
+Let me identify the key components:
+
+1. **`Decimal` class** — the main class representing a decimal number. Stores sign, coefficient (as string `_int`), exponent (`_exp`), and a special flag. Implements arithmetic operators, comparisons, conversion methods, and many operations from the IBM General Decimal Arithmetic specification.
+
+2. **`Context` class** — holds the computation environment: precision, rounding mode, Emin/Emax, traps, flags, etc. Controls how operations behave.
+
+3. **`_ContextManager`** — context manager for `localcontext()`.
+
+4. **Exception classes** — `DecimalException` and subclasses like `InvalidOperation`, `DivisionByZero`, `Inexact`, `Rounded`, `Overflow`, `Underflow`, `Subnormal`, `Clamped`, `FloatOperation`.
+
+5. **Context functions** — `getcontext()`, `setcontext()`, `localcontext()`, `IEEEContext()`.
+
+6. **Helper functions** — `_dec_from_triple`, `_convert_other`, `_normalize`, rounding functions, `_dexp`, `_dlog`, `_dlog10`, `_dpower`, etc.
+
+7. **`_WorkRep`** — internal representation using Python ints for efficient computation.
+
+Let me write a concise explanation under 300 words.
+
+=====
+The last file is `Lib/_pydecimal.py`, a pure-Python implementation of the `decimal` module (the C `_decimal` extension is the default; this is the fallback).
+
+**Core classes:**
+
+- **`Decimal`** — Represents a finite/infinite/NaN number as `(-1)**_sign * _int * 10**_exp`. It implements the full arithmetic surface from the IBM General Decimal Arithmetic spec: `+`, `-`, `*`, `/`, `//`, `%`, `**`, comparisons, `sqrt`, `exp`, `ln`, `log10`, `normalize`, `quantize`, and many others. Each operation consults a `Context` for precision, rounding, and signal handling.
+
+- **`Context`** — Holds computation parameters: `prec`, `rounding`, `Emin`/`Emax`, `traps`, `flags`, `capitals`, `clamp`. A `Context` instance governs how a `Decimal` operation rounds, signals, and clamps results. Methods like `_raise_error` set flags and optionally raise exceptions.
+
+- **`_ContextManager`** — Backs the `localcontext()` context manager, saving/restoring the thread-local context.
+
+**How they work together:**
+
+1. `getcontext()`/`setcontext()` manage a `ContextVar` holding the current `Context` per thread.
+2. When an operator like `a + b` runs, it calls `_convert_other` to coerce the other operand to a `Decimal`, then delegates to a method (e.g., `__add__`) that fetches the context, checks for NaN/Infinity special cases, performs the math (often via `_WorkRep`, an internal `(sign, int, exp)` triple), and calls `_fix` to round/clamp the result.
+3. `_fix` applies the context's rounding function (one of eight like `_round_half_even`), raises overflow/underflow signals, and produces the final `Decimal`.
+4. Exception classes (`InvalidOperation`, `DivisionByZero`, `Inexact`, `Rounded`, `Overflow`, `Underflow`, `Subnormal`, `Clamped`) are triggered through `Context._raise_error`, which either sets a flag or raises, depending on `traps`.
+
+Supporting helpers (`_dexp`, `_dlog`, `_dlog10`, `_dpower`) provide correctly-rounded transcendental/power computations via iterative refinement.
